@@ -172,6 +172,28 @@ for them.
   5 `4e467bc`, 5b `77314e9`, then 5c (DEF-108, `FLOW-001`). **Identify each by its
   commit SUBJECT, not by a sha**, since a chain can be re-based again.
 
+## M9's findings, registered by the compiler seat — deduplicate against these
+
+Registered on 2026-09-26 in the compiler's OPEN_DECISIONS §4, each citing this
+repository's `findings/` directory and `main` `88e6355` as its evidence. **All
+nine are fixed in the compiler's subcycle 1.6.1d, which lands after 1.6.1c** —
+so none is fixed in HUNT2 `9126350`, nor in `9f6f370`. Find each fix by its
+subject.
+
+- **DEF-118** — F-003: a consuming `pick`'s binding escapes the move rules (a
+  read after its move, a second move).
+- **DEF-119** — F-004: a move out through a pointer while a view of the root is
+  live (the freeze records a write, not a move out).
+- **DEF-120** — F-005: `(<-p) = v` never drops the old value.
+- **DEF-121** — F-006: a consuming `pick`'s binding is never dropped.
+- **DEF-122** — F-007: `to_cstring`'s buffer is never freed.
+- **DEF-123** — F-008: a write through a `$$i` claim's holder is not refused.
+- **DEF-124** — F-009: a re-initialised `move` parameter cannot be read.
+- **DEF-125** — F-010: the lent-`dyn` swap refused `BORROW-002` since 1.6.1
+  step 0.
+- **DEF-126** — M8's observation: a `TYPE-007` message names two same-named
+  types by one word (the workbench's O-N29). The refusal is right.
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.
