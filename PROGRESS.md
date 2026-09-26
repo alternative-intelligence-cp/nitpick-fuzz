@@ -589,10 +589,10 @@ around; to be taken through M5's steps in triage):
     (`TYPE-006`).
 
   The helper was renamed, and a `dyn` is no longer crossed with the array and
-  pointer places or the `at_*` operations (`e0d3d1c`… see git log, `M9 (2)`).
+  pointer places or the `at_*` operations (`c034731`, `M9 (2)`).
 - **Second shakedown.** The first full run at both compilers showed two more
   gaps. They were fixed and that run was superseded; its records are kept in
-  scratch (`M9 (3)`):
+  scratch (`9949f75`, `M9 (3)`):
   - the generic body had no `at_grow`, so 16 cells performed no operation;
   - the descriptor observer's number test cannot follow a loop's reuse.
 - **An observer bug found in triage.** A vacant `OwnedFd`'s `value => int64`

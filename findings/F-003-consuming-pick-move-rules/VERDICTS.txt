@@ -1,0 +1,25 @@
+# F-003-consuming-pick-move-rules — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:39 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_local_move_twice                         9126350  run 1  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_local_read_after_move                    9126350  run 1  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_pick_single_move                         9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=46/46/1 O2=46/46/1
+pick_move_twice_drop                         9126350  run 1  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1
+pick_read_after_move                         9126350  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m5771_str_pick_own_cond_move_t_ra  9126350  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m7092_str_pick_own_loop_move_nr_dx 9126350  run 1  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1
+ctl_local_move_twice                         9126350  run 2  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_local_read_after_move                    9126350  run 2  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_pick_single_move                         9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=46/46/1 O2=46/46/1
+pick_move_twice_drop                         9126350  run 2  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1
+pick_read_after_move                         9126350  run 2  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m5771_str_pick_own_cond_move_t_ra  9126350  run 2  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m7092_str_pick_own_loop_move_nr_dx 9126350  run 2  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1
+ctl_local_move_twice                         c3bdae2  run 1  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_local_read_after_move                    c3bdae2  run 1  npkc=1  codes=NITPICK-MOVE-001  O0=-  O2=-  heap O0=- O2=-
+ctl_pick_single_move                         c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=46/46/1 O2=46/46/1
+pick_move_twice_drop                         c3bdae2  run 1  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1
+pick_read_after_move                         c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m5771_str_pick_own_cond_move_t_ra  c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+minimized/m7092_str_pick_own_loop_move_nr_dx c3bdae2  run 1  npkc=0  codes=-  O0=95  O2=95  heap O0=46/46/1 O2=46/46/1

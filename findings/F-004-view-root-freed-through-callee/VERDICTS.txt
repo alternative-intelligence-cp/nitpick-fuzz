@@ -1,0 +1,19 @@
+# F-004-view-root-freed-through-callee — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:39 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_view_addr_to_overwriting_callee          9126350  run 1  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+ctl_view_claim_m_to_freeing_callee           9126350  run 1  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+ctl_view_move_direct                         9126350  run 1  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+view_addr_to_freeing_callee                  9126350  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+view_claim_i_to_freeing_callee               9126350  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+ctl_view_addr_to_overwriting_callee          9126350  run 2  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+ctl_view_claim_m_to_freeing_callee           9126350  run 2  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+ctl_view_move_direct                         9126350  run 2  npkc=1  codes=NITPICK-BORROW-015  O0=-  O2=-  heap O0=- O2=-
+view_addr_to_freeing_callee                  9126350  run 2  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+view_claim_i_to_freeing_callee               9126350  run 2  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+ctl_view_addr_to_overwriting_callee          c3bdae2  run 1  npkc=0  codes=-  O0=21  O2=21  heap O0=89/89/2 O2=89/89/2
+ctl_view_claim_m_to_freeing_callee           c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+ctl_view_move_direct                         c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=46/46/1 O2=46/46/1
+view_addr_to_freeing_callee                  c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1
+view_claim_i_to_freeing_callee               c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70  heap O0=46/46/1 O2=46/46/1

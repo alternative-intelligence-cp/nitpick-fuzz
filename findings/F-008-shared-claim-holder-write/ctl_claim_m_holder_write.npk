@@ -1,0 +1,56 @@
+mod:ctl_claim_m_holder_write;
+error:E9;
+func:mk = string() never fails {
+    pass string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+};
+func:nw = string() never fails {
+    pass string_concat("xyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "w");
+};
+func:sn = string() never fails {
+    pass string_concat("stttttttttttttttttttttttttttttttttttttttttttt", "u");
+};
+func:truth = bool(int64:n) never fails {
+    pass n > 0i64;
+};
+func:obs_s = int32(string:v) never fails {
+    if (string_byte_length(v) == 0i64) { pass 23i32; }
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 97u8) { pass 21i32; }
+    if (bs[0i64] == 120u8) { pass 22i32; }
+    if (bs[0i64] == 115u8) { pass 25i32; }
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+func:mkl = List<int64>(int64:v) never fails {
+    List<int64>:l = raw list_init::<int64>(1i64);
+    drop list_push::<int64>(@l, v);
+    pass l;
+};
+func:obs_l = int32(List<int64>:v) never fails {
+    if (v.count == -6148914691236517206i64) { pass 70i32; }
+    if (v.count == 0i64) { pass 23i32; }
+    int64:e = v[0i64];
+    if (e == 424242i64) { pass 21i32; }
+    if (e == 777777i64) { pass 22i32; }
+    if (e == 555555i64) { pass 25i32; }
+    if (e == -6148914691236517206i64) { pass 70i32; }
+    pass 24i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    string:x = raw mk();
+    string->:p = $$m x;
+    (<-p) = raw nw();
+    int32:o = raw obs_s((<-p));
+    exit o;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (E9) { exit 111i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

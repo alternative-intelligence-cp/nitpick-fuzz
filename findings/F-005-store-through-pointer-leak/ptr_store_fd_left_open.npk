@@ -1,0 +1,90 @@
+mod:ptr_store_fd_left_open;
+error:E9;
+func:mkfd = OwnedFd() {
+    cstring:dn = to_cstring("/dev/null") ?! E9;
+    fd:f = open(dn, (O_RDONLY => int32) => int64, (S_NONE => int32) => int64) ?! E9;
+    pass own_fd(f);
+};
+func:fd_open = bool(int64:n) never fails {
+    Result<int64>:r = sys(72i64, n, 1i64, 0i64);
+    pass !(r.is_error);
+};
+func:obs_fd = int32(OwnedFd:v) never fails {
+    int64:n = v.value => int64;
+    if (n == -1i64) { pass 23i32; }
+    if (n == 4294967295i64) { pass 23i32; }
+    if (!(raw fd_open(n))) { pass 70i32; }
+    pass 21i32;
+};
+func:obs_fds = int32(OwnedFd:v, OwnedFd:s) never fails {
+    if ((v.value => int64) == (s.value => int64)) { pass 25i32; }
+    pass raw obs_fd(v);
+};
+func:open_fds = int32() never fails {
+    int32:n = 0i32;
+    for (int64:k in 3i64...16i64) {
+        if (raw fd_open(k)) { n = n + 1i32; }
+    }
+    pass n;
+};
+func:mk = string() never fails {
+    pass string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+};
+func:nw = string() never fails {
+    pass string_concat("xyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "w");
+};
+func:sn = string() never fails {
+    pass string_concat("stttttttttttttttttttttttttttttttttttttttttttt", "u");
+};
+func:truth = bool(int64:n) never fails {
+    pass n > 0i64;
+};
+func:obs_s = int32(string:v) never fails {
+    if (string_byte_length(v) == 0i64) { pass 23i32; }
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 97u8) { pass 21i32; }
+    if (bs[0i64] == 120u8) { pass 22i32; }
+    if (bs[0i64] == 115u8) { pass 25i32; }
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+func:mkl = List<int64>(int64:v) never fails {
+    List<int64>:l = raw list_init::<int64>(1i64);
+    drop list_push::<int64>(@l, v);
+    pass l;
+};
+func:obs_l = int32(List<int64>:v) never fails {
+    if (v.count == -6148914691236517206i64) { pass 70i32; }
+    if (v.count == 0i64) { pass 23i32; }
+    int64:e = v[0i64];
+    if (e == 424242i64) { pass 21i32; }
+    if (e == 777777i64) { pass 22i32; }
+    if (e == 555555i64) { pass 25i32; }
+    if (e == -6148914691236517206i64) { pass 70i32; }
+    pass 24i32;
+};
+func:store = NIL(OwnedFd->:p) never fails {
+    (<-p) = mkfd() ?! E9;
+    pass NIL;
+};
+func:run = int32() never fails {
+    OwnedFd:x = mkfd() ?! E9;
+    drop store(@x);
+    pass 0i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    int32:r = raw run();
+    if ((raw open_fds()) != 0i32) { exit 26i32; }
+    exit r;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (E9) { exit 111i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

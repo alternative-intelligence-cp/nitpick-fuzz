@@ -1,0 +1,13 @@
+# F-007-to-cstring-leak — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:39 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+cstr_churn1000                               9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=10000/10000/1000 O2=10000/10000/1000
+cstr_churn4000                               9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=40000/40000/4000 O2=40000/40000/4000
+ctl_str4000                                  9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=36000/9/4000 O2=36000/9/4000
+cstr_churn1000                               9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=10000/10000/1000 O2=10000/10000/1000
+cstr_churn4000                               9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=40000/40000/4000 O2=40000/40000/4000
+ctl_str4000                                  9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=36000/9/4000 O2=36000/9/4000
+cstr_churn1000                               c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=10000/10000/1000 O2=10000/10000/1000
+cstr_churn4000                               c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=40000/40000/4000 O2=40000/40000/4000
+ctl_str4000                                  c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=36000/9/4000 O2=36000/9/4000

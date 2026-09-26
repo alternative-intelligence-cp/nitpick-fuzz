@@ -1,0 +1,13 @@
+# F-010-lent-dyn-swap-refused — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:39 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_lent_dyn_store_call                      9126350  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+ctl_lent_dyn_store_moved_local               9126350  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+lent_dyn_swap                                9126350  run 1  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-  heap O0=- O2=-
+ctl_lent_dyn_store_call                      9126350  run 2  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+ctl_lent_dyn_store_moved_local               9126350  run 2  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+lent_dyn_swap                                9126350  run 2  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-  heap O0=- O2=-
+ctl_lent_dyn_store_call                      c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+ctl_lent_dyn_store_moved_local               c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3
+lent_dyn_swap                                c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=113/113/3 O2=113/113/3

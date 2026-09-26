@@ -1,0 +1,25 @@
+# F-005-store-through-pointer-leak — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:39 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_field_store_through_ptr_noleak           9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ctl_local_assign_noleak                      9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ptr_store_churn1000                          9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=89000/46043/2000 O2=89000/46043/2000
+ptr_store_churn4000                          9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=356000/184043/8000 O2=356000/184043/8000
+ptr_store_fd_left_open                       9126350  run 1  npkc=0  codes=-  O0=26  O2=26  heap O0=20/20/2 O2=20/20/2
+ptr_store_leak                               9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3
+minimized/m0009_str_local_at_overwrite_lk    9126350  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3
+ctl_field_store_through_ptr_noleak           9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ctl_local_assign_noleak                      9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ptr_store_churn1000                          9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=89000/46043/2000 O2=89000/46043/2000
+ptr_store_churn4000                          9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=356000/184043/8000 O2=356000/184043/8000
+ptr_store_fd_left_open                       9126350  run 2  npkc=0  codes=-  O0=26  O2=26  heap O0=20/20/2 O2=20/20/2
+ptr_store_leak                               9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3
+minimized/m0009_str_local_at_overwrite_lk    9126350  run 2  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3
+ctl_field_store_through_ptr_noleak           c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ctl_local_assign_noleak                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048576/3 O2=1048665/1048576/3
+ptr_store_churn1000                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=89000/46043/2000 O2=89000/46043/2000
+ptr_store_churn4000                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=356000/184043/8000 O2=356000/184043/8000
+ptr_store_fd_left_open                       c3bdae2  run 1  npkc=0  codes=-  O0=26  O2=26  heap O0=20/20/2 O2=20/20/2
+ptr_store_leak                               c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3
+minimized/m0009_str_local_at_overwrite_lk    c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0  heap O0=1048665/1048622/3 O2=1048665/1048622/3

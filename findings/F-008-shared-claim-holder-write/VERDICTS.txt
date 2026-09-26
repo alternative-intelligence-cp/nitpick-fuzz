@@ -1,0 +1,16 @@
+# F-008-shared-claim-holder-write — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 11:40 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+claim_i_argument_write                       9126350  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+claim_i_holder_write                         9126350  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+ctl_claim_i_root_write                       9126350  run 1  npkc=1  codes=NITPICK-BORROW-013  O0=-  O2=-  heap O0=- O2=-
+ctl_claim_m_holder_write                     9126350  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+claim_i_argument_write                       9126350  run 2  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+claim_i_holder_write                         9126350  run 2  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+ctl_claim_i_root_write                       9126350  run 2  npkc=1  codes=NITPICK-BORROW-013  O0=-  O2=-  heap O0=- O2=-
+ctl_claim_m_holder_write                     9126350  run 2  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+claim_i_argument_write                       c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+claim_i_holder_write                         c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2
+ctl_claim_i_root_write                       c3bdae2  run 1  npkc=1  codes=NITPICK-BORROW-013  O0=-  O2=-  heap O0=- O2=-
+ctl_claim_m_holder_write                     c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22  heap O0=89/89/2 O2=89/89/2

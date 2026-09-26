@@ -1,0 +1,36 @@
+mod:m5771_str_pick_own_cond_move_t_ra;
+func:mk = string() never fails {
+    pass string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+};
+func:truth = bool(int64:n) never fails {
+    pass n > 0i64;
+};
+func:obs_s = int32(string:v) never fails {
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+enum:Opt = { Non; Som(string); };
+func:main = int32(cstring[]:_~argv) {
+    Opt:e = Opt.Som(raw mk());
+    pick (move(e)) {
+        (Som(x)) {
+            if (raw truth(1i64)) {
+                string:y = move(x);
+            }
+            int32:o1 = raw obs_s(x);
+            if (o1 != 23i32) { exit o1; }
+        },
+        (*) { exit 24i32; }
+    }
+    exit 0i32;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

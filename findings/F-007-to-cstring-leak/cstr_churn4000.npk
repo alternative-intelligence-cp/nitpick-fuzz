@@ -1,0 +1,25 @@
+mod:cstr_churn4000;
+error:E9;
+func:conv = int64() {
+    cstring:dn = to_cstring("/dev/null") ?! E9;
+    pass dn.len;
+};
+func:main = int32(cstring[]:_~argv) {
+    int64:acc = 0i64;
+    for (int32:i in 0i32...4000i32) {
+        acc = acc + (conv() ?! E9);
+    }
+    if (acc != 4000i64 * 9i64) { exit 1i32; }
+    exit 0i32;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (E9) { exit 111i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

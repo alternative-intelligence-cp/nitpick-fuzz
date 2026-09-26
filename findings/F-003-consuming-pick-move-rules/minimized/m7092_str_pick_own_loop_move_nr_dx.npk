@@ -1,0 +1,30 @@
+mod:m7092_str_pick_own_loop_move_nr_dx;
+func:mk = string() never fails {
+    pass string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+};
+enum:Opt = { Non; Som(string); };
+func:run = int32() never fails {
+    Opt:e = Opt.Som(raw mk());
+    pick (move(e)) {
+        (Som(x)) {
+            for (int64:k in 0i64...2i64) {
+                string:y = move(x);
+            }
+        },
+        (*) { }
+    }
+    pass 0i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    int32:r = raw run();
+    exit r;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
