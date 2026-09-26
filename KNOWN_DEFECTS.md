@@ -194,6 +194,25 @@ subject.
 - **DEF-126** — M8's observation: a `TYPE-007` message names two same-named
   types by one word (the workbench's O-N29). The refusal is right.
 
+## M10's findings, and one of the compiler seat's own — deduplicate against these
+
+Registered on 2026-09-26 by the compiler seat, each citing this repository's
+`findings/` and its M10 verdicts; **all are fixed in the compiler's subcycle
+1.6.1d** (its step 1: DEF-127 and DEF-134; step 2: DEF-128 … DEF-130; step 4:
+DEF-131 … DEF-133), so HUNT2 `9126350` and `9f6f370` still carry them.
+
+- **DEF-127** — F-011: a `for` binding outlives its loop in the emitter; an
+  outer binding of the same name reads the loop's slot, and past it.
+- **DEF-128** — F-012: a `for` over a range runs zero times at its type's edges.
+- **DEF-129** — F-013: `loop` and `till` widen an unsigned bound by its sign.
+- **DEF-130** — F-014: `till` with a negative limit counts down.
+- **DEF-131** — F-015: `<=>` refused by the emitter (`EMIT-002`).
+- **DEF-132** — F-016: a `pick` range pattern with a negative bound is `EMIT-002`.
+- **DEF-133** — F-017: seven reference sentences the compiler contradicts.
+- **DEF-134** — the compiler seat's own: a by-value receiver method called on
+  a POINTER (`q.peek()` with `Box->:q`, `peek = int64(Box:self)`) reads the
+  pointer's bits as the struct — a silent wrong answer at every pin.
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.
