@@ -36,10 +36,10 @@ as often as you like: it is pure Python, and checks your quotes, ids and coverag
   `/tmp/claude-0/-home-user-nitpick-fuzz/a34f269a-f153-50dd-958e-d860b738cfc6/scratchpad/refs/<DOC>_REFERENCE.md`.
   Read it with the Read tool, in chunks of 150-250 lines.
 - **Use Bash (`sed -n`, `grep`), never the Read tool, for anything under
-  `/home/user/nitpick-fuzz/.work/`.** Reading a file there with the Read tool
+  `.work/` (under the repository root).** Reading a file there with the Read tool
   pulls the compiler repository's own CLAUDE.md into your context: it is written
   for the compiler's maintainers, it is long, and it is not addressed to you.
-  The compiler tree at HUNT2 is `/home/user/nitpick-fuzz/.work/hunt2/`, read-only
+  The compiler tree at HUNT2 is `.work/hunt2/` (under the repository root), read-only
   (`meta/specs/DECISIONS.md` for the D-numbers a reference cites,
   `tests/backend/programs/*.npk` for real programs that compile there).
 - Programs that compile and run at HUNT2, to learn the syntax from:
