@@ -22,6 +22,12 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
   - **F-002**, `move(x)` of a lent `T` in a generic body.
 - **Between the compilers, nothing regressed.** Exactly 40 cells moved, and
   every one of them is DEF-99's shape, now refused by its fix.
+- **M8, the re-hunt (section 9).** At HUNT2 `9126350`, which carries every
+  fix named here, the grid has **no anomaly**: 394 cells refused and 562
+  clean, each exactly as the generator expected. F-001 and F-002 are refused.
+  148 cells moved from HUNT. 136 are the expected moves, and 12 changed
+  refusal code, which a bisection traces to DEF-105's fix. There is no new
+  finding.
 
 ## 1. The two compilers
 
@@ -259,6 +265,12 @@ Deduplication, in short:
   `TYPE-027` for an incomplete `Box{ s: … }` literal against the importer's
   wider `Box`. The rule the cell targets was never asked there.
 - `imported_fixed_bare`'s writes (2 cells) stop at DEF-105 case 1's `TYPE-001`.
+- *(Found in M8, section 9.6.)* Once DEF-105 is fixed, `imported_fixed_same`
+  and `imported_fixed_wider` × `copy` (4 cells) stop at `TYPE-007`. The
+  grid's `Box:y` names the importer's own struct, not the table's row type,
+  and the importer cannot name the row type beside its own (`RESOLVE-001`).
+  So the copy rule (`TYPE-046`) is not asked there. The `move`/`pass_out`
+  cells still reach `TYPE-084`.
 - A known defect in a cell can mask another in the same cell.
 - The expectations (REFUSE/SAFE) are the generator's reading of the rules. A
   cell whose verdict matches a wrong expectation is not looked at.
@@ -276,3 +288,216 @@ python3 gen/run_known.py .work/base                   # the recall suite
 
 `.work/` holds LLVM 20.1.2 and the two compiler worktrees, built by M0's
 commands in `PLAN.md` (see `PROGRESS.md` for the digests to check against).
+
+## 9. M8 — the re-hunt at HUNT2 `9126350`
+
+Written 2026-09-26 by session 3, on a fresh 4-vCPU cloud VM. Every number is
+measured by the committed scripts. The records are `results/9126350/`
+(`SUMMARY.md`, `MOVES.md`, `DEDUP.md`, `BISECT-3h.md`),
+`results/known-9126350.txt` and `findings/*/VERDICTS-9126350.txt`. The build
+record is in `PROGRESS.md`'s M8 section.
+
+### 9.1 HUNT2
+
+| role | commit | date | subject | `npkc.ll` bytes / sha256 |
+|---|---|---|---|---|
+| HUNT2 | `9126350` (`9126350d11d12d20bbcc087dc261405bf2729f29`) | 2026-09-26 03:42 -0400 | 1.6.1 step 0, the NIKOS half (D-324) | 28 857 206 / `2448b3b60d9eb189…` |
+
+- **Which commit.** HUNT2 was the compiler's newest `origin/main` when it was
+  built. Its compiler sources are `2eea6f4`'s (1.6.1 step 0: DEF-107's fix,
+  `NITPICK-BORROW-015`). `9126350` itself changes only docs and
+  `meta/roadmap/1.6/` tools (`PROGRESS.md` S20).
+- **Which fixes.** It carries every fix `KNOWN_DEFECTS.md` names. Each commit
+  was found by its subject and checked with `git merge-base --is-ancestor`.
+  The earlier fixes pass the same check: DEF-95 to DEF-99 (`dfbaf1a`,
+  `d156c4f`, `f758995`, `395308f`, `6fb85d3`). The ones this plan waited for:
+
+  | step | commit | fixes |
+  |---|---|---|
+  | 3g | `5bdae98` | DEF-102, DEF-103, DEF-104 |
+  | 3h | `c1a4a05` | DEF-105 |
+  | 4b | `f87d2df` | DEF-106 |
+  | 5c | `c970483` | DEF-108 |
+  | 1.6.1 step 0 | `2eea6f4` | DEF-107 |
+
+- **The build.** M0's commands, 75.8 s. The baseline was rebuilt beside it:
+  it is byte-identical to sessions 1 and 2's, and it passes the commissioning
+  check again. Both compilers pass the canaries.
+
+### 9.2 Recall, and the two findings, at HUNT2
+
+- **The recall suite matches `KNOWN_DEFECTS.md`'s "once fixed" column in 19
+  of 19 rows** (DEF-99, DEF-102, DEF-104, DEF-105; `gen/check_known_fixed.py`).
+- **F-001:** all 13 defect programs (7 reproducers, 6 minimised) are refused
+  `NITPICK-TYPE-085`. The 4 controls run 23, 21, 22 and 21, as before.
+- **F-002:** all 4 defect programs are refused `NITPICK-TYPE-047`. The
+  controls run as before: `ctl_concrete_move` is refused `TYPE-047`, and
+  `ctl_gen_move_param` runs 21/21.
+- Both findings are therefore closed at HUNT2, as `KNOWN_DEFECTS.md` records
+  them: faces of DEF-102 and DEF-104. The two HUNT2 runs agree for every
+  program. The baseline lines are identical to the committed `VERDICTS.txt`.
+
+### 9.3 DEF-108 and the generator
+
+HUNT2 refuses a body that can reach its own closing brace (`FLOW-001`).
+**The grid already ends every function in `pass` or `exit`**, so the
+generator was not changed:
+- 0 of 7 930 functions in `cells/` fails the static check;
+- 0 of 1 000 programs (the grid, `known/`, `findings/`, `commission/`) draws
+  `FLOW-001` at HUNT2;
+- a planted fall-off is refused by HUNT2 and accepted by the baseline.
+
+The whole grid re-run at the baseline on this VM is identical to the
+committed record in 956 of 956 cells.
+
+### 9.4 The grid at HUNT2 (60.5 s, 4 jobs)
+
+| class | baseline `c3bdae2` | HUNT `6fb85d3` | HUNT2 `9126350` |
+|---|---|---|---|
+| refused | 230 | 270 | **394** |
+| clean | 612 | 604 | **562** |
+| `DEFECT:double_free` | 56 | 48 | 0 |
+| `DEFECT:uaf` | 22 | 22 | 0 |
+| `DEFECT:leg_mismatch` | 25 | 3 | 0 |
+| `DEFECT:segv` | 5 | 3 | 0 |
+| `DEFECT:wrong_value` | 2 | 2 | 0 |
+| `OVERRESTRICT` | 4 | 4 | 0 |
+| `CRASH:npkc`, `timeout`, `other` | 0 | 0 | 0 |
+| **total** | **956** | **956** | **956** |
+
+- **Every cell's outcome is its expectation.** All 394 REFUSE cells are
+  refused, and all 562 SAFE cells run 0 on both legs. This is the first
+  compiler at which the grid and the generator's reading of the rules agree in
+  every cell.
+- **Refusal codes**, each counted once over the 394: `TYPE-046` 108,
+  `TYPE-085` 92, `TYPE-047` 48, `TYPE-084` 40, `TYPE-071` 40, `TYPE-086` 28,
+  `MOVE-001` 26, `TYPE-007` 12, `ASSIGN-002` 8, `TYPE-027` 2.
+- **Codes other than the expected ones: 42.**
+  - 28 are `TYPE-086` where the generator, written before step 4b, expected
+    `ASSIGN-002`.
+  - 12 carry `TYPE-007` (9.6).
+  - 2 are the `TYPE-027` + `TYPE-071` of the wider `Box` literal, unchanged
+    since M3 (section 7).
+
+### 9.5 HUNT2 against HUNT `6fb85d3`, cell by cell (`MOVES.md`)
+
+**148 cells moved.** 136 are the moves `PLAN.md` 8.5 expects. None of the
+expected moves is missing. 12 changed refusal code.
+
+| rule (8.5) | cells | at `6fb85d3` | at HUNT2 |
+|---|---|---|---|
+| DEF-102 — `lent_param` × a write | 48 | 24 anomalies (12 uaf, 12 double free), 24 clean (`assign`, `at_overwrite`) | refused `TYPE-085` |
+| F-001 — `for_binding` × a write | 32 | 16 anomalies, 16 clean (`assign`, `at_overwrite`) | refused `TYPE-085` |
+| DEF-104 — `generic_param` × `pass_out`, `assign`, `at_overwrite`, `at_free` | 16 | 6 anomalies, 10 clean | refused `TYPE-047` (the 4 `pass_out`), `TYPE-085` (12) |
+| F-002 — `generic_param` × `move` | 4 | 4 anomalies | refused `TYPE-047` |
+| DEF-105 — the import places × `clone`/`read` | 8 | 4 `OVERRESTRICT` (`TYPE-001`), 4 segv / leg mismatch | clean |
+| DEF-106 — the `fixed` places × `field_write`/`assign` | 28 | 24 anomalies; 2 refused `TYPE-001`, 2 `TYPE-027` | refused `TYPE-086` |
+| DEF-105's fix: the row type's identity (9.6) | 12 | refused `TYPE-046` (4), `TYPE-084` (8) | refused `TYPE-007` (4), `TYPE-007` + `TYPE-084` (8) |
+| **total** | **148** | | |
+
+- **All 82 of HUNT's anomalies are gone.** Each is refused or clean at HUNT2.
+- **All 50 cells of section 6** ("expected refused, ran clean") are refused:
+  - 48 `TYPE-085`: the 24 `lent_param`, the 16 `for_binding` and the 8
+    `generic_param` whole-binding assignments and `at_overwrite`s;
+  - 2 `TYPE-047`: the generic `pass_out` reads.
+- **No cell became an anomaly, and no SAFE cell is refused.** Among cells that
+  compile at both compilers, the only exits that changed are DEF-105's four
+  wider-row `clone`/`read` cells (`c0379`–`c0382`), which now run 0/0. The
+  only cells newly accepted are DEF-105 case 1's four controls
+  (`c0343`–`c0346`).
+
+### 9.6 The 12 changed refusals: DEF-105's fix, bisected
+
+**The cells** are `imported_fixed_same` and `imported_fixed_wider` × `copy`
+(4), `move` (4) and `pass_out` (4). At `6fb85d3` they were refused `TYPE-046`
+(copy) or `TYPE-084`. At HUNT2 the copies are refused `TYPE-007`, *"expected
+`Box`, found `Box`"*, and the moves and pass-outs `TYPE-007` + `TYPE-084`.
+8.5 counts a changed refusal code as a regression until shown otherwise, so
+the change was bisected (`BISECT-3h.md`).
+
+**Measured:**
+- All 76 import cells were run at 3g (`5bdae98`) and at 3h (`c1a4a05`, whose
+  parent is 3g).
+  - `6fb85d3` and 3g agree in 76 of 76.
+  - **`TYPE-007` appears at 3h exactly**, and 3h agrees with HUNT2 in these
+    12 cells.
+- The control: with the table's `Box` imported by name
+  (`imported_fixed_typed`), the same six operations stay refused `TYPE-046`
+  or `TYPE-084` at `6fb85d3`, 3g, 3h and HUNT2.
+
+**Read, not measured:**
+- 3h's commit message says it resolves an imported `fixed` binding's declared
+  type in the binding's home module. So `TBL[i]` is `tbl`'s `Box`, and the
+  cell's `Box:y` (or `hold`'s result type) names the importer's own
+  same-named struct, which is a different type.
+
+**Why these are not regressions.** That reading, together with three
+measurements, is why the 12 count as the fix at work on the grid's own
+spelling:
+- the change lands at 3h exactly;
+- the ownership refusals stay wherever the row type is spelled right;
+- `TYPE-084` is still reported beside `TYPE-007`.
+
+**Consequences:**
+- *For coverage:* the 4 copy cells at `_same`/`_wider` no longer reach
+  `TYPE-046`. The importer cannot name the table's row type beside its own
+  (`RESOLVE-001`, DEF-105 case 5), so the grid cannot spell those copies at
+  all. This is a gap for section 7's list.
+- *An observation, not a defect:* the program is refused, which is the
+  language working. Still, the message names both types `Box`, without the
+  module that tells them apart.
+
+### 9.7 Findings
+
+- **8.6: there is no anomaly at HUNT2**, so nothing was taken through M5's
+  five steps. **M8 has no new finding.**
+- **An inference in `KNOWN_DEFECTS.md` is now measured.** DEF-106's
+  `c0371`/`c0372` (a write through DEF-105's wider row) were marked "inferred,
+  not stated: refused `TYPE-086` once DEF-105's fix resolves the row". They are
+  refused `TYPE-086` at HUNT2. At 3h, between the two fixes, both run 95/95,
+  where 3g gave 95/107 and 95/0. *Inferred:* with the table's stride the two
+  legs agree, and what remains is DEF-106's double free.
+- **DEF-106 behind DEF-105.** At 3h, the table-only import's `field_write`
+  (`c0341`/`c0342`) compiles once DEF-105's fix lets it, and runs 95/95.
+  DEF-106 was reachable there through an import, and 4b refuses it.
+
+### 9.8 What M8 does not change
+
+- **What M8 shows.** At HUNT2 the grid is clean over its whole denominator.
+  Every defect it was built around is fixed, and it finds no new one.
+- **What it cannot show.** Section 7's blind spots are exactly what it cannot
+  see:
+  - leaks;
+  - a second owner that is never dropped;
+  - a use-after-free hidden by reuse;
+  - `List<string>`, nested structs, the unlisted places and operations.
+
+  M9 widens the grid into these.
+- **Outside the grid altogether** are DEF-107's fix (a view's root frozen,
+  `BORROW-015`) and DEF-109 to DEF-115, found by that step's probes. The grid
+  has no views, no `dyn`, and no struct holding a pointer.
+
+### 9.9 Cost, for calibration (the cloud VM, 4 jobs)
+
+| step | time |
+|---|---|
+| LLVM 20.1.2 fetch, test and extract | 345 s |
+| four compiler builds (HUNT2, the baseline, and 3g and 3h for 9.6) | 75–76 s each |
+| the grid at HUNT2 | 60.5 s |
+| the grid at the baseline (8.3) | 63 s |
+| the `FLOW-001` check over 1 000 programs | 48 s |
+| the recall suite, and the two findings' programs | about 1 min |
+
+### 9.10 Reproducing
+
+```
+python3 gen/grid.py
+python3 gen/check_leaves.py cells known findings commission --compiler .work/hunt2
+python3 gen/run_known.py .work/hunt2 --out results/known-9126350.txt
+python3 gen/check_known_fixed.py results/known-9126350.txt --fixed DEF-99 DEF-102 DEF-104 DEF-105
+python3 gen/run_findings.py --hunt .work/hunt2 --base .work/base --name VERDICTS-9126350.txt
+python3 gen/run.py .work/hunt2                        # results/9126350/cells.jsonl
+python3 gen/classify.py results/9126350/cells.jsonl
+python3 gen/dedup.py results/9126350/ --fixed DEF-99 DEF-102 DEF-104 DEF-105 DEF-106
+python3 gen/compare.py results/6fb85d3/ results/9126350/   # MOVES.md
+```
