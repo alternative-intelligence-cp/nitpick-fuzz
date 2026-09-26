@@ -1,0 +1,19 @@
+# F-013-counted-loop-unsigned-bound-sign-extended — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_loop_int8_signed                         9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_loop_uint8_below_128                     9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+loop_uint32_across_2p31                      9126350  run 1  npkc=0  codes=-  O0=93  O2=93
+loop_uint8_across_128                        9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+till_uint8_limit_200                         9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_loop_int8_signed                         9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_loop_uint8_below_128                     9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+loop_uint32_across_2p31                      9126350  run 2  npkc=0  codes=-  O0=93  O2=93
+loop_uint8_across_128                        9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+till_uint8_limit_200                         9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_loop_int8_signed                         c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_loop_uint8_below_128                     c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+loop_uint32_across_2p31                      c3bdae2  run 1  npkc=0  codes=-  O0=93  O2=93
+loop_uint8_across_128                        c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+till_uint8_limit_200                         c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

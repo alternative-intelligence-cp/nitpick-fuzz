@@ -1,0 +1,25 @@
+# F-011-for-binding-outlives-loop — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:45 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_block_shadow                             9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_no_outer                                 9126350  run 1  npkc=1  codes=NITPICK-RESOLVE-002  O0=-  O2=-
+ctl_other_name                               9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+leak_array_iteration                         9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_array_read_past_slot                    9126350  run 1  npkc=0  codes=-  O0=11  O2=10
+leak_same_type                               9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_string_invalid_ir                       9126350  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_block_shadow                             9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_no_outer                                 9126350  run 2  npkc=1  codes=NITPICK-RESOLVE-002  O0=-  O2=-
+ctl_other_name                               9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+leak_array_iteration                         9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+leak_array_read_past_slot                    9126350  run 2  npkc=0  codes=-  O0=11  O2=10
+leak_same_type                               9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+leak_string_invalid_ir                       9126350  run 2  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_block_shadow                             c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_no_outer                                 c3bdae2  run 1  npkc=1  codes=NITPICK-RESOLVE-002  O0=-  O2=-
+ctl_other_name                               c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+leak_array_iteration                         c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_array_read_past_slot                    c3bdae2  run 1  npkc=0  codes=-  O0=11  O2=10
+leak_same_type                               c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_string_invalid_ir                       c3bdae2  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1

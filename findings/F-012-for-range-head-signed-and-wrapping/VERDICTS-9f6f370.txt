@@ -1,0 +1,24 @@
+# F-012-for-range-head-signed-and-wrapping — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:47 UTC; HUNT 9f6f370 run 1 times, the baseline 9f6f370 once
+# HUNT runs agree for every program: yes
+
+ctl_incl_int8_below_max                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_above_128                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_below_128                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+incl_int32_to_max                            9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int64_to_max                            9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_to_max                             9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_whole_positive                     9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint32_across_2p31                       9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128_excl                    9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_incl_int8_below_max                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_above_128                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_below_128                      9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+incl_int32_to_max                            9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int64_to_max                            9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_to_max                             9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_whole_positive                     9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint32_across_2p31                       9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128_excl                    9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10

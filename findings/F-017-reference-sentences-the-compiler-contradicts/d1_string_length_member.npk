@@ -1,17 +1,11 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
-
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+// F-017 d1: TYPE_REFERENCE §3.2 spells a string's length `s.length`.
+// The compiler has no such member (TYPE-019); the length is `.len` (§9.1.1).
+mod:d1_string_length_member;
 
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
-    exit 11i32;
+    string:s = "hello";
+    if (s.length != 5i64) { exit 10i32; }
+    exit 0i32;
 };
 
 func:failsafe = int32(Error:e) {

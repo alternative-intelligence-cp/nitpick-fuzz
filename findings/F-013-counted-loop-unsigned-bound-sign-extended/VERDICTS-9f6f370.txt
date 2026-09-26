@@ -1,0 +1,14 @@
+# F-013-counted-loop-unsigned-bound-sign-extended — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:47 UTC; HUNT 9f6f370 run 1 times, the baseline 9f6f370 once
+# HUNT runs agree for every program: yes
+
+ctl_loop_int8_signed                         9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_loop_uint8_below_128                     9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+loop_uint32_across_2p31                      9f6f370  run 1  npkc=0  codes=-  O0=93  O2=93
+loop_uint8_across_128                        9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+till_uint8_limit_200                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_loop_int8_signed                         9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_loop_uint8_below_128                     9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+loop_uint32_across_2p31                      9f6f370  run 1  npkc=0  codes=-  O0=93  O2=93
+loop_uint8_across_128                        9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+till_uint8_limit_200                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10

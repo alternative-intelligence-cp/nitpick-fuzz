@@ -1,0 +1,18 @@
+# F-011-for-binding-outlives-loop — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9f6f370 run 1 times, the baseline 9f6f370 once
+# HUNT runs agree for every program: yes
+
+ctl_block_shadow                             9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_no_outer                                 9f6f370  run 1  npkc=1  codes=NITPICK-RESOLVE-002  O0=-  O2=-
+ctl_other_name                               9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+leak_array_iteration                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_array_read_past_slot                    9f6f370  run 1  npkc=0  codes=-  O0=11  O2=10
+leak_same_type                               9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_string_invalid_ir                       9f6f370  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_block_shadow                             9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_no_outer                                 9f6f370  run 1  npkc=1  codes=NITPICK-RESOLVE-002  O0=-  O2=-
+ctl_other_name                               9f6f370  run 1  npkc=0  codes=-  O0=0  O2=0
+leak_array_iteration                         9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_array_read_past_slot                    9f6f370  run 1  npkc=0  codes=-  O0=11  O2=10
+leak_same_type                               9f6f370  run 1  npkc=0  codes=-  O0=10  O2=10
+leak_string_invalid_ir                       9f6f370  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1

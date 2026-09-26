@@ -1,0 +1,34 @@
+# F-012-for-range-head-signed-and-wrapping — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:45 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_incl_int8_below_max                      9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_above_128                      9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_below_128                      9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+incl_int32_to_max                            9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int64_to_max                            9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_to_max                             9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_whole_positive                     9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint32_across_2p31                       9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128                         9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128_excl                    9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_incl_int8_below_max                      9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_above_128                      9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_below_128                      9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+incl_int32_to_max                            9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+incl_int64_to_max                            9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+incl_int8_to_max                             9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+incl_int8_whole_positive                     9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+uns_uint32_across_2p31                       9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128                         9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128_excl                    9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_incl_int8_below_max                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_above_128                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_uns_uint8_below_128                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+incl_int32_to_max                            c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int64_to_max                            c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_to_max                             c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+incl_int8_whole_positive                     c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint32_across_2p31                       c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128                         c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+uns_uint8_across_128_excl                    c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

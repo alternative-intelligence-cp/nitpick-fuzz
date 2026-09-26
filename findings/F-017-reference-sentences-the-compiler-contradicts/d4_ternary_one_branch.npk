@@ -1,17 +1,15 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// F-017 d4: TYPE_REFERENCE §28's table lowers the ternary to `select`, which
+// evaluates both branches (a DivByZero trap, exit 97). The compiler branches:
+// only the chosen arm runs (exit 0), as VERIFICATION_REFERENCE §1.2 models it.
+mod:d4_ternary_one_branch;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
-    exit 11i32;
+    int32:d = raw v32(0i32);
+    int32:r = is (d != 0i32) : 100i32 / d : 7i32;
+    if (r != 7i32) { exit 10i32; }
+    exit 0i32;
 };
 
 func:failsafe = int32(Error:e) {

@@ -1,0 +1,19 @@
+# F-016-negative-range-pattern-not-lowered — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_neg_value_pattern                        9126350  run 1  npkc=0  codes=-  O0=4  O2=4
+ctl_pos_range_pattern                        9126350  run 1  npkc=0  codes=-  O0=4  O2=4
+neg_low_bound_pattern                        9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern                            9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern_exclusive                  9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_neg_value_pattern                        9126350  run 2  npkc=0  codes=-  O0=4  O2=4
+ctl_pos_range_pattern                        9126350  run 2  npkc=0  codes=-  O0=4  O2=4
+neg_low_bound_pattern                        9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern                            9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern_exclusive                  9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_neg_value_pattern                        c3bdae2  run 1  npkc=0  codes=-  O0=4  O2=4
+ctl_pos_range_pattern                        c3bdae2  run 1  npkc=0  codes=-  O0=4  O2=4
+neg_low_bound_pattern                        c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern                            c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+neg_range_pattern_exclusive                  c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-

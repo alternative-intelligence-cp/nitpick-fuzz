@@ -1,6 +1,7 @@
 // M10 d16_uninit_owning_field_overwrite -- an owning field written into a struct declared without a value
 // claim: A declaration without an initialiser writes the canonical vacant value, so the first overwrite of an owning field drops nothing.
 // ref: meta/specs/DECISIONS.md:15687  "without an initialiser WRITES it. This completes a design the drop bodies"
+// ref: meta/specs/DECISIONS.md:15670  "without an initialiser — `Front:f;`, the `$$m` out-parameter idiom `src/main.npk`"
 // ref: meta/specs/TYPE_REFERENCE.md:1021  "A declared-uninitialised aggregate holds the vacant value (D-225)"
 // expect: run:0
 // wrong: the overwrite drops the slot's garbage (a trap, 91 or 95) or loses the value (10)
@@ -9,11 +10,15 @@ mod:d16_uninit_owning_field_overwrite;
 func:v32 = int32(int32:x) never fails { pass x; };
 
 struct:Hs = { string:s; int32:n; };
+func:init = NIL(Hs->:p) never fails {
+    p.s = string_concat("ab", "c");
+    p.n = raw v32(1i32);
+    pass NIL;
+};
 
 func:main = int32(cstring[]:_~argv) {
     Hs:h;
-    h.s = string_concat("ab", "c");
-    h.n = raw v32(1i32);
+    drop init($$m h);
     if (h.s.len != 3i64) { exit 10i32; }
     if (h.n != 1i32) { exit 11i32; }
     exit 0i32;

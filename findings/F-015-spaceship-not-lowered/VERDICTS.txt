@@ -1,0 +1,16 @@
+# F-015-spaceship-not-lowered — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_three_way_by_hand                        9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+spaceship_literals                           9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_uint64                             9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_values                             9126350  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_three_way_by_hand                        9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+spaceship_literals                           9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_uint64                             9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_values                             9126350  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_three_way_by_hand                        c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+spaceship_literals                           c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_uint64                             c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+spaceship_values                             c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-

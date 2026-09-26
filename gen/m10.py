@@ -277,15 +277,24 @@ item("d16_uninit_owning_field_overwrite", AREA_D,
      "A declaration without an initialiser writes the canonical vacant value, so the first "
      "overwrite of an owning field drops nothing.",
      [("DECISIONS", "without an initialiser WRITES it. This completes a design the drop bodies"),
+      ("DECISIONS", "without an initialiser — `Front:f;`, the `$$m` out-parameter idiom `src/main.npk`"),
       ("TYPE", "A declared-uninitialised aggregate holds the vacant value (D-225)")],
      "run:0",
      main_("""    Hs:h;
-    h.s = string_concat("ab", "c");
-    h.n = raw v32(1i32);
+    drop init($$m h);
     if (h.s.len != 3i64) { exit 10i32; }
     if (h.n != 1i32) { exit 11i32; }
-    exit 0i32;""", "struct:Hs = { string:s; int32:n; };"),
-     wrong="the overwrite drops the slot's garbage (a trap, 91 or 95) or loses the value (10)")
+    exit 0i32;""", """struct:Hs = { string:s; int32:n; };
+func:init = NIL(Hs->:p) never fails {
+    p.s = string_concat("ab", "c");
+    p.n = raw v32(1i32);
+    pass NIL;
+};"""),
+     wrong="the overwrite drops the slot's garbage (a trap, 91 or 95) or loses the value (10)",
+     note="Run 1 wrote the fields directly (`h.s = ...` after `Hs:h;`): refused `ASSIGN-001` at "
+          "the first field write, D-010's rule. D-225 names the idiom it serves, `Front:f;` "
+          "handed as `$$m f` to an initialiser, so the program now uses it (S36); the "
+          "expectation is unchanged.")
 
 # ------------------------------------------------------------ C conversions
 AREA_C = "numeric conversions and literals"
@@ -1259,9 +1268,12 @@ item("m12_tbb_compare_on_err_traps", AREA_M,
       ("OP", "branching on an ERR value traps to `failsafe`**. ERR flows freely through data")],
      "run:110",
      main_("""    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a > raw vt8(0tbb8)) { exit 10i32; }
+    if (a == raw vt8(0tbb8)) { exit 10i32; }
     exit 11i32;"""),
-     wrong="no trap: ERR compared as -128 (exit 11)")
+     wrong="no trap: ERR compared as -128 (exit 11)",
+     note="Run 1 spelled the comparison `a > 0`: refused `TYPE-008`, since ordering on tbb is "
+          "a compile error (D-093; error codes are compared, not sorted). The claim is about "
+          "the ERR trap, so the program now compares with `==` (S36); the expectation is unchanged.")
 
 item("m13_tbb_err_sticky", AREA_M,
      "ERR through `+`, `*` by 0, `-` of itself, and underflow",

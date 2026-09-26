@@ -1,17 +1,10 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// CONTROL for F-017 d7: the same division as a module `fixed` initialiser is
+// refused TYPE-004, as the text says.
+mod:d7_ctl_fixed_constant_div_zero;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
-
+fixed int32:X = 5i32 / 0i32;
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
-    exit 11i32;
+    exit X;
 };
 
 func:failsafe = int32(Error:e) {

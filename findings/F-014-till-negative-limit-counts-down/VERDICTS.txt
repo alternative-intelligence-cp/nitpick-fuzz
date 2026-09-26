@@ -1,0 +1,19 @@
+# F-014-till-negative-limit-counts-down — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_loop_zero_to_negative                    9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_till_positive_limit                      9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_till_zero_limit                          9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+till_negative_limit                          9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+till_negative_literal_limit                  9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_loop_zero_to_negative                    9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_till_positive_limit                      9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_till_zero_limit                          9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+till_negative_limit                          9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+till_negative_literal_limit                  9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_loop_zero_to_negative                    c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_till_positive_limit                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_till_zero_limit                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+till_negative_limit                          c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+till_negative_literal_limit                  c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

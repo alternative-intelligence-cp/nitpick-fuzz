@@ -1,17 +1,18 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// CONTROL for F-015: the same three-way answer spelled with `<` and `==`.
+mod:ctl_three_way_by_hand;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
 
+func:cmp3 = int32(int32:a, int32:b) never fails {
+    if (a < b) { pass -1i32; }
+    if (a == b) { pass 0i32; }
+    pass 1i32;
+};
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
-    exit 11i32;
+    if (raw cmp3(raw v32(-5i32), raw v32(3i32)) != -1i32) { exit 10i32; }
+    if (raw cmp3(raw v32(3i32), raw v32(3i32)) != 0i32) { exit 11i32; }
+    if (raw cmp3(raw v32(7i32), raw v32(3i32)) != 1i32) { exit 12i32; }
+    exit 0i32;
 };
 
 func:failsafe = int32(Error:e) {

@@ -1,16 +1,16 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// F-012: a uint32 range crossing 2^31.
+// The reference's answer: 10 trips (exit 0). Exit 10: zero trips.
+mod:uns_uint32_across_2p31;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+func:vu32 = uint32(uint32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
+    uint32:lo = raw vu32(2147483640u32);
+    uint32:hi = raw vu32(2147483650u32);
+    int32:n = 0i32;
+    for (uint32:i in lo...hi) { n = n + 1i32; }
+    if (n == 10i32) { exit 0i32; }
+    if (n == 0i32) { exit 10i32; }
     exit 11i32;
 };
 

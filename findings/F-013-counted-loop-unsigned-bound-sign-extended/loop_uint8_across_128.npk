@@ -1,16 +1,21 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// F-013: `loop(100u8, 200u8, 1u8)` -- an ascending uint8 counted loop.
+// The reference's answer: 100 trips, `$` from 100 to 199 (exit 0).
+// Exit 10: 156 trips from 100 DOWN to -55 -- 200 sign-extended to -56.
+mod:loop_uint8_across_128;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+func:vu8 = uint8(uint8:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
+    int32:n = 0i32;
+    int64:first = -1i64;
+    int64:last = -1i64;
+    loop (raw vu8(100u8), raw vu8(200u8), 1u8) {
+        if (n == 0i32) { first = $; }
+        last = $;
+        n = n + 1i32;
+    }
+    if (n == 100i32 && first == 100i64 && last == 199i64) { exit 0i32; }
+    if (n == 156i32 && first == 100i64 && last == -55i64) { exit 10i32; }
     exit 11i32;
 };
 

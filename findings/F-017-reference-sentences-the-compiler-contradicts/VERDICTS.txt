@@ -1,0 +1,34 @@
+# F-017-reference-sentences-the-compiler-contradicts — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 12:46 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+d1_ctl_string_len_member                     9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+d1_string_length_member                      9126350  run 1  npkc=1  codes=NITPICK-TYPE-019  O0=-  O2=-
+d2_ctl_string_bytes_index                    9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+d2_string_index                              9126350  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d3_float_ne_nan                              9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+d4_ternary_one_branch                        9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+d5_int128_overflow_traps                     9126350  run 1  npkc=0  codes=-  O0=93  O2=93
+d6_for_binding_type_code                     9126350  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d7_ctl_fixed_constant_div_zero               9126350  run 1  npkc=1  codes=NITPICK-TYPE-004  O0=-  O2=-
+d7_local_constant_div_zero                   9126350  run 1  npkc=0  codes=-  O0=97  O2=97
+d1_ctl_string_len_member                     9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+d1_string_length_member                      9126350  run 2  npkc=1  codes=NITPICK-TYPE-019  O0=-  O2=-
+d2_ctl_string_bytes_index                    9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+d2_string_index                              9126350  run 2  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d3_float_ne_nan                              9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+d4_ternary_one_branch                        9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+d5_int128_overflow_traps                     9126350  run 2  npkc=0  codes=-  O0=93  O2=93
+d6_for_binding_type_code                     9126350  run 2  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d7_ctl_fixed_constant_div_zero               9126350  run 2  npkc=1  codes=NITPICK-TYPE-004  O0=-  O2=-
+d7_local_constant_div_zero                   9126350  run 2  npkc=0  codes=-  O0=97  O2=97
+d1_ctl_string_len_member                     c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+d1_string_length_member                      c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-019  O0=-  O2=-
+d2_ctl_string_bytes_index                    c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+d2_string_index                              c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d3_float_ne_nan                              c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+d4_ternary_one_branch                        c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+d5_int128_overflow_traps                     c3bdae2  run 1  npkc=0  codes=-  O0=93  O2=93
+d6_for_binding_type_code                     c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+d7_ctl_fixed_constant_div_zero               c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-004  O0=-  O2=-
+d7_local_constant_div_zero                   c3bdae2  run 1  npkc=0  codes=-  O0=97  O2=97

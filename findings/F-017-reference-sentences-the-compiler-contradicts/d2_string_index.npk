@@ -1,17 +1,14 @@
-// M10 m12_tbb_compare_on_err_traps -- a comparison of a `tbb8` holding ERR
-// claim: Comparing or branching on ERR traps to failsafe.
-// ref: meta/specs/TYPE_REFERENCE.md:693  "- **Comparison or branching on ERR traps to `failsafe`** — `bool` has exactly two"
-// ref: meta/specs/OP_REFERENCE.md:175  "branching on an ERR value traps to `failsafe`**. ERR flows freely through data"
-// expect: run:110
-// wrong: no trap: ERR compared as -128 (exit 11)
-mod:m12_tbb_compare_on_err_traps;
+// F-017 d2: TYPE_REFERENCE §3.2 says `char8:c = s[0];` returns the char,
+// bounds-checked. The compiler refuses: "`string` cannot be indexed" (TYPE-007).
+mod:d2_string_index;
 
-func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
-    if (a == raw vt8(0tbb8)) { exit 10i32; }
-    exit 11i32;
+    string:s = "hello";
+    char8:c = s[raw v64(1i64)];
+    if (c != 'e') { exit 10i32; }
+    exit 0i32;
 };
 
 func:failsafe = int32(Error:e) {
