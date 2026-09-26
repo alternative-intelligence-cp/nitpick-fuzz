@@ -1024,3 +1024,103 @@ python3 gen/m10_report.py                # m10/RESULTS.md, the denominators and 
 python3 gen/run_findings.py F-011 F-012 F-013 F-014 F-015 F-016 F-017 --hunt .work/hunt2 --base .work/base
 python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cases among it
 ```
+
+## 12. M11 — the reference, checked against the compiler (in part: the drafted ranges)
+
+Written 2026-09-26 by session 7, on the author's machine (48 cores), from the committed
+scripts. **M11 is not finished.** These denominators cover the ranges extracted so far,
+3 704 of the fourteen references' 10 433 lines:
+- extracted whole: BUILTIN, CONCURRENCY, IO and MACRO;
+- extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
+- not yet extracted: TYPE 661–2123, VERIFICATION 1248–2352, and TRAITS, MEMORY, MODULE,
+  BUILD, OP, CONTROL, LEXICAL and AST.
+
+The records are:
+- `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
+  `m11/RESULTS.md` (the results, claim by claim);
+- `results/9126350/m11.jsonl` (the final run), with runs 1–3 beside it;
+- `results/c3bdae2/m11-disagree.jsonl` and `results/1b4f0c6/m11-disagree.jsonl` (the
+  disagreeing claims at the baseline and at the compiler's newest `main`);
+- `gen/m11_triage.py` (the class of each disagreement);
+- `findings/F-018` … `F-028`.
+
+### 12.1 The denominators
+
+| reference | claims | examples | rows | rules | untestable | testable = tested | agree | disagree |
+|---|---|---|---|---|---|---|---|---|
+| BUILTIN | 227 | 2 | 109 | 116 | 33 | 194 | 182 | 12 |
+| CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 101 | 21 |
+| IO | 78 | 5 | 9 | 64 | 11 | 67 | 60 | 7 |
+| MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 98 | 21 |
+| TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
+| VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
+| **total** | **1 488** | 59 | 344 | 1 085 | **226** | **1 262** | **1 118** | **144** |
+
+Untestable, each with its reason in `m11/CLAIMS.md`:
+- `z3` 91: needs `npkg verify` with the pinned z3;
+- `tree` 40: the compiler's own tree;
+- `vague` 36: no checkable outcome;
+- `internal` 27;
+- `unobservable` 15;
+- `tool` 8;
+- `timing` 7;
+- `platform` 2.
+
+Every expectation was written from the reference's text before its program first ran.
+Session 6 drafted five of the six modules with sub-agents. Session 7 reviewed them
+before their first run (PROGRESS.md S51). **59 programs** changed their text after a
+run, for a mistake of their own: 21 of BUILTIN's in session 6, and 38 in session 7 (26
+of them one mistake in `verif1`'s scripts, reading `main`'s rows as `<module>.main` where
+the symbol is `@main`: 25 through one shared helper, S53). The expectation stayed, except
+one under S45's recorded exception (`cc0636`). Each change carries its reason (`fixed`,
+listed in `m11/RESULTS.md` §3). Session 7's run 1 gave 1 093 agree and 169 disagree;
+its final run gives 1 118 and 144.
+
+### 12.2 The disagreements, by class
+
+| class | claims |
+|---|---|
+| compiler: a silent wrong answer (F-018 … F-021) | 6 |
+| compiler: a lifetime rule not enforced, use after destroy (F-022) | 1 |
+| compiler: accepted, then invalid IR (F-023) | 1 |
+| compiler: npkc traps, exit 3 (F-024) | 4 |
+| compiler: a flag that refuses every program (F-025) | 2 |
+| compiler: a unit annotation accepted and ignored (F-026) | 1 |
+| compiler, lower priority (F-027) | 16 |
+| documentation (F-028) | 94 |
+| known (DEF-123, DEF-131, DEF-133) | 7 |
+| not a finding: refused at compile time where the text says it traps | 2 |
+| not a finding: the program tests more than its sentence, or cannot be written | 10 |
+| **total** | **144** |
+
+**Every disagreement gives the same result at the baseline and at `1b4f0c6`** (one,
+`cc0042`, with other codes at the baseline). So each is old, and each still stands at
+the tree the maintainers work on.
+
+### 12.3 The findings
+
+| id | shape | class | HUNT2 | baseline | `1b4f0c6` |
+|---|---|---|---|---|---|
+| F-018 | a macro's free name, alone or a comparison's operand, reads the call site's local | silent wrong answer | 0, 10/10 | the same | the same |
+| F-019 | a `\u{…}` escape is a `char8`, truncated to its low byte (`'\u{1F641}'` is `'A'`); a `char32` refuses it | silent wrong answer | 0, 10/10; `char32`: 1 | the same | the same |
+| F-020 | the join relays the last-spawned child's error, not the first child error | silent wrong answer | 0, 10/10 | the same | the same |
+| F-021 | a `timedwait` expiring with no signal reports success | silent wrong answer (an error path becomes a success) | 0, 10/10 | the same | the same |
+| F-022 | a shared arena destroyed while a spawned thread holds it; the program ends in `WildLeak` | memory: use after destroy | 0, 96/96 | the same | the same |
+| F-023 | an un-awaited async method call is accepted and emits a call to an undefined symbol | compiler: invalid IR | 0, llc!1/opt!1 | the same | the same |
+| F-024 | npkc traps (exit 3, no message) on a macro emitting a method into an impl, a 500-deep expression, a macro emitting a comptime function | compiler crash | 3 | 3 | 3 |
+| F-025 | `--extra-picky=no-wildx` refuses every program (256 `WILDX-003` in the prelude) | compiler: a flag unusable | 1 | 1 | 1 |
+| F-026 | `tfp64<Meters>` accepted and its unit ignored: Meters + Seconds compiles | compiler: a refusal missing | 0, 10/10 | the same | the same |
+| F-027 | sixteen safe departures: accepted though refused, a named hole, refused though permitted, a diagnostic | compiler, lower priority | per row | the same | the same |
+| F-028 | ninety-four reference sentences the compiler contradicts, the compiler right or safe | documentation | per row | the same | the same |
+
+### 12.4 What these claims do not cover
+
+- **The ranges not yet extracted** (above), about 6 700 lines: at the drafts' density,
+  roughly 3 300 more claims.
+- **The verified build.** 91 claims need `npkg verify` with the pinned z3, and are
+  untestable here. Claims about what the compiler writes for verification were tested
+  through `npkc --obligations`, which needs no z3.
+- **A program per claim.** One agreeing program shows the claim for that program, not
+  for every program. The refusals that agreed were screened for a first diagnostic of
+  another kind (a parse, lex, resolve or reach error). One was found (`mc0312b`), and
+  it now agrees for its own reason.

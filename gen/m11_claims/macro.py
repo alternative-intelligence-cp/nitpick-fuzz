@@ -1608,3 +1608,13 @@ exit 0"""),
       wrong="accepted (2), or the first diagnostic placed elsewhere, e.g. at the invocation's line 5 (3)",
       note="the sentence also says 0.6.6 will add the invocation's location; only the body's location is "
            "checked (a note pointing at line 5 as well does not fail this)")
+
+
+# ------------------------------------------------------------------ after the runs (S45, S53)
+# mc0312b AGREED for another reason: `assert_static comptime(...)` is refused for its spelling
+# (PARSE-001, the parentheses; mc0312's documentation row), not for its false proposition. Its
+# TEXT now uses the parenthesised spelling, so the refusal it expects is the proposition's.
+refix("mc0312b", "it agreed for another reason: `assert_static comptime(...)` is refused for its "
+      "spelling (PARSE-001; mc0312's row), so the program now writes `assert_static(comptime(...))` "
+      "and the refusal it expects is the false proposition's",
+      [("    assert_static comptime(not_nine());", "    assert_static(comptime(not_nine()));")])

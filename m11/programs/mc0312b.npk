@@ -8,7 +8,7 @@ mod:mc0312b;
 comptime func:not_nine = bool() { pass ((3i32 * 3i32) == 10i32); };
 
 func:main = int32(cstring[]:_~argv) {
-    assert_static comptime(not_nine());
+    assert_static(comptime(not_nine()));
     exit 0i32;
 };
 

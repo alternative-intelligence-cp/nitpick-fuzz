@@ -41,14 +41,15 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
   - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
-- [ ] **M11** — the reference, checked against the compiler (session 6: **STOPPED
-  part-way on the author's word, 2026-09-26, the cloud credit nearly spent**;
-  resume from "M11 — the state at the stop" below). Session 7 (local, branch
-  `local-m11`) resumed it: the start checks pass; the five drafts reviewed (S51) and
-  committed with BUILTIN before their first run: 1 488 claims, 1 262 testable (S52)
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN done and run; five ranges drafted, unreviewed (`gen/m11_claims/_wip_*.py`); nine not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2
-  - [ ] 11.3 `REPORT.md` §12; stop
+- [ ] **M11** — the reference, checked against the compiler. **In part, and stopped
+  at a clean point (session 7, 2026-09-26, on the workbench's brief, S56).** Session 6
+  stopped part-way on the author's word, the cloud credit nearly spent. Session 7
+  (local, branch `local-m11`) reviewed, ran and triaged the drafted ranges, 3 704 of
+  10 433 lines: 1 488 claims, 1 262 tested, 1 118 agree, 144 disagree; findings
+  F-018 … F-028. Resume from "M11 — the state at the stop" below.
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2123, VERIFICATION 1248–2352 and eight references not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (final run: 1 118 agree, 144 disagree, all triaged)
+  - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
 
@@ -952,6 +953,50 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
+*Session 7 stopped here on the workbench's brief, at a clean point after the drafted
+modules (S50, S56). Nothing below is ticked: M11 is not finished.*
+
+**Done, committed and measured: the drafted ranges.** The ranges are:
+- BUILTIN, CONCURRENCY, IO and MACRO, whole;
+- TYPE 1–660 and VERIFICATION 1–1247.
+
+That is 3 704 of the references' 10 433 lines. On them:
+- **1 488 claims, 1 262 testable, 226 untestable** with reasons, in `m11/CLAIMS.md`;
+- every expectation written before its program's first run;
+- the final run at HUNT2 (`results/9126350/m11.jsonl`): **1 118 agree, 144 disagree**;
+- every disagreement triaged (`gen/m11_triage.py`) and run at the baseline and at the
+  newest `main` `1b4f0c6`, where all 144 give the same result.
+
+Written up in `m11/RESULTS.md`, `REPORT.md` §12, and findings F-018 … F-028:
+- the silent wrong answers F-018 … F-021;
+- a use after destroy, F-022;
+- invalid IR from an accepting compiler, F-023;
+- compiler traps, F-024;
+- a flag that refuses everything, F-025;
+- a unit annotation ignored, F-026;
+- the lower-priority rows, F-027;
+- the documentation rows, F-028.
+
+**Not started** (about 6 700 lines, roughly 3 300 claims at the drafts' density): TYPE
+661–2123, VERIFICATION 1248–2352 (§8 on), TRAITS, MEMORY, MODULE, BUILD, OP, CONTROL,
+LEXICAL and AST.
+
+**To resume (a later session):**
+1. The start checks and M0's rebuild (about 5 min; HUNT2 stays `9126350`).
+2. Extract the ranges not started into new modules of `gen/m11_claims/`. Each module
+   declares its lines with `covers()` (S52) and follows `m11/BRIEF.md`. The drafts show
+   the density and the helpers (`type1.py`'s layout and IR helpers, `verif1.py`'s and
+   `verif2.py`'s obligation scripts). Note `@main`: in `rows.txt`, `main`'s symbol is
+   `@main` (S53).
+3. Commit the modules, then `python3 gen/m11.py`, then `gen/m11_run.py .work/hunt2`
+   (about 210 s for 1 262 programs). Fix the programs' own mistakes with `refix()`
+   (text only, S45) and run again. Screen the agreeing refusals' first diagnostics.
+4. Triage into `gen/m11_triage.py` (it checks that every disagreement has a class).
+   Then `gen/m11_rows.py`, `gen/m11_report.py`, and extend `REPORT.md` §12; findings
+   number on from F-029.
+
+### M11 — the state at session 6's stop (history)
+
 The author stopped the session at about 13:50 UTC because the cloud credit was
 nearly spent. Nothing below is ticked. Everything committed is consistent: no
 claim program ran except BUILTIN's, and every expectation was written from the
@@ -1516,6 +1561,46 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   the ranges extracted and those not yet extracted, so the denominators say which part
   of each reference they are over. Extracted: BUILTIN, CONCURRENCY, IO and MACRO
   whole, TYPE 1–660, and VERIFICATION 1–1247, which is 3 704 of the 10 433 lines.
+- **S53 — a program's text changes after a run through `refix()`; four runs.**
+  - `m11lib.refix(cid, why, pairs, field)` replaces text in a claim's program. Each
+    `old` must occur, and `why` goes into the claim's `fixed`. The fixes sit at the end
+    of each module, after the drafts, so each change is a small diff that can be read.
+    The expectation never changes, except `cc0636`'s, under S45's recorded exception.
+  - **38 programs changed**, all for mistakes of their own. The main one: `verif1`'s
+    shared rows helper matched `main`'s rows by `<module>.` / `<module>.main`, but
+    `main`'s symbol in `rows.txt` is `@main`, so every count in `main` read 0. The
+    helper was corrected in all 25 scripts that embed it, and `vf0306`'s inline filter
+    separately. None of those that agreed moved to disagree.
+  - **The runs**, all at HUNT2, both legs, 4 jobs, about 210 s each:
+    - run 1: 1 093 agree / 169 disagree;
+    - run 2: 1 114 / 148, 21 moved, all to agree;
+    - run 3: 1 118 / 144, the four programs re-fixed moved;
+    - the final run: 1 118 / 144. Only `mc0312b` changed, which agreed in run 3 for
+      another reason (a spelling's `PARSE-001`) and now agrees for its own (`TYPE-069`).
+  - Runs 1–3 are kept as `results/9126350/m11-run1…3.jsonl`.
+- **S54 — the triage, and how the findings are grouped.** Every disagreement has one
+  class in `gen/m11_triage.py`, which checks that the classes and the disagreements
+  match exactly. Following S18 (one finding per shape) and S38 (sentence-sized rows
+  share a directory):
+  - each compiler shape with a wrong answer, a memory fault, invalid IR, a crash, an
+    unusable flag or a lost safety check has its own finding, F-018 … F-026, with
+    minimal programs and controls, run twice at HUNT2 and once each at the baseline and
+    `1b4f0c6`;
+  - the sixteen safe compiler departures are F-027's rows;
+  - the ninety-four documentation claims are F-028's rows.
+
+  The rows cite the claims' own programs in `m11/programs/`, with verdicts from the
+  final run and from `results/<commit>/m11-disagree.jsonl` (`gen/m11_rows.py`). A
+  claim whose program tested more than its sentence is classed "not a finding",
+  never re-expected (S45, S51).
+- **S55 — the agreeing refusals were screened.** Of 368 agreeing refusals, the 238 with
+  no named code were screened. Those whose first diagnostic is a parse, lex,
+  resolve-002, reach or `raw` error (66) were read by hand. All but one are refusals
+  of a spelling the claim itself says does not exist. The one, `mc0312b`, was
+  re-spelled (S53).
+- **S56 — the session stops after the drafted modules, with M11 unticked.** This is the
+  brief's instruction (S50). The extraction left is about 6 700 lines. Its state and
+  the way back are "M11 — the state at the stop" above.
 
 ## Log
 
@@ -1620,3 +1705,15 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     given their extracted ranges (S52). With BUILTIN: 1 488 claims (1 262 testable,
     226 untestable) over 3 704 of the references' 10 433 lines. `m11/` was written
     from the whole set and committed before any of the new programs ran.
+  - **11.2, the runs.** Run 1 at HUNT2: 1 093 agree, 169 disagree. 38 programs were fixed
+    for mistakes of their own (S53). The final run: 1 118 agree, 144 disagree. The
+    agreeing refusals were screened (S55).
+  - **Triage (S54).** The 144 were classed: 94 documentation, 16 lower-priority
+    compiler, 10 extraction errors, 7 known, 6 silent wrong answers, 4 compiler traps,
+    2 flag, 2 stricter than the text, 1 use after destroy, 1 invalid IR, 1 unit.
+    All 144 give the same result at the baseline and at `1b4f0c6`.
+  - **Findings.** F-018 … F-028, each confirmed on both legs, twice at HUNT2, and at
+    the baseline and `1b4f0c6`: every one is old and still stands. `REPORT.md` §12 and
+    `m11/RESULTS.md` written.
+  - **Stopped** after the drafted modules, as the brief says (S56). M11 stays unticked:
+    about 6 700 lines are not yet extracted.
