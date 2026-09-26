@@ -1,0 +1,6 @@
+.work/
+cells/
+*.ll
+*.o
+*.opt
+__pycache__/

@@ -1,0 +1,3 @@
+mod:canary_malformed;
+
+func:main = int64( {

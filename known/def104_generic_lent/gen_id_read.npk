@@ -1,0 +1,24 @@
+mod:gen_id_read;
+func:id<T> = T(T:x) never fails {
+    pass x;
+};
+func:keep = string() never fails {
+    string:a = string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+    string:b = raw id::<string>(a);
+    pass b;
+};
+func:main = int32(cstring[]:_~argv) {
+    string:s = raw keep();
+    uint8[]:bs = string_bytes(s);
+    if (bs[0i64] == 97u8) { exit 21i32; }
+    if (bs[0i64] == 170u8) { exit 70i32; }
+    exit 71i32;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; }, (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
