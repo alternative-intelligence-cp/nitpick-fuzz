@@ -1004,6 +1004,11 @@ def check_value(t, p, o, section):
         raise Skip("%s has no owning sub-place to write" % t.ty)
     if o == "at_grow" and not t.grows:
         raise Skip("at_grow grows a List; %s does not grow" % t.ty)
+    if o == "at_grow" and gen:
+        raise Skip("a generic body cannot grow an opaque T: a push is List's, and T names no List")
+    if o == "loop_move" and t.base == "ofd":
+        raise Skip("a descriptor number is reused across the loop's trips, so the observer's number cannot tell "
+                   "the new descriptor from the original")
     if o == "move_part" and t.part is None:
         raise Skip("%s has no owning part to move out" % t.ty)
     if o == "clone":
