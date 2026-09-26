@@ -1,0 +1,12 @@
+# F-019-unicode-escape-truncated-to-char8 — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 1b4f0c6 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_u3_char32_numeric                        1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_u4_char8_hex_escape                      1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+u1_char8_takes_high_codepoint                1b4f0c6  run 1  npkc=0  codes=-  O0=10  O2=10
+u2_char32_refuses_escape                     1b4f0c6  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-
+ctl_u3_char32_numeric                        c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_u4_char8_hex_escape                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+u1_char8_takes_high_codepoint                c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+u2_char32_refuses_escape                     c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-007  O0=-  O2=-

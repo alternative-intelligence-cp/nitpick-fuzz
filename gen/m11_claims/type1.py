@@ -2500,3 +2500,17 @@ refix("ty0399b", "a cstring's `.ptr` is `uint8->`, not `char8->` (TYPE-007): the
 refix("ty0476b", "a u256 literal is outside the 64-bit literal envelope (LEX-004, D-148): the expected value "
       "is built by widening the u64 maximum",
       [("if (u != 18446744073709551615u256)", "if (u != (18446744073709551615u64 => uint256))")])
+# after run 2: two of the three still failed for a mistake of their own
+refix("ty0399b", "run 1: a cstring's `.ptr` is `uint8->`, not `char8->` (TYPE-007); run 2: a borrow cannot "
+      "initialise a `wild` binding (BORROW-011, D-223): the bytes are now read through a view, "
+      "`string_from_bytes(c.ptr, c.len + 1)`, as the compiler's own len_ceiling.npk reads a cstring",
+      [("    wild uint8->:p = c.ptr;\n    uint8:t = p[c.len];\n    uint8:f = p[0i64];\n",
+        "    string:v = string_from_bytes(c.ptr, c.len + 1i64);\n    uint8:t = string_bytes(v)[c.len];\n"
+        "    uint8:f = string_bytes(v)[0i64];\n")])
+refix("ty0476b", "run 1 and run 2: a literal of 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, "
+      "D-148), even with a u64 suffix: the u64 maximum is computed (`0 -% 1`), and zero-extension is "
+      "checked through its half, 2^63 - 1",
+      [("    uint256:u = raw vu64(18446744073709551615u64) => uint256;\n"
+        "    if (u != (18446744073709551615u64 => uint256)) { exit 11i32; }",
+        "    uint64:mx = raw vu64(0u64) -% 1u64;\n    uint256:u = mx => uint256;\n"
+        "    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }")])

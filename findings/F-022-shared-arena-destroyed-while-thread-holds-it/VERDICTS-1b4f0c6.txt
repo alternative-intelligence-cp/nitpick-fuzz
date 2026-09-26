@@ -1,0 +1,10 @@
+# F-022-shared-arena-destroyed-while-thread-holds-it — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 1b4f0c6 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+a1_destroy_while_thread_holds                1b4f0c6  run 1  npkc=0  codes=-  O0=96  O2=96
+ctl_a2_destroy_after_join                    1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_a3_destroy_no_thread                     1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+a1_destroy_while_thread_holds                c3bdae2  run 1  npkc=0  codes=-  O0=96  O2=96
+ctl_a2_destroy_after_join                    c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_a3_destroy_no_thread                     c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0

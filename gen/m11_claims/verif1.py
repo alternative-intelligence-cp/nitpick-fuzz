@@ -2845,3 +2845,7 @@ refix("vf0138b", "a refinement leads a Rules block's list (`{ limit<r>, clause }
       "orders apart (0 traps LimitViolated by the refinement before the clause divides by it)",
       [("Rules<int32>:r_div = { 100i32 / $ > 1i32, limit<r_nz> };",
         "Rules<int32>:r_div = { limit<r_nz>, 100i32 / $ > 1i32 };")])
+# after run 2: vf0306 counts with its own inline filter, which made the same mistake
+refix("vf0306", "its inline filter matched main's rows by `vf0306.main`, but main's symbol is `@main` "
+      "(both counts read 0 in runs 1 and 2): the filter is `$6 == \"@main\"`",
+      [('index($6, "vf0306.main") > 0', '$6 == "@main"')], field="sh")

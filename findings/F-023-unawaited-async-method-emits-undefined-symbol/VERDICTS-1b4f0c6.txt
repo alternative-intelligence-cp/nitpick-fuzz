@@ -1,0 +1,10 @@
+# F-023-unawaited-async-method-emits-undefined-symbol — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:15 UTC; HUNT 1b4f0c6 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_i2_awaited_method_call                   1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_i3_unawaited_free_function               1b4f0c6  run 1  npkc=1  codes=NITPICK-TYPE-043  O0=-  O2=-
+i1_unawaited_method_call                     1b4f0c6  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_i2_awaited_method_call                   c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_i3_unawaited_free_function               c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-043  O0=-  O2=-
+i1_unawaited_method_call                     c3bdae2  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1

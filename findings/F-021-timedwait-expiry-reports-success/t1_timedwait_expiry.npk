@@ -1,20 +1,20 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:t1_timedwait_expiry;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
-
-func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
-    exit 0i32;
+// CONCURRENCY_REFERENCE:568, 426, 571 and D-056: a deadline's expiry is an error
+// (DeadlineExceeded). No task ever signals cv. Exit 0: an error; 10: success after
+// the full 200 ms wait (measured); 11: success at once.
+error:E1;
+error:E2;
+async func:main = int32(cstring[]:_~argv) {
+    Mutex<int32, 3i32>:m = mutex(0i32) ?! E1;
+    CondVar<4i32>:cv = condvar() ?! E1;
+    Guard<int32>:g = await m.acquire(raw duration_ms(100i64)) ?! E2;
+    int64:t0 = mono_now();
+    Result<NIL>:w = await cv.timedwait(g, raw duration_ms(200i64));
+    int64:dt = (mono_now() - t0) / 1000000i64;
+    if (w.is_error) { exit 0i32; }
+    if (dt >= 150i64) { exit 10i32; }
+    exit 11i32;
 };
 
 func:failsafe = int32(Error:e) {
@@ -50,6 +50,8 @@ func:failsafe = int32(Error:e) {
         (Exists) { exit 120i32; },
         (CrossDevice) { exit 121i32; },
         (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
         (*) { exit 99i32; }
     }
     exit 9i32;

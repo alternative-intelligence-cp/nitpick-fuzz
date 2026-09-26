@@ -1,0 +1,12 @@
+# F-018-macro-free-name-captured-by-call-site — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 1b4f0c6 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_h3_arithmetic_operand                    1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_h4_statement_arithmetic                  1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+h1_lone_identifier                           1b4f0c6  run 1  npkc=0  codes=-  O0=10  O2=10
+h2_comparison_operand                        1b4f0c6  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_h3_arithmetic_operand                    c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_h4_statement_arithmetic                  c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+h1_lone_identifier                           c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+h2_comparison_operand                        c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

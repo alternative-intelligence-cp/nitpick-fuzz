@@ -13,7 +13,7 @@ Rules<int32>:r_pos = { $ >= 0i32 };
 struct:Tk = { limit<r_pos> int32:n; int32:m; };
 func:fptr = int32(int32:a, int32:b) never fails {
     Tk:t = Tk{ n: a, m: 0i32 };
-    Tk->:p = $$m t;
+    Tk->:p = @t;
     p.n = b;
     pass t.n;
 };

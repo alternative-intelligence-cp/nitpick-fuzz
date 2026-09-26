@@ -1,20 +1,18 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:h1_lone_identifier;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
 
+// MACRO_REFERENCE:146: an identifier in a macro body resolves where the macro was
+// written, always. Exit 0: the module's 7 (the reference); 10: main's local 3.
+fixed int32:lvl = 7i32;
+macro:m1 = () { lvl; };
 func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
-    exit 0i32;
+    int32:lvl = raw v32(3i32);
+    int32:c = #m1();
+    discard(lvl);
+    if (c == 7i32) { exit 0i32; }
+    if (c == 3i32) { exit 10i32; }
+    exit 11i32;
 };
 
 func:failsafe = int32(Error:e) {

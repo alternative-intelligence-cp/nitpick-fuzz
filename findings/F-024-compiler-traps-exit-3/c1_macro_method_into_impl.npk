@@ -1,19 +1,16 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:c1_macro_method_into_impl;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
-
+// MACRO_REFERENCE:136: `impl:Box:Pair = { #emit_methods(); };` gives Box the method.
+// Measured: npkc exits 3 (a trap inside the compiler) and prints nothing.
+struct:Box = { int32:n; };
+trait:Pair = { func:add_one = int32(Self:self); };
+macro:emit_methods = () {
+    func:add_one = int32($$i Box:self) { pass (self.n + 1i32); };
+};
+impl:Box:Pair = { #emit_methods(); };
 func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
+    Box:b = Box{ n: 41i32 };
+    if ((b.add_one() ?| 0i32) != 42i32) { exit 10i32; }
     exit 0i32;
 };
 

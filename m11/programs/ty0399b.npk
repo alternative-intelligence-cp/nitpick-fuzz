@@ -9,9 +9,9 @@ error:E1;
 
 func:main = int32(cstring[]:_~argv) {
     cstring:c = to_cstring("abc") ?! E1;
-    wild uint8->:p = c.ptr;
-    uint8:t = p[c.len];
-    uint8:f = p[0i64];
+    string:v = string_from_bytes(c.ptr, c.len + 1i64);
+    uint8:t = string_bytes(v)[c.len];
+    uint8:f = string_bytes(v)[0i64];
     if (t != 0u8) { exit 10i32; }
     if (f != 97u8) { exit 11i32; }
     exit 0i32;

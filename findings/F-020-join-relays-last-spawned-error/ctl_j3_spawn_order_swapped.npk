@@ -1,20 +1,27 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:ctl_j3_spawn_order_swapped;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
-
-func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
-    exit 0i32;
+// Control that shows the rule followed: spawned slow first, fast second, E1 comes back
+// (the last-spawned child's error, which is also the first to fail here).
+error:E1;
+error:E2;
+async func:fast_fail = NIL() {
+    fail E1;
+};
+async func:slow_fail = NIL() {
+    await sleep(raw duration_ms(50i64)) ?| NIL;
+    fail E2;
+};
+async func:parent = int32() {
+    drop slow_fail();
+    drop fast_fail();
+    pass 5i32;
+};
+async func:main = int32(cstring[]:_~argv) {
+    Result<int32>:r = await parent();
+    if (!r.is_error) { exit 11i32; }
+    if (r.err == E1) { exit 0i32; }
+    if (r.err == E2) { exit 10i32; }
+    exit 11i32;
 };
 
 func:failsafe = int32(Error:e) {
@@ -50,6 +57,8 @@ func:failsafe = int32(Error:e) {
         (Exists) { exit 120i32; },
         (CrossDevice) { exit 121i32; },
         (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
         (*) { exit 99i32; }
     }
     exit 9i32;

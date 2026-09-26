@@ -1,0 +1,14 @@
+# F-024-compiler-traps-exit-3 — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 1b4f0c6 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+c1_macro_method_into_impl                    1b4f0c6  run 1  npkc=3  codes=-  O0=-  O2=-
+c2_nested_expression_500                     1b4f0c6  run 1  npkc=3  codes=-  O0=-  O2=-
+c3_macro_emits_comptime_function             1b4f0c6  run 1  npkc=3  codes=-  O0=-  O2=-
+ctl_c4_nested_expression_250                 1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_c5_comptime_function_direct              1b4f0c6  run 1  npkc=0  codes=-  O0=0  O2=0
+c1_macro_method_into_impl                    c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+c2_nested_expression_500                     c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+c3_macro_emits_comptime_function             c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+ctl_c4_nested_expression_250                 c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_c5_comptime_function_direct              c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0

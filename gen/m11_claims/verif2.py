@@ -2161,3 +2161,8 @@ for _cid in ("vf0866c", "vf0866d"):
     refix(_cid, "the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, "
           "and the write points the claim counts are the same",
           [("Rules<int32>:r_pos = { $ > 0i32 };", "Rules<int32>:r_pos = { $ >= 0i32 };")], field="sh")
+# after run 2: vf0866d's program then met a claim conflict of its own
+refix("vf0866d", "run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: "
+      "reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address "
+      "that claims nothing, so the write still goes through a pointer",
+      [("Tk->:p = $$m t;", "Tk->:p = @t;")], field="sh")

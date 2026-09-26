@@ -1,19 +1,11 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:ctl_i3_unawaited_free_function;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
-
-func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
+// Control: an un-awaited FREE async function bound to a Result is refused, as
+// CONCURRENCY_REFERENCE:143 says (the checker handles the free-function case).
+async func:work = int64() { pass 1i64; };
+async func:main = int32(cstring[]:_~argv) {
+    Result<int64>:n = work();
+    if (!n.is_error) { exit 10i32; }
     exit 0i32;
 };
 

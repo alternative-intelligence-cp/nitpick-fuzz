@@ -1,19 +1,24 @@
-// M11 ty0476b -- meta/specs/TYPE_REFERENCE.md:476 (rule)
-// quote: D-092 explicit widening
-// claim: An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends.
-// expect: run:0
-// wrong: 10: zero-extended (a huge positive); 11: sign-extended
-mod:ty0476b;
+mod:a1_destroy_while_thread_holds;
 
-func:v64 = int64(int64:x) never fails { pass x; };
-func:vu64 = uint64(uint64:x) never fails { pass x; };
-
-func:main = int32(cstring[]:_~argv) {
-    int256:w = raw v64(-5i64) => int256;
-    if (w != -5i256) { exit 10i32; }
-    uint64:mx = raw vu64(0u64) -% 1u64;
-    uint256:u = mx => uint256;
-    if ((u / 2u256) != (9223372036854775807u64 => uint256)) { exit 11i32; }
+// CONCURRENCY_REFERENCE:321: destroy on a shared arena requires that no thread still
+// holds it -- "ownership, not synchronization: the owner destroys it after joining".
+// Here main destroys it while the spawned thread holds `@s`; the thread allocates in
+// it 100 ms later. The reference's answer is a refusal. Measured: it compiles, and the
+// exit check traps WildLeak (96).
+error:E1;
+fixed Duration:J2 = Duration{ ns: 2000000000i64 };
+thread async func:filler = NIL(shared_arena<int64>->:s) joins J2 {
+    await sleep(raw duration_ms(100i64)) ?| NIL;
+    Handle<int64>:h = s.alloc(424242i64);
+    int64:v = s.get(h) ?! E1;
+    if (v != 424242i64) { fail E1; }
+    pass NIL;
+};
+async func:main = int32(cstring[]:_~argv) {
+    shared_arena<int64>:s = shared_arena_make(8i64);
+    drop filler(@s);
+    s.destroy();
+    await sleep(raw duration_ms(300i64)) ?| NIL;
     exit 0i32;
 };
 
@@ -50,6 +55,7 @@ func:failsafe = int32(Error:e) {
         (Exists) { exit 120i32; },
         (CrossDevice) { exit 121i32; },
         (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
         (*) { exit 99i32; }
     }
     exit 9i32;

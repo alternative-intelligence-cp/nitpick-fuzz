@@ -110,7 +110,7 @@ func:failsafe = int32(Error:e) {
 NPK
 "$NPKC" a/vf0306.npk --obligations oa -o a.ll >a.out 2>&1 || exit 3
 "$NPKC" b/vf0306.npk --obligations ob -o b.ll >b.out 2>&1 || exit 3
-na=$(awk -F'\t' '$3 == "limit" && index($6, "vf0306.main") > 0' oa/rows.txt | wc -l)
-nb=$(awk -F'\t' '$3 == "limit" && index($6, "vf0306.main") > 0' ob/rows.txt | wc -l)
+na=$(awk -F'\t' '$3 == "limit" && $6 == "@main"' oa/rows.txt | wc -l)
+nb=$(awk -F'\t' '$3 == "limit" && $6 == "@main"' ob/rows.txt | wc -l)
 [ $((na - nb)) -eq 2 ] || exit 1
 exit 0

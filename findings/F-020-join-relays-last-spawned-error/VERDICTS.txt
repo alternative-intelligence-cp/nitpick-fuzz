@@ -1,0 +1,13 @@
+# F-020-join-relays-last-spawned-error — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_j2_single_child                          9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_j3_spawn_order_swapped                   9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+j1_first_error_lost                          9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_j2_single_child                          9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_j3_spawn_order_swapped                   9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+j1_first_error_lost                          9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_j2_single_child                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_j3_spawn_order_swapped                   c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+j1_first_error_lost                          c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

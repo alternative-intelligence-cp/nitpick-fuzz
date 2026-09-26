@@ -1,0 +1,10 @@
+# F-026-unit-annotation-on-tfp-ignored — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 15:14 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_d2_dim256_mismatch_refused               9126350  run 1  npkc=1  codes=NITPICK-TYPE-049  O0=-  O2=-
+d1_tfp64_unit_mismatch_compiles              9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_d2_dim256_mismatch_refused               9126350  run 2  npkc=1  codes=NITPICK-TYPE-049  O0=-  O2=-
+d1_tfp64_unit_mismatch_compiles              9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_d2_dim256_mismatch_refused               c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-049  O0=-  O2=-
+d1_tfp64_unit_mismatch_compiles              c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
