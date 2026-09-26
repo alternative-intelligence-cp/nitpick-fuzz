@@ -14,7 +14,7 @@ committed. A session that starts here resumes at the first unticked box.
   to continue with M5 and M6, at the same HUNT `6fb85d3` (session 2).
 - [x] **M5** — the hunt: 956 cells at HUNT, 82 anomalies, 62 known, 20 new
   in 2 findings (F-001, F-002), both also present at the baseline
-- [ ] **M6** — the report
+- [x] **M6** — the report: [`REPORT.md`](REPORT.md)
 
 ## Compilers
 
@@ -426,4 +426,7 @@ HTTPS goes through an agent proxy.
   was added (S14). M5.1: the remaining 856 cells ran at HUNT in 43 s; 40 cells
   moved from the baseline, all to `TYPE-084`. M5.2: 82 anomalies, 62 known;
   20 new in two shapes, minimised, confirmed twice, run at the baseline, and
-  written up as F-001 and F-002. M5 done.
+  written up as F-001 and F-002. M5 done. M6: `REPORT.md` written, with the
+  denominators (956 generated + 1 284 skipped = 2 240; at HUNT 270 refused +
+  604 clean + 82 anomalies = 956), the recall table with DEF-106 added, the
+  findings table and the coverage gaps. M6 done. M7 only if the author asks.

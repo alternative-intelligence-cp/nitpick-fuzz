@@ -35,7 +35,8 @@ compilers and both legs, deduplicated against the known list.
 
 ## Status
 
-See [`PROGRESS.md`](PROGRESS.md). The plan is [`PLAN.md`](PLAN.md); anyone
+The results are in [`REPORT.md`](REPORT.md), and each confirmed anomaly is in
+[`findings/`](findings/). The live state is [`PROGRESS.md`](PROGRESS.md). The plan is [`PLAN.md`](PLAN.md); anyone
 working in this repository — a cloud session or a local one — starts at
 [`CLAUDE.md`](CLAUDE.md).
 
