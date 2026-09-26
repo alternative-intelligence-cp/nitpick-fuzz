@@ -1,0 +1,45 @@
+// M10 s01_signed_right_shift_arithmetic -- `>>` on a negative signed value
+// claim: `>>` is arithmetic on a signed operand.
+// ref: meta/specs/TYPE_REFERENCE.md:2048  "Arithmetic on a SIGNED operand, logical on an UNSIGNED one — the operand's"
+// expect: run:0
+// wrong: a logical shift on a signed value (the check's code)
+mod:s01_signed_right_shift_arithmetic;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if ((raw v32(-8i32) >> raw v32(1i32)) != -4i32) { exit 10i32; }
+    int8:m8 = raw v8(-127i8) - raw v8(1i8);
+    if ((m8 >> raw v8(7i8)) != -1i8) { exit 11i32; }
+    if ((raw v64(-1i64) >> raw v64(63i64)) != -1i64) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,45 @@
+// M10 x07_left_associative -- `10 - 3 - 2`, `100 / 10 / 5`, `7 % 4 * 2`, `2 * 7 % 4`
+// claim: Operators of one level group left to right.
+// ref: meta/specs/OP_REFERENCE.md:20  "| 6 | Multiplicative | `*` `/` `%` `*%` |"
+// ref: meta/specs/OP_REFERENCE.md:21  "| 7 | Additive | `+` `-` `+%` `-%` |"
+// expect: run:0
+// wrong: right grouping: 9 (10), 50 (11), 7 (12), 6 (13)
+mod:x07_left_associative;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(10i32);
+    if ((a - raw v32(3i32) - raw v32(2i32)) != 5i32) { exit 10i32; }
+    if ((raw v32(100i32) / raw v32(10i32) / raw v32(5i32)) != 2i32) { exit 11i32; }
+    if ((raw v32(7i32) % raw v32(4i32) * raw v32(2i32)) != 6i32) { exit 12i32; }
+    if ((raw v32(2i32) * raw v32(7i32) % raw v32(4i32)) != 2i32) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

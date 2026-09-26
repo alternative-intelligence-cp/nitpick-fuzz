@@ -1,0 +1,43 @@
+// M10 c06_int32_to_flt64_exact -- `int32 => flt64`
+// claim: `int32 => flt64` is accepted, and exact: 53 significand bits hold every int32.
+// ref: meta/specs/DECISIONS.md:6708  "`int32 => flt64` is accepted"
+// expect: run:0
+// wrong: a conversion through flt32 rounds 16777217 to 16777216 (exit 10)
+mod:c06_int32_to_flt64_exact;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(16777217i32);
+    if ((a => flt64) != 16777217.0f64) { exit 10i32; }
+    int32:b = raw v32(2147483647i32);
+    if ((b => flt64) != 2147483647.0f64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

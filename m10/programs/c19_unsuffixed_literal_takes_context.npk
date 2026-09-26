@@ -1,0 +1,46 @@
+// M10 c19_unsuffixed_literal_takes_context -- an unsuffixed literal beside a typed operand
+// claim: An unsuffixed integer literal takes its type from its context, including the other operand.
+// ref: meta/specs/DECISIONS.md:6482  "So an unsuffixed literal is typed by the position it appears in"
+// ref: meta/specs/DECISIONS.md:6506  "int64:g;               g + 1                 // int64"
+// expect: run:0
+// wrong: the literal typed int32 or int8: 200 as int8 is below 100 (exit 11)
+mod:c19_unsuffixed_literal_takes_context;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:g = raw v64(4000000000i64);
+    int64:h = g + 1;
+    if (h != 4000000001i64) { exit 10i32; }
+    uint8:u = raw vu8(200u8);
+    if (u < 100) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

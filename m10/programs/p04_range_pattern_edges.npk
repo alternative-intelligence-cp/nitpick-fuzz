@@ -1,0 +1,53 @@
+// M10 p04_range_pattern_edges -- `(0...5)` and `(5..9)` at 0, 5, 9 and 10
+// claim: `..` is the inclusive range [a, b] and `...` the exclusive [a, b), in `pick` patterns too.
+// ref: meta/specs/OP_REFERENCE.md:375  "| `..` | Inclusive Range | Inclusive range `[a, b]`. Used in `for` and `pick`. | `0..10` |"
+// ref: meta/specs/OP_REFERENCE.md:376  "| `...` | Exclusive Range | Exclusive range `[a, b)`. Used in `for` and `pick`. | `0...10` |"
+// expect: run:0
+// wrong: the two range spellings swapped at an edge (the check's code)
+mod:p04_range_pattern_edges;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:r = 0i32;
+    int32:v5 = raw v32(5i32);
+    pick (v5) { (0i32...5i32) { r = 1i32; }, (5i32..9i32) { r = 2i32; }, (*) { r = 3i32; } }
+    if (r != 2i32) { exit 10i32; }
+    int32:v9 = raw v32(9i32);
+    pick (v9) { (0i32...5i32) { r = 1i32; }, (5i32..9i32) { r = 2i32; }, (*) { r = 3i32; } }
+    if (r != 2i32) { exit 11i32; }
+    int32:v10 = raw v32(10i32);
+    pick (v10) { (0i32...5i32) { r = 1i32; }, (5i32..9i32) { r = 2i32; }, (*) { r = 3i32; } }
+    if (r != 3i32) { exit 12i32; }
+    int32:v0 = raw v32(0i32);
+    pick (v0) { (0i32...5i32) { r = 1i32; }, (5i32..9i32) { r = 2i32; }, (*) { r = 3i32; } }
+    if (r != 1i32) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,42 @@
+// M10 c09_float_to_int_checked_refused -- `flt64 => int64`
+// claim: A float to an integer is always lossy, so `=>` refuses it.
+// ref: meta/specs/DECISIONS.md:6713  "Float to integer is always lossy at every width"
+// expect: refuse
+// wrong: accepted: the fraction silently dropped (exit 10)
+mod:c09_float_to_int_checked_refused;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:a = raw vf64(2.5f64);
+    int64:n = a => int64;
+    if (n == 2i64) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

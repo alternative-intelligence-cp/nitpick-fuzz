@@ -1,0 +1,38 @@
+// M10 e02_failure_exit_keeps_code -- `exit 3` with a live `wild` allocation
+// claim: The leak check runs on `exit 0` only: a failure exit keeps its code.
+// ref: meta/specs/CONTROL_REFERENCE.md:406  "runs on `exit 0` — a failure exit keeps its code, because overwriting an"
+// expect: run:3
+// wrong: the code overwritten by the leak trap (96)
+mod:e02_failure_exit_keeps_code;
+
+func:main = int32(cstring[]:_~argv) {
+    wild int8->:p = alloc(16i64);
+    exit 3i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

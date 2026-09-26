@@ -1,0 +1,46 @@
+// M10 w03_when_break_then -- a `when` left by `break`
+// claim: A body that ran and was left by `break` runs `then`, not `end`.
+// ref: meta/specs/CONTROL_REFERENCE.md:143  "| body ran ≥ 1 time, exited early via `break` | `then` |"
+// expect: run:0
+// wrong: the earlier revision's reading: `break` goes to `end` (10, 11)
+mod:w03_when_break_then;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x = raw v32(5i32);
+    int32:t = 0i32;
+    int32:e = 0i32;
+    when (x > 0i32) decreases x { if (x == 4i32) { break; } x = x - 1i32; } then { t = t + 1i32; } end { e = e + 1i32; }
+    if (t != 1i32) { exit 10i32; }
+    if (e != 0i32) { exit 11i32; }
+    if (x != 4i32) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

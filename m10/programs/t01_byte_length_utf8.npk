@@ -1,0 +1,41 @@
+// M10 t01_byte_length_utf8 -- the length of a string holding a two-byte UTF-8 character
+// claim: A `string`'s length counts char units, which for `string` (`string<char8>`) are bytes; `string_byte_length` is the byte length.
+// ref: meta/specs/TYPE_REFERENCE.md:341  ";   Field 1: i64   — length (number of char units, NOT bytes for char16/32)"
+// ref: meta/specs/BUILTIN_REFERENCE.md:291  "| `string_byte_length` | `string → int64` | Folds at comptime."
+// expect: run:0
+// wrong: a code-point count, 5 (10, 11)
+mod:t01_byte_length_utf8;
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = "héllo";
+    if (string_byte_length(s) != 6i64) { exit 10i32; }
+    if (s.len != 6i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

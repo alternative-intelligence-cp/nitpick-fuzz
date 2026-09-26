@@ -1,0 +1,52 @@
+// M10 o19_wrapping_family -- `+% -% *%` at run time
+// claim: The wrapping family computes modulo 2^N: the result is the low N bits, always.
+// ref: meta/specs/TYPE_REFERENCE.md:88  "4): `+%`, `-%`, `*%`, with the compound forms `+%=`, `-%=`, `*%=`. The result"
+// ref: meta/specs/TYPE_REFERENCE.md:89  "is the low N bits, always; there is no guard, no obligation row and no"
+// expect: run:0
+// wrong: a trap (93) or a saturation (the check's code)
+mod:o19_wrapping_family;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+func:vu32 = uint32(uint32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if ((raw vu8(255u8) +% raw vu8(1u8)) != 0u8) { exit 10i32; }
+    if ((raw vu8(0u8) -% raw vu8(1u8)) != 255u8) { exit 11i32; }
+    int8:mn = raw v8(-127i8) - raw v8(1i8);
+    if ((raw v8(127i8) +% raw v8(1i8)) != mn) { exit 12i32; }
+    if ((raw vu32(4000000000u32) *% raw vu32(2u32)) != 3705032704u32) { exit 13i32; }
+    if ((raw v32(-2147483647i32) -% raw v32(2i32)) != 2147483647i32) { exit 14i32; }
+    uint32:h = raw vu32(4000000000u32);
+    h +%= raw vu32(500000000u32);
+    if (h != 205032704u32) { exit 15i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

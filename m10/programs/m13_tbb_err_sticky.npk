@@ -1,0 +1,48 @@
+// M10 m13_tbb_err_sticky -- ERR through `+`, `*` by 0, `-` of itself, and underflow
+// claim: Overflow saturates to ERR, any operation on ERR yields ERR (`ERR * 0` and `ERR - ERR` included), and `is_err` tests without trapping.
+// ref: meta/specs/TYPE_REFERENCE.md:687  "- **Any operation on an ERR value yields ERR.** This overrides mathematical"
+// ref: meta/specs/TYPE_REFERENCE.md:690  "- Overflow **saturates to ERR** rather than wrapping. Out-of-range results land"
+// expect: run:0
+// wrong: an identity erasing ERR: `ERR * 0` as 0 (11), `ERR - ERR` as 0 (12)
+mod:m13_tbb_err_sticky;
+
+func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    tbb8:a = raw vt8(127tbb8) + raw vt8(1tbb8);
+    if (!(is_err(a))) { exit 10i32; }
+    tbb8:b = a * raw vt8(0tbb8);
+    if (!(is_err(b))) { exit 11i32; }
+    tbb8:c = a - a;
+    if (!(is_err(c))) { exit 12i32; }
+    tbb8:d = raw vt8(-127tbb8) - raw vt8(1tbb8);
+    if (!(is_err(d))) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

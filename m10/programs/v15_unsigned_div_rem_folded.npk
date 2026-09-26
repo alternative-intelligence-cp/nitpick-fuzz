@@ -1,0 +1,44 @@
+// M10 v15_unsigned_div_rem_folded -- unsigned `/` and `%` on high values, folded
+// claim: The folder divides and takes remainders UNSIGNED for an unsigned type.
+// ref: meta/specs/OP_REFERENCE.md:163  "a `uint64` divides, takes remainders, shifts right and orders UNSIGNED;"
+// expect: run:0
+// wrong: a signed fold (the check's code)
+mod:v15_unsigned_div_rem_folded;
+
+fixed uint64:U1 = ~0u64 / 2u64;
+fixed uint32:U2 = 4294967295u32 % 10u32;
+fixed uint8:U3 = 200u8 / 3u8;
+
+func:main = int32(cstring[]:_~argv) {
+    if (U1 != 9223372036854775807u64) { exit 10i32; }
+    if (U2 != 5u32) { exit 11i32; }
+    if (U3 != 66u8) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

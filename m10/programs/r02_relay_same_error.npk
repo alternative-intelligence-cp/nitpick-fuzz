@@ -1,0 +1,50 @@
+// M10 r02_relay_same_error -- `relay` of a callee's error
+// claim: `relay` returns the callee's error verbatim, and yields `.value` on success.
+// ref: meta/specs/CONTROL_REFERENCE.md:326  "if `expr` is an error the enclosing function returns immediately **with that"
+// expect: run:0
+// wrong: a substituted error (11), the prototype's `fail 1;` shape
+mod:r02_relay_same_error;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+error:E1;
+error:E2;
+func:f = int32(int32:k) { if (k > 0i32) { fail E2; } pass 1i32; };
+func:g = int32(int32:k) { int32:v = relay f(k); pass v + 10i32; };
+
+func:main = int32(cstring[]:_~argv) {
+    Result<int32>:r = g(raw v32(1i32));
+    if (!r.is_error) { exit 10i32; }
+    if (r.err != E2) { exit 11i32; }
+    if ((g(raw v32(0i32)) ?| 0i32) != 11i32) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

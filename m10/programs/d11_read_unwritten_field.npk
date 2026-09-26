@@ -1,0 +1,45 @@
+// M10 d11_read_unwritten_field -- a read of the one field never written
+// claim: Writing one field of a declared-uninitialised struct does not give the other a value.
+// ref: meta/specs/DECISIONS.md:9470  "struct literal that omits a field leaves it with no value"
+// ref: meta/specs/DECISIONS.md:714  "compile time any path that reads a variable before writing it**. That guarantee is"
+// expect: refuse
+// wrong: accepted: the unwritten field reads 0 (exit 10)
+mod:d11_read_unwritten_field;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+struct:Pt = { int32:x; int32:y; };
+
+func:main = int32(cstring[]:_~argv) {
+    Pt:p;
+    p.x = raw v32(1i32);
+    if (p.y == 0i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

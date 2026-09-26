@@ -1,0 +1,42 @@
+// M10 r06_bare_call_refused -- a bare `f();` on a fallible call
+// claim: A bare `f();` on a `Result` is refused: a value-less statement is `drop`, `relay`, `?!` or `?| NIL`.
+// ref: meta/specs/DECISIONS.md:4046  "a value-less statement is one of `drop f();` / `relay f();` / `f() ?! c;` / `f() ?| NIL;`, and a bare `f();` on a `Result` is refused"
+// expect: refuse
+// wrong: accepted: the error silently dropped (exit 0)
+mod:r06_bare_call_refused;
+
+error:E1;
+func:f = NIL() { fail E1; };
+
+func:main = int32(cstring[]:_~argv) {
+    f();
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

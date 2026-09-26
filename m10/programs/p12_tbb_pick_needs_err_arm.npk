@@ -1,0 +1,43 @@
+// M10 p12_tbb_pick_needs_err_arm -- a `tbb8` `pick` with `(*)` and no `ERR:` arm
+// claim: A `tbb` selector requires an explicit `ERR:` arm; `(*)` may not absorb ERR.
+// ref: meta/specs/CONTROL_REFERENCE.md:74  "> explicit `ERR:` arm** (D-008 §5.1). `(*)` may not absorb the ERR case, or a"
+// expect: refuse
+// wrong: accepted: ERR steers into `(*)` (exit 10)
+mod:p12_tbb_pick_needs_err_arm;
+
+func:vt8 = tbb8(tbb8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    tbb8:t = raw vt8(127tbb8) + raw vt8(1tbb8);
+    int32:r = 0i32;
+    pick (t) { (5tbb8) { r = 1i32; }, (*) { r = 2i32; } }
+    if (r == 2i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

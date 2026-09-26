@@ -1,0 +1,41 @@
+// M10 l25_for_over_array_in_order -- `for (v in arr)`
+// claim: A `for` iterates an array's elements.
+// ref: meta/specs/CONTROL_REFERENCE.md:183  "> **What `for` iterates (D-166, 1.0.9):** a range, a slice, an array, or a"
+// expect: run:0
+// wrong: a reversed or skipping walk (exit 10)
+mod:l25_for_over_array_in_order;
+
+func:main = int32(cstring[]:_~argv) {
+    int32[3]:arr = [5i32, 6i32, 7i32];
+    int32:acc = 0i32;
+    for (int32:v in arr) { acc = acc * 10i32 + v; }
+    if (acc != 567i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

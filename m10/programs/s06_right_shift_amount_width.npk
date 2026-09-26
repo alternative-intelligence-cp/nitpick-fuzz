@@ -1,0 +1,42 @@
+// M10 s06_right_shift_amount_width -- `>>` by a run-time amount equal to the width
+// claim: The amount rule is `>>`'s too.
+// ref: meta/specs/TYPE_REFERENCE.md:72  "operations, not arithmetic, and have nothing to overflow. **A shift's"
+// ref: meta/specs/TYPE_REFERENCE.md:73  "AMOUNT is checked** (D-277, 1.5.4b): `x << n` and `x >> n` are defined"
+// expect: run:111
+// wrong: a saturated 0 (exit 10)
+mod:s06_right_shift_amount_width;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    uint8:x = raw vu8(128u8) >> raw vu8(8u8);
+    if (x == 0u8) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

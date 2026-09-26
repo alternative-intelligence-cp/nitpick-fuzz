@@ -1,0 +1,44 @@
+// M10 m09_char_vs_uint8_refused -- `char8 == uint8`
+// claim: `char8` and `uint8` are distinct types; two typed operands must share a type.
+// ref: meta/specs/TYPE_REFERENCE.md:166  "> **Note:** `uint8` and `char8` share the same LLVM IR type (`i8`) but are **semantically distinct**."
+// ref: meta/specs/DECISIONS.md:6498  "**Two typed operands share a type or the programmer writes the cast.** Widening"
+// expect: refuse
+// wrong: accepted: a byte compare (exit 10)
+mod:m09_char_vs_uint8_refused;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+func:vc8 = char8(char8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    char8:c = raw vc8('A');
+    uint8:u = raw vu8(65u8);
+    if (c == u) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

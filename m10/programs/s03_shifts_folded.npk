@@ -1,0 +1,53 @@
+// M10 s03_shifts_folded -- `<<`, `>>` and `~` folded as constants
+// claim: The folder shifts as the machine does: `1i8 << 7i8` is -128, `~5u8` is 250, an unsigned `>>` is logical.
+// ref: meta/specs/OP_REFERENCE.md:161  "`<<` loses the bits past its width (`1i8 << 7i8` is −128)"
+// ref: meta/specs/OP_REFERENCE.md:162  "- `~5u8` is 250;"
+// ref: meta/specs/OP_REFERENCE.md:163  "a `uint64` divides, takes remainders, shifts right and orders UNSIGNED;"
+// expect: run:0
+// wrong: a folder that computes wider, or signed (the check's code)
+mod:s03_shifts_folded;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+
+fixed int8:F1 = 1i8 << 7i8;
+fixed uint8:F2 = ~5u8;
+fixed uint64:F3 = ~0u64 >> 1u64;
+fixed int32:F4 = -8i32 >> 1i32;
+fixed uint32:F5 = 2147483648u32 >> 31u32;
+
+func:main = int32(cstring[]:_~argv) {
+    int8:m8 = raw v8(-127i8) - raw v8(1i8);
+    if (F1 != m8) { exit 10i32; }
+    if (F2 != 250u8) { exit 11i32; }
+    if (F3 != 9223372036854775807u64) { exit 12i32; }
+    if (F4 != -4i32) { exit 13i32; }
+    if (F5 != 1u32) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

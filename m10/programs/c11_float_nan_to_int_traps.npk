@@ -1,0 +1,43 @@
+// M10 c11_float_nan_to_int_traps -- `flt64 =>! int32` of NaN
+// claim: A float's `=>!` cast to an integer traps `CastRange` on NaN.
+// ref: meta/specs/DECISIONS.md:19623  "A float's `=>!` cast to an integer traps `CastRange` (4117) on NaN"
+// expect: run:112
+// wrong: no trap: LLVM poison, read as some integer (10 or 11)
+mod:c11_float_nan_to_int_traps;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:z = raw vf64(0.0f64);
+    flt64:n = z / z;
+    int32:k = n =>! int32;
+    if (k == 0i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

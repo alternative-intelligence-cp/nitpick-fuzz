@@ -1,0 +1,44 @@
+// M10 c10_float_to_int_truncates -- `flt64 =>! int32` of 3.7 and -3.7
+// claim: A float's `=>!` cast to an integer truncates toward zero.
+// ref: meta/specs/TYPE_REFERENCE.md:535  "explicit opt-in, truncates toward zero"
+// ref: meta/specs/VERIFICATION_REFERENCE.md:861  "its truncation toward zero lies inside the target"
+// expect: run:0
+// wrong: rounding to nearest (4, -4: exits 10) or flooring (-4: exit 11)
+mod:c10_float_to_int_truncates;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:a = raw vf64(3.7f64);
+    flt64:b = raw vf64(-3.7f64);
+    if ((a =>! int32) != 3i32) { exit 10i32; }
+    if ((b =>! int32) != -3i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

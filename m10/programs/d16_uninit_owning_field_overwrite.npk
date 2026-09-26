@@ -1,0 +1,47 @@
+// M10 d16_uninit_owning_field_overwrite -- an owning field written into a struct declared without a value
+// claim: A declaration without an initialiser writes the canonical vacant value, so the first overwrite of an owning field drops nothing.
+// ref: meta/specs/DECISIONS.md:15687  "without an initialiser WRITES it. This completes a design the drop bodies"
+// ref: meta/specs/TYPE_REFERENCE.md:1021  "A declared-uninitialised aggregate holds the vacant value (D-225)"
+// expect: run:0
+// wrong: the overwrite drops the slot's garbage (a trap, 91 or 95) or loses the value (10)
+mod:d16_uninit_owning_field_overwrite;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+struct:Hs = { string:s; int32:n; };
+
+func:main = int32(cstring[]:_~argv) {
+    Hs:h;
+    h.s = string_concat("ab", "c");
+    h.n = raw v32(1i32);
+    if (h.s.len != 3i64) { exit 10i32; }
+    if (h.n != 1i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

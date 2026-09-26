@@ -1,0 +1,44 @@
+// M10 q06_bool_missing_path -- a `bool` function with a missing path
+// claim: No implicit value: a `bool` function's missing path is refused.
+// ref: meta/specs/CONTROL_REFERENCE.md:334  "*   **Every path of a function body ends in one of these, or in `exit` (in"
+// expect: refuse:NITPICK-FLOW-001   (at the baseline: run:10)
+// wrong: accepted: the missing path returns false (exit 10)
+mod:q06_bool_missing_path;
+
+func:vb = bool(bool:x) never fails { pass x; };
+
+func:f = bool(bool:b) never fails {
+    if (b) { pass false; }
+};
+
+func:main = int32(cstring[]:_~argv) {
+    if (!(raw f(raw vb(false)))) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

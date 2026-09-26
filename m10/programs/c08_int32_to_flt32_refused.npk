@@ -1,0 +1,42 @@
+// M10 c08_int32_to_flt32_refused -- `int32 => flt32`
+// claim: `int32 => flt32` is refused: 24 significand bits are fewer than 31.
+// ref: meta/specs/DECISIONS.md:6711  "`int32 => flt32` is refused too"
+// expect: refuse
+// wrong: accepted: 16777217 silently rounds (exit 10)
+mod:c08_int32_to_flt32_refused;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(16777217i32);
+    flt32:f = a => flt32;
+    if (f == 16777216.0f32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

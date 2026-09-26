@@ -1,0 +1,47 @@
+// M10 a07_write_through_struct_pointer -- a callee writing `p.x` through a `Pt->`
+// claim: `.` dereferences a pointer once: `p.x` through `Pt->` writes the caller's struct.
+// ref: meta/specs/TYPE_REFERENCE.md:1998  "`.` dereferences a pointer once. `p.x` where `p` is `T->` reaches the field;"
+// expect: run:0
+// wrong: the write lost to a copy (exit 10)
+mod:a07_write_through_struct_pointer;
+
+struct:Pt = { int32:x; int32:y; };
+func:setx = NIL(Pt->:p) never fails {
+    p.x = 9i32;
+    pass NIL;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Pt:q = Pt{ x: 1i32, y: 2i32 };
+    drop setx(@q);
+    if (q.x != 9i32) { exit 10i32; }
+    if (q.y != 2i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

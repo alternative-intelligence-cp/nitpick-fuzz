@@ -1,0 +1,43 @@
+// M10 a09_view_index_past_its_len -- `s[2]` on `s = a[1...3]` (len 2) of an `int32[4]`
+// claim: A slice's index is checked against the slice's own run-time `len`, not the storage under it.
+// ref: meta/specs/TYPE_REFERENCE.md:1088  "- **Indexing is bounds-checked against the runtime `len`**, trapping to"
+// expect: run:94
+// wrong: a check against the array under the view: the fourth element is read (exit 10)
+mod:a09_view_index_past_its_len;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    int32[]:s = a[1i64...3i64];
+    int32:v = s[raw v64(2i64)];
+    if (v == 4i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,50 @@
+// M10 c18_int_to_tag_only_enum -- `int32 =>! enum` for a tag-only enum
+// claim: A tag-only enum takes `intN =>! enum`, which manufactures that tag.
+// ref: meta/specs/TYPE_REFERENCE.md:1141  "; SCOPED BY SHAPE (D-140; scoped here 2026-09-25, DEF-101): a TAG-ONLY enum takes"
+// expect: run:0   (at the baseline: refuse)
+// wrong: the tag mis-manufactured (exit 10)
+mod:c18_int_to_tag_only_enum;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+enum:Color = { Red = 0i32; Green = 1i32; Blue = 2i32; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:k = raw v32(2i32);
+    Color:c = k =>! Color;
+    int32:r = 0i32;
+    pick (c) {
+        (Color.Red) { r = 1i32; },
+        (Color.Green) { r = 2i32; },
+        (Color.Blue) { r = 3i32; }
+    }
+    if (r != 3i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

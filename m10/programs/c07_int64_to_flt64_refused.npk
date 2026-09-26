@@ -1,0 +1,42 @@
+// M10 c07_int64_to_flt64_refused -- `int64 => flt64`
+// claim: `int64 => flt64` is refused: 53 significand bits are fewer than 63.
+// ref: meta/specs/DECISIONS.md:6709  "`int64 => flt64` is **refused**"
+// expect: refuse
+// wrong: accepted: 2^53+1 silently rounds (exit 10)
+mod:c07_int64_to_flt64_refused;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:a = raw v64(9007199254740993i64);
+    flt64:f = a => flt64;
+    if (f == 9007199254740992.0f64) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

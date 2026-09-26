@@ -1,0 +1,52 @@
+// M10 w07_defer_on_relay -- a `defer` in a function whose `relay` propagates an error
+// claim: `relay`'s early return is a normal exit: its defers run.
+// ref: meta/specs/CONTROL_REFERENCE.md:382  "Runs on **every normal exit path** — scope end, `return`, `pass`, `fail`, `relay`, `exit` —"
+// ref: meta/specs/OP_REFERENCE.md:262  "`defer` runs — it is a normal exit path, not a trap."
+// expect: run:0
+// wrong: the defer skipped on the relay path (exit 12)
+mod:w07_defer_on_relay;
+
+error:E1;
+func:g = int32() { fail E1; };
+func:f = int32(int32->:cnt) {
+    defer { <-cnt = (<-cnt) + 1i32; }
+    int32:v = relay g();
+    pass v;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int32:c = 0i32;
+    Result<int32>:r = f(@c);
+    if (!r.is_error) { exit 10i32; }
+    if (r.err != E1) { exit 11i32; }
+    if (c != 1i32) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

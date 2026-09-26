@@ -1,0 +1,47 @@
+// M10 l06_for_inclusive_to_int8_max -- `for (int8:i in 125..127)`
+// claim: An inclusive range ending at the type's maximum visits the maximum and ends: `for` is bounded by construction.
+// ref: meta/specs/OP_REFERENCE.md:375  "| `..` | Inclusive Range | Inclusive range `[a, b]`. Used in `for` and `pick`. | `0..10` |"
+// ref: meta/specs/CONTROL_REFERENCE.md:109  "or both, is `NITPICK-TYPE-072`; `for`, `loop` and `till` are bounded by"
+// expect: run:0
+// wrong: the counter stepped past 127: an overflow trap (93), or a wrap and a loop that does not end (T)
+mod:l06_for_inclusive_to_int8_max;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int8:lo = raw v8(125i8);
+    int8:hi = raw v8(127i8);
+    int64:n = 0i64;
+    int64:s = 0i64;
+    for (int8:i in lo..hi) { n = n + 1i64; s = s + (i => int64); }
+    if (n != 3i64) { exit 10i32; }
+    if (s != 378i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

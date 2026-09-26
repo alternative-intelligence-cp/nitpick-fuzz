@@ -1,0 +1,47 @@
+// M10 c02_widen_unsigned_keeps_value -- `=>` from an unsigned type to a wider signed one
+// claim: An unsigned value converted by `=>` keeps its value: it zero-extends (D-095's own example is `uint8 => int16`).
+// ref: meta/specs/DECISIONS.md:6696  "The difference is not academic. `uint8 => int16` is lossless"
+// expect: run:0
+// wrong: sign-extension: 4294967295 becomes -1 (10), 200 becomes -56 (11)
+mod:c02_widen_unsigned_keeps_value;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+func:vu32 = uint32(uint32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    uint32:u = raw vu32(4294967295u32);
+    int64:w = u => int64;
+    if (w != 4294967295i64) { exit 10i32; }
+    uint8:b = raw vu8(200u8);
+    if ((b => int16) != 200i16) { exit 11i32; }
+    uint32:c = raw vu32(3000000000u32);
+    if ((c => uint64) != 3000000000u64) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

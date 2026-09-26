@@ -1,0 +1,44 @@
+// M10 o16_int128_add -- int128 `+` past the maximum
+// claim: Plain-integer `+ - *` and negation trap `IntOverflow` on overflow, at every width.
+// ref: meta/specs/TYPE_REFERENCE.md:58  "and legalized at every width the language has, `int8` through `int4096`."
+// ref: meta/specs/TYPE_REFERENCE.md:475  "**Behaviors:** ordinary integer semantics at every width — D-037 wrapping,"
+// expect: run:93
+// wrong: wraps to the minimum (exit 10)
+mod:o16_int128_add;
+
+func:vi128 = int128(int128:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int128:big = raw vi128(1i128) << raw vi128(126i128);
+    int128:mx = big + (big - raw vi128(1i128));
+    int128:o = mx + raw vi128(1i128);
+    if (o < raw vi128(0i128)) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

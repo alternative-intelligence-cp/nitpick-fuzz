@@ -1,0 +1,40 @@
+// M10 q04_main_without_exit -- `main` that can reach its closing brace
+// claim: `main` exits on every path.
+// ref: meta/specs/CONTROL_REFERENCE.md:334  "*   **Every path of a function body ends in one of these, or in `exit` (in"
+// ref: meta/specs/CONTROL_REFERENCE.md:338  "path, `main` exits. There is no implicit return and no implicit value — until"
+// expect: refuse:NITPICK-FLOW-001   (at the baseline: run:0)
+// wrong: accepted: `main` falls off and the process exits 0, a silent success
+mod:q04_main_without_exit;
+
+func:vb = bool(bool:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw vb(false)) { exit 7i32; }
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

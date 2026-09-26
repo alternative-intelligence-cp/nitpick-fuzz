@@ -1,0 +1,41 @@
+// M10 l21_zero_step_computed_traps -- `till(10, k)` with k = 0 at run time
+// claim: A computed step keeps a run-time check that traps to failsafe (`BadStep`).
+// ref: meta/specs/CONTROL_REFERENCE.md:222  "`step > 0` as a proof obligation, falling back to a runtime check that traps to"
+// expect: run:113
+// wrong: no check: a loop that never ends (T)
+mod:l21_zero_step_computed_traps;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = 0i64;
+    till (10i64, raw v64(0i64)) { n = n + 1i64; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

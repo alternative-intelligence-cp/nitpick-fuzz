@@ -1,0 +1,42 @@
+// M10 o06_int16_mul -- int16 `*` past the maximum
+// claim: Plain-integer `+ - *` and negation trap `IntOverflow` on overflow, at every width.
+// ref: meta/specs/TYPE_REFERENCE.md:53  "Arithmetic: `+`, `-`, `*` — **overflow TRAPS** (D-210, 1.4.2b), through the"
+// expect: run:93
+// wrong: computed wider and truncated: -25536 (exit 10)
+mod:o06_int16_mul;
+
+func:v16 = int16(int16:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int16:a = raw v16(200i16);
+    int16:b = a * raw v16(200i16);
+    if (b < 0i16) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

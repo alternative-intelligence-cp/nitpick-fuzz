@@ -1,0 +1,43 @@
+// M10 t03_escapes_and_raw -- the length of escaped and raw literals
+// claim: An escape is one character (`\n`, `\0`, `\x41`); a raw string performs no escape processing.
+// ref: meta/specs/LEXICAL_REFERENCE.md:361  "EscapeSequence     ::= "\" ("n" | "r" | "t" | "\" | '"' | "'" | "0""
+// ref: meta/specs/LEXICAL_REFERENCE.md:376  "> `RawStringLiteral` performs **no** escape processing."
+// expect: run:0
+// wrong: an escape kept as two bytes (10), a NUL ending the literal (11), a raw string escaped (13)
+mod:t03_escapes_and_raw;
+
+func:main = int32(cstring[]:_~argv) {
+    if (string_byte_length("a\nb") != 3i64) { exit 10i32; }
+    if (string_byte_length("a\0b") != 3i64) { exit 11i32; }
+    if (!(string_equals("\x41", "A"))) { exit 12i32; }
+    if (string_byte_length(r"a\nb") != 4i64) { exit 13i32; }
+    if (string_byte_length("\t\\\"") != 3i64) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

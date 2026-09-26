@@ -1,0 +1,54 @@
+// M10 t16_string_order -- `cmp` on strings: a prefix, a shorter larger string, a high byte
+// claim: `a.cmp(b)` orders strings lexicographically, byte by byte.
+// ref: meta/specs/TYPE_REFERENCE.md:364  "- Ordering: `a.cmp(b)` (the prelude's `string: Ord`, D-257) → lexicographic;"
+// expect: run:0
+// wrong: a length-first order (12), or a signed byte compare (13)
+mod:t16_string_order;
+
+error:E9;
+
+func:main = int32(cstring[]:_~argv) {
+    string:a = "abc";
+    string:b = "abd";
+    int32:r = 0i32;
+    pick (a.cmp(b) ?! E9) { (Ordering.Less) { r = 1i32; }, (*) { r = 2i32; } }
+    if (r != 1i32) { exit 10i32; }
+    string:c = "ab";
+    pick (c.cmp(a) ?! E9) { (Ordering.Less) { r = 3i32; }, (*) { r = 4i32; } }
+    if (r != 3i32) { exit 11i32; }
+    string:d = "b";
+    pick (d.cmp(a) ?! E9) { (Ordering.Greater) { r = 5i32; }, (*) { r = 6i32; } }
+    if (r != 5i32) { exit 12i32; }
+    string:h = "\xC3";
+    pick (h.cmp(a) ?! E9) { (Ordering.Greater) { r = 7i32; }, (*) { r = 8i32; } }
+    if (r != 7i32) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E9) { exit 89i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

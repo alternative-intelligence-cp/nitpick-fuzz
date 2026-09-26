@@ -1,0 +1,50 @@
+// M10 r03_relay_returns_at_once -- code after a `relay` that met an error
+// claim: On an error, `relay` returns immediately: nothing after it runs.
+// ref: meta/specs/CONTROL_REFERENCE.md:326  "if `expr` is an error the enclosing function returns immediately **with that"
+// expect: run:0
+// wrong: the statement after the relay runs (exit 11)
+mod:r03_relay_returns_at_once;
+
+error:E1;
+func:f = int32() { fail E1; };
+func:g = int32(int32->:cnt) {
+    int32:v = relay f();
+    <-cnt = (<-cnt) + 1i32;
+    pass v;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int32:c = 0i32;
+    Result<int32>:r = g(@c);
+    if (!r.is_error) { exit 10i32; }
+    if (c != 0i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

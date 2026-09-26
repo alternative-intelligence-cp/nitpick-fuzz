@@ -1,0 +1,42 @@
+// M10 t13_cstring_keeps_length -- the length of a `cstring`
+// claim: A `cstring` retains its length (the buffer is len + 1 bytes).
+// ref: meta/specs/TYPE_REFERENCE.md:399  "The buffer is `len + 1` bytes with `buf[len] == 0u8`. **The length is retained**,"
+// expect: run:0
+// wrong: the terminator counted, 5 (exit 10)
+mod:t13_cstring_keeps_length;
+
+error:E1;
+
+func:main = int32(cstring[]:_~argv) {
+    cstring:c = to_cstring("abcd") ?! E1;
+    if (c.len != 4i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

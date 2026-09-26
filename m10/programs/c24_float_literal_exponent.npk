@@ -1,0 +1,43 @@
+// M10 c24_float_literal_exponent -- `1.5e2f64`
+// claim: A float literal takes a decimal exponent.
+// ref: meta/specs/LEXICAL_REFERENCE.md:307  "FloatLiteral   ::= DecimalLiteral "." DecimalLiteral Exponent? TypeSuffix?"
+// expect: run:0
+// wrong: the exponent dropped or mis-signed (10 or 11)
+mod:c24_float_literal_exponent;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:x = raw vf64(1.5e2f64);
+    if (x != 150.0f64) { exit 10i32; }
+    flt64:y = raw vf64(2.5e-1f64);
+    if (y != 0.25f64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,39 @@
+// M10 c23_c_hex_prefix_refused -- `0xFF`
+// claim: The C prefixes were removed: `0xFF` is a bad-digit error at the `x`.
+// ref: meta/specs/LEXICAL_REFERENCE.md:346  "`0xFF` is a bad-digit error at the `x`"
+// expect: refuse:NITPICK-LEX-003
+// wrong: accepted: C's reading (exit 10)
+mod:c23_c_hex_prefix_refused;
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x = 0xFF;
+    if (x == 255i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

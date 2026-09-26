@@ -1,0 +1,39 @@
+// M10 t02_length_spelled_length -- `s.length`
+// claim: TYPE_REFERENCE §3.2 spells a string's length `s.length`, a field access.
+// ref: meta/specs/TYPE_REFERENCE.md:367  "- Length: `int64:len = s.length;` → field access"
+// expect: run:0
+// wrong: the documented spelling refused, or a wrong length (exit 10)
+mod:t02_length_spelled_length;
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = "hello";
+    if (s.length != 5i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

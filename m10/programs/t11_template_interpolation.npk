@@ -1,0 +1,47 @@
+// M10 t11_template_interpolation -- a template interpolating a negative int64 and an expression
+// claim: A template literal interpolates the value of each `&{ }` expression.
+// ref: meta/specs/OP_REFERENCE.md:392  "| `&{ }` | Interpolation | Evaluates and interpolates an expression inside a template."
+// ref: meta/specs/LEXICAL_REFERENCE.md:383  "Backtick-delimited, with `&{ … }` interpolation."
+// expect: run:0
+// wrong: the sign lost (10), or the expression not evaluated (11)
+mod:t11_template_interpolation;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = raw v64(-5i64);
+    string:t = `a&{ n }b`;
+    if (!(string_equals(t, "a-5b"))) { exit 10i32; }
+    int32:k = raw v32(12i32);
+    string:u = `&{ k + 1i32 }`;
+    if (!(string_equals(u, "13"))) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

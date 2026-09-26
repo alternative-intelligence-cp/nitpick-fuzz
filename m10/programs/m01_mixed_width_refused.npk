@@ -1,0 +1,43 @@
+// M10 m01_mixed_width_refused -- `int32 < int64`
+// claim: Two typed operands share a type or the program writes the cast: no implicit widening, for any operator.
+// ref: meta/specs/DECISIONS.md:6498  "**Two typed operands share a type or the programmer writes the cast.** Widening"
+// expect: refuse
+// wrong: accepted: an implicit widening, or a truncating compare (11)
+mod:m01_mixed_width_refused;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(1i32);
+    int64:b = raw v64(4294967296i64);
+    if (a < b) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,46 @@
+// M10 t07_bytes_view_bounds -- `string_bytes(s)[len]`
+// claim: `string_bytes` is the bytes as a slice, and slice indexing is bounds-checked against the run-time length.
+// ref: meta/specs/BUILTIN_REFERENCE.md:241  "| `string_bytes` | `string → uint8[]` | **The string→slice bridge**"
+// ref: meta/specs/TYPE_REFERENCE.md:1088  "- **Indexing is bounds-checked against the runtime `len`**, trapping to"
+// expect: run:94
+// wrong: no bounds check: the byte past the end is read (12 or 13)
+mod:t07_bytes_view_bounds;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = "abc";
+    uint8[]:b = string_bytes(s);
+    if (b.len != 3i64) { exit 10i32; }
+    if (b[raw v64(1i64)] != 98u8) { exit 11i32; }
+    uint8:x = b[raw v64(3i64)];
+    if (x == 0u8) { exit 12i32; }
+    exit 13i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

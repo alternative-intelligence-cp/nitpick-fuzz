@@ -1,0 +1,46 @@
+// M10 l24_while_rereads_bound -- a `while` whose bound variable changes in the body
+// claim: A `while` re-reads its bound every iteration.
+// ref: meta/specs/DECISIONS.md:16224  "extracts `hi` into a loop slot — while a `while (i < x.count)` re-reads"
+// expect: run:0
+// wrong: the bound captured: 3 (exit 10)
+mod:l24_while_rereads_bound;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = raw v64(3i64);
+    int64:i = 0i64;
+    while (i < n) decreases 100i64 - i {
+        if (i == 0i64) { n = 6i64; }
+        i = i + 1i64;
+    }
+    if (i != 6i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

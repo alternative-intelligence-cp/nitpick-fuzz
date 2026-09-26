@@ -1,0 +1,42 @@
+// M10 l02_for_exclusive -- `for (i in 0...3)`
+// claim: `...` is the exclusive range [a, b).
+// ref: meta/specs/OP_REFERENCE.md:376  "| `...` | Exclusive Range | Exclusive range `[a, b)`. Used in `for` and `pick`. | `0...10` |"
+// expect: run:0
+// wrong: an inclusive reading: 0..3 (10)
+mod:l02_for_exclusive;
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = 0i64;
+    int64:s = 0i64;
+    for (int64:i in 0i64...3i64) { n = n + 1i64; s = s + (i); }
+    if (n != 3i64) { exit 10i32; }
+    if (s != 3i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

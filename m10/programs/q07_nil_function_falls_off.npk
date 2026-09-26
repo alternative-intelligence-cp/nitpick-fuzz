@@ -1,0 +1,45 @@
+// M10 q07_nil_function_falls_off -- a `NIL` function that falls off
+// claim: A `NIL` function passes `NIL`.
+// ref: meta/specs/CONTROL_REFERENCE.md:337  "`NIL` function passes `NIL`, a fallible function names its failure on every"
+// expect: refuse:NITPICK-FLOW-001   (at the baseline: run:0)
+// wrong: accepted (nothing observable: NIL carries no value)
+mod:q07_nil_function_falls_off;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:f = NIL() never fails {
+    int32:x = raw v32(1i32);
+    discard(x);
+};
+
+func:main = int32(cstring[]:_~argv) {
+    drop f();
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

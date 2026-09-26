@@ -1,0 +1,47 @@
+// M10 v14_unsigned_div_rem -- unsigned `/` and `%` on high values at run time
+// claim: Unsigned division and remainder use `udiv`/`urem`.
+// ref: meta/specs/TYPE_REFERENCE.md:158  "Division/modulo use `udiv`/`urem` instead of `sdiv`/`srem`"
+// expect: run:0
+// wrong: signed division on the bit pattern: -2/2 = -1 (10), -1%10 = -1 (11)
+mod:v14_unsigned_div_rem;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+func:vu16 = uint16(uint16:x) never fails { pass x; };
+func:vu32 = uint32(uint32:x) never fails { pass x; };
+func:vu64 = uint64(uint64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if ((raw vu32(4294967294u32) / raw vu32(2u32)) != 2147483647u32) { exit 10i32; }
+    if ((raw vu32(4294967295u32) % raw vu32(10u32)) != 5u32) { exit 11i32; }
+    if ((raw vu8(200u8) / raw vu8(3u8)) != 66u8) { exit 12i32; }
+    if ((raw vu64(~0u64) / raw vu64(2u64)) != 9223372036854775807u64) { exit 13i32; }
+    if ((raw vu16(65535u16) % raw vu16(256u16)) != 255u16) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

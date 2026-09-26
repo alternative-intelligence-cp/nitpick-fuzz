@@ -1,0 +1,44 @@
+// M10 c17_enum_to_int_reads_tag -- `enum =>! int32`
+// claim: `enum =>! intN` reads the tag, whose values the declaration states.
+// ref: meta/specs/TYPE_REFERENCE.md:1127  "pub enum:Color = { Red = 0i32; Green = 1i32; Blue = 2i32; };"
+// ref: meta/specs/TYPE_REFERENCE.md:1140  "; `enum =>! intN` reads the TAG (slot 0) at every shape"
+// expect: run:0
+// wrong: an ordinal or the wrong slot (exit 10 or 11)
+mod:c17_enum_to_int_reads_tag;
+
+enum:Color = { Red = 0i32; Green = 1i32; Blue = 2i32; };
+
+func:main = int32(cstring[]:_~argv) {
+    Color:c = Color.Blue;
+    if ((c =>! int32) != 2i32) { exit 10i32; }
+    Color:g = Color.Green;
+    if ((g =>! int32) != 1i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

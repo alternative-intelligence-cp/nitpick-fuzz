@@ -1,0 +1,44 @@
+// M10 f01_decimal_sum_not_exact -- `0.1 + 0.2 == 0.3` on `flt64` literals
+// claim: Float arithmetic is IEEE (`fadd`), and a constant means what the run time means: 0.1 + 0.2 is not 0.3.
+// ref: meta/specs/TYPE_REFERENCE.md:181  "- Arithmetic: `+`, `-`, `*`, `/`, `%` → `fadd`, `fsub`, `fmul`, `fdiv`, `frem`"
+// ref: meta/specs/OP_REFERENCE.md:160  "- Every other operation the folder evaluates is also the machine's answer:"
+// expect: run:0
+// wrong: a folder computing in decimal: equal to 0.3 (exit 10), or unequal to the run time (12)
+mod:f01_decimal_sum_not_exact;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if ((0.1f64 + 0.2f64) == 0.3f64) { exit 10i32; }
+    flt64:r = raw vf64(0.1f64) + raw vf64(0.2f64);
+    if (r == 0.3f64) { exit 11i32; }
+    if (r != (0.1f64 + 0.2f64)) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

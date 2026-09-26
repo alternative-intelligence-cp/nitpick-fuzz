@@ -1,0 +1,44 @@
+// M10 w10_defer_per_iteration -- a `defer` in a loop body
+// claim: A loop body is a block: its defer runs at each iteration's scope end.
+// ref: meta/specs/CONTROL_REFERENCE.md:306  "A block is zero or more statements in braces `{ … }`. Blocks introduce a lexical"
+// ref: meta/specs/CONTROL_REFERENCE.md:382  "Runs on **every normal exit path** — scope end, `return`, `pass`, `fail`, `relay`, `exit` —"
+// expect: run:0
+// wrong: the defers held to the function's end (0), or one per loop (1)
+mod:w10_defer_per_iteration;
+
+func:main = int32(cstring[]:_~argv) {
+    int32:count = 0i32;
+    for (int64:i in 0i64...3i64) {
+        defer { count = count + 1i32; }
+        discard(i);
+    }
+    if (count != 3i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

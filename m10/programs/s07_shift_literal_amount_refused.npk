@@ -1,0 +1,42 @@
+// M10 s07_shift_literal_amount_refused -- `<<` by the literal amount 32 on an int32
+// claim: A known amount outside the range is NITPICK-TYPE-070 at the shift.
+// ref: meta/specs/OP_REFERENCE.md:232  "(D-277, 1.5.4b).** A known amount outside the range — a literal, a negated"
+// ref: meta/specs/OP_REFERENCE.md:233  "literal, a `fixed` constant the folder knows — is `NITPICK-TYPE-070` at the"
+// expect: refuse:NITPICK-TYPE-070
+// wrong: accepted: a masked or poison shift (10 or 11)
+mod:s07_shift_literal_amount_refused;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x = raw v32(1i32) << 32i32;
+    if (x == 1i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

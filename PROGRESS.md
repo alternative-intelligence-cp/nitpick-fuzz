@@ -33,6 +33,11 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 9.3 types, 9.4 places, 9.5 operations (sections B–E of `gen/grid9.py`)
   - [x] 9.6 the recall gate kept: every known shape flagged at the baseline; every expectation written in the generator before the first run
   - [x] 9.7 the grid at the baseline and HUNT2, triaged by M5's five steps; `REPORT.md` §10; stop (M10 waits for the author)
+- [ ] **M10** — silent wrong answers (session 5)
+  - [x] 10.1 the checklist (`m10/CHECKLIST.md`, `gen/m10.py`): 229 items, 223 testable and 6 untestable with reasons, each citing the reference sentence located by its text at both compilers
+  - [ ] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
+  - [ ] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
+  - [ ] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
 
 ## Compilers
 
@@ -734,6 +739,76 @@ measured costs, not measured):
   checklist sets the low end, and the number of disagreements to confirm and
   write up sets the high end.
 
+## M10 — silent wrong answers (session 5)
+
+**The start checks.**
+- **(a)** `uname -a` and `nproc` are under Environment below (4 cores, the hosted VM).
+- **(b)** `CLAUDE.md` was re-read, the silent-wrong-answer rule with it. A result that
+  differs from the reference, with no memory error, counts exactly as a memory fault
+  does, and is never filed as an observation outside the definition.
+- **(c)** The VM was fresh (`.work/` absent), so the toolchain was rebuilt by M0's
+  commands (below).
+- **(d)** The branch began at `88e6355`, which is `origin/main` (M9 merged): the
+  fast-forward was a no-op. M9 is ticked and M10 is not, so M10 resumes at its first
+  box. Nothing ticked was redone.
+
+**The rebuild (M0's commands).** LLVM 20.1.2 was fetched to a file and extracted as
+S13 records. The download took 15 s and the whole step 383 s. The tarball is
+2 021 628 328 bytes, sha256 `3a392f151375eeed…`, as in sessions 2–4, and
+`llvm-config --version` prints `20.1.2`.
+
+The compiler was cloned to `.work/nitpick` at 11:57 UTC. Its `origin/main` was
+`b564746` (1.6.1 step 0c, DEF-116), and `9f6f370` at a re-fetch at 12:29 UTC (a
+record commit over it). HUNT2 stays `9126350` (S32). The worktrees `.work/hunt2`
+(`9126350`) and `.work/base` (`c3bdae2`) were built one after the other by M0.5's
+command: HUNT2 in 90.8 s, the baseline in 91.7 s.
+
+**All six products are byte-identical to sessions 3 and 4's**:
+- `npkc.ll`: 28 857 206 / `2448b3b60d9eb189…` (HUNT2) and 28 111 929 /
+  `4029fc70efbe9cd3…` (the baseline), so the commissioning check passes again;
+- `npkc`: 9 972 944 / `20d35e2822b99080…` and 9 724 232 / `0cbc150ced5d20f7…`;
+- `npkrt.o`: 72 576 / `162b897539285a77…` for both.
+
+Canaries (M0.6), at both compilers: `canary.npk` gives npkc 0 and runs 0/0, and
+`canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001`.
+
+**The machine checks.**
+- The M2 grid re-run on this VM is identical to the committed records in 956 of 956
+  cells at HUNT2 (73 s) and 956 of 956 at the baseline (78 s).
+- The recall suite (`gen/run_known.py`) now holds 25 programs. Its 19 old rows are
+  identical to `results/known-9126350.txt` and `results/known-c3bdae2.txt` line for
+  line.
+- The 6 rows added at M9's merge (`known/def106_fixed_part/`,
+  `known/def108_fall_off/`) give exactly `KNOWN_DEFECTS.md`'s verdicts:
+  - at the baseline, DEF-106's cases 0/95/95 and 0/107/11, DEF-108's 0/10/10 and
+    0/12/12, both controls 0/0/0;
+  - at HUNT2, the four cases refused (`TYPE-086`, `FLOW-001`) and both controls
+    0/0/0.
+- Recorded as `results/<commit>/known-m10.txt` (S35).
+
+**10.1 — the checklist** (`gen/m10.py` writes `m10/CHECKLIST.md`, `m10/EXPECT.tsv` and
+`m10/programs/`).
+- **Sources read for it, at HUNT2:**
+  - OP_REFERENCE whole;
+  - CONTROL_REFERENCE whole;
+  - TYPE_REFERENCE §1–4, §6, §9–11, §26–28;
+  - BUILTIN_REFERENCE whole;
+  - LEXICAL_REFERENCE §5–6;
+  - the decisions they cite (D-010, D-022, D-060, D-092, D-095, D-136, D-139, D-148,
+    D-225, D-234, D-306) and VERIFICATION_REFERENCE §1.2's `pick` model.
+- **229 items in 17 areas.** 223 are testable and 6 untestable, each with its reason.
+  The plan's eleven features are all there: defaults, conversions and literals,
+  overflow, division, comparisons, strings, `pick`, `when`/`defer`, `Result`, loops and
+  shadowing. They are joined by shifts, precedence and evaluation order, arrays and
+  slices, floats, `exit`, and DEF-108's recall (10.3).
+- **Each citation is a quoted phrase.** `gen/m10.py` locates it by its text, uniquely,
+  at HUNT2 and at the baseline. All 320 resolve at HUNT2. The ones absent at the
+  baseline are exactly the sentences that changed since: FLOW-001's paragraph, the
+  tag-only enum's `=>!`, and the block-string closing sentence.
+- **Every item says what a wrong implementation would answer**, so each program is a
+  case the wrong implementation gets wrong.
+- **The expectations are committed before the first run** (S36).
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -792,6 +867,20 @@ git:       2.43.0
 ```
 
 A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
+
+*(session 5, measured 2026-09-26 11:57 UTC; M10 run here — the start check (a))*
+
+```
+uname -a:  Linux vm 6.18.44-fc-v37 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     4
+free -g:   Mem 15 total, 0 used, 15 free, 15 available; Swap 0
+df -h .:   /dev/vda  252G  7.1G used  30G avail (20%) -- 30 GB is the session's writable allowance
+os:        Ubuntu 24.04.4 LTS
+python3:   Python 3.11.15
+git:       2.43.0
+```
+
+A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
 
 ## Decisions and deviations
 
@@ -961,6 +1050,47 @@ A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
   N on both legs. `gen/run_findings.py` gained `--heap`, which records both
   legs' `heap:` words beside the exit codes. Both are additive.
 
+- **S31 — session 5 works on branch `claude/peaceful-mccarthy-ohbxra`**, which the
+  session's harness names. It started at `88e6355`, the workbench's commit after M9's
+  merge, which is `origin/main`.
+- **S32 — HUNT2 stays `9126350`.** PLAN.md 10.2 runs each program "at the baseline and
+  at HUNT2", and HUNT2 is the compiler M8 named (S20, S25). The compiler's
+  `origin/main` had moved to `b564746` (1.6.1 step 0c: DEF-116's fix,
+  `NITPICK-TYPE-014`, and DEF-117) by 11:57 UTC, and to `9f6f370` (a record commit)
+  by 12:29. Neither is HUNT2.
+- **S33 — each compiler is held to its own reference where the text changed; otherwise
+  to HUNT2's.** An item's expectation comes from HUNT2's reference text. Where the
+  baseline's own reference says something else, the item carries a second
+  expectation for the baseline, from the baseline's text (`expect_base`):
+  - the tag-only enum's `intN =>! enum` (`c18`);
+  - DEF-108's shapes (`q01`–`q07`, `q11`), whose baseline has no FLOW-001 sentence.
+    Its expected answer there is the known defect's measured one, which is what
+    10.3's "flagged" means.
+
+  The block string (`t04`) keeps one expectation, since the baseline's production
+  already said three quotes (its lexer had DEF-98). The citations show, per quote,
+  the line at each compiler or `absent`.
+- **S34 — the M10 program convention.**
+  - `failsafe` carries the grid's arms (S4) plus seven more, with unused codes:
+    `ShiftRange` 111, `CastRange` 112, `BadStep` 113, `BorrowOverlap` 114,
+    `RequiresViolated` 115, `EnsuresViolated` 116, `InvariantViolated` 117.
+  - A program's own error `E<k>` exits 80+k.
+  - Exit 0 is the reference's answer, and 10–59 name the check that saw a wrong value.
+  - A value meant to be computed at run time goes through a `never fails` identity
+    function (`raw v32(x)`), so the compiler's folder cannot evaluate it. A value
+    meant to be folded is a module `fixed` initialiser. Where the reference speaks of
+    both (`OP_REFERENCE`: "a constant expression means what the run time means"),
+    there is an item for each.
+- **S35 — M10's records are per compiler:** `results/<commit>/m10.jsonl` (one JSON line
+  per program: npkc rc, codes, first diagnostic, both legs, verdict) and
+  `results/<commit>/known-m10.txt` (this session's recall-suite run, 25 rows). The
+  M1/M8 files `results/known-*.txt` are kept as measured.
+- **S36 — expectations before runs.** `gen/m10.py`, the programs, `m10/EXPECT.tsv` and
+  the checklist are committed before any program runs. If a program fails for a
+  mistake of its own (a spelling the language does not have, where the item is about
+  something else), only its text changes, never its expectation, and each such fix is
+  listed here. This is M2's and M9's practice (S29).
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -1016,3 +1146,12 @@ A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
     written up. Two are memory faults at HUNT2: F-003, and F-004 (a gap in
     DEF-107's fix). `REPORT.md` §10 written.
   - M9 done; stopped for the author before M10.
+- 2026-09-26 (session 5, branch `claude/peaceful-mccarthy-ohbxra`, a fresh cloud
+  VM): M10.
+  - **Setup.** The gate held (`origin/main` = `88e6355`, M9 ticked). The toolchain
+    was rebuilt by M0's commands, byte-identical to sessions 3 and 4's. The M2 grid
+    re-ran identical in 956/956 cells at both compilers, and the recall suite's 19
+    old rows are identical, with its 6 new rows as `KNOWN_DEFECTS.md` says.
+  - **10.1.** The checklist: 229 items (223 testable), each citing the reference
+    sentence that states its answer. Committed with the programs and their
+    expectations before any run (S36).

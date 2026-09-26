@@ -1,0 +1,48 @@
+// M10 w09_no_defer_on_trap -- a `defer` in `main` when `?!` traps
+// claim: `defer` does not run on a trap: `?!` transfers to failsafe without unwinding.
+// ref: meta/specs/CONTROL_REFERENCE.md:384  "> **`defer` does NOT run on a trap** (D-014). `!!!` and `?!` transfer control"
+// expect: run:82
+// wrong: the defer runs first and traps DivByZero (97, or 70 on re-entry)
+mod:w09_no_defer_on_trap;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+error:E1;
+error:E2;
+func:bad = int32() { fail E1; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:z = raw v32(0i32);
+    defer { int32:q = 7i32 / z; discard(q); }
+    int32:v = bad() ?! E2;
+    exit v;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

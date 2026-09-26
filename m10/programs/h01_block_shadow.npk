@@ -1,0 +1,46 @@
+// M10 h01_block_shadow -- an inner block redeclaring an outer local
+// claim: An inner scope may redefine an outer name; the outer binding is untouched.
+// ref: meta/specs/SAFETY_ARCHITECTURE.md:128  "| `shadow` | bans inner scopes redefining outer names, ignoring macro-generated hygiene names |"
+// ref: meta/specs/SAFETY_ARCHITECTURE.md:142  "here adds pedantry beyond what safety requires; none of them gates a safety"
+// expect: run:0
+// wrong: the inner declaration writes the outer slot: 2 (exit 11)
+mod:h01_block_shadow;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x = raw v32(1i32);
+    {
+        int32:x = raw v32(2i32);
+        if (x != 2i32) { exit 10i32; }
+    }
+    if (x != 1i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

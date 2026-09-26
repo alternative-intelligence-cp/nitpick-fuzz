@@ -1,0 +1,47 @@
+// M10 w04_defer_lifo -- two `defer`s in a block
+// claim: `defer` pushes onto a stack: at scope exit the defers run LIFO.
+// ref: meta/specs/CONTROL_REFERENCE.md:375  "Pushes a block onto a stack to run when the enclosing lexical scope exits."
+// ref: meta/specs/CONTROL_REFERENCE.md:382  "LIFO, innermost scope first."
+// expect: run:0
+// wrong: FIFO order: 512 (exit 10), or the defers deferred to the function's end
+mod:w04_defer_lifo;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:log = 0i32;
+    {
+        defer { log = log * 10i32 + 1i32; }
+        defer { log = log * 10i32 + 2i32; }
+        log = raw v32(5i32);
+    }
+    if (log != 521i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

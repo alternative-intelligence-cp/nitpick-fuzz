@@ -1,0 +1,44 @@
+// M10 d13_fixed_local_written_twice -- a second write to a `fixed` local
+// claim: A `fixed` binding is written once and never again: a second write is ASSIGN-002.
+// ref: meta/specs/TYPE_REFERENCE.md:1861  "// derived = 0i32;             // NITPICK-ASSIGN-002"
+// ref: meta/specs/TYPE_REFERENCE.md:1876  "**Diagnostic:** every one of these is `NITPICK-ASSIGN-002`"
+// expect: refuse:NITPICK-ASSIGN-002
+// wrong: accepted: the second write lands (exit 10)
+mod:d13_fixed_local_written_twice;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    fixed int32:d;
+    d = raw v32(5i32);
+    d = raw v32(6i32);
+    if (d == 6i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,46 @@
+// M10 p06_unsigned_selector_ranges -- a `uint8` selector of 200 against `(0..127)`, `(128..255)`, `(200)`
+// claim: An unsigned selector is matched against its patterns by its unsigned value.
+// ref: meta/specs/TYPE_REFERENCE.md:159  "Comparisons use `ult`/`ugt`/`ule`/`uge` instead of `slt`/`sgt`/`sle`/`sge`"
+// ref: meta/specs/OP_REFERENCE.md:375  "| `..` | Inclusive Range | Inclusive range `[a, b]`. Used in `for` and `pick`. | `0..10` |"
+// expect: run:0
+// wrong: a signed range test: 200 as -56 falls in neither range (exit 10)
+mod:p06_unsigned_selector_ranges;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    uint8:x = raw vu8(200u8);
+    int32:r = 0i32;
+    pick (x) { (0u8..127u8) { r = 1i32; }, (128u8..255u8) { r = 2i32; }, (*) { r = 3i32; } }
+    if (r != 2i32) { exit 10i32; }
+    pick (x) { (200u8) { r = 4i32; }, (*) { r = 5i32; } }
+    if (r != 4i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

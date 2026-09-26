@@ -1,0 +1,46 @@
+// M10 a06_write_through_array_pointer -- a callee writing `(<-p)[0]` through an `int32[4]->`
+// claim: A pointer to the array lets a callee mutate the caller's array; its element is `(<-p)[i]`.
+// ref: meta/specs/TYPE_REFERENCE.md:1050  "If you want to mutate an array inside a function or avoid copying, you must explicitly pass a pointer to it (`int32[4]->`)."
+// ref: meta/specs/TYPE_REFERENCE.md:1210  "(`.`). Here the element is spelled `(<-p)[i]`, one level brought back. A"
+// expect: run:0
+// wrong: the write lost to a copy (exit 10): a write the program never sees
+mod:a06_write_through_array_pointer;
+
+func:poke = NIL(int32[4]->:p) never fails {
+    (<-p)[0i64] = 9i32;
+    pass NIL;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    drop poke(@a);
+    if (a[0i64] != 9i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

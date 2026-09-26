@@ -1,0 +1,46 @@
+// M10 l04_for_inclusive_empty -- `for (i in 3..1)` from run-time bounds
+// claim: An inclusive range [a, b] with a > b is empty.
+// ref: meta/specs/OP_REFERENCE.md:375  "| `..` | Inclusive Range | Inclusive range `[a, b]`. Used in `for` and `pick`. | `0..10` |"
+// expect: run:0
+// wrong: a descending walk 3, 2, 1 (10)
+mod:l04_for_inclusive_empty;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int64:lo = raw v64(3i64);
+    int64:hi = raw v64(1i64);
+    int64:n = 0i64;
+    int64:s = 0i64;
+    for (int64:i in lo..hi) { n = n + 1i64; s = s + (i); }
+    if (n != 0i64) { exit 10i32; }
+    if (s != 0i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

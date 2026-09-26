@@ -1,0 +1,44 @@
+// M10 v18_tbb_div_by_zero_is_err -- `tbb32` `/` and `%` by zero
+// claim: On `tbb`, division or modulo by zero yields ERR, with no trap.
+// ref: meta/specs/TYPE_REFERENCE.md:692  "- Division or modulo by zero yields ERR (D-007)."
+// expect: run:0
+// wrong: a DivByZero trap (97), or a non-ERR value (10, 11)
+mod:v18_tbb_div_by_zero_is_err;
+
+func:vt32 = tbb32(tbb32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    tbb32:a = raw vt32(5tbb32);
+    tbb32:q = a / raw vt32(0tbb32);
+    if (!(is_err(q))) { exit 10i32; }
+    tbb32:r = a % raw vt32(0tbb32);
+    if (!(is_err(r))) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

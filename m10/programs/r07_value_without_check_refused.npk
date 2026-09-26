@@ -1,0 +1,44 @@
+// M10 r07_value_without_check_refused -- `r.value` read with no check of `r.is_error`
+// claim: `.value` may not be read without first checking `.is_error` (or an unwrap operator).
+// ref: meta/specs/TYPE_REFERENCE.md:1369  "The compiler WILL NOT allow accessing `.value` without first checking `.is_error`"
+// expect: refuse
+// wrong: accepted: the failure's zeroed value read as 0 (exit 10)
+mod:r07_value_without_check_refused;
+
+error:E1;
+func:f = int32() { fail E1; };
+
+func:main = int32(cstring[]:_~argv) {
+    Result<int32>:r = f();
+    int32:v = r.value;
+    if (v == 0i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

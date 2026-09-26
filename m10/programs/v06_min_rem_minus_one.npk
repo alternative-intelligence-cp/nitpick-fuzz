@@ -1,0 +1,43 @@
+// M10 v06_min_rem_minus_one -- int32 minimum `%` -1
+// claim: A signed minimum divided by -1 traps `DivOverflow`, at every width; the run time traps `MIN % -1` too.
+// ref: meta/specs/OP_REFERENCE.md:164  "a constant `MIN / −1` or `MIN % −1` is refused as a constant division by"
+// ref: meta/specs/OP_REFERENCE.md:165  "zero is (TYPE-004), since the run time traps `DivOverflow`."
+// expect: run:98
+// wrong: the mathematical 0 with no trap (10), or SIGFPE (107)
+mod:v06_min_rem_minus_one;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:m = raw v32(-2147483647i32) - raw v32(1i32);
+    int32:q = m % raw v32(-1i32);
+    if (q == 0i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

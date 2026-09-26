@@ -1,0 +1,47 @@
+// M10 a08_range_view -- `a[1...3]` and `a[1..2]` of an `int32[4]`
+// claim: A range of a fixed array is a slice of those elements, with `.len`.
+// ref: meta/specs/TYPE_REFERENCE.md:1111  "Constructed by ranging a fixed array or another slice — `arr[0...n]` — or, in"
+// ref: meta/specs/OP_REFERENCE.md:375  "| `..` | Inclusive Range | Inclusive range `[a, b]`. Used in `for` and `pick`. | `0..10` |"
+// ref: meta/specs/OP_REFERENCE.md:376  "| `...` | Exclusive Range | Exclusive range `[a, b)`. Used in `for` and `pick`. | `0...10` |"
+// expect: run:0
+// wrong: the range spellings swapped (10, 13), or the view offset wrong (11)
+mod:a08_range_view;
+
+func:main = int32(cstring[]:_~argv) {
+    int32[4]:a = [1i32, 2i32, 3i32, 4i32];
+    int32[]:s = a[1i64...3i64];
+    if (s.len != 2i64) { exit 10i32; }
+    if (s[0i64] != 2i32) { exit 11i32; }
+    if (s[1i64] != 3i32) { exit 12i32; }
+    int32[]:t = a[1i64..2i64];
+    if (t.len != 2i64) { exit 13i32; }
+    if (t[1i64] != 3i32) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

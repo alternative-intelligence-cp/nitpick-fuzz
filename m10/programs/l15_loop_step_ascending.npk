@@ -1,0 +1,42 @@
+// M10 l15_loop_step_ascending -- `loop(0, 10, 3)`
+// claim: The step is the size of the jump: 0, 3, 6, 9.
+// ref: meta/specs/CONTROL_REFERENCE.md:219  "> Because direction is inferred from the bounds, `step` controls **only the size"
+// expect: run:0
+// wrong: a stepped walk off by one (10)
+mod:l15_loop_step_ascending;
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = 0i64;
+    int64:s = 0i64;
+    loop (0i64, 10i64, 3i64) { n = n + 1i64; s = s + ($); }
+    if (n != 4i64) { exit 10i32; }
+    if (s != 18i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

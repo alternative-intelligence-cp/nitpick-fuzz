@@ -1,0 +1,224 @@
+id	file	area	expect_hunt2	expect_base
+d01_struct_lit_omits_field	programs/d01_struct_lit_omits_field.npk	defaults and zero values	refuse	refuse
+d02_read_unassigned	programs/d02_read_unassigned.npk	defaults and zero values	refuse	refuse
+d03_read_unassigned_on_a_path	programs/d03_read_unassigned_on_a_path.npk	defaults and zero values	refuse	refuse
+d04_tbb_assign_replaces	programs/d04_tbb_assign_replaces.npk	defaults and zero values	run:0	run:0
+d05_empty_array_literal_is_zero	programs/d05_empty_array_literal_is_zero.npk	defaults and zero values	run:0	run:0
+d06_short_array_literal	programs/d06_short_array_literal.npk	defaults and zero values	refuse	refuse
+d07_result_literal_omits_err	programs/d07_result_literal_omits_err.npk	defaults and zero values	run:0	run:0
+d08_result_literal_omits_value	programs/d08_result_literal_omits_value.npk	defaults and zero values	run:0	run:0
+d09_optional_nil_and_value	programs/d09_optional_nil_and_value.npk	defaults and zero values	run:0	run:0
+d10_read_field_of_undeclared_struct	programs/d10_read_field_of_undeclared_struct.npk	defaults and zero values	refuse	refuse
+d11_read_unwritten_field	programs/d11_read_unwritten_field.npk	defaults and zero values	refuse	refuse
+d12_fixed_local_written_later	programs/d12_fixed_local_written_later.npk	defaults and zero values	run:0	run:0
+d13_fixed_local_written_twice	programs/d13_fixed_local_written_twice.npk	defaults and zero values	refuse:NITPICK-ASSIGN-002	refuse:NITPICK-ASSIGN-002
+d14_fixed_field_written	programs/d14_fixed_field_written.npk	defaults and zero values	refuse:NITPICK-ASSIGN-002	refuse:NITPICK-ASSIGN-002
+d15_safe_navigation_on_empty	programs/d15_safe_navigation_on_empty.npk	defaults and zero values	run:0	run:0
+d16_uninit_owning_field_overwrite	programs/d16_uninit_owning_field_overwrite.npk	defaults and zero values	run:0	run:0
+c01_widen_signed_keeps_value	programs/c01_widen_signed_keeps_value.npk	numeric conversions and literals	run:0	run:0
+c02_widen_unsigned_keeps_value	programs/c02_widen_unsigned_keeps_value.npk	numeric conversions and literals	run:0	run:0
+c03_narrow_signed_refused	programs/c03_narrow_signed_refused.npk	numeric conversions and literals	refuse	refuse
+c04_signed_to_unsigned_refused	programs/c04_signed_to_unsigned_refused.npk	numeric conversions and literals	refuse	refuse
+c05_uint8_to_int8_refused	programs/c05_uint8_to_int8_refused.npk	numeric conversions and literals	refuse	refuse
+c06_int32_to_flt64_exact	programs/c06_int32_to_flt64_exact.npk	numeric conversions and literals	run:0	run:0
+c07_int64_to_flt64_refused	programs/c07_int64_to_flt64_refused.npk	numeric conversions and literals	refuse	refuse
+c08_int32_to_flt32_refused	programs/c08_int32_to_flt32_refused.npk	numeric conversions and literals	refuse	refuse
+c09_float_to_int_checked_refused	programs/c09_float_to_int_checked_refused.npk	numeric conversions and literals	refuse	refuse
+c10_float_to_int_truncates	programs/c10_float_to_int_truncates.npk	numeric conversions and literals	run:0	run:0
+c11_float_nan_to_int_traps	programs/c11_float_nan_to_int_traps.npk	numeric conversions and literals	run:112	run:112
+c12_float_too_big_to_int_traps	programs/c12_float_too_big_to_int_traps.npk	numeric conversions and literals	run:112	run:112
+c13_unchecked_cast_truncates_bits	programs/c13_unchecked_cast_truncates_bits.npk	numeric conversions and literals	run:0	run:0
+c14_bool_to_int	programs/c14_bool_to_int.npk	numeric conversions and literals	run:0	run:0
+c15_int_to_bool_refused	programs/c15_int_to_bool_refused.npk	numeric conversions and literals	refuse	refuse
+c16_int_to_bool_unchecked_refused	programs/c16_int_to_bool_unchecked_refused.npk	numeric conversions and literals	refuse	refuse
+c17_enum_to_int_reads_tag	programs/c17_enum_to_int_reads_tag.npk	numeric conversions and literals	run:0	run:0
+c18_int_to_tag_only_enum	programs/c18_int_to_tag_only_enum.npk	numeric conversions and literals	run:0	refuse
+c19_unsuffixed_literal_takes_context	programs/c19_unsuffixed_literal_takes_context.npk	numeric conversions and literals	run:0	run:0
+c20_literal_must_fit	programs/c20_literal_must_fit.npk	numeric conversions and literals	refuse:NITPICK-TYPE-031	refuse:NITPICK-TYPE-031
+c21_most_negative_decimal_unspellable	programs/c21_most_negative_decimal_unspellable.npk	numeric conversions and literals	refuse	refuse
+c22_literal_bases	programs/c22_literal_bases.npk	numeric conversions and literals	run:0	run:0
+c23_c_hex_prefix_refused	programs/c23_c_hex_prefix_refused.npk	numeric conversions and literals	refuse:NITPICK-LEX-003	refuse:NITPICK-LEX-003
+c24_float_literal_exponent	programs/c24_float_literal_exponent.npk	numeric conversions and literals	run:0	run:0
+c25_flt32_literal_16_digits	programs/c25_flt32_literal_16_digits.npk	numeric conversions and literals	refuse	refuse
+c26_constant_overflow_contextual	programs/c26_constant_overflow_contextual.npk	numeric conversions and literals	refuse:NITPICK-TYPE-076	refuse:NITPICK-TYPE-076
+c27_uint64_zero_minus_one_refused	programs/c27_uint64_zero_minus_one_refused.npk	numeric conversions and literals	refuse:NITPICK-TYPE-076	refuse:NITPICK-TYPE-076
+c28_uint64_max_by_bits	programs/c28_uint64_max_by_bits.npk	numeric conversions and literals	run:0	run:0
+o01_int32_add	programs/o01_int32_add.npk	integer overflow	run:93	run:93
+o02_int32_sub	programs/o02_int32_sub.npk	integer overflow	run:93	run:93
+o03_int32_mul	programs/o03_int32_mul.npk	integer overflow	run:93	run:93
+o04_int32_negate_min	programs/o04_int32_negate_min.npk	integer overflow	run:93	run:93
+o05_int8_add	programs/o05_int8_add.npk	integer overflow	run:93	run:93
+o06_int16_mul	programs/o06_int16_mul.npk	integer overflow	run:93	run:93
+o07_uint8_add	programs/o07_uint8_add.npk	integer overflow	run:93	run:93
+o08_uint8_sub	programs/o08_uint8_sub.npk	integer overflow	run:93	run:93
+o09_uint32_sub	programs/o09_uint32_sub.npk	integer overflow	run:93	run:93
+o10_uint64_mul	programs/o10_uint64_mul.npk	integer overflow	run:93	run:93
+o11_int64_add	programs/o11_int64_add.npk	integer overflow	run:93	run:93
+o12_compound_add	programs/o12_compound_add.npk	integer overflow	run:93	run:93
+o13_compound_mul_int8	programs/o13_compound_mul_int8.npk	integer overflow	run:93	run:93
+o14_compound_sub_uint16	programs/o14_compound_sub_uint16.npk	integer overflow	run:93	run:93
+o15_int8_sub_past_min	programs/o15_int8_sub_past_min.npk	integer overflow	run:93	run:93
+o16_int128_add	programs/o16_int128_add.npk	integer overflow	run:93	run:93
+o17_edges_do_not_trap	programs/o17_edges_do_not_trap.npk	integer overflow	run:0	run:0
+o18_shift_loses_bits_no_trap	programs/o18_shift_loses_bits_no_trap.npk	integer overflow	run:0	run:0
+o19_wrapping_family	programs/o19_wrapping_family.npk	integer overflow	run:0	run:0
+o20_wrapping_folds_with_wrap	programs/o20_wrapping_folds_with_wrap.npk	integer overflow	run:0	run:0
+o21_constant_overflow_refused	programs/o21_constant_overflow_refused.npk	integer overflow	refuse:NITPICK-TYPE-076	refuse:NITPICK-TYPE-076
+o22_simd_lane_overflow	programs/o22_simd_lane_overflow.npk	integer overflow	run:93	run:93
+v01_truncation_run_time	programs/v01_truncation_run_time.npk	division	run:0	run:0
+v02_truncation_folded	programs/v02_truncation_folded.npk	division	run:0	run:0
+v03_div_by_zero	programs/v03_div_by_zero.npk	division	run:97	run:97
+v04_rem_by_zero	programs/v04_rem_by_zero.npk	division	run:97	run:97
+v05_min_div_minus_one	programs/v05_min_div_minus_one.npk	division	run:98	run:98
+v06_min_rem_minus_one	programs/v06_min_rem_minus_one.npk	division	run:98	run:98
+v07_int8_min_div_minus_one	programs/v07_int8_min_div_minus_one.npk	division	run:98	run:98
+v08_int64_min_div_minus_one	programs/v08_int64_min_div_minus_one.npk	division	run:98	run:98
+v09_unsigned_div_by_zero	programs/v09_unsigned_div_by_zero.npk	division	run:97	run:97
+v10_compound_div_by_zero	programs/v10_compound_div_by_zero.npk	division	run:97	run:97
+v11_compound_rem_by_zero	programs/v11_compound_rem_by_zero.npk	division	run:97	run:97
+v12_constant_div_by_zero	programs/v12_constant_div_by_zero.npk	division	refuse:NITPICK-TYPE-004	refuse:NITPICK-TYPE-004
+v13_constant_min_div_minus_one	programs/v13_constant_min_div_minus_one.npk	division	refuse:NITPICK-TYPE-004	refuse:NITPICK-TYPE-004
+v14_unsigned_div_rem	programs/v14_unsigned_div_rem.npk	division	run:0	run:0
+v15_unsigned_div_rem_folded	programs/v15_unsigned_div_rem_folded.npk	division	run:0	run:0
+v16_float_div_by_zero	programs/v16_float_div_by_zero.npk	division	run:0	run:0
+v17_float_remainder	programs/v17_float_remainder.npk	division	run:0	run:0
+v18_tbb_div_by_zero_is_err	programs/v18_tbb_div_by_zero_is_err.npk	division	run:0	run:0
+s01_signed_right_shift_arithmetic	programs/s01_signed_right_shift_arithmetic.npk	shifts	run:0	run:0
+s02_unsigned_right_shift_logical	programs/s02_unsigned_right_shift_logical.npk	shifts	run:0	run:0
+s03_shifts_folded	programs/s03_shifts_folded.npk	shifts	run:0	run:0
+s04_shift_amount_equals_width	programs/s04_shift_amount_equals_width.npk	shifts	run:111	run:111
+s05_shift_amount_negative	programs/s05_shift_amount_negative.npk	shifts	run:111	run:111
+s06_right_shift_amount_width	programs/s06_right_shift_amount_width.npk	shifts	run:111	run:111
+s07_shift_literal_amount_refused	programs/s07_shift_literal_amount_refused.npk	shifts	refuse:NITPICK-TYPE-070	refuse:NITPICK-TYPE-070
+s08_compound_shift_amount	programs/s08_compound_shift_amount.npk	shifts	run:111	run:111
+s09_bitwise_not	programs/s09_bitwise_not.npk	shifts	run:0	run:0
+m01_mixed_width_refused	programs/m01_mixed_width_refused.npk	comparisons	refuse	refuse
+m02_mixed_sign_refused	programs/m02_mixed_sign_refused.npk	comparisons	refuse	refuse
+m03_unsigned_ordering	programs/m03_unsigned_ordering.npk	comparisons	run:0	run:0
+m04_unsigned_ordering_folded	programs/m04_unsigned_ordering_folded.npk	comparisons	run:0	run:0
+m05_char_ordering_unsigned	programs/m05_char_ordering_unsigned.npk	comparisons	run:0	run:0
+m06_spaceship	programs/m06_spaceship.npk	comparisons	run:0	run:0
+m07_nan_comparisons	programs/m07_nan_comparisons.npk	comparisons	run:0	run:0
+m08_negative_zero	programs/m08_negative_zero.npk	comparisons	run:0	run:0
+m09_char_vs_uint8_refused	programs/m09_char_vs_uint8_refused.npk	comparisons	refuse	refuse
+m10_bool_ordering_refused	programs/m10_bool_ordering_refused.npk	comparisons	refuse	refuse
+m11_string_eq_refused	programs/m11_string_eq_refused.npk	comparisons	refuse:NITPICK-TYPE-034	refuse:NITPICK-TYPE-034
+m12_tbb_compare_on_err_traps	programs/m12_tbb_compare_on_err_traps.npk	comparisons	run:110	run:110
+m13_tbb_err_sticky	programs/m13_tbb_err_sticky.npk	comparisons	run:0	run:0
+t01_byte_length_utf8	programs/t01_byte_length_utf8.npk	string lengths and bounds	run:0	run:0
+t02_length_spelled_length	programs/t02_length_spelled_length.npk	string lengths and bounds	run:0	run:0
+t03_escapes_and_raw	programs/t03_escapes_and_raw.npk	string lengths and bounds	run:0	run:0
+t04_block_string_quotes	programs/t04_block_string_quotes.npk	string lengths and bounds	run:0	run:0
+t05_slice_half_open	programs/t05_slice_half_open.npk	string lengths and bounds	run:0	run:0
+t06_slice_out_of_range	programs/t06_slice_out_of_range.npk	string lengths and bounds	run:0	run:0
+t07_bytes_view_bounds	programs/t07_bytes_view_bounds.npk	string lengths and bounds	run:94	run:94
+t08_string_index	programs/t08_string_index.npk	string lengths and bounds	run:0	run:0
+t09_string_index_past_end	programs/t09_string_index_past_end.npk	string lengths and bounds	run:94	run:94
+t10_int_to_string	programs/t10_int_to_string.npk	string lengths and bounds	run:0	run:0
+t11_template_interpolation	programs/t11_template_interpolation.npk	string lengths and bounds	run:0	run:0
+t12_to_cstring_interior_nul	programs/t12_to_cstring_interior_nul.npk	string lengths and bounds	run:0	run:0
+t13_cstring_keeps_length	programs/t13_cstring_keeps_length.npk	string lengths and bounds	run:0	run:0
+t14_string_plus_concatenates	programs/t14_string_plus_concatenates.npk	string lengths and bounds	run:0	run:0
+t15_concat_empty	programs/t15_concat_empty.npk	string lengths and bounds	run:0	run:0
+t16_string_order	programs/t16_string_order.npk	string lengths and bounds	run:0	run:0
+t17_string_equals	programs/t17_string_equals.npk	string lengths and bounds	run:0	run:0
+p01_no_implicit_fallthrough	programs/p01_no_implicit_fallthrough.npk	pick	run:0	run:0
+p02_fall_to_label	programs/p02_fall_to_label.npk	pick	run:0	run:0
+p03_first_match_wins	programs/p03_first_match_wins.npk	pick	run:0	run:0
+p04_range_pattern_edges	programs/p04_range_pattern_edges.npk	pick	run:0	run:0
+p05_negative_patterns	programs/p05_negative_patterns.npk	pick	run:0	run:0
+p06_unsigned_selector_ranges	programs/p06_unsigned_selector_ranges.npk	pick	run:0	run:0
+p07_char_selector_high_byte	programs/p07_char_selector_high_byte.npk	pick	run:0	run:0
+p08_guard_false_moves_on	programs/p08_guard_false_moves_on.npk	pick	run:0	run:0
+p09_pick_expression_give	programs/p09_pick_expression_give.npk	pick	run:0	run:0
+p10_int_pick_not_exhaustive	programs/p10_int_pick_not_exhaustive.npk	pick	refuse	refuse
+p11_enum_pick_missing_variant	programs/p11_enum_pick_missing_variant.npk	pick	refuse	refuse
+p12_tbb_pick_needs_err_arm	programs/p12_tbb_pick_needs_err_arm.npk	pick	refuse	refuse
+p13_tbb_err_arm_taken	programs/p13_tbb_err_arm_taken.npk	pick	run:0	run:0
+w01_when_ran_then	programs/w01_when_ran_then.npk	`when` and `defer` ordering	run:0	run:0
+w02_when_never_ran_end	programs/w02_when_never_ran_end.npk	`when` and `defer` ordering	run:0	run:0
+w03_when_break_then	programs/w03_when_break_then.npk	`when` and `defer` ordering	run:0	run:0
+w04_defer_lifo	programs/w04_defer_lifo.npk	`when` and `defer` ordering	run:0	run:0
+w05_pass_value_before_defer	programs/w05_pass_value_before_defer.npk	`when` and `defer` ordering	run:0	run:0
+w06_defer_on_fail	programs/w06_defer_on_fail.npk	`when` and `defer` ordering	run:0	run:0
+w07_defer_on_relay	programs/w07_defer_on_relay.npk	`when` and `defer` ordering	run:0	run:0
+w08_defer_on_exit	programs/w08_defer_on_exit.npk	`when` and `defer` ordering	run:97	run:97
+w09_no_defer_on_trap	programs/w09_no_defer_on_trap.npk	`when` and `defer` ordering	run:82	run:82
+w10_defer_per_iteration	programs/w10_defer_per_iteration.npk	`when` and `defer` ordering	run:0	run:0
+w11_defer_inner_scope_first	programs/w11_defer_inner_scope_first.npk	`when` and `defer` ordering	run:0	run:0
+w12_exit_code_read_before_defer	programs/w12_exit_code_read_before_defer.npk	`when` and `defer` ordering	run:3	run:3
+r01_fallback	programs/r01_fallback.npk	`Result`, `?|`, `?!`, `relay`	run:0	run:0
+r02_relay_same_error	programs/r02_relay_same_error.npk	`Result`, `?|`, `?!`, `relay`	run:0	run:0
+r03_relay_returns_at_once	programs/r03_relay_returns_at_once.npk	`Result`, `?|`, `?!`, `relay`	run:0	run:0
+r04_emphatic_unwrap_error	programs/r04_emphatic_unwrap_error.npk	`Result`, `?|`, `?!`, `relay`	run:82	run:82
+r05_drop_of_fallible_refused	programs/r05_drop_of_fallible_refused.npk	`Result`, `?|`, `?!`, `relay`	refuse:NITPICK-TYPE-042	refuse:NITPICK-TYPE-042
+r06_bare_call_refused	programs/r06_bare_call_refused.npk	`Result`, `?|`, `?!`, `relay`	refuse	refuse
+r07_value_without_check_refused	programs/r07_value_without_check_refused.npk	`Result`, `?|`, `?!`, `relay`	refuse	refuse
+r08_raw_on_fallible_refused	programs/r08_raw_on_fallible_refused.npk	`Result`, `?|`, `?!`, `relay`	refuse:NITPICK-TYPE-042	refuse:NITPICK-TYPE-042
+r09_discard_of_result_refused	programs/r09_discard_of_result_refused.npk	`Result`, `?|`, `?!`, `relay`	refuse	refuse
+r10_result_literal_both	programs/r10_result_literal_both.npk	`Result`, `?|`, `?!`, `relay`	run:0	run:0
+l01_for_inclusive	programs/l01_for_inclusive.npk	loop ranges	run:0	run:0
+l02_for_exclusive	programs/l02_for_exclusive.npk	loop ranges	run:0	run:0
+l03_for_negative_bounds	programs/l03_for_negative_bounds.npk	loop ranges	run:0	run:0
+l04_for_inclusive_empty	programs/l04_for_inclusive_empty.npk	loop ranges	run:0	run:0
+l05_for_exclusive_empty	programs/l05_for_exclusive_empty.npk	loop ranges	run:0	run:0
+l06_for_inclusive_to_int8_max	programs/l06_for_inclusive_to_int8_max.npk	loop ranges	run:0	run:0
+l07_for_inclusive_to_uint8_max	programs/l07_for_inclusive_to_uint8_max.npk	loop ranges	run:0	run:0
+l08_for_inclusive_to_int64_max	programs/l08_for_inclusive_to_int64_max.npk	loop ranges	run:0	run:0
+l09_for_exclusive_to_int8_max	programs/l09_for_exclusive_to_int8_max.npk	loop ranges	run:0	run:0
+l10_till_counts_from_zero	programs/l10_till_counts_from_zero.npk	loop ranges	run:0	run:0
+l11_till_nonpositive_limit	programs/l11_till_nonpositive_limit.npk	loop ranges	run:0	run:0
+l12_loop_ascending	programs/l12_loop_ascending.npk	loop ranges	run:0	run:0
+l13_loop_descending	programs/l13_loop_descending.npk	loop ranges	run:0	run:0
+l14_loop_start_equals_limit	programs/l14_loop_start_equals_limit.npk	loop ranges	run:0	run:0
+l15_loop_step_ascending	programs/l15_loop_step_ascending.npk	loop ranges	run:0	run:0
+l16_loop_step_descending	programs/l16_loop_step_descending.npk	loop ranges	run:0	run:0
+l17_loop_step_near_int8_max	programs/l17_loop_step_near_int8_max.npk	loop ranges	run:0	run:0
+l18_loop_step_near_int8_min	programs/l18_loop_step_near_int8_min.npk	loop ranges	run:0	run:0
+l19_zero_step_literal_refused	programs/l19_zero_step_literal_refused.npk	loop ranges	refuse:NITPICK-TYPE-068	refuse:NITPICK-TYPE-068
+l20_negative_step_literal_refused	programs/l20_negative_step_literal_refused.npk	loop ranges	refuse:NITPICK-TYPE-068	refuse:NITPICK-TYPE-068
+l21_zero_step_computed_traps	programs/l21_zero_step_computed_traps.npk	loop ranges	run:113	run:113
+l22_negative_step_computed_traps	programs/l22_negative_step_computed_traps.npk	loop ranges	run:113	run:113
+l23_for_captures_bound	programs/l23_for_captures_bound.npk	loop ranges	run:0	run:0
+l24_while_rereads_bound	programs/l24_while_rereads_bound.npk	loop ranges	run:0	run:0
+l25_for_over_array_in_order	programs/l25_for_over_array_in_order.npk	loop ranges	run:0	run:0
+l26_labelled_continue	programs/l26_labelled_continue.npk	loop ranges	run:0	run:0
+l27_continue_in_for	programs/l27_continue_in_for.npk	loop ranges	run:0	run:0
+l28_for_binding_type_mismatch	programs/l28_for_binding_type_mismatch.npk	loop ranges	refuse:NITPICK-TYPE-033	refuse:NITPICK-TYPE-033
+h01_block_shadow	programs/h01_block_shadow.npk	shadowing and scope	run:0	run:0
+h02_for_binding_shadow	programs/h02_for_binding_shadow.npk	shadowing and scope	run:0	run:0
+h03_block_binding_invisible	programs/h03_block_binding_invisible.npk	shadowing and scope	refuse	refuse
+h04_local_shadows_module_binding	programs/h04_local_shadows_module_binding.npk	shadowing and scope	run:0	run:0
+x01_cast_binds_tighter_than_negation	programs/x01_cast_binds_tighter_than_negation.npk	precedence and evaluation	run:0	run:0
+x02_additive_before_shift	programs/x02_additive_before_shift.npk	precedence and evaluation	run:0	run:0
+x03_equality_before_bitand	programs/x03_equality_before_bitand.npk	precedence and evaluation	refuse	refuse
+x04_short_circuit	programs/x04_short_circuit.npk	precedence and evaluation	run:0	run:0
+x05_ternary_evaluates_one_branch	programs/x05_ternary_evaluates_one_branch.npk	precedence and evaluation	run:0	run:0
+x06_optional_default_lazy	programs/x06_optional_default_lazy.npk	precedence and evaluation	run:0	run:0
+x07_left_associative	programs/x07_left_associative.npk	precedence and evaluation	run:0	run:0
+a01_array_assignment_copies	programs/a01_array_assignment_copies.npk	arrays, slices and value semantics	run:0	run:0
+a02_array_argument_copies	programs/a02_array_argument_copies.npk	arrays, slices and value semantics	run:0	run:0
+a03_index_past_end	programs/a03_index_past_end.npk	arrays, slices and value semantics	run:94	run:94
+a04_index_negative	programs/a04_index_negative.npk	arrays, slices and value semantics	run:94	run:94
+a05_array_len	programs/a05_array_len.npk	arrays, slices and value semantics	run:0	run:0
+a06_write_through_array_pointer	programs/a06_write_through_array_pointer.npk	arrays, slices and value semantics	run:0	run:0
+a07_write_through_struct_pointer	programs/a07_write_through_struct_pointer.npk	arrays, slices and value semantics	run:0	run:0
+a08_range_view	programs/a08_range_view.npk	arrays, slices and value semantics	run:0	run:0
+a09_view_index_past_its_len	programs/a09_view_index_past_its_len.npk	arrays, slices and value semantics	run:94	run:94
+f01_decimal_sum_not_exact	programs/f01_decimal_sum_not_exact.npk	floats	run:0	run:0
+f02_flt32_rounds_in_flt32	programs/f02_flt32_rounds_in_flt32.npk	floats	run:0	run:0
+f03_sqrt_of_negative	programs/f03_sqrt_of_negative.npk	floats	run:0	run:0
+e01_exit_zero_with_live_wild	programs/e01_exit_zero_with_live_wild.npk	`exit` and the leak check	run:96	run:96
+e02_failure_exit_keeps_code	programs/e02_failure_exit_keeps_code.npk	`exit` and the leak check	run:3	run:3
+e03_exit_outside_main_refused	programs/e03_exit_outside_main_refused.npk	`exit` and the leak check	refuse	refuse
+q01_empty_body	programs/q01_empty_body.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:10
+q02_missing_path	programs/q02_missing_path.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:10
+q03_fallible_missing_path	programs/q03_fallible_missing_path.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:12
+q04_main_without_exit	programs/q04_main_without_exit.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:0
+q05_string_missing_path	programs/q05_string_missing_path.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:10
+q06_bool_missing_path	programs/q06_bool_missing_path.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:10
+q07_nil_function_falls_off	programs/q07_nil_function_falls_off.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:0
+q08_while_true_never_completes	programs/q08_while_true_never_completes.npk	DEF-108 recall (10.3): falling off the end	run:0	run:0
+q09_if_else_both_pass	programs/q09_if_else_both_pass.npk	DEF-108 recall (10.3): falling off the end	run:0	run:0
+q10_pick_all_arms_pass	programs/q10_pick_all_arms_pass.npk	DEF-108 recall (10.3): falling off the end	run:0	run:0
+q11_for_loop_completes	programs/q11_for_loop_completes.npk	DEF-108 recall (10.3): falling off the end	refuse:NITPICK-FLOW-001	run:0

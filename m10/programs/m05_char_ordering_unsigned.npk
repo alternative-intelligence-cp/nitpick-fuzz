@@ -1,0 +1,43 @@
+// M10 m05_char_ordering_unsigned -- `char8` ordering with a byte above 0x7F
+// claim: `char8` comparisons are unsigned (`icmp ult/ugt/...`).
+// ref: meta/specs/TYPE_REFERENCE.md:231  "- Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=` → `icmp eq/ne/ult/ugt/ule/uge` (unsigned comparison for Unicode ordering)"
+// expect: run:0
+// wrong: a signed byte compare: 0xC3 as -61 is below 'A' (exit 10)
+mod:m05_char_ordering_unsigned;
+
+func:vc8 = char8(char8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    char8:hi = raw vc8('\xC3');
+    char8:a = raw vc8('A');
+    if (!(hi > a)) { exit 10i32; }
+    if (hi < a) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

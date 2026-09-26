@@ -1,0 +1,40 @@
+// M10 l19_zero_step_literal_refused -- `till(10, 0)`
+// claim: A literal step must be positive: zero is a compile error (TYPE-068).
+// ref: meta/specs/CONTROL_REFERENCE.md:233  "| `step` negative or zero | compile error |"
+// ref: meta/specs/CONTROL_REFERENCE.md:242  "`loop` takes three arguments and `till` two, and a step written as"
+// expect: refuse:NITPICK-TYPE-068
+// wrong: accepted: a loop that cannot end, or a run-time trap
+mod:l19_zero_step_literal_refused;
+
+func:main = int32(cstring[]:_~argv) {
+    int64:n = 0i64;
+    till (10i64, 0i64) { n = n + 1i64; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

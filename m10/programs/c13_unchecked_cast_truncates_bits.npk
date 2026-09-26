@@ -1,0 +1,52 @@
+// M10 c13_unchecked_cast_truncates_bits -- `=>!` between integer types
+// claim: `=>!` is a direct bit-cast or truncation without checking.
+// ref: meta/specs/OP_REFERENCE.md:352  "Direct bit-cast/truncation without checking"
+// expect: run:0
+// wrong: a saturating or value-checked narrowing (any of 10-14)
+mod:c13_unchecked_cast_truncates_bits;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
+func:vu32 = uint32(uint32:x) never fails { pass x; };
+func:vu64 = uint64(uint64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(300i32);
+    if ((a =>! uint8) != 44u8) { exit 10i32; }
+    int32:m = raw v32(-1i32);
+    if ((m =>! uint32) != 4294967295u32) { exit 11i32; }
+    uint32:u = raw vu32(4294967295u32);
+    if ((u =>! int32) != -1i32) { exit 12i32; }
+    int64:c = raw v64(-129i64);
+    if ((c =>! int8) != 127i8) { exit 13i32; }
+    uint64:w = raw vu64(4294967297u64);
+    if ((w =>! uint32) != 1u32) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,43 @@
+// M10 x01_cast_binds_tighter_than_negation -- `-m => int64` with m the int32 minimum
+// claim: Cast (level 4) binds tighter than unary minus (level 5): `-m => int64` is `-(m => int64)`.
+// ref: meta/specs/OP_REFERENCE.md:18  "| 4 | Cast | `=>` `=>!` |"
+// ref: meta/specs/OP_REFERENCE.md:19  "| 5 | Unary | `!` `~` `-` `@` `<-` `$$i` `$$m` |"
+// expect: run:0
+// wrong: `(-m) => int64`: the int32 negation traps (93)
+mod:x01_cast_binds_tighter_than_negation;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:m = raw v32(-2147483647i32) - raw v32(1i32);
+    int64:w = -m => int64;
+    if (w != 2147483648i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

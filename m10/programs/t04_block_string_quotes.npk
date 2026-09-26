@@ -1,0 +1,45 @@
+// M10 t04_block_string_quotes -- a block string holding `"` and `""`
+// claim: A block string ends at the FIRST `"""`; a `"` or `""` inside the body is body text; newlines are preserved verbatim.
+// ref: meta/specs/LEXICAL_REFERENCE.md:366  "BlockStringLiteral ::= '"""' (SourceCharacter - '"""')* '"""'"
+// ref: meta/specs/LEXICAL_REFERENCE.md:378  "or a `""` inside the body is body text, as the production says (the lexer closed on"
+// expect: run:0
+// wrong: the literal closed at `""` (DEF-98's shape: a parse error, or 11)
+mod:t04_block_string_quotes;
+
+func:main = int32(cstring[]:_~argv) {
+    string:a = """ab"c""";
+    if (string_byte_length(a) != 4i64) { exit 10i32; }
+    string:b = """a""b""";
+    if (string_byte_length(b) != 4i64) { exit 11i32; }
+    string:c = """x
+y""";
+    if (string_byte_length(c) != 3i64) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

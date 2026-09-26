@@ -1,0 +1,43 @@
+// M10 x05_ternary_evaluates_one_branch -- `is (d != 0) : 100 / d : 7` with d = 0
+// claim: A ternary's branches are evaluated under their conditions: only the chosen one runs.
+// ref: meta/specs/VERIFICATION_REFERENCE.md:68  "> right-hand side of `&&`/`||` and a ternary's branches under theirs. An"
+// ref: meta/specs/TYPE_REFERENCE.md:2101  "| `is (cond) : then : else` | ternary/conditional | `select i1 %cond, %then, %else` | NOT `? :` syntax |"
+// expect: run:0
+// wrong: both branches evaluated, as a `select` would: the division traps (97)
+mod:x05_ternary_evaluates_one_branch;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:d = raw v32(0i32);
+    int32:r = is (d != 0i32) : 100i32 / d : 7i32;
+    if (r != 7i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

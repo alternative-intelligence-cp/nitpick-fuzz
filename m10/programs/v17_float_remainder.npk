@@ -1,0 +1,44 @@
+// M10 v17_float_remainder -- `flt64` `%`
+// claim: Float `%` is `frem`, lowered to the floor's exact `fmod`: the result takes the dividend's sign.
+// ref: meta/specs/TYPE_REFERENCE.md:182  "(`frem` lowers to the runtime floor's hand-written, exact `fmod`/`fmodf`)"
+// expect: run:0
+// wrong: a floored remainder 0.5 (11), or a trap on the zero divisor (97)
+mod:v17_float_remainder;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:b = raw vf64(2.0f64);
+    if ((raw vf64(5.5f64) % b) != 1.5f64) { exit 10i32; }
+    if ((raw vf64(-5.5f64) % b) != -1.5f64) { exit 11i32; }
+    flt64:c = raw vf64(5.0f64) % raw vf64(0.0f64);
+    if (!(c != c)) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

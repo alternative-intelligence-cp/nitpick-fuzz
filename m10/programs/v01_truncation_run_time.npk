@@ -1,0 +1,46 @@
+// M10 v01_truncation_run_time -- `/` and `%` on negative int32 operands at run time
+// claim: Signed `/` is `sdiv` and `%` is `srem`: the quotient truncates toward zero and the remainder takes the dividend's sign.
+// ref: meta/specs/TYPE_REFERENCE.md:2035  "| `/` | divide | `sdiv`/`fdiv` | div-by-zero → failsafe |"
+// ref: meta/specs/TYPE_REFERENCE.md:2036  "| `%` | remainder | `srem`/`frem` | |"
+// expect: run:0
+// wrong: floor division: -4 (10, 11) and a divisor-signed remainder 1 / -1 (12, 13)
+mod:v01_truncation_run_time;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:a = raw v32(-7i32);
+    int32:b = raw v32(2i32);
+    if ((a / b) != -3i32) { exit 10i32; }
+    if ((raw v32(7i32) / raw v32(-2i32)) != -3i32) { exit 11i32; }
+    if ((a % b) != -1i32) { exit 12i32; }
+    if ((raw v32(7i32) % raw v32(-2i32)) != 1i32) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

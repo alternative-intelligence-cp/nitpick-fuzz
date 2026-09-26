@@ -1,0 +1,47 @@
+// M10 t06_slice_out_of_range -- `string_slice` with lo > hi, hi > len, or lo < 0
+// claim: A slice out of range is an error (the floor's code -34), not a clamp.
+// ref: meta/specs/BUILTIN_REFERENCE.md:274  "reuse that vocabulary — an interior NUL is −22, a slice out of range −34 — and"
+// ref: meta/specs/BUILTIN_REFERENCE.md:240  "| `string_slice` | `(string, int64:lo, int64:hi) → Result<string>` | Byte-indexed, half-open"
+// expect: run:0
+// wrong: a clamped or empty success (the check's code), or a read past the end
+mod:t06_slice_out_of_range;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = "hello";
+    Result<string>:a = string_slice(s, raw v64(3i64), raw v64(1i64));
+    if (!a.is_error) { exit 10i32; }
+    Result<string>:b = string_slice(s, raw v64(0i64), raw v64(6i64));
+    if (!b.is_error) { exit 11i32; }
+    Result<string>:c = string_slice(s, raw v64(-1i64), raw v64(2i64));
+    if (!c.is_error) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,44 @@
+// M10 m04_unsigned_ordering_folded -- unsigned comparisons folded as constants
+// claim: The folder orders an unsigned type UNSIGNED.
+// ref: meta/specs/OP_REFERENCE.md:163  "a `uint64` divides, takes remainders, shifts right and orders UNSIGNED;"
+// expect: run:0
+// wrong: a signed fold (the check's code)
+mod:m04_unsigned_ordering_folded;
+
+fixed bool:B1 = 200u8 > 100u8;
+fixed bool:B2 = ~0u64 > 1u64;
+fixed bool:B3 = 4294967295u32 < 7u32;
+
+func:main = int32(cstring[]:_~argv) {
+    if (!B1) { exit 10i32; }
+    if (!B2) { exit 11i32; }
+    if (B3) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

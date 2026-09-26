@@ -1,0 +1,44 @@
+// M10 t05_slice_half_open -- `string_slice` of [1, 3) and of an empty range
+// claim: `string_slice(s, lo, hi)` is byte-indexed and half-open, an owned copy; an empty slice is empty.
+// ref: meta/specs/BUILTIN_REFERENCE.md:240  "| `string_slice` | `(string, int64:lo, int64:hi) → Result<string>` | Byte-indexed, half-open"
+// expect: run:0
+// wrong: an inclusive end, "ell" (10), or an error for the empty slice (11)
+mod:t05_slice_half_open;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = "hello";
+    string:t = string_slice(s, raw v64(1i64), raw v64(3i64)) ?| "X";
+    if (!(string_equals(t, "el"))) { exit 10i32; }
+    string:u = string_slice(s, raw v64(5i64), raw v64(5i64)) ?| "X";
+    if (u.len != 0i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

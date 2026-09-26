@@ -1,0 +1,44 @@
+// M10 r04_emphatic_unwrap_error -- `f() ?! E2` where `f` fails with `E1`
+// claim: `?!` calls failsafe with its one argument, an Error constant.
+// ref: meta/specs/OP_REFERENCE.md:255  "| `?!` | Emphatic Unwrap | Unwraps a Result. If error, calls `failsafe(err)`. **Takes exactly one argument**, an `Error` constant"
+// expect: run:82
+// wrong: failsafe given the callee's E1 (81), or no trap (the value)
+mod:r04_emphatic_unwrap_error;
+
+error:E1;
+error:E2;
+func:f = int32() { fail E1; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:v = f() ?! E2;
+    exit v;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

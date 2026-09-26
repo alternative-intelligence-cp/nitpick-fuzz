@@ -1,0 +1,44 @@
+// M10 d15_safe_navigation_on_empty -- `?.` through an empty and a holding Optional
+// claim: `?.` yields an empty Optional when its operand is empty, and the field wrapped when present.
+// ref: meta/specs/TYPE_REFERENCE.md:1239  "`?.` yields `zeroinitializer` of the result type when empty and wraps"
+// ref: meta/specs/TYPE_REFERENCE.md:1256  "| `a?.f` | the field, still wrapped |"
+// expect: run:0
+// wrong: the empty Optional's zeroed field read as present, 0 (exit 10)
+mod:d15_safe_navigation_on_empty;
+
+struct:Pt = { int32:x; int32:y; };
+
+func:main = int32(cstring[]:_~argv) {
+    Pt?:o = NIL;
+    Pt?:q = Pt{ x: 3i32, y: 4i32 };
+    if ((o?.x ?? 9i32) != 9i32) { exit 10i32; }
+    if ((q?.y ?? 9i32) != 4i32) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

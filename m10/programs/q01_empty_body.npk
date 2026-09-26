@@ -1,0 +1,41 @@
+// M10 q01_empty_body -- an empty body declared to return int64
+// claim: A body that can reach its own closing brace is refused (FLOW-001).
+// ref: meta/specs/CONTROL_REFERENCE.md:334  "*   **Every path of a function body ends in one of these, or in `exit` (in"
+// expect: refuse:NITPICK-FLOW-001   (at the baseline: run:10)
+// wrong: accepted: the empty body returns 0 (exit 10)
+mod:q01_empty_body;
+
+func:f = int64() never fails {
+};
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw f() != 5i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

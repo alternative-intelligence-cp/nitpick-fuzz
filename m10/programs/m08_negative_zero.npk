@@ -1,0 +1,44 @@
+// M10 m08_negative_zero -- `-(0.0)`
+// claim: Float negation is `fneg`: -(0.0) is -0.0, equal to 0.0 and of negative sign.
+// ref: meta/specs/TYPE_REFERENCE.md:186  "- Negation is `fneg` (sign-bit exact: `-(0.0)` is `-0.0`)"
+// expect: run:0
+// wrong: negation as `0.0 - x` gives +0.0, so 1/-0.0 is +inf (exit 11)
+mod:m08_negative_zero;
+
+func:vf64 = flt64(flt64:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt64:z = raw vf64(0.0f64);
+    flt64:nz = -z;
+    if (!(nz == z)) { exit 10i32; }
+    flt64:inv = raw vf64(1.0f64) / nz;
+    if (!(inv < raw vf64(0.0f64))) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

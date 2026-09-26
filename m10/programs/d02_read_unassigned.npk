@@ -1,0 +1,41 @@
+// M10 d02_read_unassigned -- a read of a binding declared without a value
+// claim: Definite assignment refuses a read before any write.
+// ref: meta/specs/TYPE_REFERENCE.md:711  "Definite-assignment analysis rejects"
+// ref: meta/specs/DECISIONS.md:714  "compile time any path that reads a variable before writing it**. That guarantee is"
+// expect: refuse
+// wrong: accepted: `x` reads 0 (exit 10) or garbage (11)
+mod:d02_read_unassigned;
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x;
+    int32:y = x + 1i32;
+    if (y == 1i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

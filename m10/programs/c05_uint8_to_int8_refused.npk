@@ -1,0 +1,42 @@
+// M10 c05_uint8_to_int8_refused -- `uint8 => int8`
+// claim: `uint8 => int8` loses 128..255 and is refused (range containment, not type families).
+// ref: meta/specs/DECISIONS.md:6691  "A conversion is lossless when every value of the source type is representable"
+// expect: refuse
+// wrong: accepted: 200 silently becomes -56 (exit 10)
+mod:c05_uint8_to_int8_refused;
+
+func:vu8 = uint8(uint8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    uint8:a = raw vu8(200u8);
+    int8:n = a => int8;
+    if (n < 0i8) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

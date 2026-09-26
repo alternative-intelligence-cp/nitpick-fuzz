@@ -1,0 +1,42 @@
+// M10 t12_to_cstring_interior_nul -- `to_cstring` of a string with an interior NUL
+// claim: `to_cstring` fails on an interior NUL (the floor's code -22).
+// ref: meta/specs/TYPE_REFERENCE.md:404  "**`to_cstring` fails on an interior NUL.** A `string` may contain `0u8` anywhere;"
+// ref: meta/specs/BUILTIN_REFERENCE.md:274  "reuse that vocabulary — an interior NUL is −22, a slice out of range −34 — and"
+// expect: run:0
+// wrong: a silent truncation at the NUL (exit 10): the poison-NUL bypass
+mod:t12_to_cstring_interior_nul;
+
+func:main = int32(cstring[]:_~argv) {
+    Result<cstring>:r = to_cstring("a\0b");
+    if (!r.is_error) { exit 10i32; }
+    Result<cstring>:q = to_cstring("abc");
+    if (q.is_error) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

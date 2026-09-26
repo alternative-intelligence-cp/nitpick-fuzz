@@ -1,0 +1,44 @@
+// M10 o22_simd_lane_overflow -- an int32 `simd` lane `+` past the maximum
+// claim: A `simd`'s integer lanes trap as their scalar does.
+// ref: meta/specs/TYPE_REFERENCE.md:59  "A `simd`'s integer lanes go through the vector form `.<N x iW>`, the"
+// ref: meta/specs/OP_REFERENCE.md:145  "scalar does since 1.5.4e (D-284)"
+// expect: run:93
+// wrong: the lane wraps to a negative value (exit 10), DEF-38's shape
+mod:o22_simd_lane_overflow;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    simd<int32, 4>:v = simd(raw v32(2147483647i32), 1i32, 2i32, 3i32);
+    simd<int32, 4>:w = simd(1i32, 1i32, 1i32, 1i32);
+    simd<int32, 4>:s = v + w;
+    if (s[0i64] < 0i32) { exit 10i32; }
+    exit 11i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
