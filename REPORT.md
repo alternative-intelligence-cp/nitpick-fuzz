@@ -43,6 +43,32 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
     F-007), a claim rule not enforced (F-008), and two lower-priority
     over-restrictions.
   - **Seven of the eight are present at the baseline too.**
+- **M10, silent wrong answers (section 11).**
+  - **The checklist:** 229 items from the references. Each carries the
+    sentence that states its answer and an expectation written from that
+    text before any run. 223 are testable, with a program each; 6 cannot be
+    tested from the text, each with its reason.
+  - **At HUNT2:** 212 agree and 11 disagree. At the baseline 210 agree, and
+    the two more that disagree are known (DEF-101, DEF-98). The DEF-108 recall
+    holds: the four shapes are flagged at the baseline and refused
+    `FLOW-001` at HUNT2.
+  - **The disagreements are seven findings, all present at the baseline and
+    at the compiler's newest `main` (`9f6f370`):**
+    - **F-011**: a `for` binding outlives its loop in the emitter. A later
+      use of an outer binding of the same name reads the loop's slot: a
+      silent wrong value, and with an array outer binding an out-of-bounds
+      stack read that differs between -O0 and -O2.
+    - **F-012**: a `for` range runs zero times at its type's edges: a signed
+      inclusive range ending at the maximum, and an unsigned range across
+      the sign bit.
+    - **F-013**: `loop`/`till` sign-extend an unsigned bound. `loop(100u8,
+      200u8, 1u8)` runs 156 times downward.
+    - **F-014**: `till` with a negative limit counts down, where the
+      reference says zero trips.
+    - **F-015** and **F-016**: `<=>` and a negative range pattern are refused
+      by the emitter (`EMIT-002`).
+    - **F-017**: seven reference sentences the compiler contradicts
+      (documentation findings).
 
 ## 1. The two compilers
 
@@ -745,4 +771,256 @@ python3 gen/dedup9.py results/9126350/ --fixed DEF-99 DEF-102 DEF-104 DEF-105 DE
 python3 gen/recall9.py results/c3bdae2/  # the recall gate
 python3 gen/run_findings.py F-003 F-004 F-005 F-006 F-007 F-008 F-009 F-010 --hunt .work/hunt2 --base .work/base --heap
 python3 gen/snip.py FILE.npk --heap      # one program, both compilers, both legs
+```
+
+## 11. M10 — silent wrong answers
+
+Written 2026-09-26 by session 5, on a fresh 4-vCPU cloud VM. Every number is
+measured by the committed scripts. The records are:
+- `m10/CHECKLIST.md` (the checklist) and `m10/RESULTS.md` (its results);
+- `results/<commit>/m10.jsonl`, with run 1 as `m10-run1.jsonl`;
+- `findings/F-011` … `F-017`, each with `VERDICTS.txt` and
+  `VERDICTS-9f6f370.txt`.
+
+The build record is in `PROGRESS.md`'s M10 section. **A silent wrong answer
+counts as a defect** (`CLAUDE.md`, the author's rule of 2026-09-26): an
+accepted program whose result differs from what the reference says, with no
+memory error.
+
+### 11.1 The compilers
+
+- **The baseline `c3bdae2` and HUNT2 `9126350`** were rebuilt by M0's commands,
+  byte-identical to sessions 3 and 4, with the commissioning check and the
+  canaries passing.
+- **The machine checks.** The M2 grid re-run on this VM is identical to the
+  committed records in 956 of 956 cells at each compiler. The recall suite
+  (`known/`, 25 programs since M9's merge) gives `KNOWN_DEFECTS.md`'s verdicts
+  in every row (`results/<commit>/known-m10.txt`).
+- **The compiler's newest `main`.** It moved during the session: `b564746` at
+  11:57 UTC (1.6.1 step 0c, DEF-116's fix), then `9f6f370` at 12:29 (a record
+  commit). HUNT2 stays `9126350`, the compiler PLAN.md 10.2 names (S32).
+- `9f6f370` was built as well (88.9 s; `npkc.ll` 28 872 365 bytes, sha256
+  `7bab110a1e45cc9d…`; canaries pass), but only to say whether each finding is
+  still there (S37). No checklist verdict is taken from it.
+
+### 11.2 The checklist (10.1)
+
+`gen/m10.py` holds the checklist.
+- **229 items in 17 areas**: PLAN.md 10.1's eleven features, plus shifts,
+  precedence and evaluation, arrays and slices, floats, `exit`, and 10.3's
+  DEF-108 recall.
+- **Each item carries:**
+  - the claim, in one sentence;
+  - one or more quoted reference sentences;
+  - the expected verdict, written from that text;
+  - what an implementation that gets the claim wrong would answer, so every
+    program is a case the wrong implementation gets wrong.
+- **The citations are located by their text, not typed as line numbers.** All
+  320 resolve to exactly one line of HUNT2's reference.
+- **The same quotes were looked up at the baseline.** They are absent there
+  only where the text changed since: FLOW-001's paragraph, the tag-only
+  enum's cast, and the block string's closing sentence. For those items each
+  compiler is held to its own reference's text (S33).
+- **Sources read for it, at HUNT2:**
+  - OP, CONTROL and BUILTIN_REFERENCE whole;
+  - TYPE_REFERENCE §1–4, §6, §9–11 and §26–28;
+  - LEXICAL_REFERENCE §5–6;
+  - VERIFICATION_REFERENCE §1.2's `pick` and path-condition model;
+  - SAFETY_ARCHITECTURE's `--extra-picky` table;
+  - the decisions those cite (D-010, D-022, D-060, D-092, D-093, D-095,
+    D-136, D-139, D-148, D-225, D-234, D-306).
+
+**The program convention** (S34):
+- exit 0 is the reference's answer, and 10–59 name the check that saw a wrong
+  value;
+- a trap exits its `failsafe` arm: the grid's codes plus `ShiftRange` 111,
+  `CastRange` 112 and `BadStep` 113;
+- a run-time value goes through a `never fails` identity function, so the
+  compiler's folder cannot evaluate it;
+- a folded value is a module `fixed` initialiser;
+- where the reference speaks of both ("a constant expression means what the
+  run time means"), there is an item for each.
+
+**The expectations were committed before any program ran** (`a19c821`, S36).
+
+### 11.3 The runs (10.2)
+
+223 programs at each compiler, both legs, 4 jobs: about 25 s per compiler.
+
+**Two programs were re-spelled after run 1, their expectations unchanged**
+(S36):
+- `m12` compared tbb values with `>`: ordering on tbb is refused (D-093);
+- `d16` wrote fields directly into a struct declared without a value: refused
+  by D-010, while D-225's `$$m` idiom is the one it serves.
+
+Run 2 is identical to run 1 in the other 221 programs at both compilers, so
+every verdict below was measured twice.
+
+| | HUNT2 `9126350` | baseline `c3bdae2` |
+|---|---|---|
+| items | 229 | 229 |
+| testable (a program each) | 223 | 223 |
+| **agreeing** with the reference | **212** | **210** |
+| **disagreeing** | **11** | **13** |
+| … a program the text refuses, accepted | 1 | 2 |
+| … a program the text admits, refused | 5 | 6 |
+| … refused with another code | 1 | 1 |
+| … a wrong exit on both legs | 4 | 4 |
+| untestable, with a reason | 6 | 6 |
+
+The baseline's two extra are known: DEF-101 (`c18`: its reference called
+`intN =>! enum` impossible, and its compiler accepts it) and DEF-98 (`t04`: a
+block string holding `""`).
+
+**Every disagreement is accounted for** (`m10/RESULTS.md`), and nothing is
+left unclassified:
+- **4 items are silent wrong answers**: F-011, F-012 (two items), F-014;
+- **2 are emitter refusals**: F-015, F-016;
+- **5 are documentation findings** (F-017).
+
+**Three items agreed and settled which of two contradicting sentences is
+stale:**
+- `!=` on floats is `une`;
+- the ternary branches rather than `select`s;
+- `int128` traps.
+
+Those are F-017 d3–d5.
+
+**By area.** Defaults and zero values (16), overflow (22), shifts (9), `when`
+and `defer` (12), `Result` (10), precedence (7), arrays and slices (9), floats
+(3) and `exit` (3) agree in every item at both compilers. The disagreements
+fall in loops (4), strings (3), division (1), comparisons (1), `pick` (1) and
+shadowing (1).
+
+### 11.4 The DEF-108 recall (10.3)
+
+| shape | M10 item | baseline `c3bdae2` | HUNT2 `9126350` |
+|---|---|---|---|
+| an empty body | `q01` | 0 / 10 / 10: returns 0 | refused `FLOW-001` |
+| a missing path, `never fails` | `q02` | 0 / 10 / 10: returns 0 | refused `FLOW-001` |
+| a fallible function's missing path | `q03` | 0 / 12 / 12: a success carrying 0 | refused `FLOW-001` |
+| `main` without `exit` | `q04` | 0 / 0 / 0: falls off, exits 0 | refused `FLOW-001` |
+| a `string` / `bool` function's missing path | `q05`, `q06` | 0 / 10 / 10: `""`, `false` | refused `FLOW-001` |
+| a `NIL` function falling off | `q07` | 0 / 0 / 0 | refused `FLOW-001` |
+| a `for` as the last statement, passing inside | `q11` | 0 / 0 / 0 | refused `FLOW-001` (loops complete as a whole) |
+| controls: `while (true)` passing inside; an `if`/`else` and a `pick` whose arms all pass | `q08`–`q10` | 0 / 0 / 0 | 0 / 0 / 0 (not refused) |
+
+`known/def108_fall_off/`'s two cases give the same: 0/10/10 and 0/12/12 at
+the baseline, `FLOW-001` at HUNT2, with the control 0/0/0 at both. **So the
+recall holds:** every DEF-108 shape the plan names is flagged at the
+baseline, where it answers a zero value, and refused `FLOW-001` at HUNT2.
+The flow rule's three stated exceptions are not over-refused.
+
+### 11.5 The findings
+
+Each was taken through M5's five steps:
+- deduplicated against `KNOWN_DEFECTS.md` (none is known);
+- written small with its controls;
+- confirmed twice at HUNT2 on both legs (the runs agree);
+- run at the baseline;
+- run at `9f6f370`.
+
+**Every finding is present at all three compilers with the same verdicts: old
+defects, not regressions.**
+
+| finding | shape | class | HUNT2 `9126350` = baseline = `9f6f370` |
+|---|---|---|---|
+| [F-011](findings/F-011-for-binding-outlives-loop/) | a `for` binding outlives its loop in the emitter: after `int64:i = 100; for (int64:i in 0...3) {…}`, `i` reads the loop's slot | silent wrong value; **out-of-bounds read**; invalid IR | same type 0/**10**/**10** (reads 3); an outer `int32[4]` read at [3] 0/**11**/**10** (past a 4-byte slot, the legs differ); an outer `string`: npkc 0, `llc`/`opt` reject the IR |
+| [F-012](findings/F-012-for-range-head-signed-and-wrapping/) | a `for` range runs zero times at its type's edges | silent wrong answer | `int8 125..127`, `0..127`, int32/int64 `…..max`: 0 trips; `uint8 100..200`, `100...200`, uint32 across 2^31: 0 trips (0/**10**/**10** each) |
+| [F-013](findings/F-013-counted-loop-unsigned-bound-sign-extended/) | `loop`/`till` sign-extend an unsigned bound | silent wrong answer; a spurious trap | `loop(100u8, 200u8, 1u8)`: 156 trips, `$` 100 → -55; `till(200u8, 1u8)`: 56 trips, `$` 0 → -55; a uint32 `loop` across 2^31: `IntOverflow` (93) |
+| [F-014](findings/F-014-till-negative-limit-counts-down/) | `till` with a negative limit counts down | silent wrong answer | `till(-3, 1)`: 3 trips, `$` 0, -1, -2, where the reference says zero |
+| [F-015](findings/F-015-spaceship-not-lowered/) | `<=>` refused by the emitter | the compiler's `EMIT-002` (lower priority) | 1, `EMIT-002`, even for `1i32 <=> 2i32` |
+| [F-016](findings/F-016-negative-range-pattern-not-lowered/) | a `pick` range pattern with a negative bound refused by the emitter; where DEF-35's fix did not reach | the compiler's `EMIT-002` (lower priority) | 1, `EMIT-002`; `(-3i32)` and `(2i32..5i32)` compile |
+| [F-017](findings/F-017-reference-sentences-the-compiler-contradicts/) | seven reference sentences the compiler contradicts | documentation | d1 `s.length` → `TYPE-019`; d2 `s[i]` → `TYPE-007`; d3 §28's `fcmp one` (it is `une`); d4 §28's ternary `select` (it branches); d5 §4's wrapping wide integers (they trap); d6 `TYPE-033` (it is `TYPE-007`); d7 a local constant `/ 0` accepted, trapping at run time |
+
+**How they were found.**
+- The checklist pointed at F-011 (`h02`), F-012 (`l06`, `l08`), F-014
+  (`l11`), F-015 (`m06`), F-016 (`p05`) and F-017. The emitted IR and probes
+  then measured each shape's extent.
+- F-013 and F-012's unsigned face were found by probes that followed the IR:
+  its loop tests are `icmp slt` for every type, and a counted loop's bounds
+  are widened by `sext`.
+- The checklist's own unsigned item (`l07`, `250..255`) agreed by a
+  coincidence F-012's third control explains. *Inferred:* an item at one
+  edge is not enough, and the crossing needs its own item.
+
+**The mechanisms, read from HUNT2's `src/backend/ir/ir_stmt.npk`, not
+measured:**
+- `emit_for` binds its loop variable with `fnem_local` in the enclosing scope
+  (F-011);
+- its range head is the literal text `icmp slt`, and the inclusive range
+  arrives as an unchecked `hi + 1` (F-012);
+- `loop_i64` widens a counted loop's bounds with `sext`, whatever their
+  signedness (F-013);
+- `emit_counted` infers a direction for `till` as for `loop` (F-014).
+
+Each finding's README keeps what was measured apart from what was read.
+
+### 11.6 What the checklist does not cover
+
+- **The six untestable items** (`m10/RESULTS.md`): no sentence states the
+  answer for
+  - a vacant `OwnedFd`'s conversion;
+  - `?|`'s laziness;
+  - a same-scope redeclaration;
+  - a float's text;
+  - `k =>! Enum` for a value that is no tag;
+  - the library's `**`.
+- **Items that rest on inference rather than a stated sentence**, marked in
+  `CHECKLIST.md`:
+  - shadowing's default (`h01`–`h04`), read from SAFETY_ARCHITECTURE's
+    optional rule;
+  - an empty inclusive range `3..1`;
+  - `loop`'s steps other than 1;
+  - an unwritten field (`d11`);
+  - `bool` ordering;
+  - left associativity.
+
+  Each is a reading of the text, and two of those readings found defects
+  (F-011's `h02`, and F-014 through the stated table).
+- **Reference text not read for this milestone:** TYPE_REFERENCE §5, §7, §8
+  and §12–25 (`tfp`, `dim256`, the ternary kinds, flags, arenas, atomics,
+  `simd` beyond one item, `dyn`, `frac`, `complex`, `buffer`), and MEMORY,
+  MODULE, TRAITS, IO, MACRO, CONCURRENCY, BUILD, AST and most of
+  VERIFICATION. That is M11's reading, every normative claim of every
+  reference.
+- **Features with no item:**
+  - generics and traits;
+  - closures and function values;
+  - `async`, threads and channels;
+  - formatting beyond integers;
+  - `Optional` beyond `??`/`?.`;
+  - enums with payloads;
+  - the verified build (`prove`, contracts, `limit`), whose meaning is a
+    solver's verdict and not an exit code.
+- **The observer is the exit code.** An item sees a wrong value only where its
+  checks compare it. A wrong value no check reads, a leak (M9's observer was
+  not used here), or a trap routed to the right code for the wrong reason is
+  not seen. F-011's out-of-bounds WRITE was probed and not seen to corrupt a
+  live local, which is a limit of the observer, not evidence that nothing is
+  overwritten.
+
+### 11.7 Cost, for calibration (the cloud VM, 4 jobs)
+
+| step | time |
+|---|---|
+| LLVM 20.1.2 fetch, test and extract | 383 s (the download 15 s) |
+| the two compiler builds | 90.8 s and 91.7 s (and `9f6f370`, 88.9 s) |
+| the M2 grid at both compilers (the machine check) | 73 s and 78 s |
+| the checklist, 223 programs | 25–26 s per compiler per run, four runs |
+| the findings' programs (46), HUNT2 twice and the baseline once | 67 s (the two runs at `9f6f370` were not timed) |
+
+The session started at 11:57 UTC. `PROGRESS.md`'s log records its last
+commit. Nearly all of the session went into reading the references and
+writing the checklist; compute was under 15 minutes.
+
+### 11.8 Reproducing
+
+```
+python3 gen/m10.py                       # m10/programs/, EXPECT.tsv, CHECKLIST.md (--refs-only: the citations at both compilers)
+python3 gen/m10_run.py .work/hunt2       # results/9126350/m10.jsonl, one named line per program
+python3 gen/m10_run.py .work/base        # results/c3bdae2/m10.jsonl
+python3 gen/m10_report.py                # m10/RESULTS.md, the denominators and every disagreement
+python3 gen/run_findings.py F-011 F-012 F-013 F-014 F-015 F-016 F-017 --hunt .work/hunt2 --base .work/base
+python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cases among it
 ```

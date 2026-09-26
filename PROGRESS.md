@@ -33,11 +33,14 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 9.3 types, 9.4 places, 9.5 operations (sections B–E of `gen/grid9.py`)
   - [x] 9.6 the recall gate kept: every known shape flagged at the baseline; every expectation written in the generator before the first run
   - [x] 9.7 the grid at the baseline and HUNT2, triaged by M5's five steps; `REPORT.md` §10; stop (M10 waits for the author)
-- [ ] **M10** — silent wrong answers (session 5)
+- [x] **M10** — silent wrong answers (session 5): 229 items, 223 testable; at HUNT2
+  212 agree and 11 disagree; the DEF-108 recall holds; seven findings (F-011–F-017),
+  four of them silent wrong answers and one an out-of-bounds read, all present at
+  the baseline and at the compiler's newest `main`
   - [x] 10.1 the checklist (`m10/CHECKLIST.md`, `gen/m10.py`): 229 items, 223 testable and 6 untestable with reasons, each citing the reference sentence located by its text at both compilers
-  - [ ] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
-  - [ ] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
-  - [ ] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
+  - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
+  - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
+  - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
 
 ## Compilers
 
@@ -46,6 +49,7 @@ committed. A session that starts here resumes at the first unticked box.
 | baseline | `c3bdae2` (`c3bdae270d63c93ab6e89825fddeec9425e2c6fd`), 2026-09-25 07:06:41 -0400 | 1.5.8d steps 1-3: the close of cycle 1.5 | 28 111 929 / `4029fc70efbe9cd3…` | 67 s |
 | hunt | `6fb85d3` (`6fb85d3d834fb7d5568ab996005f800d6d269e8f`), 2026-09-25 18:25:47 -0400 | 1.6.0 step 3f: DEF-99 — `NITPICK-TYPE-084` refuses the move out of `fixed` | 28 132 333 / `25eb7ee168604005…` | 69 s |
 | HUNT2 (M8) | `9126350` (`9126350d11d12d20bbcc087dc261405bf2729f29`), 2026-09-26 03:42:01 -0400 | 1.6.1 step 0, the NIKOS half (D-324) — docs and `meta/roadmap/1.6/` tools over `2eea6f4` (1.6.1 step 0: DEF-107, `NITPICK-BORROW-015`) | 28 857 206 / `2448b3b60d9eb189…` | 75.8 s |
+| newest `main` (M10, findings only; S37) | `9f6f370`, 2026-09-26 06:04:05 -0400 | 1.6.1 step 0c, the record of S-107's and S-108's approval — over `b564746` (1.6.1 step 0c: DEF-116, `NITPICK-TYPE-014`; DEF-117) | 28 872 365 / `7bab110a1e45cc9d…` | 88.9 s |
 
 Other build products (M0.5):
 
@@ -809,6 +813,90 @@ Canaries (M0.6), at both compilers: `canary.npk` gives npkc 0 and runs 0/0, and
   case the wrong implementation gets wrong.
 - **The expectations are committed before the first run** (S36).
 
+**10.2 — the runs** (`gen/m10_run.py`; `results/<commit>/m10.jsonl`, with run 1 as
+`m10-run1.jsonl`). 223 programs per compiler, both legs, 4 jobs, 25–26 s each.
+- **Run 1:** HUNT2 210 agree and 13 disagree; the baseline 208 and 15.
+- **Two programs were re-spelled** (S36):
+  - `m12`: `>` on tbb is refused, since ordering on tbb is a compile error
+    (D-093), so it compares with `==`;
+  - `d16`: a direct field write into a struct declared without a value is
+    refused (D-010), so it uses D-225's `$$m` idiom.
+- **Run 2:** HUNT2 **212 agree, 11 disagree**; the baseline **210 and 13**. The
+  other 221 programs' records are identical between the runs at both compilers,
+  so every verdict was measured twice.
+- **The baseline's two extra disagreements are known:**
+  - DEF-101 (`c18`): its reference called `intN =>! enum` impossible, and its
+    compiler accepts it;
+  - DEF-98 (`t04`).
+- `m10/RESULTS.md` (by `gen/m10_report.py`) classifies every disagreement,
+  leaving none unclassified.
+
+**10.3 — the DEF-108 recall holds.**
+- The four shapes the plan names, and `string`, `bool`, `NIL` and a trailing
+  `for`, are flagged at the baseline: they compile and answer a zero value
+  (10, 12, or a silent exit 0).
+- At HUNT2 they are refused `FLOW-001` (`q01`–`q07`, `q11`).
+- The rule's three stated exceptions are not over-refused at either compiler
+  (`q08`–`q10`).
+- `known/def108_fall_off/` agrees.
+
+**The triage** (M5's five steps; `findings/F-011` … `F-017`). Every finding was:
+- deduplicated against `KNOWN_DEFECTS.md` (none is a known shape);
+- written small, with controls that give the reference's answer;
+- confirmed twice at HUNT2 on both legs (`gen/run_findings.py`: the runs agree);
+- run at the baseline;
+- run twice at the compiler's newest `main` `9f6f370` (S37).
+
+**All seven are present at all three compilers with the same verdicts: old
+defects, not regressions.**
+
+| finding | shape | class | the measurement (HUNT2 = baseline = `9f6f370`) |
+|---|---|---|---|
+| F-011 | a `for` binding outlives its loop in the emitter; a later use of an outer binding of the same name reads the loop's slot | **silent wrong value; an out-of-bounds read**; invalid IR | same type: `i` reads 3, not 100 (0/10/10); an outer `int32[4]`: `v[3]` reads past the loop's 4-byte slot, 0/**11**/**10** (the legs differ); an outer `string`: npkc 0, `llc`/`opt` reject |
+| F-012 | a `for` range runs zero times: a signed inclusive range ending at the maximum; an unsigned range across 2^(W-1) | **silent wrong answer** | 7 programs, each 0 trips (0/10/10) |
+| F-013 | `loop`/`till` sign-extend an unsigned bound | **silent wrong answer**; a spurious trap | `loop(100u8, 200u8, 1u8)`: 156 trips down to -55; `till(200u8, 1u8)`: 56 trips down; a uint32 `loop`: 93 |
+| F-014 | `till` with a negative limit counts down | **silent wrong answer** | `till(-3, 1)`: 3 trips, 0 … -2, where the reference says zero |
+| F-015 | `<=>` refused by the emitter | `EMIT-002` (lower priority) | even `1i32 <=> 2i32` |
+| F-016 | a negative range pattern refused by the emitter (a gap in DEF-35's fix) | `EMIT-002` (lower priority) | `(-5..-2)`, `(-5..2)`, `(-5...-2)` |
+| F-017 | seven reference sentences the compiler contradicts | documentation | `s.length`, `s[i]`, §28's `fcmp one` and `select`, §4's wrapping, `TYPE-033`, a local constant `/ 0` |
+
+- **How they were found.** The checklist found F-011 (`h02`), F-012 (`l06`,
+  `l08`), F-014 (`l11`), F-015, F-016 and F-017. The emitted IR and probes then
+  mapped each shape. F-013 and F-012's unsigned face came from those probes.
+- **What was read, not measured:** the mechanisms, read from HUNT2's
+  `src/backend/ir/ir_stmt.npk`. They are in each README, apart from what was
+  measured.
+
+**10.4 — `REPORT.md` §11** holds the checklist's denominators (229 items, 223
+testable, 212 agreeing and 11 disagreeing at HUNT2, 210 and 13 at the baseline,
+6 untestable with reasons), the recall, the findings, what the checklist does
+not cover, and the cost.
+
+**The estimate for M11, for the author** (reasoned from this session's measured
+costs, not measured):
+- **Compute is small.** The rebuild on a fresh VM costs about 9 min. A program
+  builds and runs at about 9 per second per compiler at 4 jobs, so even 1 000
+  claims' programs run in under 5 min per compiler.
+- **The work is reading.** M11 extracts every normative claim and code example
+  from every `*_REFERENCE.md` at HUNT2: about 10 400 lines in 14 files.
+  - M10 read about a third of that closely and turned it into 229 items. It
+    covered most of OP, CONTROL, BUILTIN and LEXICAL, and a third of TYPE.
+  - M11's remainder is TYPE §5–8 and §12–25, MEMORY, MODULE, TRAITS, IO, MACRO,
+    CONCURRENCY, BUILD, AST and VERIFICATION. That is plausibly 600–1 200 more
+    claims.
+  - Many will be untestable here: VERIFICATION's solver rows need `npkg verify`
+    and z3; BUILD's `npkg` claims need the package tool; CONCURRENCY's need
+    threads under a schedule. Each is still to be listed with its reason.
+- **Findings are likely.** M10 found a documentation mismatch in roughly one
+  claim in 30, and M9 found three sentences for M11 already (`?`, `cstring`
+  literals, `fd`'s sign).
+- **Overall:** this session ran from 11:57 UTC to its last commit, about 1 h 25
+  min, of which compute was under 15 min. M11 is likely **3–5 hours**, so
+  **two sessions**. Split it by reference: TYPE, MEMORY, MODULE and TRAITS
+  first, reusing `gen/m10.py`'s citation-by-text; then IO, MACRO, BUILD,
+  CONCURRENCY, AST and VERIFICATION, with most solver and toolchain claims
+  listed untestable.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -1091,6 +1179,34 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   something else), only its text changes, never its expectation, and each such fix is
   listed here. This is M2's and M9's practice (S29).
 
+  The two fixes, both after run 1:
+  - `m12`: `a > 0` on a `tbb8` → `a == 0`, since ordering on tbb is a compile
+    error (D-093);
+  - `d16`: direct field writes into `Hs:h;` → D-225's `drop init($$m h);`,
+    since D-010 refuses the first.
+
+  Run 1's records are kept as `results/<commit>/m10-run1.jsonl`.
+- **S37 — a third compiler for the findings only.** The compiler's newest `main`,
+  `9f6f370`, was built in `.work/main9f6` (88.9 s; `npkc.ll` 28 872 365 bytes,
+  sha256 `7bab110a1e45cc9d…`; canaries pass). Each finding's programs were run
+  there twice (`VERDICTS-9f6f370.txt`), so the workbench knows whether a shape
+  still stands at the tree the maintainers work on. This is S23's practice.
+  No checklist verdict is taken from it.
+- **S38 — the documentation findings are one finding, F-017, with a row each.**
+  PLAN.md 10.2 asks for a documentation finding to be "reported the same way,
+  with the reference line". Each of F-017's seven has:
+  - its sentence, file and line;
+  - its program, and a control where one helps;
+  - its verdicts at the three compilers.
+
+  They share a directory because each is one sentence and one program, and
+  none is a wrong answer at run time.
+- **S39 — a finding's program exits 0 on the reference's answer and 10 on the
+  measured wrong one** (11 on anything else). So each program names what it
+  saw, as the grid's observer codes do. The controls exit 0. The one exception
+  is F-016: its programs exit the matched arm's code, 4, which is the
+  reference's answer.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -1155,3 +1271,21 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **10.1.** The checklist: 229 items (223 testable), each citing the reference
     sentence that states its answer. Committed with the programs and their
     expectations before any run (S36).
+  - **10.2.** The 223 programs at both compilers, twice (25–26 s a run). HUNT2:
+    212 agree, 11 disagree. The baseline: 210 and 13, its extra two known
+    (DEF-101, DEF-98). Two programs were re-spelled between the runs, their
+    expectations unchanged (S36).
+  - **10.3.** DEF-108's shapes are flagged at the baseline and refused
+    `FLOW-001` at HUNT2; the rule's exceptions are not over-refused.
+  - **Triage.** Seven findings, each written small with controls, confirmed
+    twice at HUNT2, and run at the baseline and at the compiler's newest `main`
+    `9f6f370` (S37); all present at all three:
+    - F-011, a `for` binding that outlives its loop in the emitter (a silent
+      wrong value, and an out-of-bounds read with -O0 ≠ -O2);
+    - F-012, `for` ranges running zero times at their type's edges;
+    - F-013, counted loops sign-extending unsigned bounds;
+    - F-014, `till` counting down for a negative limit;
+    - F-015 and F-016, two `EMIT-002` refusals;
+    - F-017, seven documentation findings.
+  - **10.4.** `REPORT.md` §11, and the M11 estimate above. M10 done; stopped for
+    the author before M11.
