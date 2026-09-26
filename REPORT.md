@@ -1010,9 +1010,9 @@ Each finding's README keeps what was measured apart from what was read.
 | the checklist, 223 programs | 25–26 s per compiler per run, four runs |
 | the findings' programs (46), HUNT2 twice and the baseline once | 67 s (the two runs at `9f6f370` were not timed) |
 
-The session started at 11:57 UTC. `PROGRESS.md`'s log records its last
-commit. Nearly all of the session went into reading the references and
-writing the checklist; compute was under 15 minutes.
+The session ran from 11:57 UTC to M10's last commit at 12:53: 56 minutes, of
+which about 19 were compute (the rows above, plus probes). The rest went into
+reading the references, writing the checklist, and triage.
 
 ### 11.8 Reproducing
 

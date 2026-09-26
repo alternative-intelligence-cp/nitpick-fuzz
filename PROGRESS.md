@@ -890,12 +890,15 @@ costs, not measured):
 - **Findings are likely.** M10 found a documentation mismatch in roughly one
   claim in 30, and M9 found three sentences for M11 already (`?`, `cstring`
   literals, `fd`'s sign).
-- **Overall:** this session ran from 11:57 UTC to its last commit, about 1 h 25
-  min, of which compute was under 15 min. M11 is likely **3–5 hours**, so
-  **two sessions**. Split it by reference: TYPE, MEMORY, MODULE and TRAITS
-  first, reusing `gen/m10.py`'s citation-by-text; then IO, MACRO, BUILD,
-  CONCURRENCY, AST and VERIFICATION, with most solver and toolchain claims
-  listed untestable.
+- **Overall:** this session ran from 11:57 UTC to M10's last commit at 12:53: 56
+  minutes. About 19 of them were compute: LLVM 6.4 min, three compiler builds
+  4.5, the grid check 2.5, the checklist's four runs 1.7, the findings' runs
+  about 2, and probes. M10 read about a third of the references into 229 items.
+  M11 reads the rest into perhaps 600–1 200 more, so it is likely **2–4
+  hours**: one long session, or two. Split it by reference: TYPE, MEMORY,
+  MODULE and TRAITS first, reusing `gen/m10.py`'s citation-by-text; then IO,
+  MACRO, BUILD, CONCURRENCY, AST and VERIFICATION, with most solver and
+  toolchain claims listed untestable.
 
 ## Environment
 
