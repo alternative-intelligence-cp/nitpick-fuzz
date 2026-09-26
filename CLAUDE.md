@@ -50,6 +50,19 @@ An **accepted** program (the compiler exits 0) that contains no `wild`, no
   **10**-range codes the template defines);
 - or gives a **different exit code at `-O0` and through `opt -O2`**.
 
+**And a SILENT WRONG ANSWER is a defect too — the author's rule, 2026-09-26.**
+An accepted program whose result differs from what the language's reference
+says it must be, with no memory error at all, counts exactly as a
+memory-safety fault does. Examples:
+- a function that falls off its end and returns a zero value (DEF-108);
+- an error path that becomes a success;
+- a write the program never sees;
+- a default value standing in for one never set.
+
+**Never file one as "an observation outside the defect definition".** This
+repository's first run did exactly that with DEF-108, and the author caught it
+by reading the session's reasoning.
+
 Also report, at lower priority: the compiler **crashing** (an exit other than 0
 or 1, or a signal), and a **control refused** — a `.clone()` or a plain read
 that the compiler will not accept.

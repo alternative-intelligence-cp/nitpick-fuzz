@@ -188,7 +188,10 @@ Deduplication, in short:
   fix names; and 2 `generic_param` × `pass_out` `ra`, DEF-104's own cells. No observer sees a memory error in
   them, so they are not defects by `CLAUDE.md`'s definition. Each is a write
   or pass-out through a loan that the stated loan rules say should be refused.
-- **A function with a declared result and no `pass` compiles** and returns a
+- **CONFIRMED A DEFECT AFTER THIS REPORT: DEF-108, `NITPICK-FLOW-001`** — seen by the author in this
+  session's reasoning and ruled a defect by his rule that silent wrong answers count; measured further by
+  the workbench (a fallible function falling off its end returns a SUCCESS carrying zero).
+  **A function with a declared result and no `pass` compiles** and returns a
   zero value (0, or an empty `string`), and `main` without `exit` exits 0. This
   was probed at both compilers (`PROGRESS.md` S16). No reference sentence was
   found for it. It has no memory-safety consequence, since a zero `string` is a

@@ -109,6 +109,51 @@ assignment is refused (`NITPICK-ASSIGN-002`) and so is its address
 | `c0353`–`c0356` | the same, beside a same-named, same-layout `Box` (`imported_fixed_same`) | 0 | **95** | **95** | refused `TYPE-086` |
 | `c0371`, `c0372` | `TBL[i].s = …` beside a wider same-named `Box` (`imported_fixed_wider`): DEF-106 reached through DEF-105's wrong stride | 0 | **95** | **107** (`ra`), **0** (`dx`) | *inferred, not stated:* refused `TYPE-086` once DEF-105's fix resolves the row to the table's own `Box` |
 
+## DEF-107 — a view's root can be written while the view is live
+
+A view (`string_bytes`, `string_from_bytes`, a range view) has an ESCAPE rule
+and no freeze. Its root can be reassigned, cleared or grown while the view is
+still used, and the view then reads rewritten or freed memory. The compiler
+seat's six-line reproduction, with no `wild` and no `=>!`:
+`string:d = …; string:s = string_from_bytes(d.ptr, 5i64); d = …;`. `s` reads
+the poison (exit 12 in its encoding).
+- **Not fixed.** The fix waits for the author's decision (the compiler's
+  S-106); the recommendation is to freeze a view's root for the view's lexical
+  lifetime.
+- **Deduplicate** any view-outlives-its-root cell against this.
+- **Workbench id** O-N25.
+
+## DEF-108 — a function that falls off its end returns a zero value
+
+`func:f = int64() never fails { };` compiles and returns 0. A missing path
+returns 0 on the other path, a `string` returns empty, a `bool` false, and
+**a fallible function returns a success carrying 0**. `main` falling off its
+end exits 0.
+- **Being fixed** as `NITPICK-FLOW-001`, by the author's rule: every path of
+  every function, `NIL` functions included, ends in `pass`, `fail`, `exit` or
+  a trap.
+- **Once a HUNT compiler carries it, every generated program must leave
+  explicitly** (`pass NIL;` in every `NIL` function), or its cells are refused
+  for the wrong reason.
+- **Workbench id** O-N26.
+
+## Closed as faces of known defects (measured at 3g by the compiler seat)
+
+- **F-001** (this repository's `findings/F-001-for-binding-write/`) — a write
+  through a `for` binding over owning elements. This is DEF-102's for-binding
+  face, refused `NITPICK-TYPE-085` at 1.6.0 step 3g.
+- **F-002** (`findings/F-002-generic-move-of-loan/`) — `move(x)` of a lent `T`
+  in a generic body. This is DEF-104's move face, refused `NITPICK-TYPE-047`
+  at 3g.
+- **Resolved:** F-002's control `ctl_gen_move_param` was once reported as exit 2
+  at 3g. That was a stale cached binary in the compiler seat's batch loop. Run one at
+  a time, it exits **21 on both legs under 3g** (the amended tree `5bdae98`). Any HUNT
+  carrying 3g must still give 21.
+- The compiler's chain was re-based after 3g's first harness. The planned shas are 3g
+  `5bdae98`, 3h `c1a4a05`, step 3 `0da2be7`, step 4 `996784e`, 4b `f87d2df` (DEF-106),
+  5 `4e467bc`, 5b `77314e9`, then 5c (DEF-108, `FLOW-001`). **Identify each by its
+  commit SUBJECT, not by a sha**, since a chain can be re-based again.
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.

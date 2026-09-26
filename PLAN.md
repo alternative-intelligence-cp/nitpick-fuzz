@@ -286,14 +286,173 @@ run and what counts as done. Tick the boxes in `PROGRESS.md`, not here.
     it, and the observers' blind spots.
 - [ ] **6.2** Commit, push, and end with a summary.
 
-## M7 — only if the author asks
+## M7 — superseded by M8 to M11
 
-Widen the grid:
-- more types: `buffer`, `OwnedFd`, `dyn`;
-- more places: `pick` payloads, `Result` and `?`, nested generics, closures if
-  the language has them;
-- a documentation sweep of the compiler's reference against the compiler's
-  behaviour.
+The author has asked for more cloud work, so M7's one-paragraph wish list became
+the four milestones below. **Each is a separate cloud session, and each STOPS at
+its end** with a summary and an estimate of the next milestone's cost. The author
+checks the cost before starting the next one.
+
+**Every session in M8–M11 starts the same way:**
+- **(a)** `uname -a && nproc` goes into `PROGRESS.md`. A hosted VM shows 4 cores.
+- **(b)** Read `CLAUDE.md`. Silent wrong answers are defects too, so read its
+  definition again.
+- **(c)** The VM is fresh, so rebuild what the milestone needs with M0's
+  commands. Put the compiler at `.work/nitpick` and build worktrees beside it.
+- **(d)** Resume from `PROGRESS.md`. Never redo a ticked box.
+
+## M8 — the re-hunt, at the compiler carrying the fixes
+
+**When:** after the compiler's 1.6.0 step 3h has landed on its `origin/main`.
+The author starts this session once the workbench says 3h has landed.
+
+- [ ] **8.1** HUNT2 is the newest `origin/main` of the compiler. Record its
+  sha, and which of these subjects it carries:
+  `1.6.0 step 3g` (DEF-102, 103, 104), `1.6.0 step 3h` (DEF-105), `1.6.0 step
+  4b` (DEF-106) and `1.6.0 step 5c` (DEF-108). Find them with
+  `git log --oneline origin/main | grep '1.6.0 step'`.
+  - Build HUNT2.
+  - Build the baseline `c3bdae2` only if 8.3 changes the generator.
+- [ ] **8.2** Run the recall suite (`gen/run_known.py`) at HUNT2. Each defect
+  whose fix HUNT2 carries must match `KNOWN_DEFECTS.md`'s "once fixed" column.
+  Also run `findings/F-001-*/` and `findings/F-002-*/`:
+  - every defect program there must be refused (`TYPE-085`, `TYPE-047`);
+  - every control must run as its `VERDICTS.txt` says (`ctl_gen_move_param`
+    → 21).
+- [ ] **8.3** **If HUNT2 carries DEF-108 (`FLOW-001`),** first make every
+  generated function leave explicitly (`pass NIL;` in each `NIL` function,
+  and so on). Then:
+  - regenerate the grid;
+  - re-run the baseline and confirm no verdict changes there because of the
+    generator change;
+  - commit that as its own step before any hunting.
+- [ ] **8.4** Run all 956 cells (or the regenerated set) at HUNT2 and classify
+  them.
+- [ ] **8.5** Compare HUNT2 with `results/6fb85d3/` cell by cell. The expected
+  moves:
+  - DEF-102 cells, and F-001's `for_binding` write cells, to `TYPE-085`;
+  - DEF-104 cells, and F-002's generic `move` cells, to `TYPE-047` or
+    `TYPE-085`;
+  - DEF-105 cells to `clean`;
+  - DEF-106 cells to `TYPE-086`, if 4b is in;
+  - the 50 "expected refused, ran clean" cells of `REPORT.md` §6 to a refusal,
+    if 3g covers them.
+
+  **Every other change is investigated.** A cell that was clean or refused and
+  is now a `DEFECT`, a changed refusal code, or a changed exit is a regression
+  until shown otherwise.
+- [ ] **8.6** Take every anomaly at HUNT2 that is not in `KNOWN_DEFECTS.md`
+  through M5's five steps.
+- [ ] **8.7** Add `REPORT.md` §9 (M8): HUNT2, the move table, the counts by
+  class, and any findings. Commit, push, then **stop** and summarise, with an
+  estimate for M9.
+
+## M9 — widen the ownership grid into its named gaps
+
+Take `REPORT.md` §7's gaps, in this order of value:
+
+- [ ] **9.1 A LEAK OBSERVER** (a third observer variant):
+  - Run each cell with `NPK_HEAP_STATS` set, and read the runtime's `heap:
+    allocated= peak_live= count=` line on fd 2 at exit.
+  - Learn the line's exact meaning from the runtime's source at the
+    baseline, and from `nitpick-time`'s `meta/roadmap/0.1/0.1.4b.md`, which
+    measures it.
+  - A cell whose live bytes at exit are not what its own arithmetic predicts
+    is a `DEFECT:leak`, or a `DEFECT:wrong_value` for a double count.
+  - Controls: one program that frees everything, and one that deliberately
+    keeps one allocation.
+- [ ] **9.2 A REUSE-PROOF READ.** After a suspected free, and before any other
+  allocation, read the original. Also run a variant that allocates a
+  same-sized sentinel first and reads that. A freed-and-reused body then shows
+  the sentinel's bytes instead of hiding the poison.
+- [ ] **9.3 TYPES:**
+  - `List<string>`, with growth, which moves owning elements;
+  - a struct nested in a struct (`h.v.s`);
+  - arrays of length 3 and above;
+  - a generic `T` at `List<string>` and at arrays;
+  - `buffer`, `OwnedFd` and `dyn`, wherever a snippet compiles.
+- [ ] **9.4 PLACES:**
+  - `for` over a `List`, a slice or a range;
+  - a lending `pick`'s views (D-266);
+  - `Result` and `?` paths;
+  - method receivers (`Self->`) and `dyn` receivers (the loan rule's one
+    stated exemption);
+  - `$$i` and `$$m`;
+  - temporaries.
+- [ ] **9.5 OPERATIONS:**
+  - partial moves (`move(x.s)`), swaps, and a conditional move (in one branch
+    only);
+  - a move inside a loop;
+  - `break`, `continue` and an early `pass` with live owners;
+  - `?` with live owners;
+  - a failsafe path with live owners.
+- [ ] **9.6** Keep the recall gate. Every known shape must still be flagged at
+  the baseline, and every new axis value has its expectation written before
+  its first run.
+- [ ] **9.7** Run at the baseline and at HUNT2. Triage by M5's five steps.
+  Update `REPORT.md` (a §10 for M9) with the new denominators. Commit, push,
+  **stop** and summarise, with an estimate for M10.
+
+## M10 — silent wrong answers
+
+The class `CLAUDE.md` now counts: accepted programs whose result differs from
+what the reference says, with no memory error.
+
+- [ ] **10.1** Build a checklist of language features whose result can be
+  silently wrong. For each, cite the reference section that states the right
+  answer. Look at:
+  - default and zero values (a struct literal with an omitted field, a binding
+    declared without a value);
+  - numeric conversions (checked `=>` at the range's edges, literal suffixes,
+    `>>` on signed and unsigned);
+  - integer overflow (every operator must trap `IntOverflow` where the
+    reference says so: `+`, `-`, `*`, `/`, `%`, negation, shifts);
+  - division (truncation, `DivByZero`, `DivOverflow`);
+  - mixed comparisons;
+  - string lengths and bounds;
+  - `pick` (exhaustiveness, arm order, `fall`);
+  - `when` and `defer` ordering;
+  - `Result` and `?` (an error never dropped);
+  - loop ranges (inclusive or exclusive, per the reference);
+  - shadowing.
+- [ ] **10.2** For each item, write one small program whose expected exit
+  code comes from the reference TEXT, not from running it. Run it at the
+  baseline and at HUNT2, both legs.
+  - A mismatch is a finding.
+  - If the compiler is right and the reference is wrong, it is a
+    documentation finding. Report it the same way, with the reference line.
+- [ ] **10.3** Recall: DEF-108's shapes (an empty body, a missing path, a
+  fallible function's missing path, `main` without `exit`) must be flagged at
+  the baseline, and refused `FLOW-001` at a HUNT2 that carries it.
+- [ ] **10.4** Write `REPORT.md` §11 (M10) with the checklist's denominators:
+  items, testable, agreeing, disagreeing, and untestable with a reason. Commit,
+  push, **stop** and summarise, with an estimate for M11.
+
+## M11 — the reference, checked against the compiler
+
+- [ ] **11.1** From each of the compiler's references at HUNT2, extract every
+  code example and every normative claim ("is refused", "returns", "traps",
+  and each row of an operator or builtin table) into `m11/CLAIMS.md`, with its
+  file and line. References:
+  - `meta/specs/TYPE_REFERENCE.md`
+  - `BUILTIN_REFERENCE.md`
+  - `OP_REFERENCE.md`
+  - `LEXICAL_REFERENCE.md`
+  - `BUILD_REFERENCE.md`
+  - `MEMORY_REFERENCE.md`
+  - any other `*_REFERENCE.md`
+- [ ] **11.2** Turn each testable claim into a program with its expected
+  outcome, and run it at HUNT2. Each mismatch is a finding that cites the
+  reference line.
+  - The compiler right and the reference wrong is a documentation finding.
+    Such findings have appeared before: DEF-100, DEF-101, and O-N12 earlier.
+  - Otherwise it is a compiler finding.
+- [ ] **11.3** Write `REPORT.md` §12 (M11) with the denominators: claims
+  extracted, testable, tested, agreeing, disagreeing, and untestable with a
+  reason. Commit, push, and **stop** with a summary.
+
+**After M11**, if the credit remains, the author and the workbench choose the
+next task together.
 
 ## Acceptance for the whole job
 

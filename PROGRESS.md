@@ -389,6 +389,7 @@ HTTPS goes through an agent proxy.
   was checked to be byte-identical (above) and the committed first-100 HUNT
   records were reproduced exactly. The M5 cells are appended to the same
   `results/6fb85d3/cells.jsonl`.
+- **S16 — CONFIRMED A DEFECT (2026-09-26): DEF-108**, the compiler's `NITPICK-FLOW-001`, by the author's own rule (every path of every function, `NIL` included, must leave explicitly). The note below was written under the first brief, which counted only memory-safety faults — `CLAUDE.md` now counts silent wrong answers too.
 - **S16 — a function with a declared result and no `pass` compiles** and
   returns a zero value: 0 for `int32`, an empty string for `string`. `main`
   without `exit` exits 0. This was probed at both compilers (npkc 0, 0/0),
