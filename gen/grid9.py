@@ -609,13 +609,13 @@ def gen_value(c):
                 stmts += ["Hold:h = Hold{ v: %s };" % t.init, "%s:r = raw h.op();" % TY]
                 observations += [("r", 21), ("h.v", 23)]
             else:
-                c.decls.append("func:use = %s(Hold:h) never fails {\n    pass raw h.op();\n};\n" % TY)
-                stmts += ["Hold:h = Hold{ v: %s };" % t.init, "%s:r = raw use(h);" % TY]
+                c.decls.append("func:callit = %s(Hold:h) never fails {\n    pass raw h.op();\n};\n" % TY)
+                stmts += ["Hold:h = Hold{ v: %s };" % t.init, "%s:r = raw callit(h);" % TY]
                 observations += [("r", 21), ("h.v", 21)]
         elif p == "dyn_recv":
             dyn_recv_decls(c, ["pass self.v;"], TY)
-            c.decls.append("func:use = %s(dyn Tr:d) never fails {\n    pass raw d.op();\n};\n" % TY)
-            stmts += ["DHold:b = DHold{ v: %s };" % t.init, "dyn Tr:d = move(b);", "%s:r = raw use(d);" % TY]
+            c.decls.append("func:callit = %s(dyn Tr:d) never fails {\n    pass raw d.op();\n};\n" % TY)
+            stmts += ["DHold:b = DHold{ v: %s };" % t.init, "dyn Tr:d = move(b);", "%s:r = raw callit(d);" % TY]
             observations += [("r", 21), ("@peek", 23)]
         elif p == "temp":
             c.decls.append("func:mkt = %s() never fails {\n    pass %s;\n};\n" % (TY, t.init))
@@ -720,13 +720,13 @@ def gen_value(c):
         if p == "self_recv":
             stmts += ["Hold:h = Hold{ v: %s };" % t.init, "drop h.op();"]
         else:
-            c.decls.append("func:use = NIL(Hold:h) never fails {\n    drop h.op();\n    pass NIL;\n};\n")
-            stmts += ["Hold:h = Hold{ v: %s };" % t.init, "drop use(h);"]
+            c.decls.append("func:callit = NIL(Hold:h) never fails {\n    drop h.op();\n    pass NIL;\n};\n")
+            stmts += ["Hold:h = Hold{ v: %s };" % t.init, "drop callit(h);"]
         observations.append(("h.v", exp_orig))
     elif p == "dyn_recv":
         dyn_recv_decls(c, op_stmts(c, "self.v", "@self.v") + ["pass NIL;"], "NIL")
-        c.decls.append("func:use = NIL(dyn Tr:d) never fails {\n    drop d.op();\n    pass NIL;\n};\n")
-        stmts += ["DHold:b = DHold{ v: %s };" % t.init, "dyn Tr:d = move(b);", "drop use(d);"]
+        c.decls.append("func:callit = NIL(dyn Tr:d) never fails {\n    drop d.op();\n    pass NIL;\n};\n")
+        stmts += ["DHold:b = DHold{ v: %s };" % t.init, "dyn Tr:d = move(b);", "drop callit(d);"]
         observations.append(("@peek", exp_orig))
     elif p in ("claim_m", "claim_i"):
         claim = "$$m" if p == "claim_m" else "$$i"
@@ -1041,6 +1041,9 @@ def check_value(t, p, o, section):
         raise Skip("a loop move inside a loop place is a nested loop, outside the grid")
     if t.base == "ofd" and o in ("clone",):
         raise Skip("OwnedFd has no clone")
+    if t.base == "dyn" and (p in ("elem", "for_binding", "for_range", "ptr_param") or o.startswith("at_")):
+        raise Skip("an array of, or a pointer to, a dyn has no spelling: `dyn T[2]` parses as `dyn (T[2])` "
+                   "and `dyn T->` as `dyn (T->)` (TYPE-006; the compiler's own dyn_array test says so)")
 
 
 def check_observer(t, p, o, ob):
@@ -1117,6 +1120,8 @@ def check_flow(t, p, o, ob):
         raise Skip("a generic T's exits are the concrete types' exits")
     if p == "elem" and t.base.startswith("arr"):
         raise Skip("an array of arrays is outside the grid")
+    if p == "elem" and t.base == "dyn":
+        raise Skip("an array of a dyn has no spelling: `dyn T[2]` parses as `dyn (T[2])` (TYPE-006)")
     if o in ("relay_temp", "trap_live_temp") and p != "local":
         raise Skip("a temporary's exit has no holder place: crossed once, at local")
     if o in ("trap_live", "trap_live_temp") and ob == "leak":
