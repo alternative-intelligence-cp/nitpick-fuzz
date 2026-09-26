@@ -41,6 +41,10 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
   - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
+- [ ] **M11** — the reference, checked against the compiler (session 6)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2
+  - [ ] 11.3 `REPORT.md` §12; stop
 
 ## Compilers
 
@@ -900,7 +904,63 @@ costs, not measured):
   MACRO, BUILD, CONCURRENCY, AST and VERIFICATION, with most solver and
   toolchain claims listed untestable.
 
+## M11 — the reference, checked against the compiler (session 6)
+
+**The start checks.**
+- **The gate.** `git fetch origin && git merge --ff-only origin/main` was a no-op: the
+  branch began at `626c22d`, the workbench's commit after M10's merge, which is
+  `origin/main`. M10 is ticked and M11 is not.
+- **(a)** `uname -a` and `nproc` are under Environment below (4 cores, the hosted VM).
+- **(b)** `CLAUDE.md` was re-read, the silent-wrong-answer rule with it: a result that
+  differs from the reference, with no memory error, is a defect, exactly as a memory
+  fault is, and is never filed as an observation outside the definition.
+- **(c)** The VM was fresh (`.work/` absent), so the toolchain was rebuilt by M0's
+  commands (below).
+- **(d)** M11 resumes at its first box; nothing ticked was redone.
+
+**The rebuild (M0's commands).** LLVM 20.1.2 was fetched to a file and extracted as
+S13 records: the download took 13 s and the whole step 307 s. The tarball is
+2 021 628 328 bytes, sha256 `3a392f151375eeed…` (as in sessions 2–5), and
+`llvm-config --version` prints `20.1.2`. The compiler was cloned to `.work/nitpick`
+at 13:03 UTC. Its `origin/main` was `9f6f370`, the record commit session 5 last saw,
+so HUNT2 stays `9126350` (S41). The worktrees were built one after the other by
+M0.5's command: `.work/hunt2` (`9126350`) in 55.9 s, `.work/base` (`c3bdae2`) in
+57.0 s, and `.work/main9f6` (`9f6f370`, S37's third compiler, for the findings) in
+53.1 s.
+
+**All nine products are byte-identical to sessions 3–5's**:
+- `npkc.ll`: 28 857 206 / `2448b3b60d9eb189…` (HUNT2), 28 111 929 / `4029fc70efbe9cd3…`
+  (the baseline, so the commissioning check passes again), 28 872 365 /
+  `7bab110a1e45cc9d…` (`9f6f370`);
+- `npkc`: 9 972 944 / `20d35e2822b99080…`, 9 724 232 / `0cbc150ced5d20f7…` and
+  9 977 464 / `339926efccec34f0…`;
+- `npkrt.o`: 72 576 / `162b897539285a77…` at all three.
+
+Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0, and
+`canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no `.ll`.
+
+**The machine checks.**
+- The recall suite (`gen/run_known.py`) is identical to `results/<commit>/known-m10.txt`
+  line for line at both compilers: 25 rows each (9 s for both).
+- M10's 223 programs re-run at HUNT2 are identical to `results/9126350/m10.jsonl` in
+  223 of 223 (npkc rc, codes, both legs, verdict; 16 s): 212 agree, 11 disagree, as
+  recorded.
+
 ## Environment
+
+*(session 6, measured 2026-09-26 13:03 UTC; M11 run here — the start check (a))*
+
+```
+uname -a:  Linux vm 6.18.44-fc-v37 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     4
+free -g:   Mem 15 total, 0 used, 15 free, 15 available; Swap 0
+df -h .:   /dev/vda  252G  7.1G used  30G avail (20%) -- 30 GB is the session's writable allowance
+os:        Ubuntu 24.04.4 LTS
+python3:   Python 3.11.15
+git:       2.43.0
+```
+
+A fresh VM of the same kind as sessions 2–5: `.work/` did not exist.
 
 *(M0.1, measured 2026-09-25)*
 
@@ -1209,6 +1269,36 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   saw, as the grid's observer codes do. The controls exit 0. The one exception
   is F-016: its programs exit the matched arm's code, 4, which is the
   reference's answer.
+
+- **S40 — session 6 works on branch `claude/pensive-allen-pdhqpv`**, which the session's
+  harness names. It started at `626c22d`, the workbench's commit after M10's merge, which
+  is `origin/main`.
+- **S41 — HUNT2 stays `9126350`.** PLAN.md 11.1 extracts from "the compiler's references
+  at HUNT2" and 11.2 runs "at HUNT2", and HUNT2 is the compiler M8 named (S20, S25, S32).
+  The compiler's `origin/main` is `9f6f370`, the docs-only record commit over `b564746`
+  that session 5 saw (S32); it is built as `.work/main9f6` for the findings only (S37).
+- **S42 — the extraction was split by line range.** The fourteen references (10 433
+  lines) were divided into twelve ranges. The session wrote BUILTIN's claims itself
+  (`gen/m11_claims/builtin.py`), and eleven sub-agents wrote the other eleven ranges, one
+  module each, from one brief committed as `m11/BRIEF.md`. **No agent ran the compiler,
+  a program or `llc`:** every expectation was written from the reference's text before
+  the first run, as S36 requires. Each agent learnt the language from programs that
+  compile at HUNT2 (M10's, `known/`, `findings/`, the compiler's own
+  `tests/backend/programs/`). The session reviewed every module before the commit that
+  precedes the first run.
+- **S43 — a claim is checked against its line, and coverage is checked mechanically.**
+  A claim's id is its reference's two-letter prefix and its HUNT2 line (`bi0242`,
+  `bi0242b`), and it quotes that line: `gen/m11.py` refuses a quote not on its line.
+  It also refuses a reference with a fenced code block or a table body row that has no
+  claim at its line, unless the row's table is `excluded` with a reason (a history or a
+  legend). So "every code example" and "each row of a table" are counted by the
+  generator; the normative prose sentences are extracted by reading, and their count
+  is the reading's.
+- **S44 — M11's `failsafe` names every prelude identity at HUNT2** (31): M10's twenty
+  (S4, S34) and `StaleHandle` 100, `DeadlineExceeded` 101, `ChannelClosed` 102,
+  `DriverLeak` 103, `IoEof` 104, `WouldBlock` 105, `Interrupted` 118, `NotFound` 119,
+  `Exists` 120, `CrossDevice` 121, `BadPath` 122. A program's own `E<k>` exits 80+k, and
+  exit 0 is the reference's answer (S34, S39).
 
 ## Log
 
