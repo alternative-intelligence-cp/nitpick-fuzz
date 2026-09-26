@@ -8,7 +8,7 @@ committed. A session that starts here resumes at the first unticked box.
 - [x] **M0** — the two compilers built and commissioned
 - [x] **M1** — the recall suite (`known/`) run at both compilers and matched
 - [x] **M2** — the generator, the runner and the classifier
-- [ ] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
+- [x] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
 - [ ] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
 - [ ] **M5** — the hunt
 - [ ] **M6** — the report
@@ -97,6 +97,65 @@ rule 4); it now binds the result. After the fix no SAFE cell is refused except
 the four `imported_fixed_bare` clone/read controls, which are DEF-105 case 1
 (`TYPE-001` at `tbl.npk`), a known defect.
 
+## M3 — the recall gate at `c3bdae2`
+
+The whole grid, 956 cells, ran at the baseline in 58 s (4 jobs):
+`results/c3bdae2/cells.jsonl`, `SUMMARY.md`, `classified.jsonl`.
+
+| class | cells |
+|---|---|
+| clean | 612 |
+| refused | 230 |
+| DEFECT:double_free | 56 |
+| DEFECT:leg_mismatch | 25 |
+| DEFECT:uaf | 22 |
+| DEFECT:segv | 5 |
+| DEFECT:wrong_value | 2 |
+| OVERRESTRICT | 4 |
+
+**The recall table. Every known shape is flagged; no miss, so no fix to the
+grid or the classifier was needed.** Measured at `c3bdae2`, both legs;
+`ra` = read_after, `dx` = drop_at_exit.
+
+| known | shape the plan names | cells of the shape | flagged `DEFECT:*` | the flagging cells |
+|---|---|---|---|---|
+| DEF-99 | `fixed_scalar`/`fixed_elem` × `move`/`pass_out` | 24 | 16 | `c0020`, `c0022`, `c0182`, `c0184`, `c0642`, `c0644`, `c0750`, `c0752` (fixed_scalar dx: double_free 95/95); `c0035`–`c0038`, `c0199`–`c0202` (fixed_elem ra and dx: leg_mismatch 107/0 and 107/95) |
+| DEF-102 | `lent_param` × `field_write`/`assign`/`at_callee` | 48 | 24 | field_write: `c0221`/`c0222` box, `c0519`/`c0520` wrap, `c0663`/`c0664` arr_str, `c0771`/`c0772` arr_box; at_free: `c0059`/`c0060` str, `c0227`/`c0228`, `c0409`/`c0410`, `c0525`/`c0526`, `c0669`/`c0670`, `c0777`/`c0778`; at_grow: `c0411`/`c0412` list, `c0527`/`c0528` wrap — every ra uaf 70/70, every dx double_free 95/95 |
+| DEF-104 | `generic_param` × `pass_out` at `gen_str`/`gen_box` | 4 | 2 | `c0890` gen_str dx, `c0948` gen_box dx: double_free 95/95 |
+| DEF-105 | `imported_fixed` beside a same-named struct, without its row type | 36 | 18 | the type-resolution defect itself: `c0379`/`c0380` (clone) and `c0381`/`c0382` (read) of `imported_fixed_wider`: segv 107/107, and 107/0 on c0382. The other 14 are moves and writes into the imported `fixed` table (the DEF-99 shape and the fixed-write shape below, through an import) |
+
+**The known refusals classify as `refused`:** `c0001`/`c0002` (copy of a local
+`str`) carry `NITPICK-TYPE-046`; `c0053`/`c0054` (non-generic `pass_out` of a
+lent `str`) carry `NITPICK-TYPE-047`. DEF-105 case 1 shows as the four
+`OVERRESTRICT` cells `c0341`–`c0346` (`imported_fixed_bare` clone/read and
+field_write refused `TYPE-001` at `tbl.npk`), as `KNOWN_DEFECTS.md` records it.
+
+**What the unflagged cells of each shape are** (measured; the reading of why is
+inference, marked so):
+- DEF-99: the 8 `fixed_scalar` × `move`/`pass_out` `ra` cells run 0/0. The read
+  happens before any drop and `exit` runs none, so the second owner is never
+  freed. *Inferred:* the observer has no way to see a double owner until a drop.
+- DEF-102: the 24 `assign` and `at_overwrite` cells run 0/0 with the caller's
+  value intact, as `KNOWN_DEFECTS.md`'s `ctl_whole_lent_string` row (21, caller
+  intact) says of a whole-binding assignment to a loan.
+- DEF-104: the 2 `ra` cells read the returned value and the original, both
+  intact, and exit before either is dropped.
+- DEF-105: the `_same` read/clone cells, where the importer's struct has the
+  same layout as the row, run clean — the same-named struct is resolved but
+  nothing is read at a wrong offset.
+
+**Seen at the baseline and not in `KNOWN_DEFECTS.md`** (for M5 to take through
+its five steps; not minimised or deduplicated here): writes INTO `fixed`
+storage compile — `field_write` into a `fixed` Box or array, and `assign` of a
+`fixed` element — and exit 95/95: `c0039`/`c0040` (str fixed_elem assign),
+`c0185`/`c0186`, `c0645`/`c0646`, `c0753`/`c0754` (fixed_scalar field_write),
+`c0203`–`c0206` (box fixed_elem field_write and assign), and their
+`imported_fixed` twins. A whole `assign` of a `fixed_scalar` is refused
+`ASSIGN-002`; the sub-place writes are not. And loans
+reached through a `for` binding (`for_binding` × `field_write`/`at_free`/`at_grow`)
+and a generic body (`generic_param` × `move`/`at_free`) behave as DEF-102 and
+DEF-104 do.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -174,3 +233,4 @@ machine (the session was dispatched here by the workbench). See decision S1.
   DEF-99 fix.
   M2 done: 956 cells generated, 1 284 skipped; one generator bug found and
   fixed in a baseline shakedown.
+  M3 done: whole grid at c3bdae2 in 58 s; every known shape flagged, no miss.
