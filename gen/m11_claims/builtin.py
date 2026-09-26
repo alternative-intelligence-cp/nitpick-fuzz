@@ -18,11 +18,12 @@ claim("bi0003b", D, 3, "map directly to LLVM instructions or safe runtime shims"
 claim("bi0005", D, 5, "You must explicitly import them via the `collections` module", "rule",
       "Collections (stacks, lists, hash tables) are not built in: using one without importing the `collections` module is refused.",
       expect="refuse",
-      src=main_("""    List<int64>:l = list_init();
+      src=main_("""    List<int64>:l = list_init::<int64>();
     list_push(@l, 5i64);
     if (l.count != 1i64) { exit 10i32; }
     exit 0i32;"""),
-      wrong="a List used with no import compiles and runs (the list is the prelude's)")
+      wrong="a List used with no import compiles and runs (the list is the prelude's)",
+      fixed="run 1 wrote `list_init()`, refused TYPE-022 (T not inferable: the turbofish is the spelling), not for a missing import")
 
 # ------------------------------------------------------------------ the Views column
 claim("bi0010", D, 10, "the 1-based index of the ARGUMENT WHOSE STORAGE THE RESULT", "rule",
@@ -91,12 +92,13 @@ claim("bi0051", D, 51, "METHOD is exempt", "rule",
       "A method named after a builtin is accepted (it is reached through its receiver).",
       expect="run:0",
       src=main_("""    Box:b = Box{ n: 7i64 };
-    if (b.mono_now() != 7i64) { exit 10i32; }
+    if ((raw b.mono_now()) != 7i64) { exit 10i32; }
     exit 0i32;""", """struct:Box = { int64:n; };
 impl:Box = {
     func:mono_now = int64(Self:self) never fails { pass self.n; };
 };"""),
-      wrong="refused RESOLVE-001, or the call reaches the clock")
+      wrong="refused RESOLVE-001, or the call reaches the clock",
+      fixed="run 1 called the `never fails` method without `raw` (TYPE-007)")
 claim("bi0052", D, 52, "a module-level BINDING cannot carry a", "rule",
       "A module-level binding cannot carry a function value (TYPE-035).",
       expect="refuse:NITPICK-TYPE-035",
@@ -199,6 +201,10 @@ claim("bi0096", D, 96, "Everything not noted is DERIVED", "rule",
       untestable="[tree] the harness's check")
 
 # ------------------------------------------------------------------ the Pure column
+claim("bi0102", D, 102, "classified by each row's IR body or inline lowering, never its prose", "rule",
+      "The Pure column is classified from each row's IR body or inline lowering, never from its prose.",
+      untestable="[tree] how the column is written; each row's purity is tested through TYPE-060/061 at lines 105-112",
+      note="added after run 1, found by the uncovered-line check")
 claim("bi0105", D, 105, "`pure` body (`NITPICK-TYPE-061`) and a contract expression", "rule",
       "A `pure` body admits the pure rows (string_bytes, string_from_bytes' kin, string_equals, string_byte_length, string_is_empty).",
       expect="run:0",
@@ -216,10 +222,10 @@ claim("bi0105b", D, 105, "(`NITPICK-TYPE-061`)", "rule",
       expect="refuse:NITPICK-TYPE-061",
       src=main_("""    if ((raw probe(5i64)) != 1i64) { exit 10i32; }
     exit 0i32;""", """func:probe = int64(int64:n) pure never fails {
-    string:s = int_to_string(n);
-    pass string_byte_length(s);
+    pass string_byte_length(int_to_string(n));
 };"""),
-      wrong="accepted: an allocating builtin in a pure body")
+      wrong="accepted: an allocating builtin in a pure body",
+      fixed="run 1 bound the result to an owning local, itself TYPE-061 (D-221); now the call alone")
 claim("bi0106", D, 106, "(`NITPICK-TYPE-060`) admit the `pure` rows and refuse the rest by name", "rule",
       "A contract expression admits a pure row: `requires !string_is_empty(s)` compiles and is checked.",
       expect="run:0",
@@ -243,19 +249,19 @@ claim("bi0107", D, 107, "Five rows are `pure`", "rule",
       src=main_("""    string:s = string_concat("ab", "c");
     if ((raw probe(s)) != 3i64) { exit 10i32; }
     exit 0i32;""", """func:probe = int64(string:s) pure never fails {
-    string:v = string_from_bytes(s.ptr, s.len);
-    pass v.len;
+    pass string_byte_length(string_from_bytes(s.ptr, s.len));
 };"""),
-      wrong="refused TYPE-061")
+      wrong="refused TYPE-061",
+      fixed="run 1 bound the result to an owning local, which a pure body refuses (TYPE-061, D-221); now the call alone")
 claim("bi0109", D, 109, "Everything that allocates (the allocator family,", "rule",
       "string_concat is an effect row: a pure body calling it is refused TYPE-061.",
       expect="refuse:NITPICK-TYPE-061",
       src=main_("""    if ((raw probe("ab")) != 3i64) { exit 10i32; }
     exit 0i32;""", """func:probe = int64(string:s) pure never fails {
-    string:t = string_concat(s, "c");
-    pass t.len;
+    pass string_byte_length(string_concat(s, "c"));
 };"""),
-      wrong="accepted: an allocating call in a pure body")
+      wrong="accepted: an allocating call in a pure body",
+      fixed="run 1 bound the result to an owning local, itself TYPE-061 (D-221); now the call alone")
 claim("bi0112", D, 112, "a descriptor, the clock", "rule",
       "mono_now (the clock) is an effect row: a pure body calling it is refused TYPE-061.",
       expect="refuse:NITPICK-TYPE-061",
@@ -286,11 +292,17 @@ claim("bi0123b", D, 123, "Double-free, corruption, and a foreign or misaligned p
       "A double free the analysis cannot follow traps to failsafe with -4102 (Unreachable).",
       expect="trap:Unreachable",
       src=main_("""    wild int8->:p = alloc(16i64);
-    wild int8->:q = raw same(p);
+    wild int8->:cell = alloc(8i64);
+    wild int8->->:slot = cell =>! wild int8->->;
+    <-slot = p;
+    wild int64->:bits = cell =>! wild int64->;
+    wild int8->:q = #wild_ptr<int8>(<-bits);
     dalloc(p);
     dalloc(q);
-    exit 0i32;""", """func:same = int8->(int8->:x) never fails { pass x; };"""),
-      wrong="exit 0 (the second free accepted), or a crash")
+    dalloc(cell);
+    exit 0i32;"""),
+      wrong="exit 0 (the second free accepted), or a crash",
+      fixed="run 1 aliased through a call, refused BORROW-011 (a returned parameter is a borrow; D-223); the alias now goes through memory, its bits read back as an int64 and rebuilt by `#wild_ptr` (run 2: a pointer loaded back is BORROW-011 too)")
 claim("bi0123c", D, 123, "OOM with `-4103`", "rule",
       "An allocation the kernel cannot back traps HeapOom (-4103): 2^47 bytes is legal and fails.",
       expect="trap:HeapOom",
@@ -482,6 +494,22 @@ claim("bi0135b", D, 135, "**ABI:** sym=`@memset` args=`ptr, i32, i64`", "row",
       wrong="a call to @npk_memset")
 
 # ------------------------------------------------------------------ arenas, wild tracking, W^X
+claim("bi0141", D, 141, "a page is never writable and", "rule",
+      "W^X: a page is never writable and executable at once, so an unsealed (writable) page cannot run: calling it faults.",
+      expect="trap:MachineFault",
+      src=main_("""    wildx uint8->:page = wildx_alloc(16i64) =>! wildx uint8->;
+    page[0i64] = 72u8;
+    page[1i64] = 137u8;
+    page[2i64] = 248u8;
+    page[3i64] = 195u8;
+    int64:r = raw jump(page, raw v64(5i64));
+    wildx_free(page);
+    if (r == 5i64) { exit 10i32; }
+    exit 11i32;""", """func:jump = int64(wildx uint8->:pg, int64:a) never fails {
+    pass wildx_call(pg, a);
+};"""),
+      wrong="the unsealed page runs (10): writable and executable at once",
+      note="added after run 1, found by the uncovered-line check")
 claim("bi0146", D, 146, "| `arena_make` |", "row",
       "arena_make builds an arena for T from the annotation, with no element-type argument.",
       expect="run:0",
@@ -501,9 +529,13 @@ claim("bi0146b", D, 146, "ret=`{ ptr, ptr, i64, i64, i64 }` args=`i64, i64`", "r
 claim("bi0147", D, 147, "| `shared_arena_make` |", "row",
       "shared_arena_make builds the atomically-shared arena from the annotation.",
       expect="run:0",
-      src=main_("""    shared_arena<int64>:a = shared_arena_make(4i64);
-    exit 0i32;"""),
-      wrong="refused")
+      src=main_("""    drop mk();
+    exit 0i32;""", """func:mk = NIL() never fails {
+    shared_arena<int64>:a = shared_arena_make(4i64);
+    pass NIL;
+};"""),
+      wrong="refused",
+      fixed="run 1 held the arena in `main` at `exit 0` and exited 96 (WildLeak): `exit` runs no drops (D-183); the arena is now made and dropped in a function")
 claim("bi0148", D, 148, "| `atomic_from_ptr` |", "row",
       "atomic_from_ptr::<T> aliases existing wild memory as an atomic, used as a method's receiver.",
       expect="run:0",
@@ -914,12 +946,13 @@ claim("bi0250b", D, 250, "the cell drops at scope exit exactly as a string does"
         drop mk();
         i = i + 1i64;
     }
-    exit 0i32;""", """func:mk = NIL() {
+    exit 0i32;""", """func:mk = NIL() never fails {
     buffer:b = buffer_new(raw v64(1000i64));
     if (b.len != 1000i64) { pass NIL; }
     pass NIL;
 };"""),
-      wrong="never dropped (peak 1000000)")
+      wrong="never dropped (peak 1000000)",
+      fixed="run 1's helper was not `never fails`, so `drop` was TYPE-042 (D-163)")
 claim("bi0251", D, 251, "| `channel` |", "row",
       "channel() reads element, level and capacity from the annotation and returns a Result.",
       expect="run:0",
@@ -1021,11 +1054,12 @@ async func:main = int32(cstring[]:_~argv) {
     suspend_io(f => int32, 1i32, t0 + 5000000000i64);
     io_unwatch(f => int32);
     if ((mono_now() - t0) > 4000000000i64) { exit 10i32; }
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;
 };
 """,
-      wrong="it waits to the deadline (10)")
+      wrong="it waits to the deadline (10)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0258", D, 258, "| `io_unwatch` |", "row",
       "Removing an unwatched descriptor is a no-op, not an error.",
       expect="run:0",
@@ -1046,17 +1080,18 @@ async func:main = int32(cstring[]:_~argv) {
     fd:f = open(p, 0i64, 0i64) ?! E1;
     io_watch(f => int32, 1i32);
     io_unwatch(f => int32);
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;
 };
 """,
-      wrong="the call parks, or traps")
+      wrong="the call parks, or traps",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0260", D, 260, "| `own_fd` |", "row",
       "own_fd takes ownership: the owner's drop closes the descriptor.",
       expect="run:0",
       src="""error:E1;
 
-func:hold = NIL(fd:f) {
+func:hold = NIL(fd:f) never fails {
     OwnedFd:o = own_fd(f);
     pass NIL;
 };
@@ -1070,7 +1105,8 @@ func:main = int32(cstring[]:_~argv) {
     exit 0i32;
 };
 """,
-      wrong="the descriptor left open by the owner's drop (10)")
+      wrong="the descriptor left open by the owner's drop (10)",
+      fixed="run 1's helper was not `never fails`, so `drop` was TYPE-042 (D-163)")
 claim("bi0261", D, 261, "| `release_fd` |", "row",
       "close(release_fd(move o)) consumes the owner and closes once, reporting close's verdict.",
       expect="run:0",
@@ -1086,6 +1122,22 @@ func:main = int32(cstring[]:_~argv) {
 };
 """,
       wrong="a double close (a failed verdict, 10), or the spelling refused")
+claim("bi0261c", D, 261, "consumes the owner and returns the bare number", "row",
+      "release_fd consumes the owner and returns the bare descriptor, so close sees it once and succeeds.",
+      expect="run:0",
+      src="""error:E1;
+
+func:main = int32(cstring[]:_~argv) {
+    cstring:p = to_cstring("/dev/null") ?! E1;
+    fd:f = open(p, 0i64, 0i64) ?! E1;
+    OwnedFd:o = own_fd(f);
+    Result<NIL>:c = close(release_fd(move(o)));
+    if (c.is_error) { exit 10i32; }
+    exit 0i32;
+};
+""",
+      wrong="a double close (a failed verdict, 10)",
+      note="added after run 1, from the row's text: bi0261 keeps the row's own spelling `move o`")
 claim("bi0261b", D, 261, "the move defuses the drop, so no double close is", "row",
       "After release_fd(move o), `o` is moved: a use of it is refused.",
       expect="refuse",
@@ -1103,7 +1155,7 @@ func:main = int32(cstring[]:_~argv) {
       wrong="accepted: the owner released twice")
 claim("bi0262", D, 262, "| `chain_depth` |", "row",
       "chain_depth counts the sites the in-flight error's origin chain has passed.",
-      expect="run:0", fs=False,
+      expect="run:42", fs=False,
       src="""error:E1;
 
 func:leaf = int32(int32:v) {
@@ -1119,11 +1171,12 @@ func:main = int32(cstring[]:_~argv) {
     exit 50i32;
 };
 
-""" + failsafe_with("""        (E1) { if (chain_depth() != 3i32) { exit (10i32 + chain_depth()); } exit 0i32; },"""),
-      wrong="another depth (10+depth)")
+""" + failsafe_with("""        (E1) { if (chain_depth() != 3i32) { exit (10i32 + chain_depth()); } exit 42i32; },"""),
+      wrong="another depth (10+depth)",
+      fixed="run 1 exited 0 from failsafe, which REACH-004 refuses (D-014: failsafe exits positive); the reference's answer is now exit 42, the claim unchanged")
 claim("bi0263", D, 263, "| `chain_site` |", "row",
       "chain_site(i) is 0 outside the kept range.",
-      expect="run:0", fs=False,
+      expect="run:42", fs=False,
       src="""error:E1;
 
 func:leaf = int32(int32:v) {
@@ -1136,8 +1189,9 @@ func:main = int32(cstring[]:_~argv) {
     exit 50i32;
 };
 
-""" + failsafe_with("""        (E1) { if (chain_site(100i32) != 0i32) { exit 10i32; } if (chain_site(0i32) == 0i32) { exit 11i32; } exit 0i32; },"""),
-      wrong="a site outside the kept range (10), or none inside it (11)")
+""" + failsafe_with("""        (E1) { if (chain_site(100i32) != 0i32) { exit 10i32; } if (chain_site(0i32) == 0i32) { exit 11i32; } exit 42i32; },"""),
+      wrong="a site outside the kept range (10), or none inside it (11)",
+      fixed="run 1 exited 0 from failsafe, which REACH-004 refuses (D-014: failsafe exits positive); the reference's answer is now exit 42, the claim unchanged")
 claim("bi0264", D, 264, "| `site_line` |", "row",
       "site_line(0) is 0: the runtime's reserved site 0.",
       expect="run:0",
@@ -1173,9 +1227,10 @@ claim("bi0267", D, 267, "| `open` |", "row",
     if (w.is_error) { exit 10i32; }
     Result<fd>:o = open(p, 0i64, 0i64);
     if (o.is_error) { exit 11i32; }
-    drop close(o.value);
+    Result<NIL>:cr = close(o.value);
     exit 0i32;""", "error:E1;"),
-      wrong="a relative path not found (11)")
+      wrong="a relative path not found (11)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0268", D, 268, "| `close` |", "row",
       "A failed close is reported, never swallowed: a second close of one descriptor is an error.",
       expect="run:0",
@@ -1197,9 +1252,10 @@ claim("bi0269", D, 269, "| `read` |", "row",
     if (!r.is_error) { exit 10i32; }
     if (r.err != IoEof) { exit 11i32; }
     dalloc(buf);
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;""", "error:E1;"),
-      wrong="a success carrying 0 (10)")
+      wrong="a success carrying 0 (10)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0269b", D, 269, "Zero asked is zero delivered", "row",
       "A read of zero bytes delivers zero, successfully.",
       expect="run:0",
@@ -1210,9 +1266,10 @@ claim("bi0269b", D, 269, "Zero asked is zero delivered", "row",
     if (r.is_error) { exit 10i32; }
     if (r.value != 0i64) { exit 11i32; }
     dalloc(buf);
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;""", "error:E1;"),
-      wrong="E_EOF for a zero-length read (10)")
+      wrong="E_EOF for a zero-length read (10)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0270", D, 270, "| `write` |", "row",
       "write is one kernel write returning the bytes taken.",
       expect="run:0",
@@ -1223,9 +1280,10 @@ claim("bi0270", D, 270, "| `write` |", "row",
     if (r.is_error) { exit 10i32; }
     if (r.value != 5i64) { exit 11i32; }
     dalloc(buf);
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;""", "error:E1;"),
-      wrong="another count (11)")
+      wrong="another count (11)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 claim("bi0272", D, 272, "Error slots across the floor carry the kernel's own negative codes", "rule",
       "A floor error carries the kernel's code: a missing file's read_file error is ENOENT (NotFound).",
       expect="run:0",
@@ -1379,9 +1437,10 @@ claim("bi0350", D, 350, "unsigned one or a kernel identifier ZERO-extends into i
     Result<int64>:b = sys(8i64, f, big, 0i64);
     if (b.is_error) { exit 12i32; }
     if (b.value != 4294967295i64) { exit 13i32; }
-    drop close(f);
+    Result<NIL>:cr = close(f);
     exit 0i32;""", "error:E1;"),
-      wrong="int32 -1 zero-extended (11), or uint32 sign-extended (12)")
+      wrong="int32 -1 zero-extended (11), or uint32 sign-extended (12)",
+      fixed="run 1 discarded `close`'s Result with `drop`, which only a `never fails` callee licenses (TYPE-042, D-163); now bound")
 excluded(D, 357, "the original three syscall tiers, removed by D-001 and D-048: history; the current rules are tested at lines 375-386")
 claim("bi0368", D, 368, "Restricting which syscalls a binary may make is **`--seccomp`**'s job", "rule",
       "The compiler has a `--seccomp` option (a kernel-enforced allowlist).",
@@ -1405,13 +1464,13 @@ func:main = int32(cstring[]:_~argv) {
     if (p.is_error) { exit 1i32; }
     exit 0i32;
 };
-func:failsafe = int32(Error:e) { exit 9i32; };
-EOF
+""" + failsafe_text("") + """EOF
 "$NPKC" s.npk -o a.ll > a.out 2>&1; a=$?
 "$NPKC" s.npk -o b.ll --extra-picky=no-sys > b.out 2>&1; b=$?
 head -3 a.out b.out
 [ $a -eq 0 ] && [ $b -eq 1 ]""",
-      wrong="the flag unknown, or the sys call accepted under it")
+      wrong="the flag unknown, or the sys call accepted under it",
+      fixed="run 1's script had a failsafe naming nothing, refused REACH-001 without the flag; it now names every identity")
 claim("bi0378", D, 378, "**`asm!!` is spelled `asm`** (D-046)", "rule",
       "`asm!!` no longer exists: it is refused.",
       expect="refuse",
@@ -1468,10 +1527,12 @@ claim("bi0401", D, 401, "| `#[name(...)]` | attribute annotating a declaration |
       expect="run:0",
       src=main_("""    Pt:a = Pt{ x: 1i32, y: 2i32 };
     Pt:b = Pt{ x: 1i32, y: raw v32(2i32) };
-    if (!(a == b)) { exit 10i32; }
-    exit 0i32;""", """#[derive(Eq)]
+    if (!(a.eq(b) ?! E1)) { exit 10i32; }
+    exit 0i32;""", """error:E1;
+#[derive(Eq)]
 struct:Pt = { int32:x; int32:y; };"""),
-      wrong="refused, or the derived equality wrong")
+      wrong="refused, or the derived equality wrong",
+      fixed="run 1 compared with `==`, which a derived Eq does not give (TYPE-034); a derived Eq is called `a.eq(b)`")
 claim("bi0403", D, 403, "**`@` is never a builtin prefix.**", "rule",
       "`@` is never a builtin prefix: `@sizeof(int64)` is refused.",
       expect="refuse",
@@ -1504,14 +1565,10 @@ fixed int64:S = #size_of<P>();"""),
 claim("bi0417", D, 417, "| `#wild_ptr<T>(addr)` |", "row",
       "#wild_ptr<T>(addr) constructs a pointer from an integer address, in wild context.",
       expect="run:0",
-      src=main_("""    wild int8->:p = alloc(16i64);
-    wild int8->:q = raw back(p);
-    dalloc(p);
-    exit 0i32;""", """func:back = int8->(int8->:p) never fails {
-    wild int8->:q = #wild_ptr<int8>(4096i64);
-    pass p;
-};"""),
-      wrong="refused in wild context")
+      src=main_("""    wild int8->:q = #wild_ptr<int8>(4096i64);
+    exit 0i32;"""),
+      wrong="refused in wild context",
+      fixed="run 1 returned a parameter into a wild binding, refused BORROW-011 (D-223); now the constructor alone")
 claim("bi0417b", D, 417, "**Legal only in `wild` context**", "row",
       "#wild_ptr is legal only in wild context: into a binding not declared `wild` it is refused (D-019's reading).",
       expect="refuse",

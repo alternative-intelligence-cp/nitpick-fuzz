@@ -21,6 +21,8 @@ and one JSON line each in results/<commit>/m11.jsonl (overwritten). Kinds:
   build_fail    npkc 0, and opt, llc or ld.lld refused the emission
   heap          the exits agree and a leg's `heap:` line does not match
   ir            the emitted IR does not (or does) match the expected pattern
+  emit_defect   npkc refused with NITPICK-EMIT-002, which names itself a compiler defect
+                (even where a refusal was expected: the checker accepted the program)
   crash         npkc exited other than 0 or 1
   timeout       a leg or a script hit its timeout
 """
@@ -41,9 +43,9 @@ def sh(cmd, cwd=None, env=None, timeout=120, stdin=None):
         return "T", (e.stdout or b"").decode("utf-8", "replace")
 
 
-def load_expect():
+def load_expect(path):
     rows = []
-    with open(os.path.join(ROOT, "m11", "EXPECT.tsv")) as f:
+    with open(path) as f:
         head = f.readline().rstrip("\n").split("\t")
         for line in f:
             rows.append(dict(zip(head, line.rstrip("\n").split("\t"))))
@@ -54,7 +56,7 @@ def build_and_run(row, comp, llvm):
     npkc = os.path.join(comp, ".internal", "quickemit", "npkc")
     npkrt = os.path.join(comp, ".internal", "quickemit", "npkrt.o")
     npkg = os.path.join(comp, ".internal", "quickemit", "p_main_npk")
-    src = os.path.normpath(os.path.join(ROOT, "m11", row["file"]))
+    src = row["file"] if os.path.isabs(row["file"]) else os.path.join(ROOT, row["file"])
     work = tempfile.mkdtemp(prefix="m11-")
     rec = {"npkc": "-", "codes": [], "msg": "", "O0": "-", "O2": "-", "heap_O0": None,
            "heap_O2": None, "ir": None, "sh": None, "out": ""}
@@ -137,6 +139,9 @@ def judge(row, r):
     if r["npkc"] not in (0, 1):
         return "DISAGREE", "crash"
     kind, _, val = e.partition(":")
+    if "NITPICK-EMIT-002" in r["codes"]:
+        # the emitter's refusal names itself a compiler defect: never a claimed refusal
+        return "DISAGREE", "emit_defect"
     if kind == "refuse":
         if r["npkc"] == 0:
             return "DISAGREE", "accepted"
@@ -174,11 +179,12 @@ def main():
     ap.add_argument("--ids", nargs="*", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--llvm", default=os.path.join(ROOT, ".work", "llvm"))
+    ap.add_argument("--expect", default=os.path.join(ROOT, "m11", "EXPECT.tsv"))
     a = ap.parse_args()
     comp = os.path.abspath(a.compiler)
     commit = subprocess.run(["git", "-C", comp, "rev-parse", "--short=7", "HEAD"],
                             stdout=subprocess.PIPE).stdout.decode().strip()
-    rows = load_expect()
+    rows = load_expect(a.expect)
     if a.ids:
         rows = [r for r in rows if r["id"] in set(a.ids)]
     out = a.out or os.path.join(ROOT, "results", commit, "m11.jsonl")

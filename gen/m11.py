@@ -153,8 +153,11 @@ def render_program(c):
     return body
 
 
-def write(docs):
-    pdir = os.path.join(OUT, "programs")
+def write(docs, out=OUT):
+    """Write CLAIMS.md, EXPECT.tsv and programs/ under `out` (m11/, or a scratch
+    directory for a shakedown). EXPECT.tsv's `file` is relative to the repository
+    root when `out` is m11/, and absolute otherwise."""
+    pdir = os.path.join(out, "programs")
     if os.path.isdir(pdir):
         shutil.rmtree(pdir)
     os.makedirs(pdir)
@@ -163,27 +166,29 @@ def write(docs):
         if c["untestable"]:
             continue
         if c["m10"]:
-            fn = "../m10/programs/%s.npk" % c["m10"]
+            fn = os.path.join(ROOT, "m10", "programs", "%s.npk" % c["m10"])
         elif c["expect"].startswith("sh:"):
-            fn = "programs/%s.sh" % c["id"]
-            with open(os.path.join(OUT, fn), "w") as f:
+            fn = os.path.join(pdir, "%s.sh" % c["id"])
+            with open(fn, "w") as f:
                 f.write("#!/bin/bash\n# M11 %s -- %s:%d\n# claim: %s\n# expect: %s\n%s\n" % (
                     c["id"], L.DOCS[c["doc"]][1], c["line"], c["text"], c["expect"], c["sh"].rstrip()))
         else:
             if c["files"]:
                 d = os.path.join(pdir, c["id"])
                 os.makedirs(d)
-                fn = "programs/%s/%s.npk" % (c["id"], c["id"])
+                fn = os.path.join(d, "%s.npk" % c["id"])
                 for sf, text in c["files"].items():
                     with open(os.path.join(d, sf), "w") as f:
                         f.write(text.rstrip() + "\n")
             else:
-                fn = "programs/%s.npk" % c["id"]
-            with open(os.path.join(OUT, fn), "w") as f:
+                fn = os.path.join(pdir, "%s.npk" % c["id"])
+            with open(fn, "w") as f:
                 f.write(render_program(c))
+        if out == OUT:
+            fn = os.path.relpath(fn, ROOT)
         rows.append("\t".join([c["id"], c["doc"], str(c["line"]), c["kind"], fn,
                                L.normalize_expect(c["expect"]), c["heap"] or "-"]))
-    with open(os.path.join(OUT, "EXPECT.tsv"), "w") as f:
+    with open(os.path.join(out, "EXPECT.tsv"), "w") as f:
         f.write("\n".join(rows) + "\n")
     # the claims list
     tot = len(L.CLAIMS)
@@ -235,7 +240,7 @@ def write(docs):
             for e in sorted(ex, key=lambda e: e["line"]):
                 Lh.append("- line %d: %s" % (e["line"], e["reason"]))
         Lh.append("")
-    with open(os.path.join(OUT, "CLAIMS.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(out, "CLAIMS.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(Lh))
     print("claims %d: testable %d, untestable %d; excluded tables %d; m11/ written" % (
         tot, tot - len(unt), len(unt), len(L.EXCLUDED)))
@@ -247,6 +252,7 @@ def main():
     ap.add_argument("--doc", default=None)
     ap.add_argument("--lines", default=None)
     ap.add_argument("--module", default=None)
+    ap.add_argument("--out", default=None, help="write here instead of m11/ (a shakedown)")
     a = ap.parse_args()
     load_modules(a.module)
     docs = [a.doc] if a.doc else list(L.DOCS)
@@ -259,9 +265,11 @@ def main():
     if errs:
         sys.exit(1)
     if not a.check:
-        if a.module or a.doc or a.lines:
-            sys.exit("write only from the whole set: run without --module/--doc/--lines")
-        write(list(L.DOCS))
+        if (a.module or a.doc or a.lines) and not a.out:
+            sys.exit("m11/ is written only from the whole set: use --out DIR for a part")
+        out = os.path.abspath(a.out) if a.out else OUT
+        os.makedirs(out, exist_ok=True)
+        write(list(L.DOCS), out)
 
 
 if __name__ == "__main__":

@@ -44,6 +44,9 @@ A claim:
     m10     an M10 item id whose program tests exactly this claim (then no src;
             the expectation is M10's, from m10/EXPECT.tsv)
     note    anything else
+    fixed   set only after the first run, by the session: why the program's TEXT
+            changed (a spelling of its own, not the claim's); the expectation
+            never changes (PROGRESS.md S36, S45)
 
   excluded(doc, line, reason)
     a table (its header row at `line`) whose body rows are not claims, e.g. a
@@ -102,10 +105,10 @@ EXPECT_RE = re.compile(r"^(run:\d+|trap:[A-Za-z]+|refuse|refuse:(NITPICK-)?[A-Z]
 
 
 def claim(cid, doc, line, quote, kind, text, expect=None, src=None, files=None, sh=None,
-          heap=None, fs=True, wrong="", untestable=None, m10=None, note=""):
+          heap=None, fs=True, wrong="", untestable=None, m10=None, note="", fixed=""):
     CLAIMS.append(dict(id=cid, doc=doc, line=line, quote=quote, kind=kind, text=text,
                        expect=expect, src=src, files=files or {}, sh=sh, heap=heap, fs=fs,
-                       wrong=wrong, untestable=untestable, m10=m10, note=note,
+                       wrong=wrong, untestable=untestable, m10=m10, note=note, fixed=fixed,
                        module=_MODULE[0]))
 
 
