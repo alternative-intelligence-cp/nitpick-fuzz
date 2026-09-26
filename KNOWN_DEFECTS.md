@@ -90,11 +90,17 @@ assignment is refused (`NITPICK-ASSIGN-002`) and so is its address
 - **The workbench's verdicts:** where the written part owns (a `string`, a
   `Box`), the program exits **95** on both legs. Where it is a plain value, it
   exits **107** at -O0, and at -O2 the write is silently dropped.
-- Added on 2026-09-26, after M4, on the author's instruction. There is no
-  `known/` case for it. The grid's own cells below are its instances; their
+- Added on 2026-09-26, after M4, on the author's instruction. Its `known/`
+  case (below) was added at M9's merge; the grid's own cells are its instances too; their
   verdicts were measured by this repository's M3 run at `c3bdae2`, not by the
   workbench. At a HUNT without step 4b they are deduplicated here, not
   re-investigated.
+
+| `known/def106_fixed_part/` | npkc at `c3bdae2` | -O0 | -O2 | once fixed (at `c970483`) |
+|---|---|---|---|---|
+| `case1_owning_elem` — `FA[1i64] = "gamma"` into `fixed string[2]:FA` | 0 | **95** | **95** | refused `TYPE-086` |
+| `case2_plain_elem` — `FI[1i64] = 7i64` into `fixed int64[2]:FI`, then read | 0 | **107** | **11** (the write dropped) | refused `TYPE-086` |
+| `ctl_local_elem` — the same write into a local array | 0 | 0 | 0 | 0 / 0 |
 
 | grid cells (`ra`, `dx`) | the write | npkc at `c3bdae2` | -O0 | -O2 | once fixed |
 |---|---|---|---|---|---|
@@ -117,9 +123,11 @@ still used, and the view then reads rewritten or freed memory. The compiler
 seat's six-line reproduction, with no `wild` and no `=>!`:
 `string:d = …; string:s = string_from_bytes(d.ptr, 5i64); d = …;`. `s` reads
 the poison (exit 12 in its encoding).
-- **Not fixed.** The fix waits for the author's decision (the compiler's
-  S-106); the recommendation is to freeze a view's root for the view's lexical
-  lifetime.
+- **Fixed in** 1.6.1 step 0, as a refusal: `NITPICK-BORROW-015` — a view's
+  root is frozen for the view's lexical lifetime (the author's D-325). Find it
+  by its subject; HUNT2 `9126350` carries it. **M9's F-004 is a gap in that
+  fix** (`findings/F-004-view-root-freed-through-callee/`): a callee that moves
+  the value out through `@x` or `$$i x` still frees the root.
 - **Deduplicate** any view-outlives-its-root cell against this.
 - **Workbench id** O-N25.
 
@@ -129,13 +137,23 @@ the poison (exit 12 in its encoding).
 returns 0 on the other path, a `string` returns empty, a `bool` false, and
 **a fallible function returns a success carrying 0**. `main` falling off its
 end exits 0.
-- **Being fixed** as `NITPICK-FLOW-001`, by the author's rule: every path of
-  every function, `NIL` functions included, ends in `pass`, `fail`, `exit` or
-  a trap.
+- **Fixed in** 1.6.0 step 5c, as a refusal: `NITPICK-FLOW-001`, by the
+  author's rule: every path of every function, `NIL` functions included, ends
+  in `pass`, `fail`, `exit` or a trap. Find it by its subject; HUNT2 carries it.
 - **Once a HUNT compiler carries it, every generated program must leave
   explicitly** (`pass NIL;` in every `NIL` function), or its cells are refused
   for the wrong reason.
 - **Workbench id** O-N26.
+
+| `known/def108_fall_off/` | npkc at `c3bdae2` | -O0 | -O2 | once fixed (at `c970483`) |
+|---|---|---|---|---|
+| `case1_empty_body` — `func:f = int64() never fails { };`, read against 5 | 0 | **10** (it read 0) | **10** | refused `FLOW-001` |
+| `case2_fallible_missing_path` — `g(0)` falls off a fallible function | 0 | **12** (a success) | **12** | refused `FLOW-001` |
+| `ctl_explicit` — the same function leaving on every path | 0 | 0 | 0 | 0 / 0 |
+
+M10.3's other two shapes — a missing path in a function that cannot fail, and
+`main` without `exit` — have no `known/` case yet; M10.3 needs its own programs
+for them.
 
 ## Closed as faces of known defects (measured at 3g by the compiler seat)
 
@@ -166,6 +184,11 @@ end exits 0.
 - **DEF-98** — a block string closed at the first `""` instead of `"""`
   (`PARSE-003`). Fixed at `395308f`.
 - **DEF-100, DEF-101** — documentation defects in the compiler's references.
+- **DEF-116** — an impl may declare `move` on a parameter its trait lends, or
+  lend one its trait moves, and a call through the trait frees twice or leaks.
+  Refused `TYPE-014` from 1.6.1 step 0c, which is AFTER HUNT2 `9126350`: HUNT2
+  still has it. Its twin DEF-117 (a refused argument cascading into `TYPE-022`
+  at a generic call) is a diagnostic. Workbench id O-N28.
 - **DEF-103** — a keyword accepted as a declared function or type name, and
   then uncallable. Refused `PARSE-001` from 1.6.0 step 3g.
 - **DEF-23 / O-N19** — `TYPE-046` not asked of an unsubstituted `T`. Fixed by

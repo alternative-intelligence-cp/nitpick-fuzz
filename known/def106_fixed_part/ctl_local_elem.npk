@@ -1,0 +1,31 @@
+// CONTROL: the same plain write into a LOCAL array -- no rule refuses it,
+// and the read sees it (0). If this is refused, TYPE-086's reach is wrong.
+mod:ctl_local_elem;
+
+func:put = int64() never fails {
+    int64[2]:li = [1i64, 2i64];
+    li[1i64] = 7i64;
+    pass li[1i64];
+};
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw put() != 7i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (DivByZero)         { exit 97i32; },
+        (DivOverflow)       { exit 98i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};
