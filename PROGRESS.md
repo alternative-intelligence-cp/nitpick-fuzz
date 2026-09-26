@@ -43,7 +43,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
 - [ ] **M11** — the reference, checked against the compiler (session 6: **STOPPED
   part-way on the author's word, 2026-09-26, the cloud credit nearly spent**;
-  resume from "M11 — the state at the stop" below)
+  resume from "M11 — the state at the stop" below). Session 7 (local, branch
+  `local-m11`) resumed it: the start checks pass; the drafted modules come next (S50)
   - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN done and run; five ranges drafted, unreviewed (`gen/m11_claims/_wip_*.py`); nine not started
   - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2
   - [ ] 11.3 `REPORT.md` §12; stop
@@ -1018,7 +1019,78 @@ LEXICAL and AST (about 5 900 lines).
    the classes from a `gen/m11_triage.py` still to be written; then REPORT.md
    §12.
 
+### M11, session 7 (local): the start checks
+
+- **The gate.** The workbench's brief (from `nitpick-libs_s7`, its orchestrator) says
+  to work on a branch of this clone, so the session began with `git fetch origin && git
+  switch -c local-m11 origin/main`. `origin/main` was `cbdec2e` (KNOWN_DEFECTS.md with
+  M10's DEF-127 … DEF-133 and DEF-134). M10 is ticked and M11 is not. The branch's
+  upstream was unset, so that no push can reach `main` (S47).
+- **(a)** `uname -a` and `nproc` are under Environment below: 48 cores, the author's
+  machine, shared with the compiler seat and the library agents.
+- **(b)** `CLAUDE.md` was re-read, the silent-wrong-answer rule with it.
+- **(c)** `.work/` was absent, so the toolchain was rebuilt by M0's commands, with two
+  departures: LLVM 20.1.2 is the machine's own (S48); and the compiler's newest
+  `main` is built for the findings only (S49).
+- **(d)** M11 resumes at its first box, from "the state at the stop" above; nothing
+  ticked was redone.
+
+**The rebuild.** LLVM: `.work/llvm` is a symbolic link to `/usr/lib/llvm-20`, whose
+`llvm-config --version` prints `20.1.2` (S48). The compiler was cloned from GitHub to
+`.work/nitpick` at 14:24 UTC, in 4.8 s. Its `origin/main` is `1b4f0c6` (2026-09-26
+07:09:26 -0400, 1.6.1 step 1: E-8, every module states its layout and triple), so
+HUNT2 stays `9126350` (S41). Three worktrees were built by M0.5's command:
+- `.work/hunt2` (`9126350`), alone, in 72.2 s;
+- `.work/base` (`c3bdae2`) in 73.6 s and `.work/main1b4` (`1b4f0c6`) in 55.6 s, the
+  two together.
+
+| compiler | `npkc.ll` bytes / sha256 | `npkrt.o` | `npkc` bytes / sha256 |
+|---|---|---|---|
+| HUNT2 `9126350` | 28 857 206 / `2448b3b60d9eb189…`, as sessions 3–6 | 72 576 / `162b897539285a77…` | 9 972 872 / `c7212b6be06fe6a4…` (sessions 3–6: 9 972 944) |
+| baseline `c3bdae2` | 28 111 929 / `4029fc70efbe9cd3…`, so the commissioning check passes | the same | 9 724 160 / `5fd636b9ab557c19…` (sessions 1–6: 9 724 232) |
+| newest `main` `1b4f0c6` | 28 872 936 / `ec29f358c08dfe80…`, the digest its commit message states | the same | 9 977 536 / `07de906a85d58594…` |
+
+The emissions and the runtime object are byte-identical to the earlier sessions'. The
+linked `npkc` is 72 bytes shorter at both old compilers. Its `.comment` section reads
+`Linker: Ubuntu LLD 20.1.2`. *Reasoned, not measured:* the release tarball's `ld.lld`
+writes its repository URL and commit there instead, which accounts for the length. The
+checks below show that the verdicts do not move.
+
+Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0.
+`canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no `.ll`.
+
+**The machine checks.**
+- The recall suite (`gen/run_known.py`) is identical to `results/<commit>/known-m10.txt`
+  line for line at HUNT2 and at the baseline: 25 rows each.
+- M10's 223 programs re-run at HUNT2 are identical to `results/9126350/m10.jsonl` in
+  223 of 223 (npkc rc, codes, both legs, verdict; 19 s): 212 agree, 11 disagree, as
+  recorded.
+
+**The plan for the session (S50).** The five drafted ranges are reviewed, committed,
+run and triaged, together with BUILTIN's candidates. The nine ranges not started are
+about 6 600 lines, or roughly 3 300 claims at the drafts' density. That is far more than
+the brief's "a few hours", so the session stops cleanly after the drafted modules, as
+the brief says.
+
 ## Environment
+
+*(session 7, measured 2026-09-26 14:23 UTC; M11 resumed here, on the author's machine
+— the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-34-generic #34~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Sep  4 15:38:29 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 14 used, 93 free, 142 available; Swap 15 (2 used)
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  1.7T used  4.9T avail (26%)
+os:        Linux Mint 22.3 (Ubuntu 24.04 base)
+python3:   Python 3.12.3
+git:       2.43.0
+llvm:      /usr/lib/llvm-20 (llvm-config 20.1.2), linked as .work/llvm
+earlyoom:  active
+```
+
+The machine is shared with the compiler seat's harnesses and the library agents.
+Parallelism stays at 4 jobs (CLAUDE.md rule 7, S1).
 
 *(session 6, measured 2026-09-26 13:03 UTC; M11 run here — the start check (a))*
 
@@ -1384,6 +1456,34 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   as `gen/m11_claims/_wip_*.py`, unreviewed and outside the loader, so that nothing
   committed claims more than was done.
 
+- **S47 — session 7 works on branch `local-m11` of the author's local clone**, as the
+  workbench's brief says: `git switch -c local-m11 origin/main` at `cbdec2e`. The
+  workbench reviews the branch and fast-forwards `main`; the session never pushes to
+  `main`. Its upstream was unset at once, since `switch -c` had set it to `origin/main`.
+  The brief also asks for one session in sequence with no sub-agents, since session 6's
+  eleven parallel extractors are what spent the cloud credit.
+- **S48 — LLVM 20.1.2 is the machine's own**, `/usr/lib/llvm-20` (Ubuntu's build),
+  linked as `.work/llvm` so that every runner's default finds it. PLAN.md 0.2's rule is
+  "never substitute another LLVM". The version is exactly `20.1.2`, and the checks
+  bear it out: the emissions are byte-identical, and so is the runtime object; the
+  recall suite matches at both compilers; M10's 223 programs match. Only the linked
+  `npkc` moved, by 72 bytes, in its linker comment.
+- **S49 — the compiler's newest `main` is `1b4f0c6` (1.6.1 step 1)**, built as
+  `.work/main1b4` for the findings only. This is S37's practice: each finding's programs
+  also run there, so the workbench knows whether a shape stands at the tree the
+  maintainers work on. No claim's verdict is taken from it. HUNT2 stays `9126350`
+  (S41), since the claims are read from its lines.
+- **S50 — the drafted modules first; the ranges not started are left for later.** They
+  are the rest of TYPE (661–2123), TRAITS, MEMORY, MODULE, BUILD, OP, CONTROL, LEXICAL,
+  AST, and VERIFICATION after `_wip_verif2`'s last claim: about 6 600 lines, or roughly
+  3 300 claims at 0.5 a line (BUILTIN gave 227 for 447 lines, TYPE 1–660 gave 322).
+  The brief says to stop at a clean point after the `_wip_` modules if the rest looks
+  like more than a few hours. Also, `gen/m11.py --module _wip_X` now loads the draft
+  it names. Session 6's loader skipped every `_` module, even one named, so the
+  command in "the state at the stop" could not check a draft as written. Run with the
+  new loader, it reproduces that table exactly: 322, 124, 152 and 78 claims with 0, 0,
+  6 and 5 errors, and 357 and 228 with 18 and 51.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -1476,3 +1576,10 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     claims) and run twice at HUNT2: 182 agree, 12 disagree, all old. Five other
     ranges drafted by sub-agents, unreviewed; nine not started.
   - **Stopped** on the author's word, the credit nearly spent (S46).
+- 2026-09-26 (session 7, branch `local-m11`, the author's machine): M11 resumed on the
+  workbench's brief.
+  - **Setup.** The gate held (`origin/main` = `cbdec2e`, M10 ticked). LLVM 20.1.2 is
+    the machine's own (S48). The compiler was cloned; HUNT2 `9126350`, the baseline and
+    the newest `main` `1b4f0c6` were built (S49). The emissions are byte-identical to
+    earlier sessions'; the canaries, the recall suite and M10's 223 programs re-ran
+    identical.

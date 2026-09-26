@@ -28,7 +28,8 @@ CLAIMS_DIR = os.path.join(ROOT, "gen", "m11_claims")
 
 def load_modules(only=None):
     for f in sorted(os.listdir(CLAIMS_DIR)):
-        if not f.endswith(".py") or f.startswith("_"):
+        # a leading `_` keeps a draft out of the whole set, unless it is named by --module
+        if not f.endswith(".py") or (f.startswith("_") and f[:-3] != only):
             continue
         if only and f[:-3] != only:
             continue
