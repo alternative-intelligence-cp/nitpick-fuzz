@@ -7,10 +7,16 @@ usage: python3 gen/run.py <compiler-dir> [--cells cells] [--limit N] [--ids ID .
 Cells run in id order. The output file is appended one JSON line per cell and
 the run is RESUMABLE: every cell already in the file is skipped. A compile
 step gets 120 s, a run 10 s; a run timeout is recorded as "T".
+
+M9: a cell whose meta.json says "heap": true (the leak observer) runs under
+NPK_HEAP_STATS=1, and each leg records the runtime's `heap:` line as
+heap_O0/heap_O2 = [allocated, peak_live, count] (null when no line came). A
+cell's "section", "expect_exit" and "expect_live" are carried into its record.
 """
 import argparse, concurrent.futures as cf, json, os, re, shutil, subprocess, sys, tempfile, threading
 
 CODE_RE = re.compile(r"NITPICK-[A-Z]+-\d{3}")
+HEAP_RE = re.compile(r"heap: allocated=(\d+) peak_live=(\d+) count=(\d+)")
 COMPILE_TIMEOUT, RUN_TIMEOUT = 120, 10
 
 
@@ -43,6 +49,9 @@ def do_cell(meta, cells, comp, llvm):
         rc, out = run([npkc, cid + ".npk", "-o", ll], cwd=d)
         codes = sorted(set(CODE_RE.findall(out)))
         rec = {k: meta[k] for k in ("id", "T", "P", "O", "observer", "expect")}
+        for k in ("section", "expect_exit", "expect_live"):   # M9's cells carry these
+            if k in meta:
+                rec[k] = meta[k]
         rec.update({"npkc": rc, "codes": codes, "O0": "-", "O2": "-"})
         first = [l for l in out.splitlines() if "NITPICK-" in l][:1]
         if first:
@@ -69,8 +78,14 @@ def do_cell(meta, cells, comp, llvm):
             r, o = run(["ld.lld", "-static", obj, npkrt, "-o", exe], env=env)
             if r != 0:
                 rec[leg] = "ld!%s" % r; rec[leg + "_err"] = o[-300:]; continue
-            r, o = run(["env", "-i", exe], cwd=work, timeout=RUN_TIMEOUT)
+            # M9's leak observer: the runtime's `heap:` line on fd 2 at exit
+            heap = bool(meta.get("heap"))
+            r, o = run(["env", "-i"] + (["NPK_HEAP_STATS=1"] if heap else []) + [exe],
+                       cwd=work, timeout=RUN_TIMEOUT)
             rec[leg] = r
+            if heap:
+                m = HEAP_RE.findall(o)
+                rec["heap_" + leg] = [int(x) for x in m[-1]] if m else None
         return rec
     finally:
         shutil.rmtree(work, ignore_errors=True)

@@ -25,6 +25,12 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 8.5 HUNT2 against `6fb85d3`, cell by cell: 148 moved, 136 expected, 0 missing, 12 changed codes explained (bisected to 3h)
   - [x] 8.6 the anomalies at HUNT2 through M5's five steps: none to take
   - [x] 8.7 `REPORT.md` §9; stop (M9 waits for the author)
+- [ ] **M9** — widen the ownership grid into its named gaps (session 4, in progress)
+  - [ ] 9.1 the leak observer
+  - [ ] 9.2 the reuse-proof read
+  - [ ] 9.3 types, 9.4 places, 9.5 operations
+  - [ ] 9.6 the recall gate kept; every new expectation written before its first run
+  - [ ] 9.7 the widened grid at the baseline and HUNT2, triaged; `REPORT.md` §10; stop
 
 ## Compilers
 
@@ -475,6 +481,104 @@ M2's measured costs, not measured):
   set the low end, and the number of new anomalies to triage sets the high
   end.
 
+## M9 — widen the ownership grid (session 4)
+
+**The start checks.** (a) `uname -a` and `nproc` are under Environment below
+(4 cores, the hosted VM). (b) `CLAUDE.md` re-read, the silent-wrong-answer rule
+with it: a result that differs from the reference counts as a defect, exactly
+as a memory fault does. (c) The VM was fresh (`.work/` absent), so the toolchain
+was rebuilt by M0's commands (below). (d) This branch began at `7370a9d`, before
+M8; M8 (`ea77960`) was fast-forwarded in first (S24), so M9 resumes at the first
+unticked box and nothing ticked was redone.
+
+**The rebuild (M0's commands).** LLVM 20.1.2 was fetched to a file and
+extracted as S13 records: the download took 10 s, the whole step 281 s. The
+tarball is 2 021 628 328 bytes, sha256 `3a392f151375eeed…` (as in sessions 2
+and 3), and `llvm-config --version` prints `20.1.2`. The compiler was cloned to
+`.work/nitpick`. Its `origin/main` was `9126350` at 10:28 UTC, so HUNT2 is
+unchanged (S25). The worktrees `.work/hunt2` (`9126350`) and `.work/base`
+(`c3bdae2`) were built one after the other by M0.5's command: HUNT2 in 52.5 s,
+the baseline in 54.4 s. **All six products are byte-identical to session 3's**:
+- `npkc.ll`: 28 857 206 / `2448b3b60d9eb189…` (HUNT2), and 28 111 929 /
+  `4029fc70efbe9cd3…` (the baseline). The commissioning check passes again.
+- `npkc`: 9 972 944 / `20d35e2822b99080…` and 9 724 232 / `0cbc150ced5d20f7…`.
+- `npkrt.o`: 72 576 / `162b897539285a77…` for both.
+
+Canaries (M0.6), at both compilers: `canary.npk` gives npkc 0 and runs 0/0, and
+`canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no
+`.ll`. **The M2 grid re-run on this VM is identical to the committed records**:
+956 of 956 cells at HUNT2 (41 s), and 956 of 956 at the baseline (44 s). Both
+were compared on npkc rc, codes, -O0 and -O2.
+
+**9.1 — what the `heap:` line means, read from the source and measured.**
+- *Read* at the baseline, in `runtime/npkrt.ll`:
+  - `npk_hs_note_alloc` adds each request's REQUESTED size (not the rounded
+    class) to `allocated` and to live, raises `peak_live` to live when live
+    exceeds it, and adds 1 to `count`.
+  - `npk_hs_note_free` subtracts from live, and `npk_hs_note_resize` moves
+    live by the difference.
+  - `npk_exit`'s `leave` block prints `heap: allocated=<n> peak_live=<n>
+    count=<n>` once per process, on every exit, a trapped one included.
+  - **Live bytes at exit are not printed.**
+- *Read* in `nitpick-time`'s `meta/roadmap/0.1/0.1.4b.md`, at commit
+  `1cfd3f001c915bc19901b2cccd148b4cd2034638` (a read-only clone in `.work/`).
+  It measures the same line, and states the consequence: `peak_live` is a
+  high-water mark, so a program that leaks once, as it exits, reports what one
+  that frees there reports (its §1.2). It also records that failsafe's region
+  allocations are not counted, and that a moving `ralloc` counts as an
+  allocation and then a free.
+- **The observer, therefore:** after `run` returns (every drop done), `main`
+  allocates a probe of B = 1 048 576 bytes (`buffer_new`) and exits. The probe
+  lifts the peak to (live after `run`) + B whenever B exceeds every earlier live
+  total. That holds if allocated − B < B, since no peak can exceed the bytes
+  ever requested, and the line itself shows it. So **live after `run` =
+  peak_live − B**. *Measured*, at both compilers, both legs identical:
+
+| control | line (allocated / peak_live / count) | live after `run` |
+|---|---|---|
+| `l0_nothing` (allocates nothing) | 0 / 0 / 0 | — |
+| `l3_probe_only` (the probe alone) | 1 048 576 / 1 048 576 / 1 | B = 1 048 576 |
+| `l1_freeall` (`run` makes one `mk()` string and returns) | B+46 / B / 2 | **0** |
+| `l2_keepone` (`main` also keeps one `mk()` string: `exit` runs no drop) | B+92 / B+46 / 3 | **46**, the kept string |
+
+  A peak read without the probe gives 46 for both `l1` and `l2`, so `l2` is the
+  control a wrong observer gets wrong. `mk()` requests 46 bytes, `nw()` 43, and
+  the sentinel `sn()` 46.
+
+**Found while learning the syntax** (probes in scratch; each noted, none worked
+around; to be taken through M5's steps in triage):
+- **`to_cstring`'s buffer is never freed.** *Measured* at both compilers, both
+  legs, identical:
+  - A function that converts `"/dev/null"` and returns, called N times, peaks
+    at exactly 10 × N live bytes: `allocated=10000 peak_live=10000 count=1000`
+    at N = 1 000, and 40 000 at N = 4 000. The program exits 0.
+  - The control is the same loop with an owning `string` of the same length.
+    It peaks at 9 (the substitution was asserted to match once).
+  - *Read:* `npk_to_cstring` allocates through `npk_alloc_internal`, the
+    managed internal entry that D-151's exit check does not count. `cstring` is
+    `{ptr, len}`, with no `cap` and no drop.
+  - TYPE_REFERENCE §3.2.1 types the buffer as `wild char8->`, and CONTROL §4.6
+    says a successful `exit` with live `wild` memory traps instead. One of the
+    two is wrong. A candidate finding.
+- **The `Result` fallback is spelled `?|`.** A bare `expr ? default` is refused
+  `NITPICK-PARSE-011` ("a bare `?` is not the `Result` fallback (D-175)"). Yet
+  TYPE_REFERENCE §11.2's unwrap table still lists `expr ? defaultVal`, as does
+  MEMORY_REFERENCE §4.2's `my_arena.get(h) ? 0i64`. A documentation mismatch,
+  for M11.
+- **No string literal types as `cstring`.** `cstring:dn = "/dev/null";` and a
+  literal handed to `open` are both refused, `TYPE-007` ("expected `cstring`,
+  found `string`"). TYPE_REFERENCE §3.2.1 lists "string literal in `cstring`
+  position" as a zero-cost source. Another documentation mismatch, for M11.
+- Also measured, and each is the language's stated rule rather than a finding:
+  - a read of a binding after a partial move is `MOVE-001` (D-065's
+    whole-binding rule);
+  - `for` over a `List` is `TYPE-033` (it iterates a range, a slice, an array
+    or an `Iterator`);
+  - `for` over a slice view bound in the same function (`a[0...2]`,
+    `l[0...n]`) is `BORROW-009`;
+  - `for` over a `string[]` PARAMETER compiles;
+  - `gid` is a reserved kernel-identifier type (`PARSE-001` at HUNT2).
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -519,6 +623,20 @@ git:       2.43.0
 ```
 
 A fresh VM of the same kind as session 2's: `.work/` did not exist.
+
+*(session 4, measured 2026-09-26 10:27 UTC; M9 run here — the start check (a))*
+
+```
+uname -a:  Linux vm 6.18.44-fc-v37 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     4
+free -g:   Mem 15 total, 0 used, 15 free, 15 available; Swap 0
+df -h .:   /dev/vda  252G  7.1G used  30G avail (20%) -- 30 GB is the session's writable allowance
+os:        Ubuntu 24.04.4 LTS
+python3:   Python 3.11.15
+git:       2.43.0
+```
+
+A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
 
 ## Decisions and deviations
 
@@ -648,6 +766,32 @@ A fresh VM of the same kind as session 2's: `.work/` did not exist.
   so that `gen/run.py` and `gen/classify.py` never mistake them for a whole
   grid. The old HUNT `6fb85d3` was not rebuilt: its committed record is what
   8.5 compares with, and 3g agrees with it in all 76 import cells.
+
+- **S24 — session 4 works on branch `claude/focused-ride-3dfwa8`**, which the
+  session's harness names. The branch started at `7370a9d` (the plan's M8–M11
+  commit, then `main`), without M8. M8 lived on `claude/fervent-feynman-fhlm63`
+  (`ea77960`), a direct descendant, so it was fast-forwarded in
+  (`git merge --ff-only`) before any work. The workbench's orchestrator
+  confirmed during the session that it had fast-forwarded `main` to `ea77960`
+  at 10:27 UTC, and this branch's history is `main`'s.
+- **S25 — HUNT2 stays `9126350`.** M9 runs "at the baseline and at HUNT2"
+  (PLAN.md 9.7), and HUNT2 is the compiler M8 named. The compiler's
+  `origin/main` was still `9126350` when it was cloned at 10:28 UTC, so no
+  newer compiler existed to consider.
+- **S26 — `gen/snip.py`**, a one-file runner by PLAN.md's recipe, at one or
+  both compilers, optionally under `NPK_HEAP_STATS`. It is for probes and
+  controls, with one job at a time. The grid's cells still go through
+  `gen/run.py`.
+- **S27 — the widened grid is a second generator, `gen/grid9.py`, writing
+  `cells9/`, with ids `mNNNN`.** `gen/grid.py` and its 956 cells are unchanged,
+  so every M2–M8 record stays reproducible. `grid9.py --selfcheck` renders the
+  M2 grid's 956 read_after and drop_at_exit programs with the new builder. With
+  the M2 helpers and fail-safe swapped back in, all 956 are byte-identical to
+  `grid.py`'s. So section A's new observers ride on exactly the M2 programs.
+- **S28 — `gen/run.py` gained the leak observer's run (additive).** A cell whose
+  `meta.json` says `"heap": true` runs under `NPK_HEAP_STATS=1`, and each leg
+  records the `heap:` line's three words. Cells without the key run exactly as
+  before.
 
 ## Log
 
