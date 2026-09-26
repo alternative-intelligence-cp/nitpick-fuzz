@@ -9,9 +9,10 @@ committed. A session that starts here resumes at the first unticked box.
 - [x] **M1** — the recall suite (`known/`) run at both compilers and matched
 - [x] **M2** — the generator, the runner and the classifier
 - [x] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
-- [ ] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
-  — 4.1 and 4.2 done and pushed; **WAITING at 4.3 for the author.** Do not start M5 until the author says so.
-- [ ] **M5** — the hunt
+- [x] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
+  — 4.1 and 4.2 done and pushed (session 1); 4.3: on 2026-09-26 the author said
+  to continue with M5 and M6, at the same HUNT `6fb85d3` (session 2).
+- [ ] **M5** — the hunt — in progress (session 2)
 - [ ] **M6** — the report
 
 ## Compilers
@@ -39,6 +40,20 @@ command in PLAN.md 0.2).
 **Canaries (M0.6), both compilers:** `commission/canary.npk` — npkc rc 0, links,
 runs to 0 on the -O0 leg and on the -O2 leg. `commission/canary_malformed.npk`
 — npkc rc 1, prints `NITPICK-PARSE-001`, writes no `.ll`.
+
+**Rebuilt in session 2 (2026-09-26, the cloud VM below), by M0's commands.**
+The compiler's `origin/main` was still `6fb85d3` when cloned (03:36 UTC), so
+HUNT is unchanged. Build times: base 60.1 s, hunt 64.7 s (run one after the
+other). **All six products are byte-identical to session 1's:** `npkc.ll`
+28 111 929 / `4029fc70efbe9cd3…` and 28 132 333 / `25eb7ee168604005…`;
+`npkc` 9 724 232 / `0cbc150ced5d20f7…` and 9 739 968 / `a81223d352d316be…`;
+`npkrt.o` 72 576 / `162b897539285a77…` for both. LLVM: `llvm-config
+--version` prints `20.1.2` (tarball sha256 `3a392f151375eeed…`, 2 021 628 328
+bytes; see S13). Canaries: the same four verdicts at both compilers. The
+recall suite re-run at both compilers is identical line for line to
+`results/known-c3bdae2.txt` and `results/known-6fb85d3.txt` (19/19 rows each).
+The first 100 cells re-run at HUNT are identical to the committed records
+(npkc rc, codes, -O0, -O2) in 100 of 100 cells.
 
 ## M1 — the recall suite
 
@@ -193,6 +208,60 @@ the element assignment drops the old element, a string literal in a `constant`
 global that was never allocated, and the allocator stops as `Unreachable`,
 the same end DEF-99's -O2 leg reaches.
 
+## M5 — the hunt at HUNT `6fb85d3` (session 2)
+
+**5.1 — the rest of the grid.** The 856 cells `c0101`–`c0956` ran at HUNT in
+43 s (4 jobs, the cloud VM), appended to `results/6fb85d3/cells.jsonl`, which
+now holds all 956 cells. `results/6fb85d3/SUMMARY.md` and `classified.jsonl`
+are regenerated from it.
+
+| class | at HUNT `6fb85d3` | at the baseline `c3bdae2` |
+|---|---|---|
+| clean | 604 | 612 |
+| refused | 270 | 230 |
+| DEFECT:double_free | 48 | 56 |
+| DEFECT:uaf | 22 | 22 |
+| DEFECT:leg_mismatch | 3 | 25 |
+| DEFECT:segv | 3 | 5 |
+| DEFECT:wrong_value | 2 | 2 |
+| OVERRESTRICT | 4 | 4 |
+| CRASH, timeout, other | 0 | 0 |
+
+**Baseline against HUNT, cell by cell** (npkc rc, codes, -O0, -O2): exactly
+40 cells moved, and all 40 went to `refused NITPICK-TYPE-084`. They are every
+cell of DEF-99's shape (a `fixed` place × `move`/`pass_out`, 40 cells): 32
+were anomalies at the baseline and 8 ran clean. Nothing else moved. No cell
+became an anomaly at HUNT, and no control became refused.
+
+**The same machine, both compilers:** the whole grid re-run at the baseline on
+this VM (50 s, into scratch) is identical to the committed
+`results/c3bdae2/cells.jsonl` in 956 of 956 cells.
+
+**5.2 (a) — deduplication.** `gen/dedup.py` states KNOWN_DEFECTS.md's shapes
+on the grid's axes and writes `results/<commit>/DEDUP.md`. At HUNT, with
+DEF-99's fix counted as present, there are **82 anomalies: 62 known and 20
+candidates.**
+
+| known defect (fix not in HUNT) | cells at HUNT |
+|---|---|
+| DEF-106 — a write into a part of a `fixed` binding (S14) | 24 |
+| DEF-102 — a write through a lent parameter | 24 |
+| DEF-105 — an imported table's row type resolved in the importer (4 are the `OVERRESTRICT` `TYPE-001` cells, case 1) | 8 |
+| DEF-104 — a lent `T` passed out, or `@x` of it, in a generic body | 6 |
+| **candidate** | **20** |
+
+The 20 candidates are two shapes, the two M3 noted:
+- **writes through a `for` binding**: `for_binding` × `at_free` (8 cells: 70/70
+  on `ra`, 95/95 on `dx`, for `str`, `box`, `list`, `wrap`), × `at_grow` (4:
+  `list`, `wrap`) and × `field_write` (4: `box`, `wrap`, 22/22 on `ra` and
+  95/95 on `dx`);
+- **`move(x)` of a lent `T` in a generic body**: `generic_param` × `move` (4:
+  `gen_str`, `gen_box`, 70/70 on `ra`, 95/95 on `dx`).
+
+At the baseline the same script accounts for all 114 of M3's anomalies: 32
+DEF-99, 24 DEF-106, 24 DEF-102, 8 DEF-105, 6 DEF-104, and the same 20
+candidates.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -208,6 +277,21 @@ git:       2.43.0
 
 This is not the 4-vCPU cloud VM `PLAN.md` describes; it is the author's local
 machine (the session was dispatched here by the workbench). See decision S1.
+
+*(session 2, measured 2026-09-26 03:34 UTC; M5 and M6 run here)*
+
+```
+uname -a:  Linux vm 6.18.44-fc-v42 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     4
+free -g:   Mem 15 total, 0 used, 14 free, 15 available; Swap 0
+df -h .:   /dev/vda  252G  7.1G used  30G avail (20%) -- 30 GB is the session's writable allowance
+os:        Ubuntu 24.04.4 LTS
+python3:   Python 3.11.15
+git:       2.43.0
+```
+
+This is the cloud VM `PLAN.md` describes (4 vCPUs, 16 GB, 30 GB). Outbound
+HTTPS goes through an agent proxy.
 
 ## Decisions and deviations
 
@@ -260,6 +344,26 @@ machine (the session was dispatched here by the workbench). See decision S1.
 - **S11 — the generic places** are `generic_param` (a lent `T`), `move_param`,
   `ptr_param` and `local` (a `T` local initialised from a `move` parameter),
   all inside a generic body; the original is observed in the concrete caller.
+- **S12 — session 2 works on branch `claude/awesome-cannon-b092si`**, which the
+  session's harness names. It started at `1bcd82d`, the same commit as `main`
+  and as session 1's branch.
+- **S13 — LLVM was fetched to a file, then extracted.** PLAN.md 0.2's piped
+  `curl | tar` was reset mid-transfer by the agent proxy's tunnel (curl 56,
+  `ws_closed_mid_exchange`), so the same URL was downloaded with `curl -C -` in
+  a retry loop (the first attempt completed), checked with `xz -t`, and
+  extracted with the same `tar -xJ --strip-components=1`. It is the same
+  release tarball, and `llvm-config --version` prints `20.1.2`.
+- **S14 — DEF-106 was added to `KNOWN_DEFECTS.md` on the author's
+  instruction** (the workbench's O-N24; fixed in 1.6.0 step 4b as
+  `NITPICK-TYPE-086`, not in HUNT). The writes INTO `fixed` storage that M3
+  and M4 flagged are its instances and are deduplicated, not investigated:
+  `c0039`/`c0040`, `c0185`/`c0186`, `c0203`–`c0206`, `c0645`/`c0646`,
+  `c0753`/`c0754`, and the imported twins `c0151`/`c0152`, `c0329`–`c0332`,
+  `c0353`–`c0356`, `c0371`/`c0372`.
+- **S15 — the machine changed between M4 and M5**, so before M5 the rebuild
+  was checked to be byte-identical (above) and the committed first-100 HUNT
+  records were reproduced exactly. The M5 cells are appended to the same
+  `results/6fb85d3/cells.jsonl`.
 
 ## Log
 

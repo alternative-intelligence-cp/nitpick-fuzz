@@ -77,6 +77,38 @@ A generic function can hand back its lent `T` parameter as a second owner.
 | `case6_scalar_same_name` — a `fixed Row` scalar beside a same-named struct | 0 | **10** | **10** | 0 / 0 |
 | `case7_function_only` — a function returning `Row`, imported alone | 0 | 0 | 0 | 0 / 0 |
 
+## DEF-106 — a write INTO a `fixed` binding's element or field compiles, and stores into the constant
+
+`fixed` storage is an LLVM `constant` global, as in DEF-99. The whole binding's
+assignment is refused (`NITPICK-ASSIGN-002`) and so is its address
+(`NITPICK-TYPE-071`), but an assignment to one of its parts — `FA[i] = …;`,
+`FX.s = …;`, `FX[0i64] = …;` — compiles and stores into the constant.
+
+- **Fixed in** 1.6.0 step 4b, as a refusal: `NITPICK-TYPE-086`. No commit is
+  given: find it by its subject, `1.6.0 step 4b`.
+- **Workbench id** O-N24.
+- **The workbench's verdicts:** where the written part owns (a `string`, a
+  `Box`), the program exits **95** on both legs. Where it is a plain value, it
+  exits **107** at -O0, and at -O2 the write is silently dropped.
+- Added on 2026-09-26, after M4, on the author's instruction. There is no
+  `known/` case for it. The grid's own cells below are its instances; their
+  verdicts were measured by this repository's M3 run at `c3bdae2`, not by the
+  workbench. At a HUNT without step 4b they are deduplicated here, not
+  re-investigated.
+
+| grid cells (`ra`, `dx`) | the write | npkc at `c3bdae2` | -O0 | -O2 | once fixed |
+|---|---|---|---|---|---|
+| `c0039`, `c0040` | `FA[i] = …` into `fixed string[2]:FA` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0185`, `c0186` | `FX.s = …` into `fixed Box:FX` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0203`, `c0204` | `FA[i].s = …` into `fixed Box[2]:FA` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0205`, `c0206` | `FA[i] = …` into `fixed Box[2]:FA` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0645`, `c0646` | `FX[0i64] = …` into `fixed string[2]:FX` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0753`, `c0754` | `FX[0i64] = …` into `fixed Box[2]:FX` | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0151`, `c0152` | the imported twin of `c0039`: `TBL[i] = …` (`imported_fixed_typed`, `str`) | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0329`–`c0332` | the imported twins of `c0203`–`c0206` (`imported_fixed_typed`, `box`) | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0353`–`c0356` | the same, beside a same-named, same-layout `Box` (`imported_fixed_same`) | 0 | **95** | **95** | refused `TYPE-086` |
+| `c0371`, `c0372` | `TBL[i].s = …` beside a wider same-named `Box` (`imported_fixed_wider`): DEF-106 reached through DEF-105's wrong stride | 0 | **95** | **107** (`ra`), **0** (`dx`) | *inferred, not stated:* refused `TYPE-086` once DEF-105's fix resolves the row to the table's own `Box` |
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.
