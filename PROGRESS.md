@@ -10,6 +10,7 @@ committed. A session that starts here resumes at the first unticked box.
 - [x] **M2** — the generator, the runner and the classifier
 - [x] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
 - [ ] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
+  — 4.1 and 4.2 done and pushed; **WAITING at 4.3 for the author.** Do not start M5 until the author says so.
 - [ ] **M5** — the hunt
 - [ ] **M6** — the report
 
@@ -156,6 +157,42 @@ reached through a `for` binding (`for_binding` × `field_write`/`at_free`/`at_gr
 and a generic body (`generic_param` × `move`/`at_free`) behave as DEF-102 and
 DEF-104 do.
 
+## M4 — calibration checkpoint (4.1, 4.2 done; waiting at 4.3)
+
+The first 100 cells in id order (`c0001`–`c0100`, all `str`: local,
+fixed_scalar, fixed_elem, lent_param, move_param, ptr_param, and the first of
+for_binding) ran at HUNT `6fb85d3` in 5.4 s: `results/6fb85d3/`. `origin/main`
+was re-fetched after the run and is still `6fb85d3`.
+
+| class at HUNT | cells |
+|---|---|
+| clean | 56 |
+| refused | 40 |
+| DEFECT:double_free | 3 |
+| DEFECT:uaf | 1 |
+
+Against the same 100 at the baseline: the 8 DEF-99 cells (`c0019`–`c0022`,
+`c0035`–`c0038`) moved from DEFECT/clean to `refused NITPICK-TYPE-084`, as the
+fix says. Nothing else moved.
+
+The four DEFECTs at HUNT:
+
+| cell | HUNT -O0/-O2 | baseline -O0/-O2 | known? |
+|---|---|---|---|
+| `c0059_str_lent_param_at_free_ra` | 70/70 uaf | 70/70 | DEF-102 (`@x` of a lent param to a freeing callee; fix 3g not in HUNT) |
+| `c0060_str_lent_param_at_free_dx` | 95/95 double_free | 95/95 | DEF-102, as above |
+| `c0039_str_fixed_elem_assign_ra` | 95/95 double_free | 95/95 | **not in `KNOWN_DEFECTS.md`** |
+| `c0040_str_fixed_elem_assign_dx` | 95/95 double_free | 95/95 | **not in `KNOWN_DEFECTS.md`**, same shape |
+
+`c0039`'s shape: `FA[i] = raw nw();` where `fixed string[2]:FA` is a module
+binding. It compiles at both compilers and exits 95 on both legs; the whole
+binding's assignment (`c0023`) is refused `ASSIGN-002` and its address
+(`c0025`, `c0041`) `TYPE-071`. Measured once per compiler per leg; not yet
+minimised, repeated or taken through M5's five steps. *Inferred, not measured:*
+the element assignment drops the old element, a string literal in a `constant`
+global that was never allocated, and the allocator stops as `Unreachable`,
+the same end DEF-99's -O2 leg reaches.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -234,3 +271,4 @@ machine (the session was dispatched here by the workbench). See decision S1.
   M2 done: 956 cells generated, 1 284 skipped; one generator bug found and
   fixed in a baseline shakedown.
   M3 done: whole grid at c3bdae2 in 58 s; every known shape flagged, no miss.
+  M4.1-4.2 done: 100 cells at HUNT; stopped at the calibration checkpoint.
