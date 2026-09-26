@@ -7,7 +7,7 @@ committed. A session that starts here resumes at the first unticked box.
 
 - [x] **M0** — the two compilers built and commissioned
 - [x] **M1** — the recall suite (`known/`) run at both compilers and matched
-- [ ] **M2** — the generator, the runner and the classifier
+- [x] **M2** — the generator, the runner and the classifier
 - [ ] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
 - [ ] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
 - [ ] **M5** — the hunt
@@ -59,6 +59,44 @@ are still present); DEF-99's shape is expected to appear as `refused TYPE-084`.
 The newest commit on the compiler's `main` at M0.3 was `6fb85d3`; the 3g/3h
 fixes the plan anticipated "on the night of 2026-09-25" had not landed.
 
+## M2 — the generator, the runner, the classifier
+
+`gen/grid.py` (the cells), `gen/run.py` (4 jobs, resumable), `gen/classify.py`
+(`SUMMARY.md` and `classified.jsonl`), `gen/grid_stats.py` (`results/GRID.md`).
+
+**The grid's size:** 2 240 combinations (8 T × 14 P × 10 O × 2 observers);
+**956 generated**, **1 284 skipped** with their reasons in `cells/SKIPPED.txt`
+(regenerable) and summarised in `results/GRID.md`. Of the 956, the generator's
+reading of the rules expects **394 REFUSE** and **562 SAFE**.
+
+| T | generated | skipped | | P | generated | skipped |
+|---|---|---|---|---|---|---|
+| str | 160 | 120 | | local | 134 | 26 |
+| box | 222 | 58 | | move_param | 134 | 26 |
+| list | 112 | 168 | | ptr_param | 134 | 26 |
+| wrap | 126 | 154 | | lent_param | 104 | 56 |
+| arr_str | 108 | 172 | | field | 104 | 56 |
+| arr_box | 108 | 172 | | fixed_scalar | 70 | 90 |
+| gen_str | 64 | 216 | | elem | 68 | 92 |
+| gen_box | 56 | 224 | | for_binding | 68 | 92 |
+| | | | | imported_fixed_typed | 34 | 126 |
+| | | | | fixed_elem | 34 | 126 |
+| | | | | generic_param | 30 | 130 |
+| | | | | imported_fixed_same | 18 | 142 |
+| | | | | imported_fixed_wider | 18 | 142 |
+| | | | | imported_fixed_bare | 6 | 154 |
+
+By O and by observer: see `results/GRID.md` (each observer is exactly half,
+478 cells).
+
+**Shakedown (before any result counted):** the whole grid was run at the
+baseline into `.work/` and every refusal's codes compared with the cell's
+expected codes. One generator bug was found and fixed: a generic `pass_out`
+cell's `drop_at_exit` discarded a value with `drop` (refused `TYPE-042`, D-163
+rule 4); it now binds the result. After the fix no SAFE cell is refused except
+the four `imported_fixed_bare` clone/read controls, which are DEF-105 case 1
+(`TYPE-001` at `tbl.npk`), a known defect.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -89,6 +127,44 @@ machine (the session was dispatched here by the workbench). See decision S1.
   `opt!N`/`llc!N`/`ld!N`. Build products go to a temporary directory, never
   beside `known/`.
 
+- **S4 — the failsafe carries three more arms** than `lent_field.npk`'s:
+  `LimitViolated` 108 and `DecreasesViolated` 109 (demanded by `NITPICK-REACH-002`
+  in any program using `List<T>`), and `TbbErr` 110 (demanded in a program with
+  a `Clone`-bounded generic). They are in every cell, used or not; an unused
+  named arm is accepted.
+- **S5 — `exit` is legal only in `main` and `failsafe` (`NITPICK-TYPE-010`)**, so
+  a `read_after` cell performs its operation and its observations in `main`
+  (or in the callee the place requires) and `exit`s there: no drops run after
+  an observation. A `drop_at_exit` cell does its work in `run`, which returns
+  normally so every drop runs, and `main` exits with `run`'s result.
+- **S6 — observer codes.** 21 original, 22 new value, 23 vacant (length 0 /
+  count 0), 24 other live value, 70 poison. Each observation's expected code is
+  in the cell's `meta.json`. For a cell expected REFUSE the observation expects
+  21 (the original untouched), so if such a cell is accepted, a changed or
+  freed original still shows.
+- **S7 — `at_callee` is three operations**: `at_overwrite` (the callee assigns
+  the whole value through the pointer), `at_free` (the callee moves the value
+  out through the pointer and drops it) and `at_grow` (the callee pushes eight
+  elements, forcing a reallocation; `list` and `wrap` only).
+- **S8 — the sub-place a `field_write` writes** is `.s` for `box`, `.l` for
+  `wrap`, and element 0 for `arr_str`/`arr_box` (an owning element). `str` and
+  `list` have none (a List's fields are sealed and its element is `int64`).
+- **S9 — `clone`**: `.clone()` of the owning string the value holds (`x`,
+  `x.s`, `x[0]`, `x[0].s`). `Box`, arrays and `List` have no `clone` method at
+  the baseline (`TYPE-019` at probe), so `list`/`wrap` have no clone cell;
+  `gen_str`'s clone uses a `T: Clone` bound, and `gen_box` has none (`Box`
+  declares no `Clone`).
+- **S10 — `imported_fixed` is four places**: `_typed` (the table and its row
+  type imported), `_bare` (the table alone), `_same` (the table beside the
+  importer's own `struct:Box = { string:s; }`, identical layout) and `_wider`
+  (beside `struct:Box = { string:s; int64:z; }`, a wider stride, as DEF-105's
+  case 3). A `str` table has no row type, so it has only `_typed`. Without its
+  row type the importer cannot name `Box`, so `_bare` has only the operations
+  that do not name it (`field_write`, `clone`, `read`).
+- **S11 — the generic places** are `generic_param` (a lent `T`), `move_param`,
+  `ptr_param` and `local` (a `T` local initialised from a `move` parameter),
+  all inside a generic body; the original is observed in the concrete caller.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -96,3 +172,5 @@ machine (the session was dispatched here by the workbench). See decision S1.
   (6fb85d3) worktrees built in 67 s / 69 s, digests recorded, both commissioned.
   M1 done: recall suite matches at the baseline 19/19; HUNT carries only the
   DEF-99 fix.
+  M2 done: 956 cells generated, 1 284 skipped; one generator bug found and
+  fixed in a baseline shakedown.
