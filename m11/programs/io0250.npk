@@ -1,0 +1,62 @@
+// M11 io0250 -- meta/specs/IO_REFERENCE.md:250 (rule)
+// quote: The inherited descriptors stay BLOCKING
+// claim: The inherited descriptors stay blocking: after std_in/out/err are built, fds 0-2 lack O_NONBLOCK.
+// expect: run:0
+// wrong: 10-12: O_NONBLOCK set on the shared open-file description
+mod:io0250;
+
+error:E1;
+error:E2;
+
+func:main = int32(cstring[]:_~argv) {
+    TextReader<ByteReader>:si = std_in() ?! E1;
+    TextWriter<LineBufWriter<ByteWriter>>:so = std_out() ?! E1;
+    TextWriter<ByteWriter>:se = std_err() ?! E1;
+    int64:f0 = sys(72i64, 0i64, 3i64) ?! E2;
+    if ((f0 & 2048i64) != 0i64) { exit 10i32; }
+    int64:f1 = sys(72i64, 1i64, 3i64) ?! E2;
+    if ((f1 & 2048i64) != 0i64) { exit 11i32; }
+    int64:f2 = sys(72i64, 2i64, 3i64) ?! E2;
+    if ((f2 & 2048i64) != 0i64) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

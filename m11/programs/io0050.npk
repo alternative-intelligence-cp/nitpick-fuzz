@@ -1,0 +1,58 @@
+// M11 io0050 -- meta/specs/IO_REFERENCE.md:50 (rule)
+// quote: and carries a **deadline**
+// claim: Every operation carries a deadline (there is no unbounded read): `read` without one is refused.
+// expect: refuse
+// wrong: accepted: an unbounded read
+mod:io0050;
+
+error:E1;
+error:E2;
+
+async func:main = int32(cstring[]:_~argv) {
+    Path:p = path_parse("/dev/null") ?! E1;
+    ByteReader:r = byte_reader_open(p, raw duration_ms(100i64)) ?! E2;
+    uint8[4]:buf = [0u8, 0u8, 0u8, 0u8];
+    Result<int64>:n = await r.read(buf[0i64...4i64]);
+    if (!n.is_error) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

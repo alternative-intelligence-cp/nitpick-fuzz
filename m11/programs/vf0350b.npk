@@ -1,0 +1,14 @@
+// M11 vf0350b -- meta/specs/VERIFICATION_REFERENCE.md:350 (rule)
+// quote: `failsafe` carry no contract
+// claim: failsafe carries no contract: an ensures on failsafe is refused.
+// expect: refuse
+// wrong: accepted
+mod:vf0350b;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:_~e) ensures result > 0i32 {
+    exit 1i32;
+};

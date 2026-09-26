@@ -1,0 +1,59 @@
+// M11 cc0097 -- meta/specs/CONCURRENCY_REFERENCE.md:97 (rule)
+// quote: taking a normal
+// claim: A task the scope-exit join winds up observes the request at its next await and takes a normal error exit, so its `defer` runs (here the defer divides by zero).
+// expect: trap:DivByZero
+// wrong: 101 (the join's deadline trapped with no wind-up, the defer never ran) or T (the join waited out the 30 s sleep)
+mod:cc0097;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+fixed Duration:J100 = Duration{ ns: 100000000i64 };
+thread async func:sleeper = NIL(int32:zero) joins J100 {
+    defer { discard(10i32 / zero); }
+    await sleep(raw duration_ms(20i64)) ?| NIL;
+    relay await sleep(raw duration_ms(30000i64));
+    pass NIL;
+};
+
+async func:main = int32(cstring[]:_~argv) {
+    drop sleeper(raw v32(0i32));
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

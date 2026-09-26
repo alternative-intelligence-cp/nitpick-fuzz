@@ -1,0 +1,5 @@
+mod:maclib;
+
+pub macro:lib_seven = () { 7i32; };
+
+pub func:anchor = int32() never fails { pass 0i32; };

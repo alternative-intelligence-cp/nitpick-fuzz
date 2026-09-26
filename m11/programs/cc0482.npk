@@ -1,0 +1,67 @@
+// M11 cc0482 -- meta/specs/CONCURRENCY_REFERENCE.md:482 (rule)
+// quote: `close` ends the stream, leaving the slot, the buffer and everything
+// claim: A closed channel is not reclaimed: values sent before the close are drained, and the end is reported as an error that is not StaleHandle.
+// expect: run:0
+// wrong: 10/11 (close discarded the buffer), 13 (close bumped the generation)
+mod:cc0482;
+
+error:E1;
+error:E2;
+error:E3;
+
+async func:main = int32(cstring[]:_~argv) {
+    Channel<int32, 3i32, 2i64>:ch = channel() ?! E1;
+    await ch.send(20i32, raw duration_ms(100i64)) ?! E2;
+    await ch.send(22i32, raw duration_ms(100i64)) ?! E2;
+    discard(ch.close() ?! E3);
+    Result<int32>:a = await ch.recv(raw duration_ms(100i64));
+    if (a.is_error) { exit 10i32; }
+    Result<int32>:b = await ch.recv(raw duration_ms(100i64));
+    if (b.is_error) { exit 11i32; }
+    Result<int32>:c = await ch.recv(raw duration_ms(100i64));
+    if (!c.is_error) { exit 12i32; }
+    if (c.err == StaleHandle) { exit 13i32; }
+    if ((a.value + b.value) != 42i32) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (E3) { exit 83i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

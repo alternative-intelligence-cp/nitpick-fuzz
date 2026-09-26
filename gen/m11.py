@@ -80,6 +80,8 @@ def check(docs, rng):
             errs.append("%s: quote %r not on %s line %d" % (where, c["quote"][:60], c["doc"], c["line"]))
         if c["kind"] not in ("example", "row", "rule"):
             errs.append("%s: kind %r" % (where, c["kind"]))
+        if not any(a <= c["line"] <= b for a, b in L.covered_ranges(c["doc"], c["module"])):
+            errs.append("%s: outside the ranges its module declares with covers()" % where)
         if c["untestable"]:
             tag = re.match(r"^\[(\w+)\]", c["untestable"])
             if not tag or tag.group(1) not in L.UNTESTABLE_TAGS:
@@ -109,8 +111,15 @@ def check(docs, rng):
         for fn, text in c["files"].items():
             if not re.search(r"^mod:%s;" % re.escape(fn[:-4]), text, re.M):
                 errs.append("%s: support file %s must open with mod:%s;" % (where, fn, fn[:-4]))
-    # coverage
+    # coverage, inside the ranges the modules declare they extracted
     for d in docs:
+        cov = L.covered_ranges(d)
+        for (a1, b1), (a2, b2) in zip(cov, cov[1:]):
+            if a2 <= b1:
+                errs.append("%s: declared ranges %d-%d and %d-%d overlap" % (d, a1, b1, a2, b2))
+
+        def in_cov(n):
+            return in_range(n, rng) and any(a <= n <= b for a, b in cov)
         fences, tables = L.scan(d)
         ex = {c["line"] for c in L.CLAIMS if c["doc"] == d and c["kind"] == "example"}
         rows = {c["line"] for c in L.CLAIMS if c["doc"] == d and c["kind"] == "row"}
@@ -120,13 +129,13 @@ def check(docs, rng):
             if e["doc"] == d and e["line"] not in heads:
                 errs.append("%s line %d: excluded, but no table header there" % (d, e["line"]))
         for f in fences:
-            if in_range(f, rng) and f not in ex:
+            if in_cov(f) and f not in ex:
                 errs.append("%s line %d: code block with no `example` claim" % (d, f))
         for h, body in tables:
             if h in exc:
                 continue
             for r in body:
-                if in_range(r, rng) and r not in rows:
+                if in_cov(r) and r not in rows:
                     errs.append("%s line %d: table row (table at %d) with no `row` claim" % (d, r, h))
     return errs
 
@@ -220,6 +229,23 @@ def write(docs, out=OUT):
             d, len(cs), sum(c["kind"] == "example" for c in cs), sum(c["kind"] == "row" for c in cs),
             sum(c["kind"] == "rule" for c in cs), sum(not c["untestable"] for c in cs),
             sum(bool(c["untestable"]) for c in cs)))
+    Lh.append("")
+    Lh += ["The line ranges extracted (each module declares its own with `covers()`; coverage",
+           "of every code block and table row is checked inside them) and those not yet",
+           "extracted:", "",
+           "| reference | lines | extracted | lines extracted | not extracted |", "|---|---|---|---|---|"]
+    for d in docs:
+        n = len(L.doc_lines(d))
+        cov = L.covered_ranges(d)
+        gaps, at = [], 1
+        for a, b in cov:
+            if a > at:
+                gaps.append((at, a - 1))
+            at = max(at, b + 1)
+        if at <= n:
+            gaps.append((at, n))
+        rs = lambda rr: ", ".join("%d–%d" % r for r in rr) or "—"
+        Lh.append("| %s | %d | %s | %d | %s |" % (d, n, rs(cov), sum(b - a + 1 for a, b in cov), rs(gaps)))
     Lh.append("")
     for d in docs:
         cs = sorted([c for c in L.CLAIMS if c["doc"] == d], key=lambda c: (c["line"], c["id"]))

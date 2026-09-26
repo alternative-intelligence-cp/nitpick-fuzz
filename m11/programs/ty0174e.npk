@@ -1,0 +1,57 @@
+// M11 ty0174e -- meta/specs/TYPE_REFERENCE.md:174 (rule)
+// quote: holds, moves
+// claim: flt128 is storage: a value is held in a local and a struct field and moved through a function.
+// expect: run:0
+// wrong: refused: a flt128 cannot be held or moved; or the struct's other field corrupted (10)
+mod:ty0174e;
+
+struct:Q = { flt128:v; int32:k; };
+func:m11qm = flt128(flt128:a) never fails { flt128:b = a; pass b; };
+
+func:main = int32(cstring[]:_~argv) {
+    flt128[2]:z = [];
+    flt128:x = raw m11qm(z[1i64]);
+    Q:q = Q{ v: x, k: 7i32 };
+    flt128:y = q.v;
+    discard(y);
+    if (q.k != 7i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

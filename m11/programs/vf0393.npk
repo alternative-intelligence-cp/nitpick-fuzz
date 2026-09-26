@@ -1,0 +1,14 @@
+// M11 vf0393 -- meta/specs/VERIFICATION_REFERENCE.md:393 (rule)
+// quote: a literal that is not positive refused by the checker
+// claim: failsafe's postcondition: an `exit` with a literal that is not positive is refused, REACH-004.
+// expect: refuse:REACH-004
+// wrong: accepted (failsafe reporting success)
+mod:vf0393;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:_~e) {
+    exit 0i32;
+};

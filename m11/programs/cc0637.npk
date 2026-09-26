@@ -1,0 +1,14 @@
+// M11 cc0637 -- meta/specs/CONCURRENCY_REFERENCE.md:637 (rule)
+// quote: plain call and **may not be `async`**
+// claim: `failsafe` may not be `async`: an async failsafe is refused.
+// expect: refuse
+// wrong: accepted
+mod:cc0637;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+async func:failsafe = int32(Error:_~e) {
+    exit 1i32;
+};

@@ -44,7 +44,8 @@ committed. A session that starts here resumes at the first unticked box.
 - [ ] **M11** — the reference, checked against the compiler (session 6: **STOPPED
   part-way on the author's word, 2026-09-26, the cloud credit nearly spent**;
   resume from "M11 — the state at the stop" below). Session 7 (local, branch
-  `local-m11`) resumed it: the start checks pass; the drafted modules come next (S50)
+  `local-m11`) resumed it: the start checks pass; the five drafts reviewed (S51) and
+  committed with BUILTIN before their first run: 1 488 claims, 1 262 testable (S52)
   - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN done and run; five ranges drafted, unreviewed (`gen/m11_claims/_wip_*.py`); nine not started
   - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2
   - [ ] 11.3 `REPORT.md` §12; stop
@@ -1483,6 +1484,38 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   command in "the state at the stop" could not check a draft as written. Run with the
   new loader, it reproduces that table exactly: 322, 124, 152 and 78 claims with 0, 0,
   6 and 5 errors, and 357 and 228 with 18 and 51.
+- **S51 — how the drafts were reviewed, before any of their programs ran.**
+  - **The check errors.** They were fixed mechanically; no expectation changed.
+    - Nine ids did not match their lines (the quote was on the line given): each id
+      was renamed to its line, with a letter where the line already had a claim.
+      `cc0091` and `cc0092` were swapped, and `cc0430` moved to 429.
+    - Eighteen quotes in `verif1` sat on a neighbouring line: each moved to the line
+      holding it, the id with it. One quote (`vf0306`) broke across two lines and was
+      cut to the part on its line; another (`vf0344b`) was made longer, to be unique.
+    - Two cross-references were updated to the new ids.
+  - **`verif2` stopped at the end of §7c.** It covers 846–1247; its 51 errors were
+    §8's and later blocks and rows, never started. `macro_ast`'s AST half had no claim
+    (the module is now `macro.py`).
+  - **The reading.** For IO (all 78) and CONCURRENCY 1–310, every claim was read with
+    the full reference text around it. For the other 1 100 or so, each claim's text and
+    expectation were read against its own line (a claims-only sheet), looking for an
+    expectation the sentence does not state. None was found: the drafts are careful,
+    and extract the text faithfully even where it contradicts itself. Example: TYPE:53
+    traps on overflow (D-210) while TYPE:475 still says wide integers wrap (D-037).
+    The full text around a claim is re-read at triage, for every claim whose program
+    disagrees. This lighter reading is the brief's cost limit applied. A misread
+    expectation found at triage is classed as the extraction's error, never "fixed" by
+    changing the expectation (S45).
+  - The drafts dropped their `_wip_` prefix: `type1.py`, `macro.py`,
+    `concurrency_io.py`, `verif1.py` and `verif2.py`.
+- **S52 — a module declares the lines it extracted: `covers(doc, first, last)`.** The
+  whole-set check demanded coverage of every reference, so with nine ranges not
+  started, `m11/` could never be written from the whole set. Coverage (every fence,
+  every table row) is now checked inside the declared ranges only. A claim outside its
+  own module's ranges is an error, and so are overlapping ranges. `m11/CLAIMS.md` lists
+  the ranges extracted and those not yet extracted, so the denominators say which part
+  of each reference they are over. Extracted: BUILTIN, CONCURRENCY, IO and MACRO
+  whole, TYPE 1–660, and VERIFICATION 1–1247, which is 3 704 of the 10 433 lines.
 
 ## Log
 
@@ -1583,3 +1616,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     the newest `main` `1b4f0c6` were built (S49). The emissions are byte-identical to
     earlier sessions'; the canaries, the recall suite and M10's 223 programs re-ran
     identical.
+  - **11.1, the drafts.** The five `_wip_` modules were reviewed (S51), renamed, and
+    given their extracted ranges (S52). With BUILTIN: 1 488 claims (1 262 testable,
+    226 untestable) over 3 704 of the references' 10 433 lines. `m11/` was written
+    from the whole set and committed before any of the new programs ran.

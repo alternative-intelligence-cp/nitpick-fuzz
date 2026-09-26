@@ -1,0 +1,61 @@
+// M11 ty0453 -- meta/specs/TYPE_REFERENCE.md:453 (rule)
+// quote: i128 division emits the four `__divti3`-family libcalls
+// claim: i128 division works through the runtime floor's __divti3 family: signed and unsigned `/` and `%` compute and link.
+// expect: run:0
+// wrong: a link failure (a libcall unprovided), or a wrong quotient/remainder (10-13)
+mod:ty0453;
+
+func:vi128 = int128(int128:x) never fails { pass x; };
+
+func:vu128 = uint128(uint128:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int128:big = raw vi128(1i128) << raw vi128(100i128);
+    int128:n = 0i128 - (big + raw vi128(7i128));
+    int128:d = raw vi128(1i128) << raw vi128(90i128);
+    if ((n / d) != -1024i128) { exit 10i32; }
+    if ((n % d) != -7i128) { exit 11i32; }
+    uint128:u = (raw vu128(1u128) << raw vu128(100u128)) + raw vu128(9u128);
+    uint128:v = raw vu128(1u128) << raw vu128(64u128);
+    if ((u / v) != (raw vu128(1u128) << raw vu128(36u128))) { exit 12i32; }
+    if ((u % v) != 9u128) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

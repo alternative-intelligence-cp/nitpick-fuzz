@@ -1,0 +1,57 @@
+// M11 cc0266 -- meta/specs/CONCURRENCY_REFERENCE.md:266 (rule)
+// quote: `.load()` · `.store(v)` · `.swap(v)`
+// claim: All six methods exist and act on the cell: store 5, fetch_add 3, fetch_sub 1, swap 10, compare_exchange(10, 20) leave 20.
+// expect: run:0
+// wrong: refused (a method missing) or 10
+mod:cc0266;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    atomic<int32>:c = 0i32;
+    c.store(raw v32(5i32));
+    discard(c.fetch_add(raw v32(3i32)));
+    discard(c.fetch_sub(raw v32(1i32)));
+    discard(c.swap(raw v32(10i32)));
+    discard(c.compare_exchange(raw v32(10i32), raw v32(20i32)));
+    if (c.load() != 20i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

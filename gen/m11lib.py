@@ -51,6 +51,12 @@ A claim:
   excluded(doc, line, reason)
     a table (its header row at `line`) whose body rows are not claims, e.g. a
     table of history or a legend; every other table body row needs a claim.
+
+  covers(doc, first, last=None)
+    the line range of `doc` this module extracted (`last` None: to the end).
+    Coverage (every fence, every table row) is checked inside the declared
+    ranges only, and a claim outside its own module's ranges is an error, so a
+    reference extracted in part says exactly which lines it covers.
 """
 import os, re
 
@@ -97,6 +103,7 @@ HELPERS = {
 
 CLAIMS = []
 EXCLUDED = []
+COVERS = []
 _MODULE = [None]      # the claims module being loaded (set by gen/m11.py)
 
 ID_RE = re.compile(r"^[a-z]{2}\d{4}[a-z]?$")
@@ -114,6 +121,18 @@ def claim(cid, doc, line, quote, kind, text, expect=None, src=None, files=None, 
 
 def excluded(doc, line, reason):
     EXCLUDED.append(dict(doc=doc, line=line, reason=reason, module=_MODULE[0]))
+
+
+def covers(doc, first, last=None):
+    COVERS.append(dict(doc=doc, first=first, last=last, module=_MODULE[0]))
+
+
+def covered_ranges(doc, module=None):
+    """[(first, last)] of `doc` declared by every module (or by `module`), `last`
+    resolved to the reference's last line, sorted."""
+    n = len(doc_lines(doc))
+    return sorted((c["first"], c["last"] or n) for c in COVERS
+                  if c["doc"] == doc and (module is None or c["module"] == module))
 
 
 def main_(body, decls=""):

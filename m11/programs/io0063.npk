@@ -1,0 +1,80 @@
+// M11 io0063 -- meta/specs/IO_REFERENCE.md:63 (rule)
+// quote: Object safety holds
+// claim: Reader and Writer are object-safe: `dyn Writer` and `dyn Reader` values dispatch to the user impls.
+// expect: run:0
+// wrong: refused (not object-safe) or 10/11
+mod:io0063;
+
+error:E1;
+error:E2;
+struct:Count = { int64:total; };
+impl:Count:Writer = {
+    async func:write = int64(Count->:self, fixed uint8[]:wsrc, Duration:_~within) {
+        self.total = self.total + wsrc.len;
+        pass wsrc.len;
+    };
+    async func:flush = NIL(Count->:self, Duration:_~within) {
+        pass NIL;
+    };
+};
+struct:Ones = { int64:left; };
+impl:Ones:Reader = {
+    async func:read = int64(Ones->:self, uint8[]:dest, Duration:_~within) {
+        if (self.left <= 0i64) { fail IoEof; }
+        self.left = self.left - 1i64;
+        pass dest.len;
+    };
+};
+
+async func:main = int32(cstring[]:_~argv) {
+    Count:c = Count{ total: 0i64 };
+    dyn Writer:d = move(c);
+    int64:n = await d.write(string_bytes("abc"), raw duration_ms(100i64)) ?! E1;
+    if (n != 3i64) { exit 10i32; }
+    Ones:o = Ones{ left: 1i64 };
+    dyn Reader:dr = move(o);
+    uint8[2]:buf = [0u8, 0u8];
+    int64:m = await dr.read(buf[0i64...2i64], raw duration_ms(100i64)) ?! E2;
+    if (m != 2i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,1569 @@
+# M11 claims: the references, checked against the compiler
+
+Written by `gen/m11.py` from `gen/m11_claims/` (regenerate with `python3 gen/m11.py`).
+Each claim is read from one line of one reference at HUNT2 `9126350`
+(the compiler's `meta/specs/`), quotes that line, and carries the outcome the TEXT
+says, written before any program ran (PLAN.md 11.2). Kinds: `example` (a fenced
+code block, at its opening line), `row` (a table body row), `rule` (a normative
+sentence). Expected: `run:N` (npkc 0, both legs exit N; 0 is the reference's
+answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
+`ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
+A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
+
+**1488 claims: 1262 testable, 226 untestable** (each with its reason).
+
+| reference | claims | examples | rows | rules | testable | untestable |
+|---|---|---|---|---|---|---|
+| BUILTIN | 227 | 2 | 109 | 116 | 194 | 33 |
+| CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
+| IO | 78 | 5 | 9 | 64 | 67 | 11 |
+| MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
+| TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
+| VERIFICATION | 585 | 9 | 97 | 479 | 457 | 128 |
+
+The line ranges extracted (each module declares its own with `covers()`; coverage
+of every code block and table row is checked inside them) and those not yet
+extracted:
+
+| reference | lines | extracted | lines extracted | not extracted |
+|---|---|---|---|---|
+| AST | 645 | — | 0 | 1–645 |
+| BUILD | 683 | — | 0 | 1–683 |
+| BUILTIN | 448 | 1–448 | 448 | — |
+| CONCURRENCY | 648 | 1–648 | 648 | — |
+| CONTROL | 416 | — | 0 | 1–416 |
+| IO | 288 | 1–288 | 288 | — |
+| LEXICAL | 411 | — | 0 | 1–411 |
+| MACRO | 413 | 1–413 | 413 | — |
+| MEMORY | 534 | — | 0 | 1–534 |
+| MODULE | 301 | — | 0 | 1–301 |
+| OP | 404 | — | 0 | 1–404 |
+| TRAITS | 767 | — | 0 | 1–767 |
+| TYPE | 2123 | 1–660 | 660 | 661–2123 |
+| VERIFICATION | 2352 | 1–845, 846–1247 | 1247 | 1248–2352 |
+
+## BUILTIN (`meta/specs/BUILTIN_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `bi0003` | 3 | rule | “available globally without needing to `use`” | Built-ins are callable with no declaration and no import. | `run:0` |
+| `bi0003b` | 3 | rule | “map directly to LLVM instructions or safe runtime shims” | Built-ins map to LLVM instructions or runtime shims. | untestable [vague] a description of the lowering with no outcome a program can check |
+| `bi0005` | 5 | rule | “You must explicitly import them via the `collections` module” | Collections (stacks, lists, hash tables) are not built in: using one without importing the `collections` module is refused. | `refuse` |
+| `bi0010` | 10 | rule | “the 1-based index of the ARGUMENT WHOSE STORAGE THE RESULT” | string_bytes's result aliases its argument: returning the view of a local string is refused as a borrow escaping (D-004 rule 2). | `refuse` |
+| `bi0017` | 17 | rule | “rule A (laundered through a call)” | A view laundered through a call (rule A) is still a borrow of its root: returning it from the root's function is refused. | `refuse` |
+| `bi0018` | 18 | rule | “the range-view `arr[lo...hi]` gets the” | A range view arr[lo...hi] of a local array is a borrow: returning it is refused. | `refuse` |
+| `bi0019` | 19 | rule | “This column is the ONE authority on aliasing for” | The Views column is the one authority on aliasing for builtins. | untestable [tree] a statement about which table the compiler's generator reads |
+| `bi0024` | 24 | rule | “`<!-- builtins:begin -->` and `<!-- builtins:end -->` markers define the” | The marked regions define the bare-name builtin set, generated into builtins.npk by gen_tables.py. | untestable [tree] a statement about the compiler's generator and source tree |
+| `bi0027` | 27 | rule | “That set is deliberately small (0.8.4)” | The builtin set is the floor, sys and the three comptime-foldable string names; everything else here is nlibc's, imported like any module. | untestable [vague] the set's membership is tested row by row, and the non-builtin names at lines 189-220 |
+| `bi0035` | 35 | rule | “One row per builtin, and nothing but rows” | The generator reads only the marked regions' table rows and hard-fails on a missing name. | untestable [tree] the generator's behaviour |
+| `bi0039` | 39 | rule | “`<!-- rtsyms:begin -->` … `<!-- rtsyms:end -->` (§2d) is the OTHER region” | The rtsyms region lists emitter-called symbols that are not builtins and never resolve as names. | untestable [tree] where the table is read; the resolution claim is tested at line 300 |
+| `bi0048` | 48 | rule | “whose name is a row's name in a `builtins` region is” | A module-level function named after a builtin is NITPICK-RESOLVE-001 at its declaration. | `refuse:NITPICK-RESOLVE-001` |
+| `bi0048b` | 48 | rule | “inline module or out” | A `pub` function named after a builtin, inside an inline module, is NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `bi0049` | 49 | rule | “`NITPICK-RESOLVE-001` at the declaration; so is an `extern` block's METHOD of” | An extern block's method named after a builtin is NITPICK-RESOLVE-001. | untestable [tool] an extern block needs a driver interface (MODULE_REFERENCE §5); its spelling is MODULE's claims' |
+| `bi0051` | 51 | rule | “METHOD is exempt” | A method named after a builtin is accepted (it is reached through its receiver). | `run:0` |
+| `bi0052` | 52 | rule | “a module-level BINDING cannot carry a” | A module-level binding cannot carry a function value (TYPE-035). | `refuse:NITPICK-TYPE-035` |
+| `bi0054` | 54 | rule | “CALLABLE binding (D-296)” | Inside a function, a local of function type named after a builtin is NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `bi0054b` | 54 | rule | “a parameter, a local, a `for` binding or a `pick`” | A function-typed PARAMETER named after a builtin is NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `bi0057` | 57 | rule | “a binding of any other type may (`int64:read` cannot be” | A binding of a non-function type may take a builtin's name. | `run:0` |
+| `bi0058` | 58 | rule | “and so may a function-typed FIELD, which is reached through its” | A function-typed field named after a builtin is accepted, and called through its receiver. | `run:0` |
+| `bi0060` | 60 | rule | “RESERVES A NAME in every program” | Every row added to a marked region reserves a name in every program. | untestable [tree] a rule for the compiler's maintainers; its consequence is tested at lines 48-58 |
+| `bi0070` | 70 | example | “```” | The Signature column's grammar: params → type, a param optionally `move`. | untestable [tree] the grammar gen_tables.py reads; the signatures' meaning is tested row by row |
+| `bi0076` | 76 | rule | “The arrow is U+2192” | The signature arrow is U+2192; `->` inside a type is the pointer suffix. | untestable [tree] the document's notation |
+| `bi0077` | 77 | rule | “A memory qualifier (`wild`, `wildx`, `stack`) is” | A memory qualifier is not part of a type: a `wild int8->` value binds to a plain `int8->`. | `run:0` |
+| `bi0080` | 80 | rule | “`Result<T>` appears exactly when the Fails” | A `never fails` builtin's call types as the bare value: it binds with no unwrap. | `run:0` |
+| `bi0081` | 81 | rule | “column says the builtin may fail” | A may-fail builtin's call types as Result<T>: binding it to the bare type is refused. | `refuse` |
+| `bi0082` | 82 | rule | “The generator refuses a row where the two columns” | gen_tables.py refuses a row whose Signature and Fails columns disagree. | untestable [tree] the generator's behaviour |
+| `bi0085` | 85 | rule | “The `**ABI:**` note” | A row's ABI note is the whole vocabulary of symbol departures. | untestable [tree] the document's notation; each row's note is tested where it names an emitted symbol |
+| `bi0090` | 90 | row | “\| `inline` \|” | `inline`: no floor symbol; string_is_empty lowers to a length compare, with no call. | `ir!:call [^\n]*@npk_string_is_empty` |
+| `bi0091` | 91 | row | “``sym=`@memcpy` ``” | `sym=`: the symbol is not @npk_<name>. | untestable [tree] the document's notation; mcpy's symbol is tested at line 133 |
+| `bi0092` | 92 | row | “``ret=`{ ptr, ptr, i64, i64, i64 }` ``” | `ret=`: the LLVM return differs from the derived one. | untestable [tree] the document's notation; arena_make's is tested at line 146 |
+| `bi0093` | 93 | row | “``args=`ptr, i32, i64` ``” | `args=`: the LLVM arguments differ from the derived ones. | untestable [tree] the document's notation; memset's is tested at line 135 |
+| `bi0094` | 94 | row | “\| `envelope` \|” | `envelope`: a never-fails builtin whose symbol answers { T, i32 }, the value half extracted at the call. | untestable [internal] how a call's return is unpacked; the bare typing it gives is tested at line 80 |
+| `bi0096` | 96 | rule | “Everything not noted is DERIVED” | check_runtime_sigs_agree diffs the derived ABI against runtime/npkrt.ll on every harness run. | untestable [tree] the harness's check |
+| `bi0102` | 102 | rule | “classified by each row's IR body or inline lowering, never its prose” | The Pure column is classified from each row's IR body or inline lowering, never from its prose. | untestable [tree] how the column is written; each row's purity is tested through TYPE-060/061 at lines 105-112 |
+| `bi0105` | 105 | rule | “`pure` body (`NITPICK-TYPE-061`) and a contract expression” | A `pure` body admits the pure rows (string_bytes, string_from_bytes' kin, string_equals, string_byte_length, string_is_empty). | `run:0` |
+| `bi0105b` | 105 | rule | “(`NITPICK-TYPE-061`)” | A `pure` body refuses an effect row by name (TYPE-061): int_to_string allocates. | `refuse:NITPICK-TYPE-061` |
+| `bi0106` | 106 | rule | “(`NITPICK-TYPE-060`) admit the `pure` rows and refuse the rest by name” | A contract expression admits a pure row: `requires !string_is_empty(s)` compiles and is checked. | `run:0` |
+| `bi0106b` | 106 | rule | “and refuse the rest by name” | A contract expression refuses an effect row (TYPE-060): int_to_string in a `requires`. | `refuse:NITPICK-TYPE-060` |
+| `bi0107` | 107 | rule | “Five rows are `pure`” | string_from_bytes is a pure row: a pure body may call it. | `run:0` |
+| `bi0109` | 109 | rule | “Everything that allocates (the allocator family,” | string_concat is an effect row: a pure body calling it is refused TYPE-061. | `refuse:NITPICK-TYPE-061` |
+| `bi0112` | 112 | rule | “a descriptor, the clock” | mono_now (the clock) is an effect row: a pure body calling it is refused TYPE-061. | `refuse:NITPICK-TYPE-061` |
+| `bi0115` | 115 | rule | “A row's classification is a claim about its floor body” | A row's Pure classification is a claim about its floor body. | untestable [tree] a statement about the classification's source |
+| `bi0122` | 122 | rule | “They all return `wild` pointers” | An allocation is unmanaged: a block still live at `exit 0` traps WildLeak (the programmer must free it). | `trap:WildLeak` |
+| `bi0122b` | 122 | rule | “There is no garbage collector (D-003)” | There is no garbage collector. | untestable [unobservable] an absence; the leak check at line 122 is its consequence |
+| `bi0123` | 123 | rule | “every allocation carries a hidden 16-byte header” | Every allocation carries a hidden 16-byte header: size and a secret-keyed magic word. | untestable [internal] the header's layout; reading below a block is outside every guarantee |
+| `bi0123b` | 123 | rule | “Double-free, corruption, and a foreign or misaligned pointer trap to” | A double free the analysis cannot follow traps to failsafe with -4102 (Unreachable). | `trap:Unreachable` |
+| `bi0123c` | 123 | rule | “OOM with `-4103`” | An allocation the kernel cannot back traps HeapOom (-4103): 2^47 bytes is legal and fails. | `trap:HeapOom` |
+| `bi0123d` | 123 | rule | “a malformed request (negative size” | A negative size is a malformed request: HeapBadRequest (-4104). | `trap:HeapBadRequest` |
+| `bi0123e` | 123 | rule | “checked `calloc` multiply overflow” | A calloc whose count*size overflows is a malformed request: HeapBadRequest. | `trap:HeapBadRequest` |
+| `bi0123f` | 123 | rule | “`ralloc(p, 0)`” | ralloc(p, 0) is a malformed request: HeapBadRequest. | `trap:HeapBadRequest` |
+| `bi0123g` | 123 | rule | “bad alignment) with `-4104`” | A bad alignment (not a power of two) is a malformed request: HeapBadRequest. | `trap:HeapBadRequest` |
+| `bi0123h` | 123 | rule | “Double-free of a tracked binding is already a compile-time error (D-119)” | Freeing one binding twice is a compile-time error. | `refuse` |
+| `bi0127` | 127 | row | “\| `alloc` \|” | alloc(0) is a real, unique, freeable block. | `run:0` |
+| `bi0128` | 128 | row | “\| `alloc_managed` \|” | alloc_managed is prelude-only: a program's call is refused TYPE-054. | `refuse:NITPICK-TYPE-054` |
+| `bi0129` | 129 | row | “\| `aalloc` \|” | aalloc allocates with a requested power-of-two alignment; the block is usable and freeable. | `run:0` |
+| `bi0130` | 130 | row | “\| `calloc` \|” | calloc allocates count*size ZERO-initialised bytes. | `run:0` |
+| `bi0131` | 131 | row | “\| `ralloc` \|” | ralloc resizes and copies the old contents (bounded by the old size); ralloc(NULL, n) is a fresh allocation. | `run:0` |
+| `bi0132` | 132 | row | “\| `dalloc` \|” | dalloc(NULL) traps -4102 (Unreachable). | `trap:Unreachable` |
+| `bi0133` | 133 | row | “\| `mcpy` \|” | mcpy copies n bytes from src to dst. | `run:0` |
+| `bi0133b` | 133 | row | “**ABI:** sym=`@memcpy`” | mcpy's symbol is @memcpy. | `ir:@memcpy\b|@llvm\.memcpy` |
+| `bi0134` | 134 | row | “\| `mmov` \|” | mmov is overlap-safe: moving bytes 0..7 to 1..8 in one block keeps them in order. | `run:0` |
+| `bi0134b` | 134 | row | “**ABI:** sym=`@memmove`” | mmov's symbol is @memmove. | `ir:@memmove\b|@llvm\.memmove` |
+| `bi0135` | 135 | row | “\| `memset` \|” | memset fills n bytes with the LOW 8 bits of val. | `run:0` |
+| `bi0135b` | 135 | row | “**ABI:** sym=`@memset` args=`ptr, i32, i64`” | memset's symbol is @memset (or the llvm.memset intrinsic it maps to). | `ir:@memset\b|@llvm\.memset` |
+| `bi0141` | 141 | rule | “a page is never writable and” | W^X: a page is never writable and executable at once, so an unsealed (writable) page cannot run: calling it faults. | `trap:MachineFault` |
+| `bi0146` | 146 | row | “\| `arena_make` \|” | arena_make builds an arena for T from the annotation, with no element-type argument. | `run:0` |
+| `bi0146b` | 146 | row | “ret=`{ ptr, ptr, i64, i64, i64 }` args=`i64, i64`” | arena_make's symbol is @npk_arena_make, returning { ptr, ptr, i64, i64, i64 } from (i64, i64). | `ir:\{ ptr, ptr, i64, i64, i64 \} @npk_arena_make\(i64[^,)]*, i64[^,)]*\)` |
+| `bi0147` | 147 | row | “\| `shared_arena_make` \|” | shared_arena_make builds the atomically-shared arena from the annotation. | `run:0` |
+| `bi0148` | 148 | row | “\| `atomic_from_ptr` \|” | atomic_from_ptr::<T> aliases existing wild memory as an atomic, used as a method's receiver. | `run:0` |
+| `bi0148b` | 148 | row | “a declaration or assignment storing the result is refused (TYPE-007)” | Storing atomic_from_ptr's result in a declaration is refused TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `bi0148c` | 148 | row | “**`wild`-context only** (D-187)” | atomic_from_ptr is wild-context only: over the address of a plain local it is refused. | `refuse` |
+| `bi0149` | 149 | row | “\| `wild_live_count` \|” | wild_live_count is the number of live wild allocations. | `run:0` |
+| `bi0150` | 150 | row | “\| `clone_exec` \|” | clone_exec refuses a child-bound descriptor below 4 with an error, before anything is claimed. | `run:0` |
+| `bi0151` | 151 | row | “\| `driver_retire` \|” | Retiring a registry slot that is not active traps -4102 (Unreachable). | `trap:Unreachable` |
+| `bi0152` | 152 | row | “\| `wild_release_all` \|” | The statement after wild_release_all() must be `exit`: anything else is TYPE-062. | `refuse:NITPICK-TYPE-062` |
+| `bi0152b` | 152 | row | “`argv` and `environ()`'s arrays live outside it (1.5.1b step 0)” | wild_release_all followed by exit is legal, and argv and environ() stay readable after it. | `run:0` |
+| `bi0153` | 153 | row | “\| `wildx_alloc` \|” | wildx_alloc gives writable pages; filled with code, sealed and called, the code runs. | `run:0` |
+| `bi0154` | 154 | row | “\| `wildx_seal` \|” | After wildx_seal the pages are not writable: a store faults (MachineFault). | `trap:MachineFault` |
+| `bi0155` | 155 | row | “\| `wildx_call` \|” | wildx_call passes its int64 argument to the sealed code and returns its int64 result. | `run:0` |
+| `bi0156` | 156 | row | “\| `wildx_free` \|” | wildx_free releases W^X pages; the program then exits cleanly. | `run:0` |
+| `bi0160` | 160 | rule | “`malloc` and `free` are not builtins and are not aliases” | `malloc` is not a builtin: a call to it is refused. | `refuse` |
+| `bi0160b` | 160 | rule | “and are not aliases” | `free` is not a builtin: a call to it is refused. | `refuse` |
+| `bi0162` | 162 | rule | “there is no `extern "libc"` to declare them in” | In-process FFI does not exist: an `extern "libc"` block is refused. | `refuse` |
+| `bi0163` | 163 | rule | “the WHOLE allocator API” | The natives above are the whole allocator API (five since aalloc). | untestable [unobservable] an absence; malloc and free are tested at line 160 |
+| `bi0173` | 173 | rule | “Everything in this section arrives as ordinary Nitpick functions in” | §2's string functions are nlibc's ordinary functions, not builtins (bar §2c's three). | untestable [vague] tested name by name at lines 189-220 |
+| `bi0180` | 180 | rule | “UNCLAIMED today” | No library in the ecosystem builds the nlibc string surface. | untestable [tree] a statement about the ecosystem's libraries |
+| `bi0181` | 181 | rule | “None of these names resolves” | None of §2's names resolves unless it also has a row in a marked table. | untestable [vague] tested name by name at lines 189-220 |
+| `bi0189` | 189 | rule | “`string_length(str)`” | `string_length` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0190` | 190 | rule | “`string_byte_length(str)`” | string_byte_length (a row of §2c) resolves and is the byte length: "héllo" is 6 bytes. | `run:0` |
+| `bi0191` | 191 | rule | “`string_char_count(str)`” | `string_char_count` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0192` | 192 | rule | “`string_is_empty(str)`” | string_is_empty (a row of §2c) is true exactly when the length is 0. | `run:0` |
+| `bi0193` | 193 | rule | “`string_is_valid_utf8(str)`” | `string_is_valid_utf8` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0196` | 196 | rule | “`string_equals(a, b)`” | string_equals is a byte-equal comparison. | `run:0` (M10 `t17_string_equals`) |
+| `bi0197` | 197 | rule | “`string_contains(str, needle)`” | `string_contains` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0198` | 198 | rule | “`string_starts_with(str, prefix)`” | `string_starts_with` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0199` | 199 | rule | “`string_ends_with(str, suffix)`” | `string_ends_with` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0200` | 200 | rule | “`string_index_of(str, needle)`” | `string_index_of` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0201` | 201 | rule | “`string_last_index_of(str, needle)`” | `string_last_index_of` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0204` | 204 | rule | “`string_concat(a, b)`” | string_concat (a row of §2b) concatenates two strings. | `run:0` |
+| `bi0205` | 205 | rule | “`string_substring(str, start, end)`” | `string_substring` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0206` | 206 | rule | “`string_count(str, needle)`” | `string_count` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0207` | 207 | rule | “`string_replace(str, needle, replacement)`” | `string_replace` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0208` | 208 | rule | “`string_repeat(str, n)`” | `string_repeat` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0211` | 211 | rule | “`string_trim(str)`” | `string_trim` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0212` | 212 | rule | “`string_trim_start(str)`” | `string_trim_start` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0212b` | 212 | rule | “`string_trim_end(str)`” | `string_trim_end` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0213` | 213 | rule | “`string_to_upper(str)`” | `string_to_upper` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0213b` | 213 | rule | “`string_to_lower(str)`” | `string_to_lower` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0214` | 214 | rule | “`string_pad_left(str, len, char)`” | `string_pad_left` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0214b` | 214 | rule | “`string_pad_right(str, len, char)`” | `string_pad_right` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0217` | 217 | rule | “`string_from_int(val)`” | `string_from_int` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0217b` | 217 | rule | “`string_to_int(str)`” | `string_to_int` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0218` | 218 | rule | “`string_from_int_hex(val)`” | `string_from_int_hex` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0219` | 219 | rule | “`string_from_char(byte)`” | `string_from_char` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0220` | 220 | rule | “`string_format_float(val, precision)`” | `string_format_float` is planned nlibc surface with no row in a marked table: it does not resolve (line 181). | `refuse` |
+| `bi0228` | 228 | rule | “The functions `runtime/npkrt.ll` defines and every backend rung can” | The floor's functions are bare-name builtins, callable everywhere with no declaration. | untestable [vague] tested row by row below |
+| `bi0234` | 234 | rule | “`check_runtime_sigs_agree` diffs all three on every harness run” | Three copies of the floor's signature set exist and check_runtime_sigs_agree diffs them. | untestable [tree] the compiler's source tree and harness |
+| `bi0238` | 238 | row | “\| `string_concat` \|” | string_concat concatenates; an empty result allocates nothing. | `run:0` (M10 `t15_concat_empty`) |
+| `bi0238b` | 238 | row | “also comptime-folds” | string_concat folds at compile time: it initialises a module `fixed` string. | `run:0` |
+| `bi0239` | 239 | row | “\| `int_to_string` \|” | int_to_string renders an int64 in decimal and never fails. | `run:0` (M10 `t10_int_to_string`) |
+| `bi0240` | 240 | row | “\| `string_slice` \|” | string_slice is byte-indexed and half-open. | `run:0` (M10 `t05_slice_half_open`) |
+| `bi0240b` | 240 | row | “**an OWNED COPY** (D-186)” | string_slice returns an owned copy: the slice outlives the string it was cut from. | `run:0` |
+| `bi0240c` | 240 | row | “An empty slice allocates nothing” | An empty slice allocates nothing. | `run:0` heap `0/0/0` |
+| `bi0241` | 241 | row | “\| `string_bytes` \|” | string_bytes is the string's bytes as a view: same length, same bytes, no copy (no allocation). | `run:0` heap `*/*/1` |
+| `bi0241b` | 241 | row | “The slice is a borrow (D-070)” | The bytes view is bounds-checked against its run-time length. | `run:94` (M10 `t07_bytes_view_bounds`) |
+| `bi0242` | 242 | row | “\| `string_from_bytes` \|” | string_from_bytes' length is held to [0, 2^47]: a negative length traps OutOfBounds. | `trap:OutOfBounds` |
+| `bi0242b` | 242 | row | “wraps existing bytes as a view (cap 0)” | string_from_bytes wraps existing bytes as a view with cap 0, the bytes the pointer names. | `run:0` |
+| `bi0242c` | 242 | row | “the length is held to `[0, 2^47]`” | A length above 2^47 traps OutOfBounds. | `trap:OutOfBounds` |
+| `bi0243` | 243 | row | “\| `to_cstring` \|” | to_cstring is a NUL-terminated copy: the length excludes the NUL, which follows the bytes. | `run:0` |
+| `bi0244` | 244 | row | “\| `read_file` \|” | read_file reads a whole file. | `run:0` |
+| `bi0245` | 245 | row | “\| `read_stdin` \|” | read_stdin reads the whole stream: an empty stdin gives an empty string, successfully. | `run:0` |
+| `bi0246` | 246 | row | “\| `environ` \|” | environ() is the process environment's KEY=VALUE entries: under an empty environment it is empty. | `run:0` |
+| `bi0247` | 247 | row | “\| `path_exists` \|” | path_exists never fails: an existing path answers true, a missing one false. | `run:0` |
+| `bi0248` | 248 | row | “\| `mono_now` \|” | mono_now is CLOCK_MONOTONIC nanoseconds: it never goes backwards. | `run:0` |
+| `bi0249` | 249 | row | “\| `hardware_concurrency` \|” | hardware_concurrency is at least 1 and at most 1024. | `run:0` |
+| `bi0249b` | 249 | row | “Asked at each call, never cached” | hardware_concurrency follows the affinity mask at each call: pinned to one CPU it answers 1. | `run:0` |
+| `bi0250` | 250 | row | “\| `buffer_new` \|” | buffer_new(n) is n zeroed bytes with len == cap == n; n <= 0 is the empty buffer. | `run:0` |
+| `bi0250b` | 250 | row | “the cell drops at scope exit exactly as a string does” | A buffer drops at scope exit: 1000 buffers of 1000 bytes made in turn peak at 1000 live bytes. | `run:0` heap `1000000/1000/1000` |
+| `bi0251` | 251 | row | “\| `channel` \|” | channel() reads element, level and capacity from the annotation and returns a Result. | `run:0` |
+| `bi0251b` | 251 | row | “Allocates, so it returns a `Result`” | channel() returns a Result: binding it bare is refused. | `refuse` |
+| `bi0252` | 252 | row | “\| `mutex` \|” | mutex(v) builds a Mutex from the annotation holding v, as a Result. | `run:0` |
+| `bi0253` | 253 | row | “\| `rwlock` \|” | rwlock(v) builds an RwLock holding v: a reader sees v. | `run:0` |
+| `bi0254` | 254 | row | “\| `condvar` \|” | condvar() builds a CondVar from the annotation, as a Result. | `run:0` |
+| `bi0255` | 255 | row | “\| `barrier` \|” | barrier() builds a Barrier of N arrivals from the annotation: with N = 1 one arrival passes. | `run:0` |
+| `bi0256` | 256 | row | “\| `suspend_until` \|” | suspend_until is legal only inside an async function: in a sync function it is refused. | `refuse` |
+| `bi0256b` | 256 | row | “parks the TASK until an absolute monotonic timepoint” | suspend_until parks the task until the deadline: at least that long passes. | `run:0` |
+| `bi0257` | 257 | row | “\| `suspend_io` \|” | suspend_io parks until the descriptor is ready or the deadline: a readable descriptor returns before a far deadline. | `run:0` |
+| `bi0258` | 258 | row | “\| `io_unwatch` \|” | Removing an unwatched descriptor is a no-op, not an error. | `run:0` |
+| `bi0259` | 259 | row | “\| `io_watch` \|” | io_watch registers a descriptor without parking; it is then unwatched. | `run:0` |
+| `bi0260` | 260 | row | “\| `own_fd` \|” | own_fd takes ownership: the owner's drop closes the descriptor. | `run:0` |
+| `bi0261` | 261 | row | “\| `release_fd` \|” | close(release_fd(move o)) consumes the owner and closes once, reporting close's verdict. | `run:0` |
+| `bi0261b` | 261 | row | “the move defuses the drop, so no double close is” | After release_fd(move o), `o` is moved: a use of it is refused. | `refuse` |
+| `bi0261c` | 261 | row | “consumes the owner and returns the bare number” | release_fd consumes the owner and returns the bare descriptor, so close sees it once and succeeds. | `run:0` |
+| `bi0262` | 262 | row | “\| `chain_depth` \|” | chain_depth counts the sites the in-flight error's origin chain has passed. | `run:42` |
+| `bi0263` | 263 | row | “\| `chain_site` \|” | chain_site(i) is 0 outside the kept range. | `run:42` |
+| `bi0264` | 264 | row | “\| `site_line` \|” | site_line(0) is 0: the runtime's reserved site 0. | `run:0` |
+| `bi0265` | 265 | row | “\| `site_path` \|” | site_path(0) is empty. | `run:0` |
+| `bi0266` | 266 | row | “\| `write_file` \|” | write_file writes the whole buffer, replacing what was there. | `run:0` |
+| `bi0267` | 267 | row | “\| `open` \|” | open is one openat at AT_FDCWD: a relative path opens relative to the working directory. | `run:0` |
+| `bi0268` | 268 | row | “\| `close` \|” | A failed close is reported, never swallowed: a second close of one descriptor is an error. | `run:0` |
+| `bi0269` | 269 | row | “\| `read` \|” | End of input is the error E_EOF (IoEof), never a zero in the value channel. | `run:0` |
+| `bi0269b` | 269 | row | “Zero asked is zero delivered” | A read of zero bytes delivers zero, successfully. | `run:0` |
+| `bi0270` | 270 | row | “\| `write` \|” | write is one kernel write returning the bytes taken. | `run:0` |
+| `bi0272` | 272 | rule | “Error slots across the floor carry the kernel's own negative codes” | A floor error carries the kernel's code: a missing file's read_file error is ENOENT (NotFound). | `run:0` |
+| `bi0274` | 274 | rule | “an interior NUL is −22” | to_cstring of a string with an interior NUL is an error. | `run:0` (M10 `t12_to_cstring_interior_nul`) |
+| `bi0274b` | 274 | rule | “−22, a slice out of range −34” | The codes are -22 (interior NUL) and -34 (a slice out of range). | untestable [unobservable] a program compares an error only with a declared identity, the explicit-code form is the prelude's alone (AST_REFERENCE:158), and the prelude declares none for 22 or 34; that each is an error is tested at bi0274 and M10's t06 |
+| `bi0274c` | 274 | rule | “a slice out of range −34” | A slice out of range is an error of string_slice. | `run:0` (M10 `t06_slice_out_of_range`) |
+| `bi0275` | 275 | rule | “end-of-input is E_EOF = −4096” | E_EOF is -4096, the first code past the kernel's error space, so it collides with no errno. | untestable [unobservable] the numeric value; IoEof's identity at end of input is tested at line 269 |
+| `bi0277` | 277 | rule | “−4098 INT_MIN_OVERFLOW” | INT_MIN / -1 reaches failsafe through the trap route (DivOverflow). | `run:98` (M10 `v05_min_div_minus_one`) |
+| `bi0277b` | 277 | rule | “−4099 OUT_OF_BOUNDS” | An array index past the end reaches failsafe as OutOfBounds, not through a Result. | `trap:OutOfBounds` |
+| `bi0277c` | 277 | rule | “−4097 DIV_BY_ZERO” | An integer division by zero reaches failsafe as DivByZero. | `trap:DivByZero` |
+| `bi0278` | 278 | rule | “(a slice or array index past the end, D-070), and −4100 TBB_ERR (an ERR value” | An ERR tbb value at a bare comparison reaches failsafe as TbbErr. | `trap:TbbErr` |
+| `bi0280` | 280 | rule | “Positive codes” | Positive codes belong to programs. | untestable [vague] an allocation of the code space; a program's own error identities are hashed, not chosen |
+| `bi0285` | 285 | rule | “The three string names the compiler EVALUATES during `comptime` folding” | The compiler evaluates §2c's three names during comptime folding. | untestable [vague] tested per row below |
+| `bi0290` | 290 | row | “\| `string_equals` \|” | string_equals folds at comptime: it initialises a module `fixed` bool. | `run:0` |
+| `bi0291` | 291 | row | “\| `string_byte_length` \|” | string_byte_length is the byte length. | `run:0` (M10 `t01_byte_length_utf8`) |
+| `bi0291b` | 291 | row | “Folds at comptime. **ABI:** inline” | string_byte_length folds at comptime: it initialises a module `fixed` int64. | `run:0` |
+| `bi0292` | 292 | row | “\| `string_is_empty` \|” | string_is_empty folds at comptime: it initialises a module `fixed` bool. | `run:0` |
+| `bi0300` | 300 | rule | “no program names them, the resolver admits” | The runtime symbols the emitter calls are not names: a program calling `arena_alloc` is refused. | `refuse` |
+| `bi0311` | 311 | row | “\| `arena_alloc` \|” | Every emitted module declares @npk_arena_alloc as { i64, i32 } (ptr, i64). | `ir:^declare \{ i64, i32 \} @npk_arena_alloc\(ptr[^,)]*, i64[^,)]*\)` |
+| `bi0312` | 312 | row | “\| `arena_at` \|” | Every emitted module declares @npk_arena_at as ptr (ptr, i64, i64, i32). | `ir:^declare ptr @npk_arena_at\(ptr[^,)]*, i64[^,)]*, i64[^,)]*, i32[^,)]*\)` |
+| `bi0313` | 313 | row | “\| `arena_free` \|” | Every emitted module declares @npk_arena_free as i32 (ptr, i64, i64, i32). | `ir:^declare i32 @npk_arena_free\(ptr[^,)]*, i64[^,)]*, i64[^,)]*, i32[^,)]*\)` |
+| `bi0314` | 314 | row | “\| `arena_reset` \|” | Every emitted module declares @npk_arena_reset as void (ptr, i64). | `ir:^declare void @npk_arena_reset\(ptr[^,)]*, i64[^,)]*\)` |
+| `bi0315` | 315 | row | “\| `arena_destroy` \|” | Every emitted module declares @npk_arena_destroy as void (ptr). | `ir:^declare void @npk_arena_destroy\(ptr[^,)]*\)` |
+| `bi0316` | 316 | row | “\| `sarena_bump` \|” | Every emitted module declares @npk_sarena_bump as i64 (ptr, i64). | `ir:^declare i64 @npk_sarena_bump\(ptr[^,)]*, i64[^,)]*\)` |
+| `bi0317` | 317 | row | “\| `sarena_slot` \|” | Every emitted module declares @npk_sarena_slot as ptr (ptr, i64, i64). | `ir:^declare ptr @npk_sarena_slot\(ptr[^,)]*, i64[^,)]*, i64[^,)]*\)` |
+| `bi0318` | 318 | row | “\| `sarena_destroy` \|” | Every emitted module declares @npk_sarena_destroy as void (ptr). | `ir:^declare void @npk_sarena_destroy\(ptr[^,)]*\)` |
+| `bi0319` | 319 | row | “\| `exit` \|” | Every emitted module declares @npk_exit as void (i32). | `ir:^declare void @npk_exit\(i32[^,)]*\)` |
+| `bi0323` | 323 | rule | “`arena_alloc`'s `{ i64, i32 }` is a `Handle<T>`, NOT a `Result`” | An arena's alloc() answers a Handle<T>, not a Result: it binds with no unwrap. | `run:0` |
+| `bi0337` | 337 | row | “\| `sys` \|” | sys reaches any syscall; the kernel's negative returns land in the error slot. | `run:0` |
+| `bi0341` | 341 | rule | “The call TYPES as `Result<int64>`” | A sys call types as Result<int64>: a wrong annotation over it is refused like any typed Result's. | `refuse` |
+| `bi0344` | 344 | rule | “register: integer-family at 64 bits or below” | A sys argument that does not fit a kernel register (a string) is refused. | `refuse` |
+| `bi0346` | 346 | rule | “at most” | At most six register arguments follow the syscall number: seven are refused. | `refuse` |
+| `bi0348` | 348 | rule | “resolve (a nested bare-builtin call) is refused with "bind it to a typed” | An argument that is a nested bare-builtin call is refused (bind it to a typed name first). | `refuse` |
+| `bi0350` | 350 | rule | “unsigned one or a kernel identifier ZERO-extends into its register” | At the trampoline a signed argument sign-extends and an unsigned one zero-extends: lseek to int32 -1 fails, to uint32 0xFFFFFFFF succeeds. | `run:0` |
+| `bi0368` | 368 | rule | “Restricting which syscalls a binary may make is **`--seccomp`**'s job” | The compiler has a `--seccomp` option (a kernel-enforced allowlist). | `sh:0` |
+| `bi0375` | 375 | rule | “`--extra-picky=no-sys` bans direct syscalls” | `--extra-picky=no-sys` refuses a program that calls sys; without it the program compiles. | `sh:0` |
+| `bi0378` | 378 | rule | “**`asm!!` is spelled `asm`** (D-046)” | `asm!!` no longer exists: it is refused. | `refuse` |
+| `bi0379` | 379 | rule | “`!!` no longer exists in the language” | `!!` no longer exists: `sys!!(...)` is refused. | `refuse` |
+| `bi0381` | 381 | rule | “**`sys!!!` is removed** (D-001)” | `sys!!!` is removed: it is refused. | `refuse` |
+| `bi0384` | 384 | rule | “Both remaining tiers are `Result`-wrapped” | Every function but main and failsafe returns Result<T>: a fallible function's result bound bare is refused. | `refuse` |
+| `bi0386` | 386 | rule | “`raw` / `_!` remains the single explicit, greppable bypass” | `_!` is the other spelling of `raw`: it unwraps a never-fails call. | `run:0` |
+| `bi0394` | 394 | rule | “`#` is the **compiler-directive sigil**” | `#` marks what is addressed to the compiler. | untestable [vague] tested through the forms below |
+| `bi0399` | 399 | row | “\| `#name<T>(...)` \| builtin producing a value \|” | `#name<T>(...)` is a builtin producing a value: #size_of<int64>() is a value. | `run:0` |
+| `bi0400` | 400 | row | “\| `#name(...)` \| **macro invocation** (D-046) — replaces `name!(args)` \|” | The old macro invocation `name!(args)` is replaced by `#name(args)`: `name!(args)` is refused. | `refuse` |
+| `bi0401` | 401 | row | “\| `#[name(...)]` \| attribute annotating a declaration \|” | `#[name(...)]` annotates a declaration: #[derive(Eq)] on a struct derives ==. | `run:0` |
+| `bi0403` | 403 | rule | “**`@` is never a builtin prefix.**” | `@` is never a builtin prefix: `@sizeof(int64)` is refused. | `refuse` |
+| `bi0408` | 408 | rule | “**Except casting**, which has no builtin form at all” | A cast has no builtin form: `#cast<int64>(x)` is refused (the operators are => and =>!). | `refuse` |
+| `bi0409` | 409 | rule | “`@cast_unchecked<T>` become the operators **`=>`** and **`=>!`** (D-021)” | `@cast<T>(x)` is not a cast; `x => T` is. | `refuse` |
+| `bi0416` | 416 | row | “\| `#size_of<T>` \|” | #size_of<T> is T's size in bytes, known at compile time. | `run:0` |
+| `bi0417` | 417 | row | “\| `#wild_ptr<T>(addr)` \|” | #wild_ptr<T>(addr) constructs a pointer from an integer address, in wild context. | `run:0` |
+| `bi0417b` | 417 | row | “**Legal only in `wild` context**” | #wild_ptr is legal only in wild context: into a binding not declared `wild` it is refused (D-019's reading). | `refuse` |
+| `bi0418` | 418 | row | “\| `#wild_slice<T>(ptr, len)` \|” | #wild_slice's count is held to [0, 2^47]: a negative count traps OutOfBounds. | `trap:OutOfBounds` |
+| `bi0418b` | 418 | row | “TYPE-061 keeps it out of `pure` bodies” | #wild_slice is refused in a pure body (TYPE-061). | `refuse:NITPICK-TYPE-061` |
+| `bi0418c` | 418 | row | “STRUCK by D-315 (2026-09-23)” | #wild_slice is no longer wild-context only: a slice over a plain pointer compiles. | `run:0` |
+| `bi0419` | 419 | row | “\| `#ptr_add<T>(ptr, offset)` \|” | #ptr_add<T>'s offset is in elements of T: #ptr_add<int64>(p, 1) advances eight bytes. | `run:0` |
+| `bi0419b` | 419 | row | “**Legal only in `wild` context** — pointer arithmetic is the manual regime's” | #ptr_add is legal only in wild context: over a buffer's pointer, outside wild, it is refused. | `refuse` |
+| `bi0420` | 420 | row | “\| `#sqrt(x)` \|” | #sqrt of a negative operand yields NaN, with no error channel. | `run:0` (M10 `f03_sqrt_of_negative`) |
+| `bi0420b` | 420 | row | “`flt32`/`flt64` only, by refusal” | #sqrt of an integer is refused. | `refuse` |
+| `bi0420c` | 420 | row | “it lowers to `llvm.sqrt.f32`/`f64`” | #sqrt lowers to the llvm.sqrt intrinsic. | `ir:@llvm\.sqrt\.f64` |
+| `bi0421` | 421 | row | “\| `#unreachable()` \|” | #unreachable() traps UNREACHABLE (-4102) when reached. | `trap:Unreachable` |
+| `bi0421b` | 421 | row | “Takes no arguments” | #unreachable takes no arguments: #unreachable(1i32) is refused. | `refuse` |
+| `bi0428` | 428 | rule | “Nitpick supports direct inline assembly for `x86_64` and `aarch64` targets” | Inline assembly is supported for x86_64 (and aarch64). | untestable [vague] tested through the row and the example below; aarch64 is another platform |
+| `bi0432` | 432 | row | “\| `asm<T>(arch, code, constraints, args)` \|” | asm<T> wraps the output in Result<T>; a negative integer return is an error. | `run:0` |
+| `bi0434` | 434 | rule | “**`asm!!!` is removed** (D-001)” | `asm!!!` is removed: it is refused. | `refuse` |
+| `bi0439` | 439 | example | “```nitpick” | The example: x86_64 assembly adding 1 to its input, returning Result<int32>. | `run:0` |
+
+Tables whose rows are not claims:
+
+- line 357: the original three syscall tiers, removed by D-001 and D-048: history; the current rules are tested at lines 375-386
+
+## CONCURRENCY (`meta/specs/CONCURRENCY_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `cc0020` | 20 | row | “native `async` / `await`, coroutines” | Asynchronous execution is native `async`/`await`: an async function that suspends (sleeps) and resumes is awaited from `async main` and yields its value. | `run:0` |
+| `cc0021` | 21 | row | “standard library only, no language keywords” | System threading uses no language keywords, so `thread` is an ordinary identifier. | `run:0` |
+| `cc0027` | 27 | rule | “Every thread runs an executor” | Every thread runs an executor: a thread's body spawns a task, awaits the channel it fills, and reports the value plus one. | `run:0` |
+| `cc0027b` | 27 | rule | “waiting is always a task-level event” | Waiting is a task-level event: main waiting in `recv` does not stop a sibling task on the same thread from running and sending the value main waits for. | `run:0` |
+| `cc0035` | 35 | rule | “blocking-versus-async split in the API” | There is no blocking form of a channel operation: `ch.recv(d)` without `await` is refused. | `refuse` |
+| `cc0042` | 42 | example | “```nitpick” | The declaring-and-awaiting example compiles as written and exits 0. | `run:0` |
+| `cc0053` | 53 | rule | “functions return `Result<T>` like every other function, so the result” | An awaited async call is a `Result<T>` that must be unwrapped: binding it straight to `int32` is refused. | `refuse` |
+| `cc0053b` | 53 | rule | “`async` functions return `Result<T>`” | An awaited async call binds as `Result<int32>` and carries the callee's value. | `run:0` |
+| `cc0055` | 55 | rule | “callee can never be `never fails`” | An `async` function can never be `never fails`: declaring one is refused. | `refuse` |
+| `cc0056` | 56 | rule | “so `raw await f(…)` is unlicensed by” | `raw await f()` is unlicensed: it is refused. | `refuse` |
+| `cc0059` | 59 | example | “```nitpick” | The three honest spellings (relay, `?\| fallback`, `?! 9tbb32`) compile, and each yields the callee's value when it succeeds. | `run:0` |
+| `cc0060` | 60 | rule | “relay await fetch_data(url);      // propagate” | `relay await` propagates the callee's error verbatim as the caller's own. | `run:0` |
+| `cc0061` | 61 | rule | “?\| fallback;     // default” | `await f() ?\| d` yields d when the call fails and the value when it succeeds. | `run:0` |
+| `cc0062` | 62 | rule | “?! 9tbb32;       // trap” | `await f() ?! 9tbb32` on a failing call traps to failsafe with code 9, which no named arm matches, so the catch-all arm answers. | `run:99` |
+| `cc0065` | 65 | rule | “is valid only inside an `async func`” | `await` in a synchronous function is refused. | `refuse` |
+| `cc0066` | 66 | rule | “hard compile error, `NITPICK-040`” | `await` in a synchronous function is refused with the code NITPICK-040. | `refuse:NITPICK-040` |
+| `cc0070` | 70 | rule | “and discarding the result spawns” | Calling an async function without `await` and discarding the result spawns it: the spawned task runs and delivers its value through a channel. | `run:0` |
+| `cc0073` | 73 | example | “```nitpick” | `drop work();` spawns an async function whose VALUE is discarded: a value-returning async callee is accepted in the spawn form. | `run:0` |
+| `cc0079` | 79 | rule | “the enclosing scope's D-062 join” | A spawned task's error reaches the join and becomes the enclosing async function's own error. | `run:0` |
+| `cc0080` | 80 | rule | “after every child has finished” | The join relays the first child error verbatim, and only after every child has finished: a slower sibling's value is already in the channel when the parent returns. | `run:0` |
+| `cc0081` | 81 | rule | “a task wound up by the join's deadline reports its wind-up” | A task wound up by the join's deadline reports its wind-up code as the enclosing async function's error, the way a child error does. | `run:0` |
+| `cc0082` | 82 | rule | “A spawned task's error is observable or the program does not” | Spawning where no error can be observed does not compile: `drop work()` in a synchronous function is refused. | `refuse` |
+| `cc0091` | 91 | rule | “The task runs” | The spawned task runs concurrently with its spawner: it waits for a value the spawner sends after spawning it, and answers. | `run:0` |
+| `cc0092` | 92 | rule | “does not return until it has” | A spawned task cannot outlive its scope: the enclosing async function does not return until the task has finished, so its value is in the channel when the function returns. | `run:0` |
+| `cc0097` | 97 | rule | “taking a normal” | A task the scope-exit join winds up observes the request at its next await and takes a normal error exit, so its `defer` runs (here the defer divides by zero). | `trap:DivByZero` |
+| `cc0098` | 98 | rule | “The deadline is a property of the executor, fixed” | The join deadline is a property of the executor, fixed where the executor is created, not repeated at every spawn. | untestable [vague] the section gives no construct that sets an executor's deadline; `joins` appears only in LEXICAL_REFERENCE, never in this reference |
+| `cc0100` | 100 | rule | “There is no unbounded join, and expiry **traps to” | There is no unbounded join: a thread that outlives its join deadline traps to failsafe (DeadlineExceeded) instead of being detached or waited for. | `trap:DeadlineExceeded` |
+| `cc0108` | 108 | rule | “There is no cancellation operation.” | There is no operation that cancels a task. | untestable [unobservable] no task can be named (D-058), so no program can even form a call to a cancel operation; cc0143 tests that the spawn's result cannot be held |
+| `cc0115` | 115 | rule | “A task resumes on the thread it suspended on.” | A task resumes on the thread it suspended on (no migration, no work-stealing): its gettid is the same after every await, while two other threads are busy. | `run:0` |
+| `cc0130` | 130 | rule | “lowers to `@llvm.coro` state machines” | `async` lowers to `@llvm.coro` state machines: the emitted IR uses llvm.coro intrinsics. | `ir:@llvm\.coro\.` |
+| `cc0132` | 132 | example | “```llvm” | `Future<T>` is the handle `%Future = type { ptr, ptr }` (coroutine handle, result slot) in the emitted IR of an async program. | `ir:%Future = type \{ ptr, ptr \}` |
+| `cc0136` | 136 | rule | “Each thread's executor owns an `arena<T>` from which task frames are” | Each thread's executor allocates task frames from its own single-threaded arena, released on task completion. | untestable [internal] where a frame's bytes come from is the runtime's business; no program-visible operation distinguishes an executor arena from the heap |
+| `cc0141` | 141 | rule | “is an internal lowering artifact, not surface syntax” | `Future<T>` is not surface syntax: a parameter of type `Future<int32>` is refused. | `refuse` |
+| `cc0142` | 142 | rule | “yields `T` directly” | `await f()` yields `T` directly: `int32:x = await f(..)` compiles and x is the value. | `run:0` |
+| `cc0143` | 143 | rule | “a user can neither name it nor hold it” | The result of an un-awaited async call cannot be held: binding `work()` is refused. | `refuse` |
+| `cc0146` | 146 | rule | “fan-out and collect” | Fan-out and collect goes through a channel: three spawned tasks send their squares on one channel and main collects 1+4+9. | `run:0` |
+| `cc0151` | 151 | rule | “no `spawn` or `go` keyword” | There is no `spawn` keyword: `spawn` is an ordinary identifier. | `run:0` |
+| `cc0151b` | 151 | rule | “no `spawn` or `go` keyword” | There is no `go` keyword: `go` is an ordinary identifier. | `run:0` |
+| `cc0151c` | 151 | rule | “no `sync` keyword” | There is no `sync` keyword and the compiler rejects it: a `sync` function modifier is refused. | `refuse` |
+| `cc0153` | 153 | rule | “barriers are standard-library abstractions” | Threads, mutexes, condition variables, rwlocks and barriers are standard-library abstractions, not language constructs. | untestable [tree] where the primitives are implemented is a fact about the source tree; note LEXICAL_REFERENCE §4 lists Mutex, Guard, RwLock, RGuard, CondVar, Barrier as BuiltinType keywords and `thread` as a keyword |
+| `cc0167` | 167 | rule | “supplies the primitives.” | libn's syscall layer wraps futex (12 uses), clone (5), gettid, tkill, set_robust_list. | untestable [tree] a count of call sites in the archived prototype's source |
+| `cc0187` | 187 | rule | “The three carrying **direct** C shims are already marked deprecated” | The three prototype modules with direct C shims are marked deprecated in their source. | untestable [tree] a statement about the archived prototype's files |
+| `cc0194` | 194 | rule | “Only `mutex`, `rwlock`, and `condvar` are genuinely” | Of the prototype's modules only mutex, rwlock and condvar are free of C dependencies. | untestable [tree] a statement about the archived prototype's imports |
+| `cc0207` | 207 | rule | “records the full read” | meta/CONCURRENCY_STDLIB_AUDIT.md records the full read of the prototype modules. | untestable [tree] a statement about a document in the compiler repository |
+| `cc0220` | 220 | rule | “language type emitting native LLVM atomic IR with no shim” | `atomic<T>` emits native LLVM atomic IR: `fetch_add` appears as an `atomicrmw add`. | `ir:atomicrmw add ` |
+| `cc0220b` | 220 | rule | “with no shim” | `atomic<T>` needs no shim: the program's IR names no `*shim*` symbol. | `ir!:@[\w.$]*shim` |
+| `cc0243` | 243 | example | “```nitpick” | The three ways to obtain an atomic compile as written: scope storage, a struct field, and `atomic_from_ptr<int32>(hdr_ptr)` bound to a local. | `run:0` |
+| `cc0244` | 244 | rule | “atomic<int32>:counter = 0i32;” | An atomic may live in the enclosing scope, initialised from a plain value, and is usable there. | `run:0` |
+| `cc0247` | 247 | rule | “atomic<int64>:hits;” | An atomic may be a struct field, and its methods work through the field. | `run:0` |
+| `cc0250` | 250 | rule | “atomic_from_ptr<int32>(hdr_ptr);   // alias existing memory” | `atomic<int32>:lk = atomic_from_ptr<int32>(hdr_ptr)` aliases existing memory: a store through lk is what the pointer reads. | `run:0` |
+| `cc0253` | 253 | rule | “`atomic_new(0i32)` is **removed**” | `atomic_new(0i32)` is removed (there is no allocating constructor): it is refused. | `refuse` |
+| `cc0258` | 258 | rule | “Where an aliased address originates as an integer it must be converted with” | An integer address must be converted with `#wild_ptr<T>` first: passing an int64 straight to `atomic_from_ptr` is refused. | `refuse` |
+| `cc0259b` | 259 | rule | “`#wild_ptr<T>(addr)` in `wild` context” | An integer address converted with `#wild_ptr<T>(addr)` can be aliased as an atomic: a store through the alias is read back through the pointer (an mmap'd page). | `run:0` |
+| `cc0260` | 260 | rule | “not the raw `hdr_ptr + 24i64`” | Offsets go through `#ptr_add`, not raw `ptr + n`: adding an integer to a pointer is refused. | `refuse` |
+| `cc0260b` | 260 | rule | “`#ptr_add<T>(ptr, offset)`” | `#ptr_add<T>(ptr, offset)` offsets a pointer, and an atomic alias of the result works. | `run:0` |
+| `cc0264` | 264 | rule | “Exactly six, and nothing else:” | The atomic method set is exactly six: a seventh (`fetch_or`) is refused. | `refuse` |
+| `cc0266` | 266 | rule | “`.load()` · `.store(v)` · `.swap(v)`” | All six methods exist and act on the cell: store 5, fetch_add 3, fetch_sub 1, swap 10, compare_exchange(10, 20) leave 20. | `run:0` |
+| `cc0268` | 268 | example | “```nitpick” | `int32:prev = counter.fetch_add(1i32);` yields the value before the add. | `run:0` |
+| `cc0272` | 272 | rule | “Methods dispatch via UFCS” | Atomic methods dispatch via UFCS. | untestable [internal] UFCS is how `c.load()` is resolved; the reference gives no free-function spelling for an atomic method a program could call instead |
+| `cc0276` | 276 | rule | “methods enforce SeqCst” | All six atomic methods lower with seq_cst ordering (load, store, xchg, add, sub, cmpxchg seq_cst seq_cst). | `ir:\A(?=[\s\S]*?load atomic i32[^\n]*seq_cst)(?=[\s\S]*?store atomic i32[^\n]*seq_cst)(?=[\s\S]*?atomicrmw xchg[^\n]*seq_cst)(?=[\s\S]*?atomicrmw add[^\n]*seq_cst)(?=[\s\S]*?atomicrmw sub[^\n]*seq_cst)(?=[\s\S]*?cmpxchg[^\n]*seq_cst seq_cst)` |
+| `cc0277` | 277 | rule | “orderings such as `.load_acquire()` are rejected by the compiler” | A suffixed weaker ordering such as `.load_acquire()` is refused. | `refuse` |
+| `cc0278` | 278 | rule | “are reserved keywords but reachable” | `relaxed` is a reserved keyword: it cannot name a variable. | `refuse` |
+| `cc0278b` | 278 | rule | “are reserved keywords but reachable” | `acquire` is a reserved keyword: it cannot name a variable. | `refuse` |
+| `cc0278c` | 278 | rule | “are reserved keywords but reachable” | `release` is a reserved keyword: it cannot name a variable. | `refuse` |
+| `cc0279` | 279 | rule | “only through low-level compiler intrinsics” | The ordering keywords are reachable only through low-level compiler intrinsics. | untestable [vague] no intrinsic is named, so no program can reach one or show it absent |
+| `cc0297` | 297 | rule | “they pass down the call stack and never up” | Borrows pass down the call stack and never up: a function returning a borrow of its own local is refused. | `refuse` |
+| `cc0298` | 298 | rule | “a borrow may not cross **a thread spawn**” | A borrow may not cross a thread spawn: passing `@x` of an int32 to a thread is refused. | `refuse` |
+| `cc0298b` | 298 | rule | “**an `await` point**” | A borrow may not cross an await point: a borrow held across an `await` and used after it is refused. | `refuse` |
+| `cc0298c` | 298 | rule | “or **an `await` point**” | A borrow may not cross an await point: passing `@x` into an awaited async callee that suspends while holding it is refused. | `refuse` |
+| `cc0309` | 309 | row | “\| Threading \| single-threaded \| multi-threaded \|” | A `shared_arena<T>` is multi-threaded: two threads allocate in one shared arena and read their values back. | `run:0` |
+| `cc0309b` | 309 | row | “single-threaded” | An `arena<T>` is single-threaded: handing one to a thread is refused. | `refuse` |
+| `cc0310` | 310 | row | “**`alloc`, `get`, `destroy` only**” | A `shared_arena<T>` has only alloc, get and destroy: `reset` is refused. | `refuse` |
+| `cc0310b` | 310 | row | “`alloc`, `get`, `free`, `reset`, `destroy`” | An `arena<T>` supports alloc, get, free, reset and destroy: reset invalidates a live handle. | `run:0` |
+| `cc0310c` | 310 | row | “`destroy` only**” | A `shared_arena<T>` supports alloc, get and destroy. | `run:0` |
+| `cc0311` | 311 | row | “\| Per-slot `free` \| yes \| **no** \|” | A `shared_arena<T>` has no per-slot free: `free` is refused. | `refuse` |
+| `cc0311b` | 311 | row | “\| Per-slot `free` \| yes \|” | An `arena<T>` frees per slot: the freed handle fails, a sibling handle still reads. | `run:0` |
+| `cc0312` | 312 | row | “**chunked, never moves**” | A shared arena's storage is chunked and never moves; an arena<T> may reallocate. | untestable [unobservable] neither operation list yields an address a program could compare before and after growth; handles hide where the slot lives |
+| `cc0313` | 313 | row | “one atomic bump per allocation” | An arena<T> allocation costs nothing extra; a shared arena's costs one atomic bump. | untestable [internal] the allocation paths are the runtime's (npk_arena_*, npk_sarena_*), not the program's IR |
+| `cc0321` | 321 | rule | “requires that no thread still holds handles” | Destroying a shared arena needs no thread to hold it, by ownership: `destroy` while a spawned thread still borrows it is refused. | `refuse` |
+| `cc0326` | 326 | rule | “Race freedom comes from three structural properties” | Race freedom comes from three structural properties (the list that follows has five). | untestable [vague] a count of the document's own list, which it gets wrong (3 vs 5); the five properties are tested at cc0298, cc0115, cc0309-0311, cc0092, cc0332 |
+| `cc0332` | 332 | rule | “cannot outlive the scope that spawned them either” | Threads cannot outlive the scope that spawned them: a function that spawns a thread returns only after the thread has finished. | `run:0` |
+| `cc0350` | 350 | rule | “that two threads can reach is classified” | Every word of runtime/npkrt.ll two threads can reach is classified in npkrt.spec, and a belt refuses an unclassified access. | untestable [tree] a claim about the runtime's specification files and the tree's belt |
+| `cc0354` | 354 | rule | “Each protocol then has a bounded model in `runtime/models/`” | Each runtime protocol has a bounded model whose bad predicates are proven unreachable, with a control per predicate. | untestable [tree] a claim about runtime/models/ and the tree's full run |
+| `cc0373` | 373 | example | “```nitpick” | `Channel<T, LEVEL, CAP>` is the channel type: an instance with T=int32, LEVEL=3, CAP=2 carries a value. | `run:0` |
+| `cc0379` | 379 | row | “\| `T` \| element type \|” | T is the element type: sending an int64 on a `Channel<int32, ...>` is refused. | `refuse` |
+| `cc0380` | 380 | row | “a channel blocks, so it is a blocking primitive” | A channel's LEVEL is a D-056 lock level: a send on a level-4 channel while holding a level-5 mutex guard is a downward acquisition and is refused. | `refuse` |
+| `cc0380b` | 380 | row | “\| `LEVEL` \| D-056 lock level” | A send on a level-4 channel while holding a level-3 guard is an upward acquisition and is accepted. | `run:0` |
+| `cc0381` | 381 | row | “`> 0` is buffered” | CAP > 0 is a buffer: with CAP 2 two sends complete with no receiver, and a third with a zero deadline fails. | `run:0` |
+| `cc0383` | 383 | rule | “A rendezvous is not a one-slot buffer.” | A rendezvous (CAP 0) sender waits for a receiver, not for space: with no receiver a send times out instead of depositing. | `run:0` |
+| `cc0386` | 386 | rule | “Registering as a receiver is itself the event” | A rendezvous completes in both arrival orders: a parked sender is taken by a later receiver, and a parked receiver takes a later send. | `run:0` |
+| `cc0394` | 394 | rule | “Capacity lives in the **type**” | Capacity lives in the type: a CAP-2 endpoint cannot be bound as a CAP-4 channel. | `refuse` |
+| `cc0399` | 399 | rule | “It is a capacity-1 channel the sender closes.” | A one-shot is a capacity-1 channel the sender closes: the receiver gets the value, then an error. | `run:0` |
+| `cc0403` | 403 | example | “```nitpick” | The three operations: `await ch.send(move(v), d)` is Result<NIL>, `await ch.recv(d)` is Result<T>, `ch.close()` is Result<NIL>. | `run:0` |
+| `cc0409` | 409 | rule | “was struck” | `len()` was struck: `ch.len()` is refused. | `refuse` |
+| `cc0415` | 415 | rule | “with a zero deadline, which asks and acts atomically” | A zero deadline asks and acts without waiting: recv on an empty channel fails at once, recv on a non-empty one takes the value. | `run:0` |
+| `cc0417` | 417 | rule | “A closed channel is an **error code, never a” | `recv` returns Result<T>: a received zero is a value, and a closed, drained channel is an error (not a timeout, not a value). | `run:0` |
+| `cc0421` | 421 | rule | “the parameter is a RELATIVE” | The deadline is a RELATIVE Duration: `recv(Duration{ ns: 60 ms })` on an empty channel waits about 60 ms (an absolute reading would expire at once). | `run:0` |
+| `cc0422` | 422 | rule | “(prelude `{ int64:ns }`)” | `Duration` is the prelude struct `{ int64:ns }`. | `run:0` |
+| `cc0425` | 425 | rule | “so re-arms cannot drift” | A deadline is converted once to an absolute monotonic time at suspension entry, so re-arms cannot drift. | untestable [timing] drift across re-arms is a property of wait durations |
+| `cc0426` | 426 | rule | “`DEADLINE_EXCEEDED` (−4107)” | Expiry is the error `DEADLINE_EXCEEDED`: an expired recv's error compares equal to it. | `run:0` |
+| `cc0426b` | 426 | rule | “(−4107)” | DEADLINE_EXCEEDED's code is 4107 (−4107): comparing an error with it compares against that constant. | `ir:icmp (eq|ne) i32 [^\n]*[ ,(]-?4107\b` |
+| `cc0427` | 427 | rule | “`acquire`, the JOIN's trap code” | Expiry is a catchable Result error at an `acquire`: a 1 ms acquire of a mutex another thread holds returns DeadlineExceeded. | `run:0` |
+| `cc0428` | 428 | rule | “There is no unbounded `recv`” | Deadlines are mandatory: a `recv()` with no deadline is refused. | `refuse` |
+| `cc0429` | 429 | rule | “`try_send` and `try_recv` do not” | `try_recv` does not exist: it is refused. | `refuse` |
+| `cc0431` | 431 | rule | “written `move(v)`” | `send` takes ownership, written `move(v)`: sending an owning string without `move` is refused. | `refuse` |
+| `cc0431b` | 431 | rule | “takes ownership” | After `send(move(s), d)` the sender no longer owns s: using s afterwards is refused. | `refuse` |
+| `cc0433` | 433 | rule | “is woken by its peer, not by a timer” | A blocked operation is woken by its peer, not by a polling timer. | untestable [timing] the difference is the latency of a hand-off |
+| `cc0442` | 442 | rule | “Every operation suspends the task, never the thread” | Channel operations are safe across threads (the ring is under a per-channel mutex): two threads sending 50 each to one channel lose nothing. | `run:0` |
+| `cc0454` | 454 | rule | “may not contain a borrow” | A channel element may not contain a borrow: `Channel<int32->, ...>` is refused. | `refuse` |
+| `cc0455` | 455 | rule | “so a slice — which is a borrow (D-070) —” | A slice is a borrow and cannot be sent: `Channel<uint8[], ...>` is refused. | `refuse` |
+| `cc0458` | 458 | rule | “There is no `select`” | There is no `select`: the word is an ordinary identifier. | `run:0` |
+| `cc0478` | 478 | rule | “as handles they may cross freely” | Channel endpoints are handles and cross a thread spawn freely, by value. | `run:0` |
+| `cc0479` | 479 | rule | “`StaleHandle` (−4106)” | StaleHandle's code is 4106 (−4106): comparing an error with it compares against that constant. | `ir:icmp (eq|ne) i32 [^\n]*[ ,(]-?4106\b` |
+| `cc0482` | 482 | rule | “`close` ends the stream, leaving the slot, the buffer and everything” | A closed channel is not reclaimed: values sent before the close are drained, and the end is reported as an error that is not StaleHandle. | `run:0` |
+| `cc0489` | 489 | rule | “today a channel outlives its creating scope” | Reclamation is not built: a channel outlives the function that created it, so an endpoint it returns still delivers the value sent before it returned. | `run:0` |
+| `cc0490` | 490 | rule | “provoked from source.” | StaleHandle cannot be provoked from source today. | untestable [unobservable] a claim that no program can produce the error; cc0489 tests the half that is observable |
+| `cc0492` | 492 | rule | “no `destroy` and no endpoint reference counting” | There is no channel `destroy`: `ch.destroy()` is refused. | `refuse` |
+| `cc0501` | 501 | example | “```nitpick” | `Actor<M, R, LEVEL>` is a type with `tell` (Result<NIL>) and `ask` (Result<R>), each taking a moved message and a deadline. | `run:0` |
+| `cc0508` | 508 | rule | “An actor is a **task with a mailbox**” | An actor is a task with a mailbox, not a thread. | untestable [vague] no spelling is given to create or spawn an actor |
+| `cc0513` | 513 | rule | “The mailbox is a `Channel<M, LEVEL, CAP>`” | An actor's mailbox is a Channel<M, LEVEL, CAP>. | untestable [vague] no operation reaches an actor's mailbox; CAP appears in no actor type parameter |
+| `cc0518` | 518 | rule | “an endpoint is a generation-checked handle” | An endpoint may ride in a message: a request carrying its reply channel is answered on that channel. | `run:0` |
+| `cc0523` | 523 | rule | “`R = NIL` for an actor that does not reply” | With R = NIL, `ask` is an acknowledgement: it yields Result<NIL>. | `run:0` |
+| `cc0526` | 526 | rule | “an actor cannot outlive the scope that spawned” | An actor cannot outlive its spawning scope; scope exit closes, drains and joins it. | untestable [vague] no spelling is given to spawn an actor |
+| `cc0528` | 528 | rule | “`alive` is an `atomic<bool>`” | `atomic<bool>` is a valid atomic: store, load and swap work on it. | `run:0` |
+| `cc0535` | 535 | example | “```nitpick” | `ThreadPool<LEVEL, CAP>:pool = ThreadPool.create(n)?;` and `await pool.submit(move(job), deadline)?;` compile and run. | `run:0` |
+| `cc0540` | 540 | rule | “A thread pool is N worker tasks receiving from one channel.” | A thread pool is N worker tasks receiving from one channel. | untestable [vague] describes the pool's construction, which no program can reach without a constructor that works (cc0535) |
+| `cc0550` | 550 | rule | “Submitted work is lexically scoped” | The pool's owning scope does not exit until every submitted job has finished, under a deadline whose expiry traps. | untestable [vague] no pool can be built from the reference's spelling (cc0535) |
+| `cc0555` | 555 | rule | “The job type is checked.” | The pool's job type is checked. | untestable [vague] the job type is never named |
+| `cc0557` | 557 | rule | “does not exist” | `wait_idle` does not exist. | untestable [unobservable] no pool can be built to call it on (cc0535), so a refusal could not be attributed to wait_idle |
+| `cc0566` | 566 | row | “owns its data (D-056); no recursive variant” | `Mutex<T, LEVEL>` owns its data: the guard reads the initial value, a write through one guard is seen through the next. | `run:0` |
+| `cc0567` | 567 | row | “\| `RwLock<T, LEVEL>` \| owns its data \|” | `RwLock<T, LEVEL>` owns its data: read guards see it, a write guard changes it. | `run:0` |
+| `cc0568` | 568 | row | “**`wait` is removed**” | `CondVar.wait` is removed: `cv.wait(g)` is refused. | `refuse` |
+| `cc0568b` | 568 | row | “`timedwait` is the only form” | `timedwait` is the form: with no signal it returns an error when its deadline expires. | `run:0` |
+| `cc0569` | 569 | row | “reimplemented natively; LEVELLED like every blocking primitive” | `Barrier<N, LEVEL>` exists: a lone arrival at a 3-party barrier fails when its deadline expires. | `run:0` |
+| `cc0569b` | 569 | row | “from the unlevelled `Barrier<N>` this table first wrote” | The unlevelled `Barrier<N>` is gone: a one-parameter Barrier type is refused. | `refuse` |
+| `cc0571` | 571 | rule | “deadline-bounded, and returns `Result`” | Every acquisition is deadline-bounded: `m.acquire()` with no deadline is refused. | `refuse` |
+| `cc0574` | 574 | example | “```nitpick” | The critical section is a bare block: the guard is released at the closing brace (a 1 ms re-acquire succeeds) and the write through `guard.value.retries` is kept. | `run:0` |
+| `cc0581` | 581 | rule | “`await` is not optional here” | `await` is not optional on an acquisition: `m.acquire(d)` without await is refused. | `refuse` |
+| `cc0584` | 584 | rule | “no `with` construct” | There is no `with` construct for a critical section. | untestable [unobservable] `with` is a reserved VerificationKeyword (LEXICAL §4), so neither an identifier nor a statement test can show the absence |
+| `cc0587` | 587 | rule | “There is no lock-free queue.” | There is no lock-free queue. | untestable [vague] no spelling of such a queue is given whose refusal could be tested |
+| `cc0609` | 609 | rule | “acquisition must strictly” | Acquisition must strictly increase: holding a level-5 guard, acquiring a level-3 mutex is refused. | `refuse` |
+| `cc0609b` | 609 | rule | “must strictly” | Strictly: holding a level-3 guard, acquiring another level-3 mutex is refused. | `refuse` |
+| `cc0609c` | 609 | rule | “blocking primitive carries a compile-time `LEVEL`” | An increasing acquisition (level 3, then level 5, both held) is accepted. | `run:0` |
+| `cc0613` | 613 | rule | “flag now claims lock-order freedom rather than deadlock freedom” | The concurrency flag claims lock-order freedom, not deadlock freedom. | untestable [tree] a statement about what a flag's documentation claims |
+| `cc0614` | 614 | rule | “`create_recursive` is” | `create_recursive` is removed: calling it is refused. | `refuse` |
+| `cc0628` | 628 | rule | “`exit` already” | `exit` routes to failsafe when a wild allocation is still live. | `trap:WildLeak` |
+| `cc0632` | 632 | rule | “No coroutine is resumed on any thread, no `defer` runs” | A trap is a whole-program event: a suspended task's `defer` (which would divide by zero) does not run, and failsafe sees the original IntOverflow. | `trap:IntOverflow` |
+| `cc0635` | 635 | rule | “stop *before* `failsafe` gets control” | Other threads stop before failsafe gets control. | untestable [timing] an ordering between threads at the moment of a trap |
+| `cc0636` | 636 | rule | “`failsafe` runs on the trapping thread as a” | failsafe runs on the trapping thread: a trap on a spawned thread runs failsafe on that thread (its gettid is not the process id). | `run:0` |
+| `cc0637` | 637 | rule | “plain call and **may not be `async`**” | `failsafe` may not be `async`: an async failsafe is refused. | `refuse` |
+| `cc0641` | 641 | rule | “thread registry (64 slots” | The floor keeps a 64-slot thread registry, claimed and published before the clone. | untestable [internal] the registry's layout; the text states no outcome for a 65th live thread |
+| `cc0646` | 646 | rule | “is the exit-70 stop” | A re-entering failsafe holder is the exit-70 stop: a trap inside failsafe ends the process with 70. | `run:70` |
+
+Tables whose rows are not claims:
+
+- line 174: an inventory of the archived prototype's stdlib files (line counts, C dependencies): facts about another source tree, not language behaviour
+
+## IO (`meta/specs/IO_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `io0014` | 14 | rule | “D-074” | D-074 returns `stream` to userland: it is an ordinary identifier. | `run:0` |
+| `io0015b` | 15 | rule | “returns it to userland along with `process`, `pipe`, `debug`, and `log`” | D-074 returns `process` to userland: it is an ordinary identifier. | `run:0` |
+| `io0015c` | 15 | rule | “returns it to userland along with `process`, `pipe`, `debug`, and `log`” | D-074 returns `pipe` to userland: it is an ordinary identifier. | `run:0` |
+| `io0015d` | 15 | rule | “returns it to userland along with `process`, `pipe`, `debug`, and `log`” | D-074 returns `debug` to userland: it is an ordinary identifier. | `run:0` |
+| `io0015e` | 15 | rule | “returns it to userland along with `process`, `pipe`, `debug`, and `log`” | D-074 returns `log` to userland: it is an ordinary identifier. | `run:0` |
+| `io0016` | 16 | rule | “what follows needs language syntax” | Nothing in the I/O model needs language syntax. | untestable [vague] no checkable outcome |
+| `io0022` | 22 | rule | “`Stream` describes what every readable or writable thing can” | `Stream` is the trait every readable or writable thing implements: it can bound a generic parameter. | `run:0` |
+| `io0023` | 23 | rule | “files, pipes, sockets, and memory buffers are stdlib types implementing it” | Files, pipes, sockets and memory buffers are stdlib types implementing the stream trait. | untestable [vague] names no socket or memory-buffer type to test |
+| `io0025` | 25 | example | “```nitpick” | Reader and Writer have the example's shape: user types implementing `read`, `write` and `flush` with exactly those signatures are called through them. | `run:0` |
+| `io0036` | 36 | rule | “receivers are `Self->`” | Receivers are `Self->`: an impl whose receiver is by value is refused. | `refuse` |
+| `io0039` | 39 | rule | “An impl must keep the trait's” | An impl must keep the trait's `async`: a synchronous `write` in an impl of Writer is refused with TYPE-048. | `refuse:TYPE-048` |
+| `io0039b` | 39 | rule | “are relative spans named `within`” | Deadline parameters are relative spans named `within`. | untestable [timing] relativity shows only as a wait's duration; cc0421 measures it on a channel |
+| `io0045` | 45 | rule | “Every operation is `async`” | Every stream operation is async: `r.read(..)` without await is refused. | `refuse` |
+| `io0048` | 48 | rule | “through raw syscalls” | The executor's readiness mechanism is io_uring or epoll through raw syscalls. | untestable [internal] the executor is the runtime's; the syscalls it makes are not visible to a program |
+| `io0050` | 50 | rule | “and carries a **deadline**” | Every operation carries a deadline (there is no unbounded read): `read` without one is refused. | `refuse` |
+| `io0052` | 52 | rule | “a read cannot be told a length that disagrees” | Buffers are slices: a read into a 4-byte slice of an 8-byte array takes 4 bytes of 8 available and leaves the rest of the array alone. | `run:0` |
+| `io0063` | 63 | rule | “Object safety holds” | Reader and Writer are object-safe: `dyn Writer` and `dyn Reader` values dispatch to the user impls. | `run:0` |
+| `io0070` | 70 | example | “```nitpick” | `Result<int64>:n = await src.read(dest, deadline);` yields the number of bytes read. | `run:0` |
+| `io0074` | 74 | rule | “returns the number of bytes placed in `dest`” | `read` returns the number of bytes placed in dest: 5 available into an 8-byte slice gives 5. | `run:0` |
+| `io0075` | 75 | rule | “code `E_EOF` = −4096” | End of input is the error code `E_EOF`: a read of an exhausted stream fails with it. | `run:0` |
+| `io0075b` | 75 | rule | “= −4096” | E_EOF's code is 4096 (−4096): comparing a read's error with the EOF identity compares against that constant. | `ir:icmp (eq|ne) i32 [^\n]*[ ,(]-?4096\b` |
+| `io0077` | 77 | rule | “pins the value” | tests/backend/programs/fd_io.npk pins E_EOF's value with a running program. | untestable [tree] a claim about a test file in the compiler repository (it compares with the identity IoEof, not with a number) |
+| `io0078` | 78 | rule | “No operation returns a sentinel” | No operation returns a sentinel: an exhausted read is an error, not a zero count. | `run:0` |
+| `io0090` | 90 | rule | “end-of-input is an error code, exactly as a closed channel is” | A closed, drained channel is an error code, as end-of-input is. | `run:0` |
+| `io0099` | 99 | rule | “**different types** rather than a mode flag on one type” | Text and byte streams are different types: a ByteWriter cannot be bound as a TextWriter. | `refuse` |
+| `io0103` | 103 | row | “\| Translation \| **none, ever** \| on \|” | A byte stream never translates: `a\r\nb\n` written by a ByteWriter reads back as the same 5 bytes. | `run:0` |
+| `io0104` | 104 | row | “and lone `\r` all yield `\n`” | A text reader reads `\r\n`, `\n` and a lone `\r` each as one line break: `a\r\nb\nc\rd` is four lines. | `run:0` |
+| `io0105` | 105 | row | “`\n`, unless opened requesting otherwise” | A text writer created with LineEnding.Lf writes `\n` as `\n`. | `run:0` |
+| `io0106` | 106 | row | “\| Unit \| `uint8[]` \|” | A byte stream's unit is `uint8[]`: passing a `string` to a ByteWriter's write is refused. | `refuse` |
+| `io0111` | 111 | rule | “is a creation parameter held in the writer” | The line ending is a creation parameter held in the writer, not in the type: an Lf and a CrLf writer have one type, and one function writes differently through each. | `run:0` |
+| `io0115` | 115 | example | “```nitpick” | `TextWriter:w = text_writer_create(sink, LineEnding.Lf) ?! …;` and the CrLf twin build text writers; the CrLf one writes `\r\n`. | `run:0` |
+| `io0117` | 117 | rule | “LineEnding.CrLf” | LineEnding.CrLf is the opt-in: a CrLf text writer writes `a\nb` as `a\r\nb`. | `run:0` |
+| `io0121` | 121 | rule | “static methods — every trait and impl method takes `self`” | The language has no static methods: an impl method without `self`, called as `Type.method()`, is refused. | `refuse` |
+| `io0124` | 124 | rule | “`Path.parse` spelling this document used” | Construction is a bare function: the `Path.parse` spelling is refused. | `refuse` |
+| `io0130` | 130 | rule | “never inferred from whether the output is a terminal” | Buffering is never inferred from whether the output is a terminal. | untestable [platform] needs a terminal on stdout to compare with a pipe; the harness has none |
+| `io0134` | 134 | row | “\| `stdin` \| fully buffered \|” | stdin is fully buffered. | untestable [unobservable] how far a reader fetches ahead of what it returns is not visible to the program; stdin is /dev/null here |
+| `io0135` | 135 | row | “\| `stdout` \| line buffered, always \|” | stdout is line buffered, always: with fd 1 on a pipe, a partial line written through std_out() is not delivered until its newline. | `run:0` |
+| `io0136` | 136 | row | “\| `stderr` \| **unbuffered, always** \|” | stderr is unbuffered: with fd 2 on a pipe, a partial line written through std_err() is delivered at once. | `run:0` |
+| `io0144` | 144 | rule | “`io_isatty` remains available” | `io_isatty` is available and answers whether a descriptor is a terminal. | untestable [vague] the reference gives no signature, so no call can be written from the text; no BUILTIN_REFERENCE row names io_isatty |
+| `io0151` | 151 | rule | “(`std_out` returns” | `std_out` returns `TextWriter<LineBufWriter<ByteWriter>>`: buffering is a type. | `run:0` |
+| `io0157` | 157 | rule | “`defer` does not run on a trap (D-014)” | `defer` does not run on a trap: a registered defer that would divide by zero does not run when the program traps IntOverflow. | `trap:IntOverflow` |
+| `io0158` | 158 | rule | “**No flush is attempted**” | No flush is attempted on a trap: a partial line in line-buffered stdout is lost when the program traps. | `sh:0` |
+| `io0163` | 163 | rule | “so diagnostics written to it survive a trap” | stderr is unbuffered, so a partial line written to it survives a trap. | `sh:0` |
+| `io0165` | 165 | rule | “The registry of open streams is reachable from `failsafe`” | The registry of open streams is reachable from failsafe, which may flush. | untestable [vague] no spelling reaches the registry; its shape is an open item (line 282) |
+| `io0175` | 175 | example | “```nitpick” | `Path:p = path_parse("/etc/hosts") ?! …; ByteReader:r = byte_reader_open(p, within) ?! …;` opens a file for reading. | `run:0` |
+| `io0184` | 184 | rule | “open `O_NONBLOCK \| O_CLOEXEC`” | Opened descriptors are O_NONBLOCK and O_CLOEXEC. | `run:0` |
+| `io0187` | 187 | rule | “**Opening takes a `Path`**, never a `string`” | Opening takes a Path, never a string: `byte_reader_open("/dev/null", d)` is refused. | `refuse` |
+| `io0188` | 188 | rule | “absolute, lexically normalized, and contains no interior NUL” | A Path is absolute: parsing a relative path fails. | `run:0` |
+| `io0188b` | 188 | rule | “lexically normalized” | A Path is lexically normalized: `/a/./b/../c//d` parses as `/a/c/d`. | `run:0` |
+| `io0188c` | 188 | rule | “contains no interior NUL” | A Path contains no interior NUL: parsing `/a\0b` fails. | `run:0` |
+| `io0189` | 189 | rule | “where the conversion” | The conversion to cstring rejects interior NULs: `to_cstring("ab\0cd")` fails. | `run:0` |
+| `io0191` | 191 | rule | “POSIX's `-1` goes to `Result.err`” | An fd is always valid: a failed open is a Result error, not a -1 descriptor. | `run:0` |
+| `io0196` | 196 | rule | “Lexical normalization is not kernel resolution” | Normalization is lexical: `/no_such_dir_m11/../etc` normalizes to `/etc` though the directory does not exist. | `run:0` |
+| `io0204` | 204 | rule | “and is closed at scope” | A stream is closed at the exit of the scope that opened it: after the writer's block, the reader drains its byte and then sees end of input. | `run:0` |
+| `io0210` | 210 | rule | “There is no `close` in the surface.” | There is no close in the surface: `w.close()` on a stream is refused. | `refuse` |
+| `io0212` | 212 | rule | “`close(release_fd(move o))` is the explicit spelling” | `close(release_fd(move o))` closes an owned descriptor and reports the verdict: the reader then sees end of input. | `run:0` |
+| `io0213` | 213 | rule | “no double-close is” | No double close is spellable: a second `release_fd(move(o))` of a moved owner is refused. | `refuse` |
+| `io0215` | 215 | rule | “A stream cannot be sent through a channel” | A stream cannot be sent through a channel: `Channel<ByteReader, ...>` is refused. | `refuse` |
+| `io0216` | 216 | rule | “refusal fires on `OwnedFd`” | The element refusal fires on OwnedFd: `Channel<OwnedFd, ...>` is refused. | `refuse` |
+| `io0218` | 218 | rule | “A MOVE into a spawn is legal” | A move of a stream into a thread spawn is legal: the thread writes through the moved writer, and its scope's close gives the reader end of input. | `run:0` |
+| `io0220` | 220 | rule | “A BORROW of a stream still refuses at the” | A borrow of a stream refuses at the spawn. | `refuse` |
+| `io0227` | 227 | example | “```nitpick” | `await s.seek(Whence.Start, offset, deadline)` returns Result<int64>, the new position. | `run:0` |
+| `io0231` | 231 | rule | “not an `int64` constant” | `Whence` is an enum, not an int64: seeking with `0i64` as the origin is refused. | `refuse` |
+| `io0231b` | 231 | rule | “`Start`, `Current`, `End`” | Whence.End, Whence.Start and Whence.Current measure from the end, the start and the current position. | `run:0` |
+| `io0232` | 232 | rule | “Seeking a buffered stream discards the read buffer” | Seeking a buffered stream discards its read buffer: after a text reader has read `ab` (buffering `cd`), seeking to the start and reading gives `ab` again. | `run:0` |
+| `io0239` | 239 | rule | “are `TextReader` / `TextWriter` over the three” | The standard streams are TextReader/TextWriter over the inherited descriptors: std_in() reads fd 0 (here /dev/null) and meets end of input at once. | `run:0` |
+| `io0242` | 242 | rule | “They are **not** globals that any code may grab.” | The standard streams are not globals: the name `stdout` is not defined. | `refuse` |
+| `io0242b` | 242 | rule | “They belong to `main`'s scope and” | The standard streams belong to main's scope and are passed down: constructing one in a helper function is refused. | `refuse` |
+| `io0248` | 248 | rule | “Each owns a `F_DUPFD_CLOEXEC` DUP” | Each standard stream owns an F_DUPFD_CLOEXEC dup: its descriptor is not 0-2 and has FD_CLOEXEC. | `run:0` |
+| `io0249` | 249 | rule | “scope-exit close can never close 0/1/2” | Scope-exit close never closes 0/1/2: after std_in/out/err are built and dropped, descriptors 0, 1 and 2 are still open. | `run:0` |
+| `io0250` | 250 | rule | “The inherited descriptors stay BLOCKING” | The inherited descriptors stay blocking: after std_in/out/err are built, fds 0-2 lack O_NONBLOCK. | `run:0` |
+| `io0252` | 252 | rule | “blocks the thread, bounded by the consumer” | A write to a stuffed stdout pipe blocks the thread, bounded by the consumer. | untestable [timing] a blocked thread shows only as a duration |
+| `io0261` | 261 | row | “`cstring` at the boundary (D-049)” | nlibc is raw syscalls with cstring at the boundary: the floor's `open` refuses a `string` path. | `refuse` |
+| `io0262` | 262 | row | “the text and byte streams, buffering, the standard streams” | The stdlib layer supplies Path, Reader/Writer, the text and byte streams, buffering and the standard streams, and they compose. | `run:0` |
+| `io0267` | 267 | rule | “**`printf` and `scanf` are not in either layer**” | `printf` is not available. | `refuse` |
+| `io0268` | 268 | rule | “spliced by `&{ }` interpolation” | Formatting is ordinary functions returning string, spliced by `&{ }` interpolation. | `run:0` |
+| `io0269` | 269 | rule | “There is no format-specifier language” | There is no format-specifier language: a text writer writes `%d` verbatim. | `run:0` |
+| `io0280` | 280 | rule | “and only epoll” | The readiness mechanism is epoll only, with no timerfd; io_uring is refused. | untestable [internal] the executor's syscalls are the runtime's, not visible to a program |
+
+## MACRO (`meta/specs/MACRO_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `mc0015` | 15 | rule | “does not compile against” | The prototype's 32-test corpus is written in a dialect that does not compile against this language. | untestable [tree] a statement about the compiler repository's regression corpus (tests/bugs/), not about what the compiler does with a program |
+| `mc0022` | 22 | example | “```nitpick” | The declaration shape `macro:name = (param, …) { body };` declares a macro invoked as `#name(...)`. | `run:0` |
+| `mc0026` | 26 | rule | “What it contains determines where the macro may be” | Only the body decides where a macro may be invoked: an expression body invoked where a declaration is expected (module level) is refused. | `refuse` |
+| `mc0032` | 32 | row | “\| declarations (`func:`, …) \| module level \| top-level declarations \|” | A body of declarations invoked at module level splices as TOP-LEVEL declarations: a function written above the invocation can call what it emits. | `run:0` |
+| `mc0033` | 33 | row | “\| variable declarations \| a `struct` body \| fields \|” | A body of variable declarations invoked in a struct body splices as that struct's fields. | `run:0` |
+| `mc0034` | 34 | row | “\| function declarations \| an `impl` body \| methods \|” | A body of function declarations invoked in an impl body splices as methods of the type. | `run:0` |
+| `mc0035` | 35 | row | “\| a single expression \| expression position \| that expression \|” | A body of one expression invoked in expression position is that expression, as one node: `#four() * 10i32` is (2 + 2) * 10. | `run:0` |
+| `mc0037` | 37 | rule | “A macro taking no parameters still declares an empty list” | A macro with no parameters must still write `()`: `macro:m = { … };` is refused. | `refuse` |
+| `mc0039` | 39 | rule | “A body is a declaration body if it CONTAINS a declaration” | A body that contains a declaration is a declaration body even when its first item is an invocation; invoked at module level it emits both what the inner macro emits and its own declaration. | `run:0` |
+| `mc0043` | 43 | rule | “`macro:opt = () { #caller(x) + 1i32; };`” | `macro:opt = () { #caller(x) + 1i32; };` is accepted as a single-expression macro (a body beginning with `#` is not thereby a declaration body). | `run:0` |
+| `mc0044` | 44 | rule | “a statement macro could not invoke another one” | A statement macro may invoke another statement macro (it could not before D-125): the body `{ #check_base(); #check_base(); }` expands at statement position. | `run:0` |
+| `mc0046` | 46 | rule | “nothing but a single invocation” | A body that is only one invocation is whatever the invoked macro is: an alias of an expression macro works in expression position. | `run:0` |
+| `mc0046b` | 46 | rule | “`macro:alias = () { #b(); };`” | "is whatever `b` is": an alias whose target is a declaration macro, invoked at module level, emits the target's declarations. | `run:0` |
+| `mc0048` | 48 | rule | “at statement position it becomes a block holding” | An alias of a statement macro, invoked at statement position, becomes a block holding `#b();` that the next round expands. | `run:0` |
+| `mc0053` | 53 | example | “```nitpick” | `#name()` invokes with no arguments and `#name(a, b)` with arguments. | `run:0` |
+| `mc0060` | 60 | example | “```nitpick” | The four positions with one spelling: module level emits declarations, a struct body splices fields, an impl body splices methods, an expression position substitutes the expression. | `run:0` |
+| `mc0070` | 70 | rule | “An invocation whose expansion does not fit where it landed is an error” | Fields into something that is not a struct is an error: a variable-declaration body invoked in an impl body is refused. | `refuse` |
+| `mc0071` | 71 | rule | “declarations into an expression” | Declarations into an expression is an error: a declaration body invoked where a value is expected is refused. | `refuse` |
+| `mc0076` | 76 | row | “\| module level \| declarations \| cloned \|” | At module level a declarations body arrives as a copy of its declarations, all of them callable. | `run:0` |
+| `mc0077` | 77 | row | “\| `struct` body \| variable declarations \| **converted to fields** \|” | In a struct body a variable-declarations body is converted to fields, which can be written and read like any field. | `run:0` |
+| `mc0078` | 78 | row | “\| `impl` or `trait` body \| declarations \| cloned \|” | A trait body takes a declarations body too: spliced signatures become required methods an impl supplies. | `run:0` |
+| `mc0079` | 79 | row | “\| expression position \| one expression \| substituted in place \|” | In expression position the one expression is substituted in place, each invocation its own copy with its own argument: #doubled(3) + #doubled(10) = 26. | `run:0` |
+| `mc0080` | 80 | row | “\| `enum` body \| — \| refused \|” | An invocation in an enum body is refused. | `refuse` |
+| `mc0082` | 82 | rule | “parses as a STATEMENT” | `int32:x;` parses as a statement in a macro body and as a field in a struct, so a struct splice is a conversion rather than a copy. | untestable [internal] which grammar reads the text and how the splice converts it are the parser's and expander's internals; mc0077 tests the observable result |
+| `mc0085` | 85 | rule | “carrying an initialiser or a qualifier is refused rather than stripped” | A variable declaration with an initialiser spliced into a struct body is refused rather than stripped. | `refuse` |
+| `mc0085b` | 85 | rule | “a field has” | A variable declaration carrying a qualifier (`fixed`) spliced into a struct body is refused rather than stripped: "a field has neither". | `refuse` |
+| `mc0088` | 88 | rule | “An enum body is refused” | An enum body is refused whatever the body's shape: a declarations body invoked in an enum is refused. | `refuse` |
+| `mc0094` | 94 | rule | “An argument replaces every occurrence of the parameter name in the body” | An argument replaces every occurrence of the parameter, including inside a declaration the body emits. | `run:0` |
+| `mc0097` | 97 | example | “```nitpick” | `#make_const(42i32);` emits `func:my_const = int32() { pass 42i32; };`. | `run:0` |
+| `mc0105` | 105 | rule | “Substitution traverses the whole emitted subtree” | Substitution reaches a parameter however deep it sits in the emitted subtree (inside a pick arm inside an if inside an emitted function). | `run:0` |
+| `mc0105b` | 105 | rule | “It is not textual” | Substitution is not textual: the argument lands as one AST node, so #times3(1 + 2) is (1 + 2) * 3 = 9. | `run:0` |
+| `mc0112` | 112 | example | “```nitpick” | The emit_helpers example: three emitted declarations referencing each other; helper_sum is 42. | `run:0` |
+| `mc0120` | 120 | rule | “All three become top-level declarations” | All three emitted functions become top-level declarations and helper_sum resolves the other two. | `run:0` |
+| `mc0121` | 121 | rule | “Names emitted by one expansion are visible to each other” | Names emitted by one expansion are visible to each other regardless of order: the first emitted function calls two emitted after it. | `run:0` |
+| `mc0126` | 126 | example | “```nitpick” | `struct:Point = { #make_xy_fields(); };` gives Point fields x and y. | `run:0` |
+| `mc0132` | 132 | rule | “may mix spliced and literal fields freely” | A struct may mix spliced and literal fields: a literal field, a splice of two, a literal field gives four fields of 16 bytes, each holding its own value. | `run:0` |
+| `mc0136` | 136 | example | “```nitpick” | The emit_methods example: `impl:Box:Pair = { #emit_methods(); };` gives Box the method add_one. | `run:0` |
+| `mc0146` | 146 | rule | “An identifier in a macro body resolves in the scope where the macro was” | An identifier in a macro body resolves where the macro was written, always: invoked inside a function with a local of the same name, the macro reads the module binding. | `run:0` |
+| `mc0149` | 149 | rule | “A macro is invocable only in the module that declares it” | A macro is invocable in the module that declares it, including a nested module invoking a macro it declares itself. | `run:0` |
+| `mc0150` | 150 | rule | “`use` does not bind it, `pub` on it changes nothing” | A macro is not exported: a `pub macro:` in another module, named in a `use`, is still not invocable. | `refuse` |
+| `mc0151` | 151 | rule | “inside the declaring one cannot reach it” | A module nested inside the declaring one cannot invoke its macro; invoking a macro from another module is NITPICK-MACRO-007. | `refuse:NITPICK-MACRO-007` |
+| `mc0154` | 154 | rule | “macro from another module is `NITPICK-MACRO-007`” | Invoking, at module level, a macro declared in another file module (imported with `use ….*`) is NITPICK-MACRO-007. | `refuse:NITPICK-MACRO-007` |
+| `mc0156` | 156 | rule | “is the mechanism for code generation that crosses a module” | `#[derive]` is the mechanism for code generation across modules; `macro:` is a local shorthand. | untestable [vague] a statement of which mechanism is meant for what; it states no outcome a program could check beyond mc0150/mc0154 |
+| `mc0159` | 159 | example | “```nitpick” | The hygiene example: `#report()` reads the TOP-LEVEL `shared` (100), not main's local 5, so the template is "shared = 100". | `run:0` |
+| `mc0171` | 171 | rule | “that is a **compile error**” | A name in a macro body that does not resolve in the defining scope is a compile error, never a fallback to the call site. | `refuse` |
+| `mc0176` | 176 | example | “```nitpick” | `#caller(shared)` inside a template reads the invocation site's `shared`: "shared = 5". | `run:0` |
+| `mc0180` | 180 | rule | “resolves `NAME` at the **invocation site**” | `#caller(NAME)` resolves NAME at the invocation site: the caller's int32 `flag`, not the module's bool. | `run:0` |
+| `mc0181` | 181 | rule | “naming something absent there is an error” | `#caller(NAME)` naming something absent at the invocation site is an error. | `refuse` |
+| `mc0186` | 186 | rule | “It resolves the way any name at that point resolves” | `#caller(NAME)` reaches past the caller's locals to the module's own names: with no local of that name it reads the module binding. | `run:0` |
+| `mc0188` | 188 | rule | “It differs from writing the” | `#caller(NAME)` differs from the bare name exactly when the invocation site has a local binding of it. | `run:0` |
+| `mc0193` | 193 | rule | “site is `NITPICK-RESOLVE-002`” | `#caller(NAME)` naming something absent from the invocation site (declared only inside another function) is NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `mc0194` | 194 | rule | “is `NITPICK-MACRO-008`” | Writing `#caller` outside a macro body is NITPICK-MACRO-008. | `refuse:NITPICK-MACRO-008` |
+| `mc0201` | 201 | row | “\| a declaration \| the declarations, in this module \| landing where the macro was written \|” | Declarations emitted at module level land in this module, where the macro was written: a free name in an emitted function resolves to the module binding. | `run:0` |
+| `mc0202` | 202 | row | “\| a statement \| **a block** holding the statements \| the block's parent being the module scope \|” | A statement invocation becomes a block whose parent is the module scope: a free name in it reads the module binding past the caller's local of the same name. | `run:0` |
+| `mc0203` | 203 | row | “\| an expression \| the expression, substituted in place \| one mark on the substituted node \|” | An expression invocation is substituted in place and still resolves its free names where the macro was written: 101, not the caller's 5 + 1. | `run:0` |
+| `mc0207` | 207 | rule | “collide with a caller's `tmp`” | A `tmp` declared in a statement body cannot collide with the caller's `tmp`: both coexist and the caller's keeps its value. | `run:0` |
+| `mc0207b` | 207 | rule | “it cannot be read after the invocation” | A local declared in a statement body cannot be read after the invocation. | `refuse` |
+| `mc0208` | 208 | rule | “name in the body walks up past the caller's locals to the module” | A free name in a statement body walks past the caller's locals to the module: a module FUNCTION is called although the caller has an int32 local of the same name. | `run:0` |
+| `mc0209` | 209 | rule | “statement-position hygiene needs no check anywhere” | One block node carries the statement-position hygiene rule; no check is needed anywhere. | untestable [internal] how the expander represents the rule; the observable halves are mc0202-mc0208 |
+| `mc0220` | 220 | rule | “no longer exists” | NITPICK-061 (MACRO_HYGIENE_VIOLATION) no longer exists: a macro whose free name resolves differently at the call site compiles with no such diagnostic. | `sh:0` |
+| `mc0225` | 225 | rule | “Expansion precedes everything.” | Expansion runs before name resolution: a struct emitted by a macro names a parameter type of a function written above the invocation. | `run:0` |
+| `mc0226` | 226 | rule | “so what those passes see is the expanded” | Static analyses see the expanded program: an emitted function with a path that reaches its end without `pass` is refused. | `refuse` |
+| `mc0231` | 231 | example | “```nitpick” | `#outer();` expands to `{ #inner(); f3 }`, then inner expands on the next round: f1 and f3 both exist. | `run:0` |
+| `mc0238` | 238 | rule | “The loop repeats until no invocation remains.” | The fixed-point loop repeats until no invocation remains: three levels of nested declaration macros all expand. | `run:0` |
+| `mc0239` | 239 | rule | “struct-body macro may expand to a body containing another struct-body macro” | A struct-body macro may expand to a body containing another struct-body macro, which expands next round. | `run:0` |
+| `mc0241` | 241 | rule | “Expansion precedes `comptime` evaluation” | Expansion precedes comptime evaluation: `comptime(#twice_m(21i32))` evaluates the expanded expression. | `run:0` |
+| `mc0246` | 246 | example | “```nitpick” | `macro:m = () { #m(); };      // refused` — the self-invoking declaration is refused. | `refuse` |
+| `mc0250` | 250 | rule | “limits one invocation's nesting” | A depth bound limits one invocation's nesting: an expression body nested 1000 operators deep is refused as a compile error. | `refuse` |
+| `mc0250b` | 250 | rule | “limits” | An iteration bound limits the fixed-point loop: two declaration macros that invoke each other are refused as a compile error instead of looping. | `refuse` |
+| `mc0251` | 251 | rule | “Exceeding either is an ordinary compile error naming the” | Exceeding the iteration bound is a compile error naming the macro and the chain that reached the bound: both ping_m and pong_m appear in the diagnostic. | `sh:0` |
+| `mc0256` | 256 | rule | “one budget would report them alike” | The depth bound and the iteration bound are separate and report differently: a too-deep single expansion and a mutual recursion are refused with different diagnostic codes. | `sh:0` |
+| `mc0264` | 264 | rule | “still in the program when expansion finishes is refused” | Every `#name(...)` still standing after expansion is refused, wherever it stands: an unknown one as a statement inside a loop body. | `refuse` |
+| `mc0265` | 265 | rule | “as `MACRO-001` if the name is unknown” | An unknown `#name(...)` left standing at module level is NITPICK-MACRO-001. | `refuse:NITPICK-MACRO-001` |
+| `mc0265b` | 265 | rule | “`MACRO-007` if the macro is” | An invocation of a macro declared in another module, left standing in expression position, is NITPICK-MACRO-007. | `refuse:NITPICK-MACRO-007` |
+| `mc0266` | 266 | rule | “`MACRO-008` if it is `#caller`” | A `#caller(...)` left standing in an ordinary function (outside any macro) is NITPICK-MACRO-008. | `refuse:NITPICK-MACRO-008` |
+| `mc0266b` | 266 | rule | “Only the three” | Only the three compiler builtins survive expansion. | untestable [vague] the text does not name the three builtins, and the references use more than three `#` builtins (`#size_of`, `#align_of`, `#wild_ptr`, `#unreachable`, `#sqrt`, `#caller`), so no program can tell which one the sentence says is refused |
+| `mc0270` | 270 | rule | “`#totally_not_a_macro(3i32)` used to compile clean” | `#totally_not_a_macro(3i32)` in expression position is refused as NITPICK-MACRO-001 (it used to compile clean). | `refuse:NITPICK-MACRO-001` |
+| `mc0278` | 278 | rule | “the scan afterwards cannot” | The expansion walk reaches every statement kind (a miss would arrive as a refusal): invocations in an if condition, a while condition and measure, a for body, a pick arm, a when body and then block, a nested block, a struct literal, an array literal, a call argument and a give all expand. | `run:0` |
+| `mc0281` | 281 | rule | “A macro body is exempt” | A macro body is exempt from the leftover-invocation scan: an unknown invocation inside a macro that is never invoked is not refused. | `run:0` |
+| `mc0290` | 290 | example | “```nitpick” | `comptime func:double` is a callable; `comptime(double(21i32))` forces it: 42. | `run:0` |
+| `mc0296` | 296 | rule | “is a **keyword operator with a parenthesised operand**” | `comptime(expr)` is a keyword operator, not a call: its value is the plain int32, used with no `raw`. | `run:0` |
+| `mc0296b` | 296 | rule | “keyword operator with a parenthesised operand” | The operand of `comptime` is parenthesised: `comptime 42i32` without parentheses is refused. | `refuse` |
+| `mc0305` | 305 | row | “\| integer arithmetic \| throughout \|” | The comptime evaluator does integer arithmetic as the language does: `/`, `%` and negation agree with the run-time result for -7 and 2. | `run:0` |
+| `mc0306` | 306 | row | “**mutable locals and assignment**” | The evaluator supports mutable locals and assignment, `x = x + n` and chains of them: accum(7) = 35. | `run:0` |
+| `mc0307` | 307 | row | “**loops** — `loop(lo, hi, step) { … }`” | The evaluator runs `loop(lo, hi, step)`: a comptime sum over loop(0, 10, 3) equals the same loop run at run time. | `run:0` |
+| `mc0308` | 308 | row | “calls to `comptime func:` declarations, nested” | The evaluator follows nested calls between comptime functions: sum_sq(3, 4) = 25. | `run:0` |
+| `mc0309` | 309 | row | “**strings** — concatenation, equality, ordering, length” | The evaluator handles string concatenation, equality and length: len("ab" ++ "cde") = 5 and "ab" ++ "c" equals "abc". | `run:0` |
+| `mc0309b` | 309 | row | “ordering” | The evaluator handles string ordering: "ab" orders before "b". | `run:0` |
+| `mc0310` | 310 | row | “size and alignment intrinsics” | The evaluator folds the size intrinsic: `comptime(#size_of<int64>())` is 8. | `run:0` |
+| `mc0310b` | 310 | row | “\| size and alignment intrinsics \|” | The evaluator folds the alignment intrinsic: `comptime(#align_of<int64>())` is 8. | `run:0` |
+| `mc0311` | 311 | row | “built-in macros inside `comptime(…)`” | Built-in `#` forms are evaluated inside `comptime(…)`: `comptime(#size_of<int32>() * 2i64)` is 8. | `run:0` |
+| `mc0312` | 312 | row | “`assert_static comptime(…)`” | `assert_static comptime(…)` is evaluated: a true proposition compiles. | `run:0` |
+| `mc0312b` | 312 | row | “short-circuiting to the verifier” | `assert_static comptime(…)` over a false proposition halts compilation. | `refuse` |
+| `mc0315` | 315 | rule | “executes loops and mutates locals” | The evaluator is an interpreter: it runs a `while` loop that mutates locals: tri(10) = 55. | `run:0` |
+| `mc0316` | 316 | rule | “the compiler runs at build time” | What `comptime(...)` expresses runs at build time: the emitted IR carries no call to the comptime function. | `ir!:call[^\n]*@[\w.$]*tri_ct` |
+| `mc0321` | 321 | example | “```nitpick” | Macros and comptime both ways: a macro body containing comptime (#four() = 4), comptime over an invocation (6), and nested arbitrarily (21). | `run:0` |
+| `mc0327` | 327 | rule | “expansion runs to a fixed point first, then evaluation” | Expansion runs to a fixed point first, then evaluation runs over the result: a comptime function EMITTED by a macro can be evaluated. | `run:0` |
+| `mc0332` | 332 | rule | “A `const` global folds” | A `const` global folds: `comptime(N * 2i32)` over `const int32:N = 4i32;` is 8. | `run:0` |
+| `mc0334` | 334 | rule | “A `fixed`” | A `fixed` binding is not a constant: `comptime(F * 2i32)` over `fixed int32:F` is refused. | `refuse` |
+| `mc0336` | 336 | rule | “local or a parameter of an ordinary function” | A local is not a constant: `comptime(loc + 1i32)` is refused. | `refuse` |
+| `mc0336b` | 336 | rule | “a parameter of an ordinary function” | A parameter of an ordinary function is not a constant: `comptime(p + 1i32)` is refused. | `refuse` |
+| `mc0338` | 338 | rule | “a call folds when the function is declared `comptime`” | A call folds only when the function is declared comptime: `comptime(four_rt())` over an ordinary (foldable) function is refused. | `refuse` |
+| `mc0344` | 344 | rule | “The diagnostic names **the offending expression**” | A comptime failure inside nested comptime calls names the offending expression and the call chain: the diagnostic mentions inner_div and outer_call and points at the division. | `sh:0` |
+| `mc0346` | 346 | rule | “A comptime failure is a compile error.” | A comptime evaluation that fails (division by zero inside a comptime function) is a compile error. | `refuse` |
+| `mc0351` | 351 | rule | “A budget bounds the total work” | A budget bounds the total work: a comptime loop that never ends is NITPICK-TYPE-025. | `refuse:NITPICK-TYPE-025` |
+| `mc0352` | 352 | rule | “a `comptime func:` that calls itself” | A depth bound bounds recursion: a comptime function that calls itself forever is NITPICK-TYPE-025, not a crashed compiler. | `refuse:NITPICK-TYPE-025` |
+| `mc0356` | 356 | rule | “Exceeding either is `NITPICK-TYPE-025`” | Exceeding either evaluation bound is NITPICK-TYPE-025: two comptime functions recursing into each other are refused with it. | `refuse:NITPICK-TYPE-025` |
+| `mc0368` | 368 | row | “\| `impl:Trait:for:Type` \| `impl:Type:Trait` \| D-030 \|” | The corpus's `impl:Trait:for:Type` is not this language: it is refused. | `refuse` |
+| `mc0368b` | 368 | row | “`impl:Type:Trait`” | This language writes `impl:Type:Trait`. | `run:0` |
+| `mc0369` | 369 | row | “\| `@sizeof(T)`, `@alignof(T)` \|” | The corpus's `@sizeof(T)` is not this language (`@` is address-of and nothing else): it is refused. | `refuse` |
+| `mc0369b` | 369 | row | “`#size_of<T>()`” | This language writes `#size_of<T>()`: `#size_of<int64>()` is 8. | `run:0` |
+| `mc0369c` | 369 | row | “`#align_of<T>()`” | This language writes `#align_of<T>()`: `#align_of<int64>()` is 8. | `run:0` |
+| `mc0370` | 370 | row | “\| `expr ? default` \| the defaults operator \|” | The corpus's `expr ? default` is respelled: a bare `?` fallback is refused. | `refuse` |
+| `mc0371` | 371 | row | “\| `0`, `10`, `exit 1` \|” | The corpus's width-less literals (`0`, `10`, `exit 1`) are not this language: they are refused (literals carry their width). | `refuse` |
+| `mc0372` | 372 | row | “\| `func:main = int32()` \|” | The corpus's `func:main = int32()` is not this language: a main with no parameter is refused. | `refuse` |
+| `mc0372b` | 372 | row | “`func:main = int32(cstring[]:argv)`” | This language writes `func:main = int32(cstring[]:argv)`. | `run:0` |
+| `mc0373` | 373 | row | “\| `name!(args)` — the invocation \| **`#name(args)`** \|” | The corpus's invocation `name!(args)` is not this language: `make_pair!();` at module level is refused. | `refuse` |
+| `mc0374` | 374 | row | “\| `MacroPattern` in a `pick` arm \| **removed** \|” | A MacroPattern in a pick arm (the corpus's `MyMacro!(a, b) where (a > b) { … }`) is removed: refused. | `refuse` |
+| `mc0379` | 379 | rule | “there is no postfix `!` in the grammar” | There is no postfix `!`: `twice!(3i32)` in expression position is refused. | `refuse` |
+| `mc0388` | 388 | rule | “the emitted function is literally called” | Substitution does not reach a declaration's name: `macro:m = (N) { func:N = …; };` emits a function literally named N (unimplemented rather than refused). | `run:0` |
+| `mc0393` | 393 | rule | “a macro never renames what” | A macro never renames what it emits: a spliced method keeps its name and so satisfies the trait it implements. | `run:0` |
+| `mc0394` | 394 | rule | “a collision is an error like any other name declared” | Two module-level invocations of one declaration macro emit one name twice: a collision is an error. | `refuse` |
+| `mc0394b` | 394 | rule | “it emits** (D-128)” | Two splices of one field macro into one struct collide: refused. | `refuse` |
+| `mc0405` | 405 | rule | “currently carries the macro's” | A diagnostic inside an expansion carries the macro body's location: "cannot find only_local" is reported at the macro BODY's line, not the invocation's. | `sh:0` |
+
+## TYPE (`meta/specs/TYPE_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `ty0003` | 3 | rule | “No C/C++ in any form” | No type is defined in C or C++: each is handwritten LLVM IR (Tier 0) or Nitpick source (Tier 1+). | untestable [tree] where a type's definition is written is a fact about the compiler's source tree |
+| `ty0004` | 4 | rule | “No libc” | Programs use no libc: a program that allocates (a concatenation, a to_cstring) declares no libc allocator, stdio or string function in its IR. | `ir!:^declare [^\n]*@(?:malloc|calloc|realloc|free|printf|puts|fopen|fwrite|strlen)\(` |
+| `ty0017` | 17 | rule | “These map directly to LLVM primitive types” | The fundamental scalars map directly to LLVM primitive types: an int16 function is `i16` in, `i16` out, and a flt32 one `float`. | `ir:(?s)\A(?=.*?^define [^@\n]*\bi16 @"?(?:[\w$]+\.)*m11s16"?\(i16 )(?=.*?^define [^@\n]*\bfloat @"?(?:[\w$]+\.)*m11f32"?\(float )` |
+| `ty0023` | 23 | row | “\| `bool` \| `i1` (stored as `i8`) \| 1 byte \| 1 \|” | `bool` is 1 byte with alignment 1, and `true` is 1, `false` 0. | `run:0` |
+| `ty0026` | 26 | rule | “`&&` (short-circuit AND), `\|\|` (short-circuit OR)” | `&&` and `\|\|` short-circuit: the right side is not evaluated when the left decides. | `run:0` (M10 `x04_short_circuit`) |
+| `ty0027` | 27 | rule | “Comparison: `==`, `!=`” | `bool` compares with `==` and `!=`. | `run:0` |
+| `ty0027b` | 27 | rule | “Comparison: `==`, `!=`” | `bool` has `==` and `!=` and no ordering: `<`/`>` on bools is refused. | `refuse` (M10 `m10_bool_ordering_refused`) |
+| `ty0028` | 28 | rule | “No arithmetic operations” | `bool` has no arithmetic: `true + false` is refused. | `refuse` |
+| `ty0029` | 29 | rule | “Cast: `bool => int32` yields 0 or 1” | `bool => int32` yields 0 or 1. | `run:0` (M10 `c14_bool_to_int`) |
+| `ty0032` | 32 | example | “```llvm” | A bool local is an `i8` alloca, and a branch on it truncates the loaded `i8` to `i1`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11bl"?\((?=(?:(?!\n\}).)*?alloca i8\b)(?=(?:(?!\n\}).)*?trunc i8 %\S+ to i1)` |
+| `ty0047` | 47 | row | “\| `int8` \|” | `int8` is 1 byte with alignment 1. | `run:0` |
+| `ty0048` | 48 | row | “\| `int16` \|” | `int16` is 2 bytes with alignment 2. | `run:0` |
+| `ty0049` | 49 | row | “\| `int32` \|” | `int32` is 4 bytes with alignment 4. | `run:0` |
+| `ty0050` | 50 | row | “\| `int64` \|” | `int64` is 8 bytes with alignment 8. | `run:0` |
+| `ty0053` | 53 | rule | “Arithmetic: `+`, `-`, `*` — **overflow TRAPS**” | Plain-integer `+` traps IntOverflow on overflow. | `run:93` (M10 `o01_int32_add`) |
+| `ty0053b` | 53 | rule | “Arithmetic: `+`, `-`, `*` — **overflow TRAPS**” | Plain-integer `-` traps IntOverflow on overflow. | `run:93` (M10 `o02_int32_sub`) |
+| `ty0053c` | 53 | rule | “Arithmetic: `+`, `-`, `*` — **overflow TRAPS**” | Plain-integer `*` traps IntOverflow on overflow. | `run:93` (M10 `o03_int32_mul`) |
+| `ty0053d` | 53 | rule | “Arithmetic: `+`, `-`, `*` — **overflow TRAPS**” | Only an overflow traps: a result equal to a type's maximum or minimum is a value. | `run:0` (M10 `o17_edges_do_not_trap`) |
+| `ty0054` | 54 | rule | “`IntOverflow` (−4110)” | IntOverflow's code is -4110: the guard of a computed int32 `+` routes -4110 to failsafe. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11add"?\((?=(?:(?!\n\}).)*?-4110\b)` |
+| `ty0056` | 56 | rule | “Lowers through `llvm.{s,u}{add,sub,mul}.with.overflow.iN`” | Signed `+ - *` lower through llvm.sadd/ssub/smul.with.overflow at the operand width. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11s"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.ssub\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.smul\.with\.overflow\.i32\()` |
+| `ty0057` | 57 | rule | “Signedness picks the family” | Unsigned `+ - *` lower through the unsigned family llvm.uadd/usub/umul.with.overflow and not the signed one. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11u"?\((?=(?:(?!\n\}).)*?@llvm\.uadd\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.usub\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.umul\.with\.overflow\.i32\()(?!(?:(?!\n\}).)*?@llvm\.s(?:add|sub|mul)\.with\.overflow)` |
+| `ty0058` | 58 | rule | “legalized at every width the language has” | The overflow trap holds at the wide widths: an int128 `+` past the maximum traps IntOverflow. | `run:93` (M10 `o16_int128_add`) |
+| `ty0058b` | 58 | rule | “`int8` through `int4096`” | The overflow trap holds at the top of the ladder: an int4096 `+` past the maximum traps IntOverflow. | `trap:IntOverflow` |
+| `ty0059` | 59 | rule | “A `simd`'s integer lanes go through the vector form” | A simd's integer lane that overflows traps IntOverflow as its scalar does. | `run:93` (M10 `o22_simd_lane_overflow`) |
+| `ty0059b` | 59 | rule | “`.<N x iW>`” | A simd<int32, 4> `+` lowers through the vector overflow intrinsic llvm.sadd.with.overflow.v4i32. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.v4i32\()` |
+| `ty0060` | 60 | rule | “overflow lanes folded to one any-lane test” | The lanes' overflow bits are folded into one any-lane test. | untestable [internal] how the overflow bits are combined changes no outcome, and the text names no instruction to look for |
+| `ty0061` | 61 | rule | “traps per fold step” | An integer simd `.sum()` whose total overflows traps IntOverflow. | `trap:IntOverflow` |
+| `ty0061b` | 61 | rule | “traps per fold step” | `.sum()` traps per fold step: a step that overflows traps even when the lanes' total fits. | `trap:IntOverflow` |
+| `ty0062` | 62 | rule | “is checked AFTER every write” | A limit<Rules> integer binding is checked after every write: an assignment its rule refuses traps LimitViolated. | `trap:LimitViolated` |
+| `ty0063` | 63 | rule | “`LimitViolated` (−4111)” | LimitViolated's code is -4111: the check after a computed write to a limit binding routes -4111 to failsafe. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11lim"?\((?=(?:(?!\n\}).)*?-4111\b)` |
+| `ty0065` | 65 | rule | “their `limit` rows are decided by z3” | An integer limit row is decided by z3, and a discharged one elides into one llvm.assume over the rule's range clauses. | untestable [z3] rows are decided and elided only under `npkg verify` with the pinned z3 |
+| `ty0067` | 67 | rule | “**Unary `-` is `0 - x`**” | Unary `-` traps IntOverflow on the most negative value. | `run:93` (M10 `o04_int32_negate_min`) |
+| `ty0069` | 69 | rule | “**`x += y` traps identically**” | The compound `+=` traps IntOverflow exactly as `+` does. | `run:93` (M10 `o12_compound_add`) |
+| `ty0071` | 71 | rule | “**Bit operations are unchanged**” | Bit operations have nothing to overflow: `<<` loses the bits past the width and does not trap. | `run:0` (M10 `o18_shift_loses_bits_no_trap`) |
+| `ty0073` | 73 | rule | “`x << n` and `x >> n` are defined” | `x << n` is defined for 0 <= n < width only: a computed amount equal to the width traps ShiftRange. | `run:111` (M10 `s04_shift_amount_equals_width`) |
+| `ty0073b` | 73 | rule | “`x << n` and `x >> n` are defined” | The amount rule holds for `>>` too: a computed amount equal to the width traps ShiftRange. | `run:111` (M10 `s06_right_shift_amount_width`) |
+| `ty0074` | 74 | rule | “a known amount outside it is TYPE-070” | A known shift amount outside 0 <= n < width is NITPICK-TYPE-070 at the `<<`. | `refuse:NITPICK-TYPE-070` (M10 `s07_shift_literal_amount_refused`) |
+| `ty0075` | 75 | rule | “the shift (both spellings)” | A known amount outside the range is TYPE-070 at a `>>` as at a `<<`. | `refuse:NITPICK-TYPE-070` |
+| `ty0075b` | 75 | rule | “the shift (both spellings)” | A known amount outside the range is TYPE-070 at the compound `<<=` as at `<<`. | `refuse:NITPICK-TYPE-070` |
+| `ty0075c` | 75 | rule | “a computed one is guarded by one unsigned” | A computed shift amount is guarded by one unsigned compare against the width (`icmp ult n, W`). | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11shl"?\((?=(?:(?!\n\}).)*?icmp ult i32 %\S+, 32\b)(?=(?:(?!\n\}).)*?\bshl i32 )` |
+| `ty0076` | 76 | rule | “traps `ShiftRange` (−4115)” | ShiftRange's code is -4115: the guard of a computed shift amount routes -4115 to failsafe. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11shl"?\((?=(?:(?!\n\}).)*?-4115\b)` |
+| `ty0077` | 77 | rule | “eliding the guard where proven” | The shift-range obligation elides the guard where it is proven. | untestable [z3] obligations are discharged only under `npkg verify` with the pinned z3 |
+| `ty0078` | 78 | rule | “**`/` and `%` by zero still trap**” | Integer `/` by zero traps DivByZero. | `run:97` (M10 `v03_div_by_zero`) |
+| `ty0078b` | 78 | rule | “**`/` and `%` by zero still trap**” | Integer `%` by zero traps DivByZero. | `run:97` (M10 `v04_rem_by_zero`) |
+| `ty0078c` | 78 | rule | “signed `/` adds the” | Signed `/` of the minimum by -1 traps DivOverflow. | `run:98` (M10 `v05_min_div_minus_one`) |
+| `ty0078d` | 78 | rule | “**`/` and `%` by zero still trap**” | The compound `/=` by zero traps DivByZero as `/` does. | `run:97` (M10 `v10_compound_div_by_zero`) |
+| `ty0079` | 79 | rule | “On `tbb` both yield ERR” | On tbb, `/` and `%` by zero yield ERR and do not trap. | `run:0` (M10 `v18_tbb_div_by_zero_is_err`) |
+| `ty0080` | 80 | rule | “**There are no sub-byte widths.**” | There are no sub-byte integer widths: `int4` is not a type. | `refuse` |
+| `ty0081` | 81 | rule | “twins were STRUCK at D-231” | The unsigned sub-byte twins were struck too: `uint2` is not a type. | `refuse` |
+| `ty0083` | 83 | rule | “a range-limited byte is `limit<Rules>`” | A range-limited byte is a limit<Rules> binding of a byte type: writing a value outside its rule traps LimitViolated. | `trap:LimitViolated` |
+| `ty0084` | 84 | rule | “The ladder is `int8` … `int4096`” | The signed ladder is int8 through int4096: each rung exists and its sign bit is bit W-1 (1 << (W-1) is negative). | `run:0` |
+| `ty0085` | 85 | rule | “arithmetic including `/` and `%` at 1024, 2048 and 4096 bits” | `/` and `%` compute at 1024, 2048 and 4096 bits; signed quotients truncate toward zero and remainders keep the dividend's sign. | `run:0` |
+| `ty0086` | 86 | rule | “D-210 trap at 512” | An int512 addition past the maximum traps IntOverflow. | `trap:IntOverflow` |
+| `ty0088` | 88 | rule | “with the compound forms `+%=`, `-%=`, `*%=`” | The compound wrapping forms `+%=`, `-%=`, `*%=` wrap modulo 2^N. | `run:0` |
+| `ty0089` | 89 | rule | “is the low N bits, always” | `+% -% *%` compute modulo 2^N: the result is the low N bits. | `run:0` (M10 `o19_wrapping_family`) |
+| `ty0089b` | 89 | rule | “there is no guard” | A wrapping operation has no guard: a `*%` lowers to a plain `mul` with no overflow intrinsic. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11wm"?\((?=(?:(?!\n\}).)*?= mul i32 )(?!(?:(?!\n\}).)*?with\.overflow)` |
+| `ty0089c` | 89 | rule | “no obligation row” | A wrapping operation has no obligation row. | untestable [z3] obligation rows are written by `npkg verify` |
+| `ty0090` | 90 | rule | “`failsafe` arm, because nothing can go wrong” | A wrapping operation arms no failsafe arm: a program whose only arithmetic is `+%`/`*%` compiles with a failsafe that does not name IntOverflow. | `run:0` |
+| `ty0091` | 91 | example | “```nitpick” | `uint32:mixed = h *% 2654435761u32;` is the low 32 bits of the product. | `run:0` |
+| `ty0094` | 94 | rule | “and `simd` integer lanes'” | The wrapping family applies to simd integer lanes: `+%` wraps each lane. | `run:0` |
+| `ty0095` | 95 | rule | “`NITPICK-TYPE-078` names the kind” | The wrapping operators are refused on a twisted value (tbb): NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0096` | 96 | rule | “the ternary kinds saturate” | The wrapping operators are refused on a ternary kind (tryte): NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0097` | 97 | rule | “`frac` is exact or ERR” | The wrapping operators are refused on `frac`: NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0097b` | 97 | rule | “`dim256` carries a unit” | The wrapping operators are refused on `dim256`: NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0098` | 98 | rule | “`complex` computes per component” | The wrapping operators are refused on `complex`: NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0098b` | 98 | rule | “and a float is IEEE” | The wrapping operators are refused on a float: NITPICK-TYPE-078. | `refuse:NITPICK-TYPE-078` |
+| `ty0098c` | 98 | rule | “A constant wrap folds” | A constant wrap folds WITH the wrap. | `run:0` (M10 `o20_wrapping_folds_with_wrap`) |
+| `ty0099` | 99 | rule | “where the trapping twin is `NITPICK-TYPE-076`” | A constant `+ - *` that overflows is NITPICK-TYPE-076 where it is written. | `refuse:NITPICK-TYPE-076` (M10 `o21_constant_overflow_refused`) |
+| `ty0109` | 109 | rule | “**`tbb` remains the saturate-to-ERR family**” | tbb overflow is a value the program inspects: it saturates to ERR (sticky) and `is_err` sees it without a trap. | `run:0` (M10 `m13_tbb_err_sticky`) |
+| `ty0122` | 122 | rule | “Arithmetic, wrapping: `+%`, `-%`, `*%`” | `+% -% *%` lower to `add`, `sub`, `mul` with no flags. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11wr"?\((?=(?:(?!\n\}).)*?= add i32 %)(?=(?:(?!\n\}).)*?= sub i32 %)(?=(?:(?!\n\}).)*?= mul i32 %)` |
+| `ty0124` | 124 | rule | “Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=` → `icmp eq/ne/slt/sgt/sle/sge`” | Signed integer comparisons are signed: -5 is below 3 under all six operators. | `run:0` |
+| `ty0124b` | 124 | rule | “`icmp eq/ne/slt/sgt/sle/sge`” | A signed `<` lowers to `icmp slt`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11lt"?\((?=(?:(?!\n\}).)*?icmp slt i32 )` |
+| `ty0125` | 125 | rule | “Bitwise: `&`, `\|`, `^`, `~`, `<<`, `>>`” | The bitwise operators on signed integers are and/or/xor/not/shl/ashr: `-8 >> 1` is -4. | `run:0` |
+| `ty0125b` | 125 | rule | “`and`, `or`, `xor`, `shl`, `ashr`” | A signed `>>` lowers to `ashr`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11sr"?\((?=(?:(?!\n\}).)*?\bashr i32 )` |
+| `ty0126` | 126 | rule | “Casting: explicit only” | Integer conversions are explicit only: an int32 assigned to an int64 without `=>` is refused. | `refuse` |
+| `ty0127` | 127 | rule | “Literal suffixes: `42i32`, `-1i8`, `0FFhexi64`” | `42i32`, `-1i8` and `0FFhexi64` are literals of 42, -1 and 255. | `run:0` |
+| `ty0130` | 130 | example | “```llvm” | `a + b` lowers through llvm.sadd.with.overflow.i32 and `a / b` tests the divisor against 0 before an `sdiv`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11ad"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?icmp eq i32 %\S+, 0\b)(?=(?:(?!\n\}).)*?= sdiv i32 )` |
+| `ty0144` | 144 | rule | “`tbb` uses the same intrinsics” | tbb arithmetic uses the same overflow intrinsics: a tbb32 `+` lowers through llvm.sadd.with.overflow.i32. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11tb"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.i32\()` |
+| `ty0151` | 151 | row | “\| `uint8` \|” | `uint8` is 1 byte with alignment 1. | `run:0` |
+| `ty0152` | 152 | row | “\| `uint16` \|” | `uint16` is 2 bytes with alignment 2. | `run:0` |
+| `ty0153` | 153 | row | “\| `uint32` \|” | `uint32` is 4 bytes with alignment 4. | `run:0` |
+| `ty0154` | 154 | row | “\| `uint64` \|” | `uint64` is 8 bytes with alignment 8. | `run:0` |
+| `ty0158` | 158 | rule | “Division/modulo use `udiv`/`urem`” | Unsigned division and remainder are unsigned (udiv/urem). | `run:0` (M10 `v14_unsigned_div_rem`) |
+| `ty0159` | 159 | rule | “Comparisons use `ult`/`ugt`/`ule`/`uge`” | Unsigned comparisons are unsigned (ult/ugt/ule/uge). | `run:0` (M10 `m03_unsigned_ordering`) |
+| `ty0160` | 160 | rule | “Right shift uses `lshr` (logical)” | `>>` on an unsigned operand is logical. | `run:0` (M10 `s02_unsigned_right_shift_logical`) |
+| `ty0161` | 161 | rule | “Overflow TRAPS, as with signed types” | Unsigned `+` overflow traps IntOverflow (255 + 1 at uint8). | `run:93` (M10 `o07_uint8_add`) |
+| `ty0161b` | 161 | rule | “Overflow TRAPS, as with signed types” | Unsigned `-` below zero traps IntOverflow (0 - 1 at uint8). | `run:93` (M10 `o08_uint8_sub`) |
+| `ty0164` | 164 | rule | “Literal suffixes: `42u32`, `0FFhexu8`” | `42u32` and `0FFhexu8` are literals of 42 and 255. | `run:0` |
+| `ty0166` | 166 | rule | “are **semantically distinct**” | `uint8` and `char8` are distinct types: a char8 compared with a uint8 is refused. | `refuse` (M10 `m09_char_vs_uint8_refused`) |
+| `ty0172` | 172 | row | “\| `flt32` \| `float` \| 4 bytes \| 4 \|” | `flt32` is 4 bytes with alignment 4. | `run:0` |
+| `ty0172b` | 172 | row | “\| `flt32` \| `float` \|” | `flt32` is `float`: its arithmetic rounds at 24 significand bits. | `run:0` (M10 `f02_flt32_rounds_in_flt32`) |
+| `ty0173` | 173 | row | “\| `flt64` \| `double` \| 8 bytes \| 8 \|” | `flt64` is 8 bytes with alignment 8. | `run:0` |
+| `ty0174` | 174 | row | “\| `flt128` \| `fp128` \| 16 bytes \| 16 \|” | `flt128` is 16 bytes with alignment 16. | `run:0` |
+| `ty0174b` | 174 | rule | “no literals, arithmetic, or comparison” | flt128 has no literals: `1.5f128` is refused. | `refuse` |
+| `ty0174c` | 174 | rule | “no literals, arithmetic, or comparison” | flt128 has no arithmetic: `a + b` on flt128 values is refused. | `refuse` |
+| `ty0174d` | 174 | rule | “no literals, arithmetic, or comparison” | flt128 has no comparison: `a == b` on flt128 values is refused. | `refuse` |
+| `ty0174e` | 174 | rule | “holds, moves” | flt128 is storage: a value is held in a local and a struct field and moved through a function. | `run:0` |
+| `ty0174f` | 174 | rule | “crosses FFI” | flt128 crosses FFI. | untestable [tool] an FFI crossing needs a foreign object linked into the program; the harness links only the runtime |
+| `ty0174g` | 174 | row | “\| `flt128` \| `fp128` \|” | flt128 is `fp128` in the IR. | `ir:^define [^@\n]*\bfp128 @"?(?:[\w$]+\.)*m11fp"?\(fp128 ` |
+| `ty0176` | 176 | rule | “are **reserved words, not types**” | `flt256` is not a type: a binding declared with it is refused. | `refuse` |
+| `ty0176b` | 176 | rule | “are **reserved words, not types**” | `flt512` is a reserved word: it cannot name a binding. | `refuse` |
+| `ty0178` | 178 | rule | “the `f256`/`f512` literal suffixes are gone” | The `f512` literal suffix is gone: `1.5f512` is refused. | `refuse` |
+| `ty0181` | 181 | rule | “Arithmetic: `+`, `-`, `*`, `/`, `%` → `fadd`” | Float arithmetic is IEEE `fadd` and friends; a constant means what the run time means: 0.1 + 0.2 is not 0.3. | `run:0` (M10 `f01_decimal_sum_not_exact`) |
+| `ty0181b` | 181 | rule | “`fadd`, `fsub`, `fmul`, `fdiv`, `frem`” | flt64 `+ - * /` lower to `fadd`, `fsub`, `fmul`, `fdiv` on `double`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fa"?\((?=(?:(?!\n\}).)*?= fadd double )(?=(?:(?!\n\}).)*?= fsub double )(?=(?:(?!\n\}).)*?= fmul double )(?=(?:(?!\n\}).)*?= fdiv double )` |
+| `ty0182` | 182 | rule | “(`frem` lowers to the runtime floor's hand-written, exact `fmod`/`fmodf`)” | Float `%` is the exact fmod: the result takes the dividend's sign. | `run:0` (M10 `v17_float_remainder`) |
+| `ty0182b` | 182 | rule | “`frem` lowers to the runtime floor's” | flt64 `%` is emitted as `frem double`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fr"?\((?=(?:(?!\n\}).)*?= frem double )` |
+| `ty0183` | 183 | rule | “**Total, no traps**” | Float division by zero yields an infinity and does not trap. | `run:0` (M10 `v16_float_div_by_zero`) |
+| `ty0186` | 186 | rule | “Negation is `fneg` (sign-bit exact” | Float negation is sign-bit exact: -(0.0) is -0.0. | `run:0` (M10 `m08_negative_zero`) |
+| `ty0186b` | 186 | rule | “Negation is `fneg`” | flt64 unary `-` lowers to `fneg double`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fn"?\((?=(?:(?!\n\}).)*?= fneg double )` |
+| `ty0187` | 187 | rule | “`fcmp` ordered predicates, except `!=` which is `une`” | Float comparisons are ordered except `!=`, which is unordered: NaN != NaN is true. | `run:0` (M10 `m07_nan_comparisons`) |
+| `ty0187b` | 187 | rule | “`fcmp` ordered predicates” | flt64 `!=` lowers to `fcmp une` and `<` to the ordered `fcmp olt`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11ne"?\((?=(?:(?!\n\}).)*?fcmp une double ))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11fl"?\((?=(?:(?!\n\}).)*?fcmp olt double ))` |
+| `ty0189` | 189 | rule | “Literal suffixes: `3.14f32`, `2.718f64`” | `3.14f32` and `2.718f64` are float literals of those values. | `run:0` |
+| `ty0189b` | 189 | rule | “`3.14flt32`” | The spelling `3.14flt32` does not lex: it is refused. | `refuse` |
+| `ty0190` | 190 | rule | “carries at most 15 significant digits” | A flt32 literal with 16 significant digits is refused. | `refuse` (M10 `c25_flt32_literal_16_digits`) |
+| `ty0190b` | 190 | rule | “carries at most 15 significant digits” | A flt32 literal of exactly 15 significant digits is accepted and correctly rounded (through a correctly-rounded double). | `run:0` |
+| `ty0194` | 194 | rule | “Math functions (sin, cos, sqrt, …) arrive with the library tier” | Math functions arrive with the library tier, wrapping LLVM intrinsics. | untestable [vague] names no spelling, module or result to check (and 'arrive' reads as a plan) |
+| `ty0198` | 198 | rule | “term of the IEEE sort” | A flt32/flt64 value is a term of the SMT IEEE sort (tier 1), with a Real-interval twin (tier 2). | untestable [z3] the encoding is exercised only by `npkg verify` with the pinned z3 |
+| `ty0201` | 201 | rule | “no obligation row is a” | No obligation row is a float's. | untestable [z3] obligation rows are written by `npkg verify` |
+| `ty0202` | 202 | rule | “a `limit`, a contract, an `invariant`” | A limit, contract, invariant or prove over floats is decided. | untestable [z3] decided only under `npkg verify` with the pinned z3 |
+| `ty0203` | 203 | rule | “**A float `/` or `%` arms no” | A float `/` or `%` arms no DivByZero/DivOverflow: a program whose only division is a float's compiles with a failsafe that names neither. | `run:0` |
+| `ty0205` | 205 | rule | “the emitter writes a bare `fdiv`/`frem`” | The emitter writes a bare `fdiv`/`frem`: no compare guards a float division. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fd"?\((?=(?:(?!\n\}).)*?= fdiv double )(?=(?:(?!\n\}).)*?= frem double )(?!(?:(?!\n\}).)*?fcmp)` |
+| `ty0205b` | 205 | rule | “a `failsafe` names the two only” | Where an integer division exists, failsafe must name DivByZero and DivOverflow: one that names neither is refused. | `refuse` |
+| `ty0206` | 206 | rule | “`#sqrt` is `fp.sqrt`” | `#sqrt` is encoded as fp.sqrt; `%` and a cast out of a float stay opaque to the verifier. | untestable [z3] the encoding is exercised only by `npkg verify` with the pinned z3 |
+| `ty0214` | 214 | rule | “`char8:c = 65char8;` is the letter 'A'” | `65char8` is the letter 'A'. | `run:0` |
+| `ty0222` | 222 | row | “\| `char8` \| `i8` \| 1 byte \| 1 \|” | `char8` is 1 byte with alignment 1. | `run:0` |
+| `ty0223` | 223 | row | “\| `char16` \| `i16` \| 2 bytes \| 2 \|” | `char16` is 2 bytes with alignment 2. | `run:0` |
+| `ty0224` | 224 | row | “\| `char32` \| `i32` \| 4 bytes \| 4 \|” | `char32` is 4 bytes with alignment 4. | `run:0` |
+| `ty0224b` | 224 | rule | “Unicode scalar value (full codepoint)” | A char32 is a Unicode scalar value: a literal above U+10FFFF is refused. | `refuse` |
+| `ty0224c` | 224 | rule | “Unicode scalar value (full codepoint)” | A char32 is a Unicode scalar value: a surrogate (U+D800) is not one, so the literal is refused. | `refuse` |
+| `ty0227` | 227 | rule | “cannot perform arithmetic on char type” | Arithmetic `+` on char8 is a compile-time error. | `refuse` |
+| `ty0227b` | 227 | rule | “cannot perform arithmetic on char type” | Arithmetic `-` on char8 is a compile-time error. | `refuse` |
+| `ty0227c` | 227 | rule | “cannot perform arithmetic on char type” | Arithmetic `*` on char8 is a compile-time error. | `refuse` |
+| `ty0227d` | 227 | rule | “cannot perform arithmetic on char type” | Arithmetic `/` on char8 is a compile-time error. | `refuse` |
+| `ty0227e` | 227 | rule | “cannot perform arithmetic on char type” | Arithmetic `%` on char8 is a compile-time error. | `refuse` |
+| `ty0228` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `&` on char8 is a compile-time error. | `refuse` |
+| `ty0228b` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `\|` on char8 is a compile-time error. | `refuse` |
+| `ty0228c` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `^` on char8 is a compile-time error. | `refuse` |
+| `ty0228d` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `~` on char8 is a compile-time error. | `refuse` |
+| `ty0228e` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `<<` on char8 is a compile-time error. | `refuse` |
+| `ty0228f` | 228 | rule | “cannot perform bitwise operations on char type” | Bitwise `>>` on char8 is a compile-time error. | `refuse` |
+| `ty0231` | 231 | rule | “(unsigned comparison for Unicode ordering)” | char8 comparisons are unsigned: '\xC3' is above 'A'. | `run:0` (M10 `m05_char_ordering_unsigned`) |
+| `ty0231b` | 231 | rule | “Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`” | Ordering is permitted on char16 and char32 too, and is unsigned: 65535char16 is above 65char16. | `run:0` |
+| `ty0232` | 232 | rule | “Assignment: `char8:c = 'A';` or `char8:c = 65char8;`” | `char8:c = 'A';` and `char8:c = 65char8;` assign the same character. | `run:0` |
+| `ty0233` | 233 | rule | “Indexing into char arrays” | A char array indexes to its chars: `arr[0]` is the first. | `run:0` |
+| `ty0239` | 239 | row | “\| `toUpper` \|” | `toUpper` uppercases an ASCII letter and leaves every other char8 unchanged (ASCII range only). | `run:0` |
+| `ty0240` | 240 | row | “\| `toLower` \|” | `toLower` lowercases an ASCII letter and leaves every other char8 unchanged (ASCII range only). | `run:0` |
+| `ty0241` | 241 | row | “\| `isAlpha` \|” | `isAlpha` is true for letters and false for a digit and for the bytes beside 'A' and 'Z'. | `run:0` |
+| `ty0242` | 242 | row | “\| `isDigit` \|” | `isDigit` is true for '0' through '9' only. | `run:0` |
+| `ty0243` | 243 | row | “\| `isAlphaNumeric` \|” | `isAlphaNumeric` is true for a letter or a digit and false otherwise. | `run:0` |
+| `ty0244` | 244 | row | “\| `isWhitespace` \|” | `isWhitespace` is true for exactly space, tab, CR and LF: vertical tab and form feed are not in the list. | `run:0` |
+| `ty0245` | 245 | row | “\| `isUpper` \|” | `isUpper` is true for 'A' through 'Z' only. | `run:0` |
+| `ty0246` | 246 | row | “\| `isLower` \|” | `isLower` is true for 'a' through 'z' only. | `run:0` |
+| `ty0247` | 247 | row | “\| `toUint` \|” | `toUint` reinterprets a char8 as its uint8 byte. | `run:0` |
+| `ty0248` | 248 | row | “\| `fromUint` \|” | `fromUint` reinterprets a uint8 as the char8 of that byte. | `run:0` |
+| `ty0249` | 249 | row | “\| `toChar16` \|” | `toChar16` zero-extends a char8: '\xE9' becomes 233char16. | `run:0` |
+| `ty0250` | 250 | row | “\| `toChar32` \|” | `toChar32` zero-extends a char8: '\xFF' becomes 255char32. | `run:0` |
+| `ty0257` | 257 | example | “```llvm” | A char8 range test lowers to the unsigned predicates `icmp uge i8 ..., 65` and `icmp ule i8 ..., 90`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11cu"?\((?=(?:(?!\n\}).)*?icmp uge i8 %\S+, 65\b)(?=(?:(?!\n\}).)*?icmp ule i8 %\S+, 90\b)` |
+| `ty0272` | 272 | example | “```nitpick” | The character literals compile to their code units: '\n' 10, '\t' 9, '\0' 0, '\\' 92, '\'' 39, '\x41' 'A', and '\u{1F600}' in a char32 is U+1F600. | `run:0` |
+| `ty0280` | 280 | rule | “// Unicode escape (char32 only)” | The `\u{...}` escape is for char32 only: in a char8 slot it is refused. | `refuse` |
+| `ty0285` | 285 | example | “```nitpick” | The example compiles: a char8[5] holds 5 chars, `cstring:cs = "Hello";` is a cstring of length 5, and `to_cstring` of a clean string succeeds. | `run:0` |
+| `ty0286` | 286 | rule | “char arrays do NOT implicitly add a null byte” | A char array holds exactly its elements: `char8[5]` of 'Hello' has len 5 and occupies 5 bytes. | `run:0` |
+| `ty0290` | 290 | rule | “cstring:cs = "Hello";” | A string literal in cstring position is a cstring: `cstring:cs = "Hello";` compiles with length 5. | `run:0` |
+| `ty0295` | 295 | rule | “ERROR: cannot assign char8[] to string” | A char array is not a string: assigning one to a `string` is a compile error. | `refuse` |
+| `ty0304` | 304 | row | “\| `trit` \| A base-3 unit of information” | A trit holds the base-3 digits 0 and 1 (common to both readings the row gives). | `run:0` |
+| `ty0304b` | 304 | rule | “(values: -1, 0, 1 or 0, 1, 2)” | A trit holds three values: 3 is outside both readings and is refused. | `refuse` |
+| `ty0305` | 305 | row | “\| `tryte` \| A block of 10 trits” | A tryte is 10 trits: it holds 29524 (ten balanced trits; six would stop at 364) and has 10 digits. | `run:0` |
+| `ty0306` | 306 | row | “\| `nit` \| Base-9 primitive (values: 0-8)” | A nit takes the values 0 to 8: `nit:n = 8;` holds 8. | `run:0` |
+| `ty0307` | 307 | row | “\| `nyte` \| A block of 2 nits (values: 0-80)” | A nyte is 2 nits holding 0 to 80: `nyte:n = 81;` is out of range and refused. | `refuse` |
+| `ty0307b` | 307 | rule | “(values: 0-80)” | A nyte holds 80, the top of the row's range. | `run:0` |
+| `ty0308` | 308 | row | “\| `tensor` \| N-dimensional array primitive.” | `tensor` is a native primitive: `tensor<flt64>` names a type with no import. | `run:0` |
+| `ty0308b` | 308 | row | “Emits LLVM vector/SIMD intrinsics.” | Tensor operations emit LLVM vector/SIMD intrinsics. | untestable [vague] names no operation (and no construction in this range) whose emission could be checked |
+| `ty0309` | 309 | row | “\| `matrix` \| 2D data primitive.” | `matrix` is a native primitive: `matrix<flt64>` names a type with no import. | `run:0` |
+| `ty0309b` | 309 | row | “Hardware-accelerated dot products / SGEMM.” | Matrix operations are hardware-accelerated dot products / SGEMM. | untestable [vague] names no operation or instruction to check |
+| `ty0319` | 319 | row | “\| `string` \| `string<char8>` \| `{ptr, i64, i64}` \| 24 bytes \| 8 \|” | `string` is 24 bytes with alignment 8. | `run:0` |
+| `ty0319b` | 319 | row | “\| `string` \| `string<char8>` \|” | `string` is an alias for `string<char8>`: a `string<char8>` is accepted wherever a string is. | `run:0` |
+| `ty0320` | 320 | row | “\| `string<char16>` \| — \| `{ptr, i64, i64}` \| 24 bytes \| 8 \|” | `string<char16>` is 24 bytes with alignment 8. | `run:0` |
+| `ty0321` | 321 | row | “\| `string<char32>` \| — \| `{ptr, i64, i64}` \| 24 bytes \| 8 \|” | `string<char32>` is 24 bytes with alignment 8. | `run:0` |
+| `ty0322` | 322 | row | “\| `cstring` \| — \| `{ptr, i64}` \| 16 bytes \| 8 \|” | `cstring` is 16 bytes with alignment 8. | `run:0` |
+| `ty0327` | 327 | rule | “is not NUL-terminated” | A `string` is `{ptr, len, cap}` and is not NUL-terminated. | untestable [unobservable] a byte after a string's last is out of its bounds: no in-bounds read can see whether it is 0 |
+| `ty0330` | 330 | rule | “pointers are thin” | Pointers are thin: an `int8->` parameter is one `ptr`, with no bounds metadata. | `ir:^define [^@\n]*\bi8 @"?(?:[\w$]+\.)*m11tp"?\(ptr ` |
+| `ty0332` | 332 | rule | “a `string` may carry an interior NUL” | A `string` may carry an interior NUL: one built at run time keeps all its bytes. | `run:0` |
+| `ty0338` | 338 | example | “```llvm” | A `string` is the struct `{ ptr, i64, i64 }`: a string parameter has that type. | `ir:^define [^@\n]*\bi64 @"?(?:[\w$]+\.)*m11sl"?\(\{ ?ptr, i64, i64 ?\} ` |
+| `ty0340` | 340 | rule | “(heap-allocated data buffer)” | A string's data buffer is heap-allocated. | untestable [vague] §3.3 (line 435) says a literal's buffer is constant data, so no one outcome is stated; no program here can see where a buffer lives |
+| `ty0341` | 341 | rule | “length (number of char units, NOT bytes for char16/32)” | A string's length counts char units, which for `string` are bytes. | `run:0` (M10 `t01_byte_length_utf8`) |
+| `ty0342` | 342 | rule | “capacity (allocated char units)” | Field 2 of a string is its capacity in char units. | untestable [internal] no accessor for the capacity is documented; a program cannot read it |
+| `ty0348` | 348 | row | “\| 0 \| 8 \| data \| `ptr`” | The data pointer is at offset 0: the struct opens with `ptr` ({ptr, i64, i64}). | `ir:^define [^@\n]*\bi64 @"?(?:[\w$]+\.)*m11sd"?\(\{ ?ptr, i64, i64 ?\} ` |
+| `ty0349` | 349 | row | “\| 8 \| 8 \| length \| `i64` \|” | The length is field 1 (offset 8): `s.len` reads field 1 of the string struct. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11ln"?\((?=(?:(?!\n\}).)*?(?:extractvalue \{ ?ptr, i64, i64 ?\} %\S+, 1\b|getelementptr [^\n]*\{ ?ptr, i64, i64 ?\}, ptr %\S+, i32 0, i32 1\b))` |
+| `ty0350` | 350 | row | “\| 16 \| 8 \| capacity \| `i64` \|” | The capacity is field 2 (offset 16). | untestable [internal] no accessor for the capacity is documented; its position shows only in the struct type ty0348 checks |
+| `ty0355` | 355 | rule | “`+` is **concatenation**, NOT addition” | On `string`, `+` is concatenation. | `run:0` (M10 `t14_string_plus_concatenates`) |
+| `ty0355b` | 355 | rule | “No `-`, `*`, `/`, `%`.” | `-` on strings is refused. | `refuse` |
+| `ty0355c` | 355 | rule | “No `-`, `*`, `/`, `%`.” | `*` on strings is refused. | `refuse` |
+| `ty0355d` | 355 | rule | “No `-`, `*`, `/`, `%`.” | `/` on strings is refused. | `refuse` |
+| `ty0355e` | 355 | rule | “No `-`, `*`, `/`, `%`.” | `%` on strings is refused. | `refuse` |
+| `ty0358` | 358 | rule | “allocates new buffer, copies both” | `a + b` allocates a new buffer and copies both operands: `a` and `b` stay usable and unchanged. | `run:0` |
+| `ty0359` | 359 | rule | “Comparison: `a.eq(b)`” | `a.eq(b)` (the prelude's string: Eq) compares byte by byte. | `run:0` |
+| `ty0359b` | 359 | rule | “`string_eq(a, b)`” | `string_eq(a, b)` compares byte by byte. | `run:0` |
+| `ty0360` | 360 | rule | “**`==` and `!=` are REFUSED on a `string`**” | `==` on strings is refused: NITPICK-TYPE-034. | `refuse:NITPICK-TYPE-034` (M10 `m11_string_eq_refused`) |
+| `ty0360b` | 360 | rule | “**`==` and `!=` are REFUSED on a `string`**” | `!=` on strings is refused: NITPICK-TYPE-034. | `refuse:NITPICK-TYPE-034` |
+| `ty0364` | 364 | rule | “Ordering: `a.cmp(b)`” | `a.cmp(b)` orders strings lexicographically. | `run:0` (M10 `t16_string_order`) |
+| `ty0365` | 365 | rule | “the operators are refused as `==` is” | The ordering operators are refused on strings: `a < b` is refused. | `refuse` |
+| `ty0365b` | 365 | rule | “the operators are refused as `==` is” | The ordering operators are refused on strings: `a <=> b` is refused. | `refuse` |
+| `ty0366` | 366 | rule | “Indexing: `char8:c = s[0];`” | `s[i]` returns the char at that index. | `run:0` (M10 `t08_string_index`) |
+| `ty0366b` | 366 | rule | “(bounds-checked)” | String indexing is bounds-checked: past the end traps OutOfBounds. | `run:94` (M10 `t09_string_index_past_end`) |
+| `ty0367` | 367 | rule | “Length: `int64:len = s.length;`” | A string's length is the field `s.length`. | `run:0` (M10 `t02_length_spelled_length`) |
+| `ty0373` | 373 | row | “\| `charAt` \|” | `charAt(s, i)` is the char at index i. | `run:0` |
+| `ty0373b` | 373 | row | “Get character at index (bounds-checked)” | `charAt` is bounds-checked: an index past the end traps OutOfBounds. | `trap:OutOfBounds` |
+| `ty0374` | 374 | row | “\| `substring` \|” | `substring(s, start, length)` extracts `length` chars from `start`. | `run:0` |
+| `ty0375` | 375 | row | “\| `split` \|” | `split(s, c)` splits by the delimiter into its parts. | `run:0` |
+| `ty0376` | 376 | row | “\| `trim` \|” | `trim` removes leading and trailing whitespace. | `run:0` |
+| `ty0377` | 377 | row | “\| `trimLeft` \|” | `trimLeft` removes leading whitespace only. | `run:0` |
+| `ty0378` | 378 | row | “\| `trimRight` \|” | `trimRight` removes trailing whitespace only. | `run:0` |
+| `ty0379` | 379 | row | “\| `contains` \|” | `contains(s, t)` is a substring search. | `run:0` |
+| `ty0380` | 380 | row | “\| `startsWith` \|” | `startsWith(s, p)` is a prefix check. | `run:0` |
+| `ty0381` | 381 | row | “\| `endsWith` \|” | `endsWith(s, p)` is a suffix check. | `run:0` |
+| `ty0382` | 382 | row | “\| `indexOf` \|” | `indexOf(s, c)` is the first occurrence's index, -1 if not found. | `run:0` |
+| `ty0383` | 383 | row | “\| `toUpper` \|” | `toUpper(s)` uppercases the ASCII letters and leaves other bytes alone. | `run:0` |
+| `ty0384` | 384 | row | “\| `toLower` \|” | `toLower(s)` lowercases the ASCII letters and leaves other bytes alone. | `run:0` |
+| `ty0385` | 385 | row | “\| `toCharArray` \|” | `toCharArray(s, dest)` copies into a caller-owned destination and returns the elements written. | `run:0` |
+| `ty0386` | 386 | row | “\| `fromCharArray` \|” | `fromCharArray(a)` copies a char array into a string. | `run:0` |
+| `ty0387` | 387 | row | “\| `to_cstring` \|” | `to_cstring` fails on an interior NUL and succeeds on a clean string. | `run:0` (M10 `t12_to_cstring_interior_nul`) |
+| `ty0388` | 388 | row | “\| `to_string` \|” | `to_string(c)` copies a cstring out into a string. | `run:0` |
+| `ty0392` | 392 | rule | “so it cannot be” | A `string` cannot be handed to a syscall: passing one where a builtin takes a cstring is refused. | `refuse` |
+| `ty0393` | 393 | rule | “`cstring` is the type that can” | A `cstring` can be handed to a syscall. | `run:0` |
+| `ty0395` | 395 | example | “```” | `cstring` is `{ ptr, len }`: a cstring parameter is the struct `{ ptr, i64 }`. | `ir:^define [^@\n]*\bi64 @"?(?:[\w$]+\.)*m11cl"?\(\{ ?ptr, i64 ?\} ` |
+| `ty0399` | 399 | rule | “**The length is retained**” | A cstring retains its length: `.len` excludes the terminator. | `run:0` (M10 `t13_cstring_keeps_length`) |
+| `ty0399b` | 399 | rule | “The buffer is `len + 1` bytes with `buf[len] == 0u8`.” | A cstring's buffer holds a NUL at index len. | `run:0` |
+| `ty0400` | 400 | rule | “never calls `strlen`” | nlibc never calls strlen: the unbounded scan is absent from every path and name in the library. | untestable [tree] a claim about the library's source |
+| `ty0404` | 404 | rule | “**`to_cstring` fails on an interior NUL.**” | `to_cstring` fails on an interior NUL. | `run:0` (M10 `t12_to_cstring_interior_nul`) |
+| `ty0414` | 414 | row | “\| string literal in `cstring` position \| compile time” | A string literal in cstring position costs nothing at run time: it is a NUL-terminated constant. | `ir:constant \[4 x i8\] c"abc\\00"` |
+| `ty0414b` | 414 | rule | “interior NUL is a compile error” | A string literal with an interior NUL in cstring position is a compile error. | `refuse` |
+| `ty0415` | 415 | row | “\| `to_cstring(s)` on a runtime `string`” | `to_cstring` on a string built at run time: an interior NUL is Result.err, a clean one converts. | `run:0` |
+| `ty0418` | 418 | rule | “until D-053 removed that type” | The `fmt` type was removed: a binding of type `fmt` is refused. | `refuse` |
+| `ty0420` | 420 | rule | “`cstring` is immutable” | `cstring` is immutable: writing its field is refused. | `refuse` |
+| `ty0421` | 421 | rule | “is an explicit `to_string`” | cstring to string is only the explicit `to_string`: an implicit assignment is refused. | `refuse` |
+| `ty0426` | 426 | example | “```nitpick” | `string:greeting = "Hello, world!";` compiles, a 13-byte string. | `run:0` |
+| `ty0430` | 430 | example | “```llvm” | A string literal is emitted as a constant `[13 x i8]` of its bytes, with no NUL. | `ir:constant \[13 x i8\] c"Hello, world!"` |
+| `ty0453` | 453 | rule | “i128 division emits the four `__divti3`-family libcalls” | i128 division works through the runtime floor's __divti3 family: signed and unsigned `/` and `%` compute and link. | `run:0` |
+| `ty0455` | 455 | rule | “expands inline” | Division at a width above 128 expands inline: an int256 `/` and `%` compute and link with no libcall. | `run:0` |
+| `ty0456` | 456 | rule | “ARE the LLVM types; nothing is limbed” | Wide integers are the LLVM types: an int256 function takes and returns `i256` and adds through the i256 intrinsic. | `ir:(?s)\A(?=.*?^define [^@\n]*\bi256 @"?(?:[\w$]+\.)*m11w"?\(i256 )(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11w"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.i256\())` |
+| `ty0460` | 460 | row | “\| `int128` /” | `int128` / `uint128` / `tbb128` are 16 bytes with alignment 16. | `run:0` |
+| `ty0461` | 461 | row | “\| `int256` /” | `int256` / `uint256` / `tbb256` are 32 bytes with alignment 16. | `run:0` |
+| `ty0462` | 462 | row | “\| `int512` /” | `int512` / `uint512` are 64 bytes with alignment 16. | `run:0` |
+| `ty0463` | 463 | row | “\| `int1024` /” | `int1024` / `uint1024` are 128 bytes with alignment 16. | `run:0` |
+| `ty0464` | 464 | row | “\| `int2048` /” | `int2048` / `uint2048` are 256 bytes with alignment 16. | `run:0` |
+| `ty0465` | 465 | row | “\| `int4096` /” | `int4096` / `uint4096` are 512 bytes with alignment 16. | `run:0` |
+| `ty0469` | 469 | rule | “put `{i8, i128}` at 32 bytes and `{i8, i256}` at 48” | `{int8, int128}` is 32 bytes and `{int8, int256}` is 48. | `run:0` |
+| `ty0471` | 471 | rule | “the frontend now stores exactly this column” | The frontend's layout of wide fields is LLVM's: `{int8, int256, int8}` is 64 bytes, `{int8, tbb256}` 48, and the fields round-trip. | `run:0` |
+| `ty0475` | 475 | rule | “ordinary integer semantics at every width — D-037 wrapping” | The wide integers have D-037 wrapping: an int128 `+` past the maximum wraps to the minimum. | `run:0` |
+| `ty0476` | 476 | rule | “D-092 explicit widening” | Widening to a wide integer is explicit: an int64 assigned to an int256 without `=>` is refused. | `refuse` |
+| `ty0476b` | 476 | rule | “D-092 explicit widening” | An explicit widening keeps the value: a negative int64 sign-extends, a uint64 zero-extends. | `run:0` |
+| `ty0476c` | 476 | rule | “the D-142 division guards (zero divisor” | At a wide width, integer division by zero traps DivByZero. | `trap:DivByZero` |
+| `ty0477` | 477 | rule | “structural INT_MIN/−1 check” | The signed minimum divided by -1 traps DivOverflow (at int8). | `run:98` (M10 `v07_int8_min_div_minus_one`) |
+| `ty0477c` | 477 | rule | “which is width-independent by construction” | At a wide width, the signed minimum divided by -1 traps DivOverflow. | `trap:DivOverflow` |
+| `ty0485` | 485 | rule | “reserves a specific value (the most negative value)” | tfp's error state is the most negative raw value, and it is sticky. | `run:0` |
+| `ty0487` | 487 | rule | “resolve to this error state rather than crashing” | tfp operations that overflow or divide by zero resolve to ERR rather than trapping. | `run:0` |
+| `ty0491` | 491 | row | “\| `tfp32` \|” | `tfp32` is 4 bytes, alignment 4, format Q16.16: the least step is 2^-16 and the integer part tops out at 2^15 - 1. | `run:0` |
+| `ty0492` | 492 | row | “\| `tfp64` \|” | `tfp64` is 8 bytes, alignment 8, format Q32.32: the least step is 2^-32 and the integer part tops out at 2^31 - 1. | `run:0` |
+| `ty0493` | 493 | row | “\| `tfp128` \|” | `tfp128` is 16 bytes, alignment 16, format Q64.64: the least step is 2^-64 and the integer part tops out at 2^63 - 1. | `run:0` |
+| `ty0494` | 494 | row | “\| `tfp256` \| `i256` \| 32 bytes \| Q128.128 \| 16 \|” | `tfp256` is 32 bytes, alignment 16, format Q128.128: 2^-128 is its least step and the integer part tops out at 2^127 - 1. | `run:0` |
+| `ty0497` | 497 | example | “```nitpick” | Suffixing a numeric literal with the type name makes a tfp literal of that value. | `run:0` |
+| `ty0504` | 504 | rule | “Add/sub: same as integer add/sub on the raw representation” | tfp add and subtract are the integer add/sub of the raw values. | `run:0` |
+| `ty0505` | 505 | rule | “Mul: `(a * b) >> FRAC_BITS`” | tfp multiply is `(a * b) >> FRAC_BITS` on the raws: the shift floors, so -2^-16 * 0.5 is -2^-16 and 2^-16 * 0.5 is 0. | `run:0` |
+| `ty0506` | 506 | rule | “Div: `(a << FRAC_BITS) / b`” | tfp divide is `(a << FRAC_BITS) / b` on the raws, an integer division that truncates toward zero: 1/3 and -1/3 are ±21845/65536 at tfp32. | `run:0` |
+| `ty0507` | 507 | rule | “Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`, `<=>` (spaceship)” | tfp values compare with all six operators and `<=>`, which yields -1, 0 or 1. | `run:0` |
+| `ty0509` | 509 | rule | “overflow produce the `ERR` sentinel” | An overflowing tfp operation produces ERR and it is sticky: ERR * 0, ERR - ERR and -ERR stay ERR. | `run:0` |
+| `ty0510` | 510 | rule | “a comparison on an ERR operand TRAPS to `failsafe`” | A comparison with an ERR tfp operand traps to failsafe (TbbErr, the family's one trap, line 723). | `trap:TbbErr` |
+| `ty0512` | 512 | rule | “`is_err(x)` is the test that looks” | `is_err` tests a tfp for ERR without trapping. | `run:0` |
+| `ty0514` | 514 | rule | “Remainder: `%` — the same-scale remainder” | tfp `%` is the same-scale remainder (the sign of the dividend), and `% 0` is ERR. | `run:0` |
+| `ty0515` | 515 | rule | “Unary negation: `-val` (total” | tfp negation is total: the most positive value negates to a valid value (not ERR), and -ERR is ERR. | `run:0` |
+| `ty0516` | 516 | rule | “Shift / bitwise on the raw representation~~ — STRUCK” | Bitwise operators on tfp are struck: `a & b` is refused. | `refuse` |
+| `ty0516b` | 516 | rule | “Shift / bitwise on the raw representation~~ — STRUCK” | Shifts on tfp are struck: `x << 1` is refused (`ERR << 1` would launder ERR to zero). | `refuse` |
+| `ty0518` | 518 | rule | “Scaling is multiplication by a power-of-two constant” | Scaling a tfp is multiplication by a power-of-two constant, exact both ways. | `run:0` |
+| `ty0520` | 520 | rule | “`floor` and `trunc` are METHODS on every width” | `.floor()` (toward -inf) and `.trunc()` (toward zero) are methods at every tfp width. | `run:0` |
+| `ty0521` | 521 | rule | “`tfp256_*` free-function family” | The `tfp256_*` free functions are struck: `tfp256_floor(x)` is refused. | `refuse` |
+| `ty0522` | 522 | example | “```nitpick” | `3.7tfp256.floor()` and `.trunc()` are both 3.0tfp256. | `run:0` |
+| `ty0529` | 529 | example | “```nitpick” | The cast block's accepted lines compile and compute: 42.5 into flt64 both ways, 42 by `=>!` to int64, 42.5 narrowed to tfp64, 1.5 widened to tfp128. | `run:0` |
+| `ty0531` | 531 | rule | “32 raw bits fit a 53-bit mantissa exactly” | `tfp32 => flt64` is accepted and exact, even for a value using all 32 raw bits. | `run:0` |
+| `ty0533` | 533 | rule | “Q128.128 into 52 mantissa bits LOSES” | tfp256 into flt64 loses precision, so the plain `=>` is refused. | `refuse` |
+| `ty0534` | 534 | rule | “COMPILE ERROR — drops the fractional part” | `tfp256 => int64` is a compile error: it drops the fractional part. | `refuse` |
+| `ty0535` | 535 | rule | “truncates toward zero, yields 42” | `tfp256 =>! int64` truncates toward zero: 42.5 gives 42 and -42.5 gives -42. | `run:0` |
+| `ty0536` | 536 | rule | “narrowing: precision loss, so =>! is required” | Narrowing tfp256 to tfp64 requires `=>!`: the plain `=>` is refused. | `refuse` |
+| `ty0537` | 537 | rule | “widening keeps every value; ERR maps to ERR” | Widening tfp64 to tfp128 keeps every value (the most negative valid one included) and maps ERR to ERR. | `run:0` |
+| `ty0540` | 540 | rule | “A cast OUT of the family TRAPS on an ERR operand under BOTH spellings” | A cast of an ERR tfp out of the family with `=>!` traps (TbbErr). | `trap:TbbErr` |
+| `ty0540b` | 540 | rule | “under BOTH spellings” | A cast of an ERR tfp out of the family with the plain `=>` traps (TbbErr). | `trap:TbbErr` |
+| `ty0544` | 544 | rule | “is a **compile-time error** wherever data loss is possible” | `=>` is a compile-time error wherever data loss is possible: `flt64 => tfp32` is refused. | `refuse` |
+| `ty0553` | 553 | rule | “Only `dim256` supports” | Only dim256 takes a unit annotation: `tfp64<Meters>` is refused. | `refuse` |
+| `ty0559` | 559 | rule | “vectors themselves and is TOTAL” | The unit algebra is total: products and quotients whose vectors nothing names compose and cancel. | `run:0` |
+| `ty0560` | 560 | rule | “Two `dim256` types are the same type” | Two dim256 types are the same exactly when their vectors are equal: Kilograms * (m/s)^2 and Newtons * Meters are both Joules. | `run:0` |
+| `ty0562` | 562 | rule | “which is why `dist / dist` is a bare” | The dimensionless vector IS tfp256: `dist / dist` is a bare tfp256. | `run:0` |
+| `ty0563` | 563 | rule | “why bare `dim256` (as an annotation or a literal suffix) is” | Bare `dim256` as an annotation is refused. | `refuse` |
+| `ty0564` | 564 | rule | “refused — the dimensionless type already has a name” | Bare `dim256` as a literal suffix is refused. | `refuse` |
+| `ty0567` | 567 | example | “```nitpick” | `dim256<Unit>` bindings take `dim256<Unit>`-suffixed literals of those values. | `run:0` |
+| `ty0573` | 573 | rule | “The seven SI base units are compiler-declared” | The seven SI base units Kilograms, Meters, Seconds, Amperes, Kelvin, Moles and Candela are declared. | `run:0` |
+| `ty0576` | 576 | rule | “`Pascals`, `Watts`, `MetersPerSecond`, …) are PRELUDE declarations” | The derived names Newtons, Joules, Hertz, Pascals, Watts and MetersPerSecond are declared in the prelude with their SI vectors. | `run:0` |
+| `ty0580` | 580 | example | “```nitpick” | Unit declarations of this form compile, and a declared name is its vector's name (Furlongs is Meters). | `run:0` |
+| `ty0588` | 588 | rule | “unit names, `1`, `*`, `/`,” | A unit declaration's right-hand side is unit algebra only: a number other than 1 is refused. | `refuse` |
+| `ty0589` | 589 | rule | “An annotation position takes a” | An annotation takes a single unit name, never an inline expression: `dim256<Meters / Seconds>` is refused. | `refuse` |
+| `ty0593` | 593 | rule | “is IDENTICAL to bare `tfp256` at the” | `dim256<Joules>` is identical to tfp256 at the IR: functions over each take and return `i256`. | `ir:(?s)\A(?=.*?^define [^@\n]*\bi256 @"?(?:[\w$]+\.)*m11dj"?\(i256 )(?=.*?^define [^@\n]*\bi256 @"?(?:[\w$]+\.)*m11tf"?\(i256 )` |
+| `ty0595` | 595 | rule | “every D-195 `tfp256` rule (ERR discipline, saturation” | Every tfp256 rule applies to dim256 unchanged: floor/trunc, saturation to ERR, ERR on division by zero. | `run:0` |
+| `ty0599` | 599 | example | “```nitpick” | Units are tracked through arithmetic: `dim256<Meters>:speed = dist / time;` is a compile error. | `refuse` |
+| `ty0608` | 608 | rule | “OK: Newtons * Meters IS the Joules vector” | `force * dist` of Newtons and Meters is a Joules value, with no registration. | `run:0` |
+| `ty0612` | 612 | rule | “Adding/subtracting/`%` same unit” | `+`, `-` and `%` of the same unit keep the unit. | `run:0` |
+| `ty0613` | 613 | rule | “Adding/subtracting different units” | Adding different units is a compile-time error. | `refuse` |
+| `ty0613b` | 613 | rule | “Adding/subtracting different units” | Subtracting different units is a compile-time error. | `refuse` |
+| `ty0614` | 614 | rule | “a bare `tfp256` operand is the” | Multiplying or dividing by a bare tfp256 scales, in either operand order; tfp256 over a unit inverts it. | `run:0` |
+| `ty0616` | 616 | rule | “Comparing different units” | Comparing different units is a compile-time error. | `refuse` |
+| `ty0616b` | 616 | rule | “same vector: full ordering” | Values of the same vector have the full ordering. | `run:0` |
+| `ty0618` | 618 | rule | “`dim256<U> => tfp256`: ✅ drops the unit” | `dim256<U> => tfp256` drops the unit, and an ERR rides through it without a trap. | `run:0` |
+| `ty0621` | 621 | rule | “`tfp256 =>! dim256<U>`: the acknowledged unit ASSERTION” | `tfp256 =>! dim256<U>` asserts a unit and keeps the value. | `run:0` |
+| `ty0622` | 622 | rule | “refuses — a silent unit-gain is how unit bugs are born” | Without `=>!`, `tfp256 => dim256<U>` is refused. | `refuse` |
+| `ty0624` | 624 | rule | “`dim256<U> => dim256<V>`” | `dim256<U> => dim256<V>` is impossible: refused. | `refuse` |
+| `ty0624b` | 624 | rule | “❌ CAST_IMPOSSIBLE” | A unit relabel is impossible under `=>!` too: `dim256<U> =>! dim256<V>` is refused. | `refuse` |
+| `ty0624c` | 624 | rule | “`dim256<U>` ⇄ anything else” | A dim256 casts to nothing but tfp256: `dim256<U> =>! int64` is refused. | `refuse` |
+| `ty0625` | 625 | rule | “a relabel is spelled as its two honest halves” | A relabel is `=> tfp256` then `=>! dim256<V>`, keeping the value. | `run:0` |
+| `ty0627` | 627 | rule | “a dimensioned value has no `ToString` BY DESIGN” | A dimensioned value has no ToString: interpolating one is refused. | `refuse` |
+| `ty0628` | 628 | rule | “drops are explicit: `&{x => tfp256}`” | Rendering a dimensioned value is the explicit drop `&{x => tfp256}`. | `run:0` |
+| `ty0631` | 631 | example | “```nitpick” | A function declared to return `dim256<Meters>` that passes `d / t` (Meters*Seconds^-1) is a type error. | `refuse` |
+| `ty0634` | 634 | rule | “Must declare return as dim256<MetersPerSecond>” | Declared to return dim256<MetersPerSecond>, the same body compiles and computes d / t. | `run:0` |
+| `ty0634b` | 634 | rule | “or bare tfp256” | Declared to return bare tfp256, the same body `pass(d / t)` compiles. | `run:0` |
+| `ty0639` | 639 | example | “```nitpick” | A struct may hold dim256 fields of different units; they read and compose. | `run:0` |
+| `ty0648` | 648 | example | “```llvm” | At the IR, dim256<Joules> is tfp256, whose type is `{ i64, i64, i64, i64 }`. | `ir:^%\"?tfp256\"? = type \{ ?i64, i64, i64, i64 ?\}|^define [^@\n]* @"?(?:[\w$]+\.)*m11dj"?\(\{ ?i64, i64, i64, i64 ?\} ` |
+| `ty0654` | 654 | rule | “The dimensional annotation is attached to the AST type node” | The annotation lives on the AST type node; the type checker verifies the algebra and codegen ignores it. | untestable [internal] the AST's type node is not observable; codegen's ignoring the unit is ty0593's IR test |
+
+## VERIFICATION (`meta/specs/VERIFICATION_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `vf0003` | 3 | rule | “mathematically prove the correctness of the code before it is allowed to execute” | Nitpick proves the code correct with Z3 before it is allowed to execute. | untestable [vague] a statement of intent: the plain build runs unverified code by design (the banner at 5-21 and §1.2), and the sentence names no outcome a program can check |
+| `vf0007` | 7 | rule | “`npkc --obligations DIR`” | The compiler writes every function's proof obligations as SMT-LIB2 text under `--obligations DIR`: numbered .smt2 files holding (check-sat) queries, plus index.txt and rows.txt. | `sh:0` |
+| `vf0008` | 8 | rule | “`npkc --elide nitpick.obligations`” | The compiler reads a manifest of verdicts with `--elide FILE` and emits the verified build. | untestable [z3] the manifest's verdicts come only from `npkg verify` with the pinned z3; a hand-made manifest's header (the z3 pin, the profile) is §8's and outside this claim |
+| `vf0009` | 9 | rule | “spawns the pinned z3” | `npkg verify` runs one fresh z3 per function, decides every obligation, holds the rows to the committed nitpick.obligations and emits the VERIFIED build, each discharged guard replaced by llvm.assume. | untestable [z3] needs `npkg verify` with the pinned z3 |
+| `vf0020` | 20 | rule | “manifest holds 5,890 rows” | At the 1.5 close the compiler's own manifest holds 5,890 rows. | untestable [tree] a figure about the compiler's own tree and manifest |
+| `vf0026` | 26 | rule | “compilation immediately halts” | An `assert_static` whose expression evaluates to false halts compilation. | `refuse` |
+| `vf0028` | 28 | example | “```nitpick” | The example `assert_static(1i32 == 1i32);` compiles: a true constant proposition passes and the program runs. | `run:0` |
+| `vf0035` | 35 | rule | “`NITPICK-TYPE-069`” | An assert_static proposition that reads a value the evaluator cannot see (a run-time value) is refused, NITPICK-TYPE-069. | `refuse:TYPE-069` |
+| `vf0036` | 36 | rule | “one that folds to `false` halts compilation under the same code” | An assert_static that folds to false halts compilation with NITPICK-TYPE-069. | `refuse:TYPE-069` |
+| `vf0037` | 37 | rule | “`comptime` body the evaluator folds it per call” | In a comptime body an assert_static over the function's parameter is folded per call: called comptime with a value that satisfies it, the program compiles and computes. | `run:0` |
+| `vf0037b` | 37 | rule | “a false `prove` there” | A false `prove` in a comptime body, evaluated at a comptime call, is a counterexample: compilation is refused. | `refuse` |
+| `vf0038` | 38 | rule | “The statement lowers to nothing” | An assert_statement lowers to nothing: the IR of a program with `assert_static(1i32 == 1i32)` appended to a line has as many lines as the same program without it. | `sh:0` |
+| `vf0039` | 39 | rule | “row in the manifest is the catalogue's `checker` entry” | An assert_static's row is the catalogue's checker entry: one `assert-static` row, frontend-decided (`c` in rows.txt's encoded column), no query. | `sh:0` |
+| `vf0043` | 43 | rule | “forces the SMT solver to construct a mathematical proof” | `prove` makes the solver prove the expression across all control flows and states. | untestable [z3] a verdict of the verified build; the `--verify` flag it names is struck (§5, line 86) |
+| `vf0045` | 45 | rule | “If the solver finds a path where the expression is false, compilation fails” | A prove with a counterexample path fails the (verified) compilation and reports the counterexample. | untestable [z3] the verified build's refusal (VERIFY-001) needs z3's verdict; `--prove-report` is struck |
+| `vf0047` | 47 | example | “```nitpick” | The example compiles: `prove(x != 0i32)` inside `if (x > 0i32)` is accepted, and the plain build runs it as nothing. | `run:0` |
+| `vf0055` | 55 | rule | “path-condition-aware” | Branch guards of enclosing control flow are asserted as axioms before a prove's obligation. | untestable [z3] only a z3 verdict shows which hypotheses a row carries |
+| `vf0059` | 59 | rule | “an `if`'s condition inside its then-arm and its negation” | An if's condition is a hypothesis in its then-arm, its negation in the else-arm. | untestable [z3] a hypothesis of the encoder, visible only through a verdict |
+| `vf0061` | 61 | rule | “terminator” | After an arm that never falls through (pass, fail, return, exit, trap, break, continue, give), the other arm's condition holds. | untestable [z3] a hypothesis of the encoder, visible only through a verdict |
+| `vf0063` | 63 | rule | “a `pick` arm's pattern (a value, a range, a wildcard as the” | A pick arm is taken under its pattern and the negations of the earlier arms: the first matching arm in source order wins. | `run:0` (M10 `p03_first_match_wins`) |
+| `vf0065` | 65 | rule | “`where` guard” | A pick arm's where guard is a hypothesis; none when a fall sits in the pick, only the pattern when any arm carries a guard. | untestable [z3] a hypothesis of the encoder, visible only through a verdict |
+| `vf0066` | 66 | rule | “a loop's negated condition after a loop nothing” | After a loop nothing breaks out of, the negated loop condition is a hypothesis. | untestable [z3] a hypothesis of the encoder, visible only through a verdict |
+| `vf0067` | 67 | rule | “`when`'s `then` and `end` on whether the body ran” | when's then and end blocks carry whether the body ran as a hypothesis. | untestable [z3] a hypothesis of the encoder, visible only through a verdict |
+| `vf0068` | 68 | rule | “a ternary's branches under theirs” | A ternary's branches are evaluated under their conditions: only the chosen one runs. | `run:0` (M10 `x05_ternary_evaluates_one_branch`) |
+| `vf0068b` | 68 | rule | “right-hand side of `&&`/`\|\|`” | The right-hand side of && and \|\| is evaluated under its left side: a division guarded by the left operand never runs when the left operand decides. | `run:0` |
+| `vf0070` | 70 | rule | “MERGE as `(ite c v_then v_else)`” | Versions after an if, a when or a pick merge as an ite; a pick expression's value is the chain of its arms' give terms. | untestable [z3] the encoder's terms, visible only through a verdict |
+| `vf0072` | 72 | rule | “counted loop's `$` and a range `for`'s binding are terms with their bounds” | A counted loop's `$` and a range for's binding are terms carrying their bounds. | untestable [z3] the encoder's terms, visible only through a verdict |
+| `vf0075` | 75 | rule | “is a row of kind `prove`” | Each `prove(e)` is one obligation row of kind `prove`. | `sh:0` |
+| `vf0076` | 76 | rule | “nothing executes” | A prove is walked quiet: nothing in it executes, so a division by zero inside a prove does not trap at run time. | `run:0` |
+| `vf0077` | 77 | rule | “is not a site” | A division inside a prove is not a site: it records no div-zero row (while the prove row exists). | `sh:0` |
+| `vf0077b` | 77 | rule | “knowledge for every site” | Once discharged, a prove is knowledge for every site after it. | untestable [z3] a discharge is z3's verdict |
+| `vf0078` | 78 | rule | “The plain build lowers the” | The plain build lowers a prove to nothing and claims nothing: a prove that is false at run time does not trap. | `run:0` |
+| `vf0079` | 79 | rule | “The VERIFIED build refuses an” | Under --elide, a prove whose row the manifest does not discharge (open, budget, unencoded or absent) is NITPICK-VERIFY-001 at the statement. | untestable [z3] needs a manifest from `npkg verify` with the pinned z3 |
+| `vf0083` | 83 | rule | “writes the” | `npkg verify --explain` writes the model of an open prove. | untestable [z3] needs `npkg verify` with the pinned z3 |
+| `vf0085` | 85 | rule | “is `open` rather than `unencoded`” | A bool proposition always has at least an opaque term, so a prove row is open rather than unencoded. | untestable [z3] `open` is z3's verdict; which propositions the encoder cannot express is not stated here |
+| `vf0096` | 96 | example | “```nitpick” | The example compiles and runs: a Rules block over int32 and a limited local initialised with 5, which satisfies it. | `run:0` |
+| `vf0109` | 109 | rule | “a typo is `NITPICK-RESOLVE-002`” | The rule name in limit<...> resolves like any name: a misspelt rule at a local is NITPICK-RESOLVE-002. | `refuse:RESOLVE-002` |
+| `vf0110` | 110 | rule | “`NITPICK-RESOLVE-011`” | A limit<...> naming something that is not a Rules block (a function) is NITPICK-RESOLVE-011. | `refuse:RESOLVE-011` |
+| `vf0111` | 111 | rule | “parameter” | The rule name resolves at a parameter: a misspelt rule on a parameter is NITPICK-RESOLVE-002. | `refuse:RESOLVE-002` |
+| `vf0111b` | 111 | rule | “and a refinement” | The rule name resolves at a refinement: a misspelt refinement inside a Rules block is NITPICK-RESOLVE-002. | `refuse:RESOLVE-002` |
+| `vf0111c` | 111 | rule | “types eagerly” | A Rules body types eagerly: an ill-typed Rules block is refused even when nothing uses it. | `refuse` |
+| `vf0112` | 112 | rule | “every clause a `bool`” | Every Rules clause is a bool: a clause of type int32 is refused. | `refuse` |
+| `vf0112b` | 112 | rule | “subject's type” | `$` has the subject's type: in a Rules<bool>, comparing `$` with an int32 is refused. | `refuse` |
+| `vf0113` | 113 | rule | “`limit<r_positive> int64:x` refuses” | A limited binding's declared type must be the rule's subject by identity: limit<r_positive> int64:x over a Rules<int32> is NITPICK-TYPE-059. | `refuse:TYPE-059` |
+| `vf0114` | 114 | rule | “and so does a type parameter” | A limited binding whose declared type is a type parameter is NITPICK-TYPE-059. | `refuse:TYPE-059` |
+| `vf0116` | 116 | rule | “clause is a contract expression and follows” | A Rules clause is a contract expression under §3's admission: a clause using `?\|` is refused. | `refuse` |
+| `vf0119` | 119 | rule | “is enforced in every build” | limit<Rules> is enforced in every build: a limited local initialised at run time with a value its rule refuses traps LimitViolated in the plain build. | `trap:LimitViolated` |
+| `vf0121` | 121 | rule | “the integrated Z3 solver proves that the assigned” | With verification the solver proves `5i32` satisfies `$ > 0i32` and the check is removed. | untestable [z3] a discharge and its elision are the verified build's |
+| `vf0124` | 124 | rule | “traps to `failsafe`” | Where a check remains, a violation traps to failsafe: an assignment of a run-time value the rule refuses traps LimitViolated. | `trap:LimitViolated` |
+| `vf0127` | 127 | rule | “proving a constraint removes its runtime check” | Proving a constraint removes its runtime check. | untestable [z3] elision is the verified build's |
+| `vf0131` | 131 | rule | “checked AFTER every write” | A limited binding is checked after every write over its whole value: a compound assignment that leaves the rule traps LimitViolated. | `trap:LimitViolated` |
+| `vf0132` | 132 | rule | “a declaration without one is not a” | A declaration without an initialiser is not a write point: the vacant value (0, outside `$ > 0`) is never checked, and the first assignment is. | `run:0` |
+| `vf0133` | 133 | rule | “every assignment to it” | Every assignment to a limited binding is a write point: assigning a whole struct value the rule refuses traps LimitViolated. | `trap:LimitViolated` |
+| `vf0134` | 134 | rule | “a field or element store re-checks the root” | A field store to a limited struct re-checks the whole root: storing a refused field value traps LimitViolated. | `trap:LimitViolated` |
+| `vf0134b` | 134 | rule | “element store” | An element store to a limited array re-checks the whole root: storing a refused element traps LimitViolated. | `trap:LimitViolated` |
+| `vf0135` | 135 | rule | “callee's entry for a limited parameter, once per call in a sync function” | A limited parameter is checked at the callee's entry in a sync function: a call with a refused argument traps LimitViolated before the body runs. | `trap:LimitViolated` |
+| `vf0136` | 136 | rule | “once per task at state 0 in a coroutine” | A coroutine's limited parameter is checked at state 0: awaiting it with a refused argument traps LimitViolated. | `trap:LimitViolated` |
+| `vf0137` | 137 | rule | “`@"npk.<module>.<name>"`” | The check is one generated predicate per Rules declaration, emitted as @"npk.<module>.<name>". | `ir:^define [^\n]*@"npk\.vf0137\.r_positive"\(` |
+| `vf0138` | 138 | rule | “the clauses in source order, short-circuit” | A rule's clauses run in source order, short-circuit: `$ != 0` false ends the check, so the division in the next clause never runs and the trap is LimitViolated, not DivByZero. | `trap:LimitViolated` |
+| `vf0138b` | 138 | rule | “refinements then the clauses” | The refinements run before the clauses: a refinement written after a dividing clause still runs first, so zero traps LimitViolated, not DivByZero. | `trap:LimitViolated` |
+| `vf0140` | 140 | rule | “limited binding has no address” | `@` of a limited binding is refused, NITPICK-TYPE-063. | `refuse:TYPE-063` |
+| `vf0140b` | 140 | rule | “`$$m`” | `$$m` of a limited binding is refused, NITPICK-TYPE-063. | `refuse:TYPE-063` |
+| `vf0140c` | 140 | rule | “`$$i` of it” | `$$i` of a limited binding is refused, NITPICK-TYPE-063. | `refuse:TYPE-063` |
+| `vf0141` | 141 | rule | “out of an owning field or element of it, refuse (NITPICK-TYPE-063)” | A move out of an owning field of a limited binding is refused, NITPICK-TYPE-063. | `refuse:TYPE-063` |
+| `vf0141b` | 141 | rule | “element of it” | Passing an owning element out of a limited array is refused, NITPICK-TYPE-063. | `refuse:TYPE-063` |
+| `vf0142` | 142 | rule | “pass it by value” | A limited binding passed by value is accepted (the permitted twin of the address refusal). | `run:0` |
+| `vf0144` | 144 | rule | “trait signature's parameter” | A limit on a trait signature's parameter (no write point) is refused, NITPICK-TYPE-064. | `refuse:TYPE-064` |
+| `vf0144b` | 144 | rule | “a `wild`/`wildx` binding” | A limit on a `wild` binding is refused, NITPICK-TYPE-064. | `refuse:TYPE-064` |
+| `vf0145` | 145 | rule | “function;” | A limit in a comptime function (its parameter) is refused, NITPICK-TYPE-064. | `refuse:TYPE-064` |
+| `vf0145b` | 145 | rule | “`main`/`failsafe`'s parameters under D-244” | A limit on main's parameter is refused: the sentence lists it among the TYPE-064 sites. | `refuse:TYPE-064` |
+| `vf0146` | 146 | rule | “every write point is a `limit` row” | Every write point of a limited binding is one `limit` row: an initialiser, an assignment and a compound assignment in main are three. | `sh:0` |
+| `vf0147` | 147 | rule | “HYPOTHESIS” | The rule is a hypothesis on every later version of the binding, so a division by a limited divisor discharges, after a loop included. | untestable [z3] a discharge is z3's verdict |
+| `vf0150` | 150 | rule | “scalar family is inside it” | Every scalar family is inside the encoder's fragment: a limit over a flt64 subject is an encoded row. | `sh:0` |
+| `vf0151` | 151 | rule | “a string, a struct or an array is” | A struct subject is outside the encoder's fragment: its limit row is unencoded (0 in rows.txt). | `sh:0` |
+| `vf0151b` | 151 | rule | “or an array” | An array subject is outside the encoder's fragment: its limit row is unencoded (0 in rows.txt). | `sh:0` |
+| `vf0152` | 152 | rule | “is an `unencoded` row” | A string subject is outside the encoder's fragment: its limit row is unencoded (0 in rows.txt). | `sh:0` |
+| `vf0152b` | 152 | rule | “whose guard stays” | An unencoded row's guard stays: a string subject's rule is still checked at run time, and an empty string traps LimitViolated. | `trap:LimitViolated` |
+| `vf0153` | 153 | rule | “limited parameters is a `limit-subsume` row” | Every direct call of a sync callee with limited parameters is one limit-subsume row: two calls, two rows. | `sh:0` |
+| `vf0156` | 156 | rule | “ONE `llvm.assume` over the rule's range clauses” | A discharged write point emits one llvm.assume over the rule's range clauses and no check. | untestable [z3] needs a manifest with the row discharged |
+| `vf0158` | 158 | rule | “`limit-subsume` row lets the call name the callee's BODY” | A discharged limit-subsume row lets the call name the callee's body past its checked entry. | untestable [z3] needs a manifest with the row discharged |
+| `vf0159` | 159 | rule | “a sync function with a limited parameter is emitted as” | A sync function with a limited parameter is emitted as <symbol>.body plus its ordinary symbol, the checked entry. | `ir:^define [^\n]*@"npk\.vf0159\.limited\.body"\(` |
+| `vf0161` | 161 | rule | “function value, vtable slot and spawn names by construction” | A function value names the checked entry: calling a limited function through a function value with a refused argument traps LimitViolated. | `trap:LimitViolated` |
+| `vf0164` | 164 | rule | “It traps to `failsafe`, as” | A constraint violation traps to failsafe: a limited local driven out of its rule by a loop traps LimitViolated. | `trap:LimitViolated` |
+| `vf0174` | 174 | rule | “the solver proves the indices unequal and the borrows disjoint” | With indices under different rules, the solver proves two $$m claims disjoint. | untestable [z3] the disjoint row's discharge is z3's verdict |
+| `vf0177` | 177 | example | “```nitpick” | The example compiles and runs in the plain build: two $$m claims of one array at an even and an odd index, 7 + 9 = 16. | `run:0` |
+| `vf0193` | 193 | rule | “declaration-qualifier spelling the prototype text carried” | The declaration-qualifier borrow spelling `$$m int32:a = arr[i];` never existed: it is refused. | `refuse` |
+| `vf0195` | 195 | rule | “is a SHARED claim (many readers)” | $$i is a shared claim: two $$i of one local and a plain read of it may live together. | `run:0` |
+| `vf0196` | 196 | rule | “an EXCLUSIVE one (one writer, no other name)” | $$m is an exclusive claim: reading the local by its name while the $$m claim lives is a static conflict, NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0197` | 197 | rule | “plain address that claims nothing” | `@place` claims nothing: two `@` of one local and a read of it may live together. | `run:0` |
+| `vf0198` | 198 | rule | “counts as a write-capable access” | `@place` counts as a write-capable access: taking `@x` while a $$i claim of x lives is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0200` | 200 | rule | “conflicts with the call's other arguments” | A whole call argument's claim conflicts with the call's other arguments: `two($$m x, $$i x)` is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0202` | 202 | rule | “held by that local from its declaration to the end of the block” | A pointer local's claim ends with the block that declares it: after an inner block holding $$m x, x is read freely. | `run:0` |
+| `vf0203` | 203 | rule | “a `defer` body sees every claim of its enclosing blocks” | A defer body sees every claim of its enclosing blocks: writing x in a defer while $$i x is held is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0204` | 204 | rule | “Non-lexical lifetimes and two-phase borrows are decided OUT” | Non-lexical lifetimes are out: reading x after the last use of a $$m holder, in the same block, is still NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0207` | 207 | rule | “a nested expression” | A claim in a nested expression is NITPICK-BORROW-014. | `refuse:BORROW-014` |
+| `vf0210` | 210 | rule | “the fix is to spell `@` for an address that claims nothing” | The same nested position with `@` (an address that claims nothing) is accepted. | `run:0` |
+| `vf0212` | 212 | rule | “a field that differs” | Paths through different fields are disjoint: writing s.b while $$m s.a lives is accepted. | `run:0` |
+| `vf0212b` | 212 | rule | “two unequal numerals: disjoint” | Two unequal numeral indices are disjoint: writing a[1] while $$m a[0] lives is accepted. | `run:0` |
+| `vf0213` | 213 | rule | “statically overlapping” | Equal numeral indices (nothing computed) overlap statically: writing a[0] while $$m a[0] lives is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0214` | 214 | rule | “write-capable access under `$$i`” | A write to x while a $$i claim of x lives is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0215` | 215 | rule | “claim on storage a held `@` reaches” | A claim on storage a held `@` reaches is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0215b` | 215 | rule | “a write through a shared claim's” | A write through a shared ($$i) claim's holder is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0216` | 216 | rule | “a call's arguments among themselves” | A call's arguments conflict among themselves: `two($$i x, @x)` (a write-capable `@` beside a shared claim) is NITPICK-BORROW-013. | `refuse:BORROW-013` |
+| `vf0219` | 219 | rule | “held by the binding that holds the view from its declaration to the” | A view is a party on its root until the end of the block declaring its holder: after that block the root may be written. | `run:0` |
+| `vf0220` | 220 | rule | “or live for the call a view expression” | A view expression passed as a call argument is live for that call only: the root may be written after the call. | `run:0` |
+| `vf0222` | 222 | rule | “it lives is `NITPICK-BORROW-015`” | A write-capable access of viewed storage while the view lives is NITPICK-BORROW-015. | `refuse:BORROW-015` |
+| `vf0222b` | 222 | rule | “with no runtime guard for a computed pair” | A computed index against a live view has no run-time guard: the pair refuses (BORROW-015) even when the index would fall outside the view. | `refuse:BORROW-015` |
+| `vf0224` | 224 | rule | “the ESCAPE analysis's provenance” | What a binding views is the escape analysis's provenance at its fixpoint, with per-function summaries. | untestable [internal] the analysis's representation; its consequences are claimed at 219-236 |
+| `vf0231` | 231 | rule | “recorded declaration (a `dyn` method, a function value) is read with every” | A call with no recorded declaration is read with every bit set: handing `@d` to a function value while a view of d lives is refused (BORROW-015), where the direct call is accepted (vf0235). | `refuse:BORROW-015` |
+| `vf0233` | 233 | rule | “The path is what makes” | The path separates fields: a view of one string field does not freeze a write to a sibling int field. | `run:0` |
+| `vf0235` | 235 | rule | “the mutation summary what makes `@r` handed to a callee that writes” | `@d` handed to a callee that writes nothing through it conflicts with no view of d: accepted. | `run:0` |
+| `vf0236` | 236 | rule | “The prelude `List`'s” | A List's count, cap and items are its header: disjoint from a body view through an element's ptr, overlapping a slice of its storage. | untestable [internal] the List header's path rule is an analysis detail no single program here isolates |
+| `vf0239` | 239 | rule | “COMPUTED conflict is a RUNTIME GUARD in every build” | A computed conflict is a run-time guard in every build: two $$m claims of one array at computed indices that are equal at run time trap BorrowOverlap. | `trap:BorrowOverlap` |
+| `vf0244` | 244 | rule | “the obligation is the `disjoint` row” | The obligation of a computed claim pair is one `disjoint` row per site: §2.1's example has one. | `sh:0` |
+| `vf0248` | 248 | rule | “removes the compare (no `llvm.assume` over pointers)” | A discharged disjoint row removes the compare, with no llvm.assume over pointers. | untestable [z3] needs a manifest with the row discharged |
+| `vf0250` | 250 | rule | “the verified build carries no compare where the plain build” | In the example the rules make (not (= i j)) unsat, so the verified build carries no compare. | untestable [z3] z3's verdict and the verified build |
+| `vf0253` | 253 | rule | “accesses that spell the SAME ROOT” | Exclusivity is decided among accesses that spell the same root: a $$m claim through one pointer parameter and a write through another aliasing it are two roots, accepted. | `run:0` |
+| `vf0257` | 257 | rule | “a `fixed` binding has no address” | `@` of a fixed local is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0258` | 258 | rule | “`$$i`” | `$$i` of a fixed local is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0258b` | 258 | rule | “`$$m`” | `$$m` of a fixed local is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0258c` | 258 | rule | “the implicit pointer-receiver address” | A pointer-receiver call on a fixed binding (its implicit address) is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0259` | 259 | rule | “field included” | `@` of a fixed field of a plain struct is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0260` | 260 | rule | “through a `fixed` module binding” | `@` of a fixed module binding is refused, NITPICK-TYPE-071. | `refuse:TYPE-071` |
+| `vf0267` | 267 | rule | “A borrow may not be returned” | A borrow may not be returned: `pass @x` of a local is refused. | `refuse` |
+| `vf0267b` | 267 | rule | “stored into anything outliving the frame” | A borrow may not be stored into anything outliving the frame: storing `@x` of a local into the caller's struct is refused. | `refuse` |
+| `vf0268` | 268 | rule | “an `await` point” | A borrow may not be carried across an await point: a pointer local holding `@x` used after an await is refused. | `refuse` |
+| `vf0276` | 276 | example | “```nitpick” | The example's r_small_positive refines r_positive: a value that meets `$ < 100` but not the refinement's `$ > 0` traps LimitViolated. | `trap:LimitViolated` |
+| `vf0279` | 279 | rule | “r_small_positive requires: $ > 0i32 AND $ < 100i32” | r_small_positive requires its own clause too: 100 traps LimitViolated. | `trap:LimitViolated` |
+| `vf0282` | 282 | rule | “The Z3 solver can prove that one Rules block subsumes another” | The solver proves one Rules block implies another, enabling narrowing at call sites without checks. | untestable [z3] a limit-subsume discharge is z3's verdict |
+| `vf0285` | 285 | rule | “refining a `Rules<int32>` is `NITPICK-TYPE-059`” | A Rules<int64> refining a Rules<int32> is NITPICK-TYPE-059. | `refuse:TYPE-059` |
+| `vf0287` | 287 | rule | “`Rules` block that refines itself, directly or through a chain, is refused” | A Rules block that refines itself directly is refused at resolve, NITPICK-RESOLVE-006. | `refuse:RESOLVE-006` |
+| `vf0287b` | 287 | rule | “through a chain” | A Rules block that refines itself through a chain is refused at resolve, NITPICK-RESOLVE-006. | `refuse:RESOLVE-006` |
+| `vf0290` | 290 | rule | “the conjunction is `enc_rule`” | The conjunction is enc_rule; the implication is a limit-subsume row decided by z3. | untestable [internal] an encoder function name; the row's verdict is z3's |
+| `vf0299` | 299 | rule | “`sealed limit<Len> int64:count;`” | A struct field may carry limit<R> after its qualifiers and before its type (`sealed limit<Len> int64:count;`): it compiles, and a write the rule admits runs. | `run:0` |
+| `vf0301` | 301 | rule | “Its subject is the field's type by identity (TYPE-059)” | A field rule's subject must be the field's type by identity: a Rules<int32> on an int64 field is TYPE-059. | `refuse:TYPE-059` |
+| `vf0302` | 302 | rule | “struct literal's value for the field” | A struct literal's value for a limited field is a write point, checked in every build: a refused value traps LimitViolated. | `trap:LimitViolated` |
+| `vf0302b` | 302 | rule | “an assignment through any path (`s.f = v`” | An assignment `s.f = v` to a limited field is a write point: a refused value traps LimitViolated. | `trap:LimitViolated` |
+| `vf0303` | 303 | rule | “`p.f = v` through a pointer” | An assignment through a pointer to a limited field is a write point: a refused value traps LimitViolated. | `trap:LimitViolated` |
+| `vf0303b` | 303 | rule | “and a compound assignment” | A compound assignment to a limited field is a write point: leaving the rule traps LimitViolated. | `trap:LimitViolated` |
+| `vf0306` | 306 | rule | “limited binding is two checks at two keys” | A write to a limited field of a limited binding is two limit rows (the field's and the root's): adding the statement `t.n = v` adds two limit rows to main. | `sh:0` |
+| `vf0306b` | 306 | rule | “Every read of” | Every read of a limited field is a fact: the rule over the read's term is a hypothesis for later rows. | untestable [z3] a hypothesis shows only through z3's verdicts |
+| `vf0309` | 309 | rule | “The rule must hold of the field's vacant” | A field rule that holds of the vacant value (0 for `$ >= 0`) is accepted. | `run:0` |
+| `vf0311` | 311 | rule | “TYPE-077 otherwise” | A field rule that the vacant value fails (0 for `$ > 0`) is NITPICK-TYPE-077. | `refuse:TYPE-077` |
+| `vf0311b` | 311 | rule | “TYPE-077” | A bool field whose rule refuses the vacant `false` is NITPICK-TYPE-077. | `refuse:TYPE-077` |
+| `vf0311c` | 311 | rule | “a rule the folder cannot decide there is refused too” | A field rule the constant folder cannot decide at the declaration (a call) is refused. | `refuse` |
+| `vf0312` | 312 | rule | “the subject is a plain integer, a `bool` or a `char`” | A field rule's subject is a plain integer, a bool or a char: a flt64 field with a rule is refused, even one the vacant 0.0 would satisfy. | `refuse` |
+| `vf0312b` | 312 | rule | “A limited field has no” | `@s.f` of a limited field is refused, TYPE-063. | `refuse:TYPE-063` |
+| `vf0313b` | 313 | rule | “through a pointer to its struct as well” | `@` of a limited field reached through a pointer to its struct is refused, TYPE-063. | `refuse:TYPE-063` |
+| `vf0313c` | 313 | rule | “`$$m`/`$$i`” | `$$m` of a limited field is refused, TYPE-063. | `refuse:TYPE-063` |
+| `vf0314` | 314 | rule | “of it and a pointer-receiver call on it refuse” | `$$i` of a limited field is refused, TYPE-063. | `refuse:TYPE-063` |
+| `vf0314b` | 314 | rule | “pointer-receiver call on it” | A pointer-receiver call on a limited field is refused, TYPE-063. | `refuse:TYPE-063` |
+| `vf0315` | 315 | rule | “REACH arms `LimitViolated` at the writes” | The reach analysis arms LimitViolated at a limited field's writes: a program writing one, whose failsafe names every arm but LimitViolated, is refused. | `refuse` |
+| `vf0316b` | 316 | rule | “The prelude's `List` carries” | The prelude's List carries the ListLen rule on count and cap. | untestable [internal] no program may write a List's header, so the rule is visible only as the prelude's own rows and facts |
+| `vf0317` | 317 | rule | “a name D-239 reserves” | ListLen is a name D-239 reserves: a user Rules block named ListLen is refused. | `refuse` |
+| `vf0318` | 318 | rule | “built-in lengths of `string`, `cstring`, a slice and a `buffer` carry the same” | The built-in lengths carry the [0, 2^47] bound as a fact at every read. | untestable [z3] a fact shows only through z3's verdicts |
+| `vf0321` | 321 | rule | “program may write a header” | No program may write a header: assigning a string's `.len` is refused. | `refuse` |
+| `vf0330` | 330 | example | “```nitpick” | The example's divide (requires b != 0, ensures result > 0, passes 10) compiles, and divide(10, 2) returns 10. | `run:0` |
+| `vf0339` | 339 | rule | “Nitpick automatically enforces these contracts at runtime” | Without the static verifier contracts are enforced at run time: divide(10, 0) traps RequiresViolated. | `trap:RequiresViolated` |
+| `vf0339b` | 339 | rule | “the compiler translates these contracts into Z3 assertions” | With verification the contracts are translated into Z3 assertions and proven. | untestable [z3] the verified build; `--verify-contracts` is struck (§5) |
+| `vf0342` | 342 | rule | “Every proposition” | A requires clause must be a bool: an int32 clause is NITPICK-TYPE-007. | `refuse:TYPE-007` |
+| `vf0342b` | 342 | rule | “`ensures`” | An ensures clause must be a bool: `ensures result` over an int32 is NITPICK-TYPE-007. | `refuse:TYPE-007` |
+| `vf0342c` | 342 | rule | “each `invariant` conjunct” | An invariant conjunct must be a bool: `invariant t` over an int32 is NITPICK-TYPE-007. | `refuse:TYPE-007` |
+| `vf0343` | 343 | rule | “`prove`, `assert_static` — is a `bool`” | A prove proposition must be a bool: `prove(a)` over an int32 is NITPICK-TYPE-007. | `refuse:TYPE-007` |
+| `vf0343b` | 343 | rule | “`assert_static`” | An assert_static proposition must be a bool: `assert_static(1i32)` is NITPICK-TYPE-007. | `refuse:TYPE-007` |
+| `vf0344` | 344 | rule | “the SUCCESS value, typed `T`” | `result` is typed T: comparing an int32 function's result with an int64 is refused. | `refuse` |
+| `vf0344b` | 344 | rule | “typed `T`, legal in” | `result` is legal in ensures alone: in a function body it is refused. | `refuse` |
+| `vf0345` | 345 | rule | “`ensures` alone” | `result` is legal in ensures alone: in a requires it is refused. | `refuse` |
+| `vf0345c` | 345 | rule | “so no binding can shadow it” | `result` is a keyword: a local named result is refused. | `refuse` |
+| `vf0346` | 346 | rule | “the operand's value at the function's ENTRY” | `old(n)` is n's value at the function's entry: after the body adds 5 to n, `result == old(n) + 1` holds of `n - 4`. | `run:0` |
+| `vf0346b` | 346 | rule | “legal in `ensures`” | `old(...)` is legal in ensures and invariant only: in a requires it is refused. | `refuse` |
+| `vf0347` | 347 | rule | “never nested” | `old` is never nested: `old(old(a))` is refused. | `refuse` |
+| `vf0348` | 348 | rule | “`result`, and only of a COPYABLE value” | `old` is never of result: `old(result)` is refused. | `refuse` |
+| `vf0348b` | 348 | rule | “neither an owner (a `string`, a” | `old` is only of a copyable value: `old(s)` of a string (an owner) is refused. | `refuse` |
+| `vf0349` | 349 | rule | “nor an address (a pointer, a slice)” | `old` is only of a copyable value: `old(s)` of a slice (an address) is refused. | `refuse` |
+| `vf0350` | 350 | rule | “`main` and `failsafe` carry no contract (D-244)” | main carries no contract: a requires on main is refused. | `refuse` |
+| `vf0350b` | 350 | rule | “`failsafe` carry no contract” | failsafe carries no contract: an ensures on failsafe is refused. | `refuse` |
+| `vf0351` | 351 | rule | “fails` function may (D-241)” | A never fails function may carry contracts: one with a requires and an ensures compiles and runs. | `run:0` |
+| `vf0354` | 354 | rule | “no `await`” | A contract may not contain await: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0355` | 355 | rule | “`move`, no” | A contract may not contain move: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0355b` | 355 | rule | “`relay`” | A contract may not contain relay: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0355c` | 355 | rule | “`?!`” | A contract may not contain `?!`: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0355d` | 355 | rule | “`?\|`” | A contract may not contain `?\|`: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0355e` | 355 | rule | “no `pick` expression” | A contract may not contain a pick expression: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0358` | 358 | rule | “a user function spelled `raw f(” | A contract may call a named pure never-fails user function spelled `raw f(...)`: accepted, and the call runs. | `run:0` |
+| `vf0359` | 359 | rule | “that is **`pure`**” | A contract's callee must be pure: a never-fails function that is not pure is NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0359b` | 359 | rule | “a function value, a field” | A contract may not call a function value: NITPICK-TYPE-060. | `refuse:TYPE-060` |
+| `vf0362` | 362 | rule | “`is_err(x)` is a predicate and passes” | `is_err(x)` passes in a contract: a requires over `!(is_err(t))` compiles and a call with a non-ERR value runs. | `run:0` |
+| `vf0365` | 365 | rule | “a pure function may `fail`” | pure is orthogonal to never fails: a pure function may fail, and its failure reaches the caller. | `run:0` |
+| `vf0367` | 367 | rule | “no `async`/`thread`” | A pure function may not be async: NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0367b` | 367 | rule | “no `move` parameter” | A pure function may not take a move parameter: NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0367c` | 367 | rule | “no callee” | A pure function may not call a function that is not pure: NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0370` | 370 | rule | “the clock” | A builtin that touches the clock is an effect: `mono_now()` in a pure function is NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0372` | 372 | rule | “no `wild`/`wildx` storage” | A pure function may not hold wild storage: NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0372b` | 372 | rule | “no owning local” | A pure function may not have an owning local: a string local is NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0373` | 373 | rule | “store that reaches memory the caller can see” | A pure function may not store to memory the caller can see: a write through a pointer parameter is NITPICK-TYPE-061. | `refuse:TYPE-061` |
+| `vf0374` | 374 | rule | “impl keeps its trait method's `pure`” | An impl keeps its trait method's pure: an impl method dropping it is refused. | `refuse` |
+| `vf0374b` | 374 | rule | “Purity never rides a function type” | Purity never rides a function type: a pure function calling a never-fails function value is refused. | `refuse` |
+| `vf0377` | 377 | rule | “A contract violation is a TRAP” | A violated requires is a trap: RequiresViolated reaches failsafe. | `trap:RequiresViolated` |
+| `vf0378` | 378 | rule | “`EnsuresViolated`” | A violated ensures is a trap: EnsuresViolated reaches failsafe. | `trap:EnsuresViolated` |
+| `vf0378b` | 378 | rule | “`InvariantViolated`” | A violated loop invariant is a trap: InvariantViolated reaches failsafe. | `trap:InvariantViolated` |
+| `vf0380` | 380 | rule | “A `requires` is checked at the CALLEE's” | A requires is checked at the callee's entry, every clause: with two requires clauses, violating the second traps RequiresViolated. | `trap:RequiresViolated` |
+| `vf0381` | 381 | rule | “`<symbol>.req`” | A requires is checked in a generated predicate <symbol>.req. | `ir:^define [^\n]*@"npk\.vf0381\.half\.req"\(` |
+| `vf0384` | 384 | rule | “therefore splits into `<symbol>.body`” | A sync function with a requires splits into <symbol>.body and its ordinary symbol (the checked entry). | `ir:^define [^\n]*@"npk\.vf0384\.half\.body"\(` |
+| `vf0385` | 385 | rule | “or at state 0 of a coroutine” | A coroutine's requires is checked at state 0: awaiting it with a violating argument traps RequiresViolated. | `trap:RequiresViolated` |
+| `vf0387` | 387 | rule | “indirect” | Every caller is covered, indirect too: calling a requires function through a function value with a violating argument traps RequiresViolated. | `trap:RequiresViolated` |
+| `vf0387b` | 387 | rule | “through `dyn`” | Every caller is covered through dyn: a trait call with a violating argument traps RequiresViolated. | `trap:RequiresViolated` |
+| `vf0388` | 388 | rule | “every return seam” | An ensures is checked at every return seam: the second of two `pass` points violating it traps EnsuresViolated. | `trap:EnsuresViolated` |
+| `vf0388b` | 388 | rule | “and `return Result{” | An ensures is checked at a `return Result{...}` whose error field is 0: a violating value traps EnsuresViolated. | `trap:EnsuresViolated` |
+| `vf0389` | 389 | rule | “is 0), before the value is stored” | An ensures is checked only on success (error field 0): a failing path is not checked, and the caller's `?\|` default is taken. | `run:0` |
+| `vf0390` | 390 | rule | “`old(e)` a snapshot taken once at the body's start” | In a coroutine `old(v)` is a snapshot taken at the body's start: after the body adds 5, `result == old(v) + 1` holds of `v - 4`. | `run:0` |
+| `vf0393` | 393 | rule | “a literal that is not positive refused by the checker” | failsafe's postcondition: an `exit` with a literal that is not positive is refused, REACH-004. | `refuse:REACH-004` |
+| `vf0395` | 395 | rule | “re-enters it and ends the process at 70” | A computed non-positive failsafe exit is guarded: EnsuresViolated inside failsafe re-enters it and ends the process at 70. | `run:70` |
+| `vf0397` | 397 | rule | “One `requires` row per CALL with a recorded callee” | One requires row per call with a recorded callee and one per function entry: two direct calls of a requires function make three rows. | `sh:0` |
+| `vf0398` | 398 | rule | “`bypass` at a direct sync” | A direct sync call's requires row has the role `bypass`. | `sh:0` |
+| `vf0400` | 400 | rule | “`held` at an `await` or through a `dyn`” | A requires row through dyn has the role `held`. | `sh:0` |
+| `vf0405` | 405 | rule | “One `ensures` row per return point” | One ensures row per return point: a function with two `pass` points has two ensures rows. | `sh:0` |
+| `vf0407` | 407 | rule | “A callee's `ensures` is KNOWLEDGE at every unwrap” | A callee's ensures is knowledge at every unwrap that continues only on success, never at `?\|`. | untestable [z3] knowledge shows only through z3's verdicts |
+| `vf0410` | 410 | rule | “UNINTERPRETED FUNCTION” | A pure never-fails callee is an uninterpreted function in the obligations. | untestable [z3] the encoding shows only through z3's verdicts |
+| `vf0413` | 413 | rule | “CONFORMANCE is two rows per impl method” | Conformance is two rows per impl method whose trait method carries a contract (role `conform`, no guard). | `sh:0` |
+| `vf0417` | 417 | rule | “never a refusal: the impl's own entry traps the argument the trait admits” | An impl that strengthens its trait's requires is not refused; through the trait, an argument the trait admits and the impl does not traps RequiresViolated at the impl's entry. | `trap:RequiresViolated` |
+| `vf0418` | 418 | rule | “A guard inside a clause (a division in a `requires`)” | A guard inside a requires clause is the function's own site in the predicate: dividing by a zero argument there traps DivByZero. | `trap:DivByZero` |
+| `vf0422` | 422 | rule | “it has a row in every context the head's one check runs in” | A guard inside an invariant has a row per context of the head's check (entry, back edge, each continue): a division in an invariant of a loop with one continue has three div-zero rows. | `sh:0` |
+| `vf0429` | 429 | rule | “PROGRAM-INVALID state, not a value” | A contract violation is a trap, never a Result: a violated requires traps RequiresViolated even when the caller offers a `?\|` default. | `trap:RequiresViolated` |
+| `vf0437` | 437 | rule | “so it is never `never fails`” | A function with a requires is never `never fails`: declaring one is refused. | `refuse` |
+| `vf0437b` | 437 | rule | “`raw` does not apply here” | `raw` does not apply to a call of a function with a requires (not never fails): it is refused. | `refuse` |
+| `vf0439` | 439 | example | “```nitpick” | The example compiles and runs with §3's divide: `divide(10i32, 2i32) ?! 7tbb32` unwraps 10 and main exits 0. | `run:0` |
+| `vf0453` | 453 | rule | “support an `invariant` clause” | A counted `loop` supports an invariant, checked: an accumulator leaving it traps InvariantViolated. | `trap:InvariantViolated` |
+| `vf0453b` | 453 | rule | “`while`” | A `while` supports an invariant, checked: violating it traps InvariantViolated. | `trap:InvariantViolated` |
+| `vf0453c` | 453 | rule | “`till`” | A `till` supports an invariant, checked: violating it traps InvariantViolated. | `trap:InvariantViolated` |
+| `vf0453d` | 453 | rule | “`when`” | A `when` supports an invariant, checked: violating it traps InvariantViolated. | `trap:InvariantViolated` |
+| `vf0453e` | 453 | rule | “BEFORE the invariant” | A while/when states `decreases E` or `unbounded` before the invariant: the invariant first is refused. | `refuse` |
+| `vf0455` | 455 | example | “```nitpick” | The example sum_range (requires n > 0, ensures result >= 0, a while with decreases and a two-conjunct invariant) compiles, and sum_range(3) is 3. | `run:0` |
+| `vf0470` | 470 | rule | “the Z3 solver verifies the inductive step” | The solver verifies the invariant's inductive step. | untestable [z3] a verdict; `--verify-contracts` is struck (§5) |
+| `vf0473` | 473 | rule | “a counted loop's invariant may name `$`” | A counted loop's invariant may name `$` (the counter): `invariant $ < 3` traps InvariantViolated when the counter reaches 3. | `trap:InvariantViolated` |
+| `vf0474` | 474 | rule | “`old(expr)` — the value at the FUNCTION's entry” | An invariant's `old(n)` is n's value at the function's entry: with n lowered by 3 before the loop, `i <= old(n)` holds for i up to 4. | `run:0` |
+| `vf0477` | 477 | rule | “CHECKED AT THE LOOP HEAD, before” | The invariant is checked at the loop head before the condition: an invariant false at entry traps even when the condition is false and the body never runs. | `trap:InvariantViolated` |
+| `vf0478` | 478 | rule | “at entry and after every iteration” | The invariant is checked after every iteration, the last included (the exit is a head visit): an invariant only the final iteration breaks traps. | `trap:InvariantViolated` |
+| `vf0479` | 479 | rule | “for every loop form” | The invariant is checked for every loop form, a range for included: violating it traps InvariantViolated. | `trap:InvariantViolated` |
+| `vf0481` | 481 | rule | “the ENTRY row at the loop statement” | An invariant's rows: the entry row, the preservation row and one per continue: a while with one continue has three invariant rows. | `sh:0` |
+| `vf0484` | 484 | rule | “Inside the body the invariant and” | Inside the body the invariant and the condition are hypotheses; after a loop nothing breaks out of, the invariant and the negated condition. | untestable [z3] hypotheses show only through z3's verdicts |
+| `vf0492` | 492 | rule | “(descending, `limit < $ <= start`)” | A descending counted loop's `$` lies in limit < $ <= start: loop(5, 0, 1) visits 5, 4, 3, 2, 1. | `run:0` |
+| `vf0496` | 496 | rule | “its bounds captured at entry” | A range for's bounds are captured at entry: raising the bound's variable inside the body does not add iterations. | `run:0` |
+| `vf0499` | 499 | rule | “a name a bound mentions moves nothing” | A counted loop's bounds are captured as the emitter's slots hold them: a body assigning the bound's variable moves nothing. | `run:0` |
+| `vf0500` | 500 | rule | “the compare at the loop's entry is its guard” | A computed step's positivity is guarded at the loop's entry: a zero step at run time traps BadStep. | `trap:BadStep` |
+| `vf0500b` | 500 | rule | “`loop-step` row (S-46, D-270)” | A computed step is one `loop-step` row; a literal step has none. | `sh:0` |
+| `vf0501` | 501 | rule | “a literal step is the checker's (TYPE-068, D-022)” | A literal step that is not positive is the checker's: a zero literal step is TYPE-068. | `refuse:TYPE-068` |
+| `vf0502` | 502 | rule | “An invariant naming `$` or the binding is decided on the” | An invariant naming `$` or the for binding is decided on the merits. | untestable [z3] a verdict |
+| `vf0509` | 509 | example | “```nitpick” | Both shapes compile and run: a while with `decreases n - i` then its invariant, and `while (true) unbounded` (left here by break). | `run:0` |
+| `vf0514` | 514 | rule | “is a plain integer (`intN`/`uintN`, TYPE-073)” | A loop measure is a plain integer: a flt64 measure is TYPE-073. | `refuse:TYPE-073` |
+| `vf0514b` | 514 | rule | “TYPE-073” | A loop measure is a plain integer: a bool measure is TYPE-073. | `refuse:TYPE-073` |
+| `vf0515` | 515 | rule | “a contract expression (§3's admission, TYPE-060)” | A measure is a contract expression: calling a never-fails function that is not pure in it is TYPE-060. | `refuse:TYPE-060` |
+| `vf0516` | 516 | rule | “neither `result` nor `old(” | `old(...)` does not exist in a measure: refused. | `refuse` |
+| `vf0516b` | 516 | rule | “`result`” | `result` does not exist in a measure: refused. | `refuse` |
+| `vf0517` | 517 | rule | “BEFORE `invariant`, once” | The clause comes before invariant: `invariant ... decreases ...` is TYPE-072. | `refuse:TYPE-072` |
+| `vf0517b` | 517 | rule | “once” | The clause comes once: two `decreases` are TYPE-072. | `refuse:TYPE-072` |
+| `vf0517c` | 517 | rule | “`unbounded` and `decreases` never both” | `unbounded` and `decreases` never both: TYPE-072. | `refuse:TYPE-072` |
+| `vf0519` | 519 | rule | “each of those shapes is TYPE-072 by name” | A `for` takes neither clause: `for ... decreases` is TYPE-072. | `refuse:TYPE-072` |
+| `vf0519b` | 519 | rule | “TYPE-072” | A `loop` takes neither clause: `loop ... unbounded` is TYPE-072. | `refuse:TYPE-072` |
+| `vf0519c` | 519 | rule | “by name” | A `till` takes neither clause: `till ... decreases` is TYPE-072. | `refuse:TYPE-072` |
+| `vf0520` | 520 | rule | “`while`/`when` with NO clause” | A while with no clause is TYPE-072. | `refuse:TYPE-072` |
+| `vf0520b` | 520 | rule | “NO clause” | A when with no clause is TYPE-072. | `refuse:TYPE-072` |
+| `vf0522` | 522 | rule | “at the top of the body, each time the” | The measure is checked at the top of the body each time the condition holds: a negative measure of a loop whose condition is false at entry is never checked. | `run:0` |
+| `vf0524` | 524 | rule | “zero traps `DecreasesViolated` (4119)” | A signed measure below zero traps DecreasesViolated at the first visit. | `trap:DecreasesViolated` |
+| `vf0525` | 525 | rule | “not below the previous visit's traps the same” | From the second visit on, a measure not below the previous visit's traps DecreasesViolated. | `trap:DecreasesViolated` |
+| `vf0525b` | 525 | rule | “never a” | Never a sentinel: a signed measure starting at INT32_MAX is not mistaken for the previous visit's. | `run:0` |
+| `vf0526` | 526 | rule | “sentinel (DEF-69)” | Two slots per loop, never a sentinel: an unsigned measure starting at UINT32_MAX is not mistaken for the previous visit's. | `run:0` |
+| `vf0527` | 527 | rule | “frame slots at roles 42 and 43” | The previous measure and the first-visit flag are allocas in a sync body and frame slots 42 and 43 in a coroutine. | untestable [internal] the slots' placement; their behaviour is vf0525/vf0526 |
+| `vf0528` | 528 | rule | “`continue` re-enters the” | `continue` re-enters the head and is checked: a continue that leaves the measure unchanged traps DecreasesViolated at the next visit. | `trap:DecreasesViolated` |
+| `vf0529` | 529 | rule | “`break` and `exit` leave without one” | `break` leaves without a check: a body that grows the measure and breaks runs clean. | `run:0` |
+| `vf0530` | 530 | rule | “emits nothing.” | `unbounded` emits nothing. | untestable [unobservable] an unbounded loop has no measure to check and no clause-less twin to compare against (a while with no clause is TYPE-072) |
+| `vf0531` | 531 | rule | “the ENTRY row at the loop statement, `E >= 0`” | terminate rows: an entry row (signed measures only), a preservation row, and one per continue: a signed loop has two, an unsigned one one, a signed one with a continue three. | `sh:0` |
+| `vf0537` | 537 | rule | “compares become one `llvm.assume` each only when EVERY row is discharged” | The check's compares become assumes only when every terminate row is discharged. | untestable [z3] needs a manifest with the rows discharged |
+| `vf0545` | 545 | rule | “What discharges” | A counter's `bound - v` and a halving n under n > 0 discharge. | untestable [z3] verdicts |
+| `vf0548` | 548 | rule | “`List`'s `count` as the bound has no length term” | A List's count as a loop's bound has no length term: the terminate rows are unencoded (0 in rows.txt). | `sh:0` |
+| `vf0551` | 551 | rule | “function's `decreases E` is a contract of kind `decreases`” | A function's decreases is a contract checked at recursive calls: fact(5) with `decreases n` runs and returns 120. | `run:0` |
+| `vf0552` | 552 | rule | “optional (D-304 (5))” | A function's measure is optional: a self-recursion without one compiles and runs. | `run:0` |
+| `vf0552b` | 552 | rule | “and checked at every call inside the” | The measure is checked at every call inside the recursive group: is_even(n) calling is_odd(n) (no decrease across the pair) traps DecreasesViolated. | `trap:DecreasesViolated` |
+| `vf0554` | 554 | rule | “Tarjan's components” | The recursive groups are Tarjan's components over the checker's call edges, one predicate for emitter and encoder. | untestable [internal] the pass's algorithm; its outcomes are vf0552b/vf0557/vf0562/vf0564 |
+| `vf0557` | 557 | rule | “a call through a `dyn` receiver or a function value is” | A call through a function value is no edge: a function whose only recursion is through a function value has no cycle, so its decreases is TYPE-075. | `refuse:TYPE-075` |
+| `vf0562` | 562 | rule | “TYPE-074: every function of a cyclic” | Every function of a cyclic group states decreases if any member does: a pair with one measured member is TYPE-074. | `refuse:TYPE-074` |
+| `vf0564` | 564 | rule | “TYPE-075: a `decreases` on a function whose group has no cycle checks” | A decreases on a function whose group has no cycle is TYPE-075. | `refuse:TYPE-075` |
+| `vf0565` | 565 | rule | “TYPE-073, for functions: the measure is at most 64 bits wide” | A function's measure is at most 64 bits wide: an int128 measure is TYPE-073. | `refuse:TYPE-073` |
+| `vf0568` | 568 | rule | “compares only with itself and keeps any width” | A loop's measure keeps any width: an int128 loop measure is accepted and checked. | `run:0` |
+| `vf0569` | 569 | rule | “a generated predicate `<sym>.measure(params)” | The check is a generated predicate <sym>.measure(params) returning i128. | `ir:^define [^\n]*\bi128 @"npk\.vf0569\.fact\.measure"\(` |
+| `vf0572` | 572 | rule | “the body's ENTRY stores” | The body's entry stores m0 after the entry checks and before the old snapshots. | untestable [internal] an ordering inside the emitted entry that no program here can isolate |
+| `vf0577` | 577 | rule | “then `m0 >= 0`” | At a recursive call `m0 >= 0` is checked: step(-1), whose measure is negative at entry, traps DecreasesViolated at its recursive call. | `trap:DecreasesViolated` |
+| `vf0578` | 578 | rule | “and `m1 < m0` as one verdict with ONE trap `DecreasesViolated`” | At a recursive call `m1 < m0` is checked: a self-call with an unchanged argument traps DecreasesViolated. | `trap:DecreasesViolated` |
+| `vf0579` | 579 | rule | “predicate holds no snapshot” | A recursive call inside a requires clause or a measure is not checked. | untestable [internal] a recursive call inside a generated predicate recurses through the predicate itself; no program here isolates the missing check from that recursion |
+| `vf0580` | 580 | rule | “`unbounded` is a” | `unbounded` is a loop's word only: on a function it is refused. | `refuse` |
+| `vf0582` | 582 | rule | “the `terminate` CALL row” | A recursive call is one terminate row of the caller's, role `guard`. | `sh:0` |
+| `vf0588` | 588 | rule | “The measure's own guards (an overflow inside `E`) have ONE row each” | The measure's own guards have one row each at the function's entry, under the parameters' range axioms alone. | untestable [z3] which hypotheses a row carries shows only through verdicts |
+| `vf0595` | 595 | rule | “row (D-305” | One stack-depth row per cyclic group, `d` (derived) in rows.txt: a self-recursion and a mutual pair make two. | `sh:0` |
+| `vf0598` | 598 | rule | “its verdict is DERIVED by both runners” | The stack-depth verdict is derived by the runners from the group's terminate call rows. | untestable [z3] the runners' derivation needs z3's verdicts |
+| `vf0605` | 605 | rule | “It elides nothing” | The stack-depth row elides nothing: the stack check stays in every build. | untestable [z3] a statement about the verified build's elision |
+| `vf0606` | 606 | rule | “the compiler's own groups state no measure” | The compiler's own recursive groups state no measure, so their rows are open. | untestable [tree] about the compiler's own source |
+| `vf0607` | 607 | rule | “`index.txt` carries per file the function's cyclic group” | index.txt carries per file the function's cyclic group (0 for none) and whether it states a measure. | `sh:0` |
+| `vf0610` | 610 | rule | “`fact(n) decreases n` calling `fact(n - 1)`” | fact's call row discharges on the path condition; step under n != 0 leaves m0 >= 0 open. | untestable [z3] verdicts |
+| `vf0614` | 614 | rule | “every `while` and `when` of the” | Every while and when of the compiler's tree (977 loops) states its clause. | untestable [tree] about the compiler's own tree |
+| `vf0618` | 618 | rule | “PROVE monotone (392)” | The sweep tool wrote 392 loops' measures; the others were read into decreases_read.txt. | untestable [tree] about the compiler's own tree and tools |
+| `vf0634` | 634 | rule | “call a `pure never fails` function (TYPE-060)” | A measure may call a pure never-fails function: accepted, and the loop runs. | `run:0` |
+| `vf0638` | 638 | rule | “a measure that does not shrink” | The compile-time evaluator checks a measure of a loop it runs: one that does not shrink is a counterexample, TYPE-069. | `refuse:TYPE-069` |
+| `vf0638b` | 638 | rule | “or a signed one below zero” | The compile-time evaluator refuses a signed measure below zero, TYPE-069. | `refuse:TYPE-069` |
+| `vf0639` | 639 | rule | “Every `failsafe` in the tree” | Every failsafe in the compiler's tree names DecreasesViolated. | untestable [tree] about the compiler's own tree |
+| `vf0644` | 644 | rule | “1,183 `terminate` row sites in the compiler's own build” | The measurement over the compiler's own build: 1,183 terminate row sites, 684 discharged, 499 open. | untestable [tree] a measurement of the compiler's own build |
+| `vf0667` | 667 | rule | “116, all `open`” | The compiler's stack-depth rows: 116, all open. | untestable [tree] a measurement of the compiler's own build |
+| `vf0674` | 674 | rule | “the by-value aggregate carries” | Since D-317 a by-value aggregate carries an identity and its fields are functions of it. | untestable [z3] the encoder's aggregate terms show only through verdicts |
+| `vf0676` | 676 | rule | “1,188 `terminate` row sites, 753 discharged, 435 open” | After D-317: 1,188 terminate row sites, 753 discharged, 435 open. | untestable [tree] a measurement of the compiler's own build |
+| `vf0695` | 695 | rule | “None of the flags below exists in `npkc`” | None of the tabulated verification flags exists in npkc: each is refused. | `sh:0` |
+| `vf0696` | 696 | rule | “PROJECT's, in `nitpick.toml`'s `[verify]`” | Verification configuration is the project's, in nitpick.toml's [verify], read by every invocation. | untestable [tool] needs a package tree and `npkg verify` |
+| `vf0702` | 702 | rule | “a knob that would re-enable it is refused” | The wall-clock timeout is disabled; a [verify] knob that would re-enable it is refused by name. | untestable [tool] a package tree under `npkg`; the knob's name is not given |
+| `vf0706` | 706 | rule | “`--prove-report` and `--debug-z3` are `npkg verify --explain`” | The report and the SMT dump are `npkg verify --explain` and build/verify/obl/. | untestable [z3] needs `npkg verify` with the pinned z3 |
+| `vf0714` | 714 | row | “`--verify`” | The flag --verify is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0715` | 715 | row | “`--verify-contracts`” | The flag --verify-contracts is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0716` | 716 | row | “`--verify-overflow`” | The flag --verify-overflow is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0717` | 717 | row | “`--verify-concurrency`” | The flag --verify-concurrency is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0718` | 718 | row | “`--verify-memory`” | The flag --verify-memory is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0719` | 719 | row | “`--verify-level=N`” | The flag --verify-level=2 is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0720` | 720 | row | “`--smt-opt`” | The flag --smt-opt is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0721` | 721 | row | “`--smt-manifest=<path>`” | The flag --smt-manifest=nitpick.obligations is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0722` | 722 | row | “`--smt-timeout=N`” | The flag --smt-timeout=5000 is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0723` | 723 | row | “`--prove-report`” | The flag --prove-report is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0724` | 724 | row | “`--debug-z3`” | The flag --debug-z3 is struck (the banner at 694-710): npkc does not accept it. | `sh:0` |
+| `vf0732` | 732 | row | “\| `0` \|” | Verification level 0 is struck with `--verify-level` (694-710): npkc does not accept `--verify-level=0`. | `sh:0` |
+| `vf0733` | 733 | row | “\| `1` \|” | Verification level 1 is struck with `--verify-level` (694-710): npkc does not accept `--verify-level=1`. | `sh:0` |
+| `vf0734` | 734 | row | “\| `2` \|” | Verification level 2 is struck with `--verify-level` (694-710): npkc does not accept `--verify-level=2`. | `sh:0` |
+| `vf0735` | 735 | row | “\| `3` \|” | Verification level 3 is struck with `--verify-level` (694-710): npkc does not accept `--verify-level=3`. | `sh:0` |
+| `vf0746` | 746 | rule | “Invoked during compilation (`npkc --verify`)” | Z3 is invoked during compilation by `npkc --verify`. | untestable [z3] needs z3; and §5 (694-710) says the flag does not exist in npkc |
+| `vf0749` | 749 | rule | “Covers: `limit<Rules>` constraints, function contracts, loop invariants,” | The obligations cover limit, contracts, invariants, prove/assert_static, overflow and index disjointness: one program using each yields a row of each kind. | `sh:0` |
+| `vf0750` | 750 | rule | “memory safety,” | Z3 covers memory safety and concurrency. | untestable [vague] no obligation kind of §7b's catalogue names memory safety or concurrency; the sentence names no checkable row |
+| `vf0755` | 755 | rule | “Used offline during language development, not during compilation” | The K framework proves the language's metatheory offline, not during compilation. | untestable [tree] about the project's development process |
+| `vf0760` | 760 | rule | “`k-semantics/nitpick.k`” | The operational semantics live in k-semantics/nitpick.k with proof claims in k-semantics/proofs/. | untestable [tree] about the repository's files |
+| `vf0788` | 788 | rule | “moves a page RW” | wildx_seal moves a page RW to RX with no reverse; a page is never writable and executable at once. | untestable [unobservable] page permissions are not observable without raw memory access |
+| `vf0790` | 790 | rule | “refuses any write after seal” | A write to a wildx page after its seal is refused, NITPICK-WILDX-001. | `refuse:WILDX-001` |
+| `vf0791` | 791 | rule | “any execute before it (`NITPICK-WILDX-002`)” | Executing a wildx page before its seal is refused, NITPICK-WILDX-002. | `refuse:WILDX-002` |
+| `vf0793` | 793 | rule | “The lifecycle is a state machine” | The lifecycle alloc, write, seal, execute, free is accepted and runs: the page's `mov eax, 7; ret` returns 7. | `run:0` |
+| `vf0794` | 794 | rule | “double-free” | A double free of a wildx page is refused (a free is a move). | `refuse` |
+| `vf0794b` | 794 | rule | “use-after-free” | Executing a wildx page after its free is refused (a use after a move). | `refuse` |
+| `vf0794c` | 794 | rule | “seal-after-free” | Sealing a wildx page after its free is refused. | `refuse` |
+| `vf0795` | 795 | rule | “no-live-pages-at-exit” | No live pages at exit, from the <wild-live> registry: `exit 0` with a live wildx page traps WildLeak. | `trap:WildLeak` |
+| `vf0796` | 796 | rule | “Guard pages turn an” | Guard pages turn a wildx over/underrun into a fault. | untestable [unobservable] reaching a guard page needs pointer arithmetic past the checked indexing |
+| `vf0797` | 797 | rule | “the page is placed by the kernel's mmap” | A wildx page is placed by the kernel's mmap randomisation (ASLR). | untestable [platform] the kernel's placement policy |
+| `vf0802` | 802 | rule | “validated by Nikola's sandbox and oracle rounds” | The generated bytes' contents are validated by Nikola's sandbox and oracle rounds, not these backends. | untestable [vague] about another project's process |
+| `vf0805` | 805 | rule | “will not reach the” | A program containing wildx will not reach the highest DO-178C / IEC 61508 / ISO 26262 levels. | untestable [vague] a certification statement |
+| `vf0808` | 808 | rule | “**`--extra-picky=no-wildx`**” | `--extra-picky=no-wildx` excludes runtime code generation: a program without wildx compiles under it and one using wildx does not. | `sh:0` |
+| `vf0811` | 811 | rule | “It is a rule separate from `no-wild`” | no-wildx is a rule separate from no-wild: a program using `wild` (not wildx) compiles under no-wildx and not under no-wild. | `sh:0` |
+| `vf0819` | 819 | rule | “borrows cannot cross a thread spawn or” | Borrows cannot cross an await: a $$i claim held by a pointer local across an await is refused. | `refuse` |
+| `vf0820` | 820 | rule | “tasks do not migrate between threads” | Tasks do not migrate between threads. | untestable [timing] a scheduling property; no single run can show a migration never happens |
+| `vf0821` | 821 | rule | “never move memory or reuse slots” | Shared arenas never move memory or reuse slots. | untestable [unobservable] a program cannot observe an arena's slot reuse without raw addresses |
+| `vf0828` | 828 | rule | “acquisition must strictly increase” | Acquisition must strictly increase: holding a level-5 mutex and acquiring a level-3 one is refused. | `refuse` |
+| `vf0828b` | 828 | rule | “strictly” | Strictly: acquiring a second mutex of the same level while holding the first is refused. | `refuse` |
+| `vf0828c` | 828 | rule | “Circular wait is impossible” | Increasing acquisition is accepted: level 3 then level 5 compiles and runs. | `run:0` |
+| `vf0829` | 829 | rule | “A whole-program analysis computes each function's transitive” | The analysis is whole-program: holding level 3 and calling a function that acquires level 1 is refused. | `refuse` |
+| `vf0830` | 830 | rule | “dynamically dispatched methods declare a maximum level” | A dynamically dispatched method declares a maximum level and implementations are checked against it: an impl acquiring 9 under `acquires <= 3` is refused. | `refuse` |
+| `vf0831` | 831 | rule | “an undeclared method may not acquire at all” | An undeclared dynamically dispatched method may not acquire at all: an impl of a trait method with no level acquiring one is refused. | `refuse` |
+| `vf0834` | 834 | rule | “operation takes a deadline and returns `Result`” | Every blocking operation takes a deadline: an acquire without one is refused. | `refuse` |
+| `vf0836` | 836 | rule | “surfaces as a” | What the analysis cannot cover surfaces as a timeout error at a known point. | untestable [timing] needs a contended acquire whose deadline expires |
+| `vf0839` | 839 | rule | “The flag is documented as verifying” | The flag verifies data-race and lock-order freedom, not deadlock freedom. | untestable [vague] about a struck flag's documentation |
+| `vf0848` | 848 | rule | “Every kind the manifest's `kind` column may carry, exhaustively” | The catalogue lists every obligation kind exhaustively: every row the compiler writes to rows.txt carries one of its 22 kinds. | `sh:0` |
+| `vf0857` | 857 | row | “\| `div-zero` \| the divisor of an integer `/` or `%` is not zero” | An integer `/` or `%` by a computed divisor is one `div-zero` row: one each in a signed `/`, a signed `%` and an unsigned `/`. | `sh:0` |
+| `vf0857b` | 857 | row | “\| yes \| 1.5.0 \|” | `div-zero` has a guard: in the plain build an integer `%` by a computed zero traps DivByZero. | `trap:DivByZero` |
+| `vf0857c` | 857 | row | “a `simd` division's any-lane guard is ONE row over the lanes' conjunction (D-282)” | A `simd<int32, 4>` division by a computed vector has ONE `div-zero` row, not one per lane. | `sh:0` |
+| `vf0858` | 858 | row | “\| `div-min` \|” | A signed integer division has one `div-min` row; an unsigned division has none. | `sh:0` |
+| `vf0858b` | 858 | row | “a signed division is not `INT_MIN / -1` (D-142)” | `div-min` has a guard: the int32 minimum divided by -1 traps DivOverflow in the plain build. | `run:98` (M10 `v05_min_div_minus_one`) |
+| `vf0858c` | 858 | row | “one row over the lanes for a signed-element `simd` (D-282)” | A signed-element `simd` division has ONE `div-min` row over the lanes; an unsigned-element one has none. | `sh:0` |
+| `vf0859` | 859 | row | “\| `overflow` \| a plain-integer `+ - *` or negation stays in range (D-210)” | Each plain-integer `+`, `-`, `*` and negation over computed operands is one `overflow` row at its own node: `a + b` one, `-a` one, `(a + b) * c` two, a compound `x += b` one. | `sh:0` |
+| `vf0859b` | 859 | row | “ONE row over the lanes for a `simd` integer operation” | A `simd<int32, 4>` `+` of computed vectors is ONE `overflow` row, not one per lane. | `sh:0` |
+| `vf0859c` | 859 | row | “ONE with N-1 traps for an integer `.sum()`” | An integer `.sum()` of a `simd<int32, 4>` is ONE `overflow` row whose traps field is 3 (N-1). | `sh:0` |
+| `vf0859d` | 859 | row | “a node the folder writes as its constant has no guard and no row (D-310)” | `2i32 + 3i32`, which the folder writes as its constant, has no `overflow` row. | `sh:0` |
+| `vf0859e` | 859 | row | “\| yes \| 1.5.8b step 3 \|” | `overflow` has a guard: a plain int32 `+` past the maximum traps IntOverflow in the plain build. | `run:93` (M10 `o01_int32_add`) |
+| `vf0859f` | 859 | row | “or negation stays in range (D-210)” | Negating the int32 minimum traps IntOverflow. | `run:93` (M10 `o04_int32_negate_min`) |
+| `vf0860` | 860 | row | “\| `bounds` \| an index is inside its array, slice, buffer or `List`” | A computed index into a fixed array and into a slice is one `bounds` row each. | `sh:0` |
+| `vf0860b` | 860 | row | “ONE row for a range slice's pair (`lo <= hi <= len`) at the RANGE's node” | A range slice `xs[lo...hi]` with computed bounds is ONE `bounds` row for the pair. | `sh:0` |
+| `vf0860c` | 860 | row | “`0 <= i < len` at every checked element access” | The element check is `0 <= i < len`: a negative index traps OutOfBounds. | `run:94` (M10 `a04_index_negative`) |
+| `vf0860d` | 860 | row | “\| yes \| 1.5.8b step 5” | `bounds` has a guard: an index past the end of an array traps OutOfBounds. | `run:94` (M10 `a03_index_past_end`) |
+| `vf0860e` | 860 | row | “ONE row at each call of `string_from_bytes(p, len)`” | A call of `string_from_bytes(p, len)` is ONE `bounds` row, keyed on the call. | `sh:0` |
+| `vf0860f` | 860 | row | “`0 <= len <= 2^47`, the emitter's guard read back” | The emitter guards `string_from_bytes(p, len)` with `0 <= len <= 2^47`: a length of 2^47 + 1 traps (the `bounds` code, OutOfBounds) before any byte is read. | `trap:OutOfBounds` |
+| `vf0860g` | 860 | row | “`0 <= len <= 2^47`” | The same guard's lower half: `string_from_bytes(p, -1)` traps OutOfBounds. | `trap:OutOfBounds` |
+| `vf0860h` | 860 | row | “a discharged row elides the guard into one `llvm.assume`” | In the verified build a discharged `string_from_bytes` row replaces its guard with exactly one `llvm.assume` and no OutOfBounds trap. | `sh:0` |
+| `vf0860i` | 860 | row | “the length is the term `(\|npk.len\| base)` wherever it is named” | A loop over `xs.len` indexing `xs[i]` states the length as `\|npk.len\|` in its obligation file. | `sh:0` |
+| `vf0860j` | 860 | row | “so a loop written over `xs.len` or `l.count` proves the accesses inside it” | An access inside a loop bounded by `xs.len` or `l.count` is a discharged row. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0860k` | 860 | row | “a fixed array's length is its type's constant” | A fixed array's length enters the goal as its type's constant. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0861` | 861 | row | “\| `cast-range` \| a float's `=>!` cast to an integer has an integer meaning (D-306)” | A `flt64 =>! int32` is one `cast-range` row. | `sh:0` |
+| `vf0861b` | 861 | row | “the value is not NaN or an infinity” | A NaN's `=>!` to an integer traps CastRange. | `run:112` (M10 `c11_float_nan_to_int_traps`) |
+| `vf0861c` | 861 | row | “lies inside the target” | A float whose truncation the target cannot hold (3e9 to int32) traps CastRange. | `run:112` (M10 `c12_float_too_big_to_int_traps`) |
+| `vf0861d` | 861 | row | “its truncation toward zero” | The cast truncates toward zero (3.7 is 3, -3.7 is -3). | `run:0` (M10 `c10_float_to_int_truncates`) |
+| `vf0861e` | 861 | row | “the two ordered compares before the conversion, `CastRange`” | An infinity's `=>!` to int32 traps CastRange. | `trap:CastRange` |
+| `vf0861f` | 861 | row | “its truncation toward zero lies inside the target” | It is the TRUNCATION that must fit: -2147483648.5 and 2147483647.5 cast to int32 give the minimum and the maximum without trapping. | `run:0` |
+| `vf0861g` | 861 | row | “a `simd` cast's any-lane guard is one row over the lanes” | A `simd<flt64, 4> =>! simd<int32, 4>` is ONE `cast-range` row. | `sh:0` |
+| `vf0862` | 862 | row | “\| `exhaustive` \| a `pick` covers its domain (checker-discharged)” | A `pick` statement is one `exhaustive` row, decided by the checker (`c` in rows.txt's fifth field). | `sh:0` |
+| `vf0862b` | 862 | row | “(checker-discharged) \| no \| 1.5.4 \|” | The checker decides coverage: a `pick` over int32 with no arm for most values and no `(*)` is refused. | `refuse` |
+| `vf0863` | 863 | row | “\| `requires` \| a callee's precondition holds at the call (D-221)” | A call of a function with a `requires` is one `requires` row in the caller. | `sh:0` |
+| `vf0863b` | 863 | row | “\| `requires` \| a callee's precondition holds at the call (D-221) \| yes \|” | `requires` has a guard: calling with an argument that breaks the precondition traps RequiresViolated in the plain build. | `trap:RequiresViolated` |
+| `vf0864` | 864 | row | “\| `ensures` \|” | A postcondition is checked at each return: a function with two `pass` seams and an `ensures` has two `ensures` rows. | `sh:0` |
+| `vf0864b` | 864 | row | “a body's postcondition holds at its return (D-221)” | `ensures` has a guard: a return that breaks the postcondition traps EnsuresViolated in the plain build. | `trap:EnsuresViolated` |
+| `vf0865` | 865 | row | “\| `invariant` \| a loop invariant holds at entry and is preserved (D-221)” | A `while` with an `invariant` and no `continue` has two `invariant` rows: the entry and the preservation. | `sh:0` |
+| `vf0865b` | 865 | row | “a loop invariant holds at entry and is preserved” | `invariant` has a guard: a body that breaks the invariant traps InvariantViolated at the next head visit. | `trap:InvariantViolated` |
+| `vf0866` | 866 | row | “\| `limit` \| a `limit<Rules>` binding satisfies its rule at every write point (D-220)” | A limited binding's initial write and a later assignment are one `limit` row each. | `sh:0` |
+| `vf0866b` | 866 | row | “\| yes \| 1.5.2; fields 1.5.8b step 6 \|” | `limit` has a guard: an assignment that breaks the rule traps LimitViolated in the plain build. | `trap:LimitViolated` |
+| `vf0866c` | 866 | row | “so a write to a limited field of a limited binding is two rows at two keys” | Assigning a limited field of a limited binding adds two `limit` rows (the field's, keyed on the written expression, and the root's, keyed on the statement), at two distinct sites. | `sh:0` |
+| `vf0866d` | 866 | row | “an assignment through any path including a pointer's” | A write to a limited field through a pointer is a `limit` row, as the struct literal's value for it is. | `sh:0` |
+| `vf0867` | 867 | row | “\| `limit-subsume` \| one `Rules` implies another at a boundary (D-220)” | A direct call of a sync callee with a limited parameter is one `limit-subsume` row in the caller. | `sh:0` |
+| `vf0867b` | 867 | row | “at a direct call of a sync callee” | A call of an ASYNC callee with a limited parameter has no `limit-subsume` row. | `sh:0` |
+| `vf0867c` | 867 | row | “\| yes \| 1.5.2 \|” | `limit-subsume`'s guard is the callee's entry check: calling a limited parameter with a value outside its rule traps LimitViolated in the plain build. | `trap:LimitViolated` |
+| `vf0868` | 868 | row | “\| `terminate` \| a `while`/`when` loop's `decreases E` measure is at least zero at every head visit” | A `while` with a signed `decreases` measure and no `continue` has two `terminate` rows: the entry row and the preservation row. | `sh:0` |
+| `vf0868b` | 868 | row | “an unsigned one cannot be below zero and records no such row” | A loop whose measure is unsigned records no entry row: one `terminate` row (the preservation). | `sh:0` |
+| `vf0868c` | 868 | row | “one per `continue` re-entering the loop” | Each `continue` that re-enters the loop adds one `terminate` row: a signed loop with one `continue` has three. | `sh:0` |
+| `vf0868d` | 868 | row | “the head's check, `DecreasesViolated`” | `terminate` has a guard: a measure that does not decrease between head visits traps DecreasesViolated in the plain build. | `trap:DecreasesViolated` |
+| `vf0868e` | 868 | row | “the callee's measure at the arguments below the caller's at entry with the caller's at least zero” | A recursive call inside a group whose members state `decreases` is one `terminate` row of the caller's at the call site. | `sh:0` |
+| `vf0868f` | 868 | row | “the check before the call, one trap” | A recursive call whose argument's measure is not below the caller's traps DecreasesViolated before the call. | `trap:DecreasesViolated` |
+| `vf0868g` | 868 | row | “a recursive call inside a `requires` clause or a measure has no check and an `unencoded` row with no trap” | A recursive call inside a `requires` clause or a measure is an `unencoded` row with no trap. | untestable [vague] the text gives no spelling of a recursive call inside a clause or a measure (a pure, measured callee inside its own group's contract) that this extractor has seen compile |
+| `vf0869` | 869 | row | “\| `stack-depth` \| the recursion depth is bounded (the audit's G-6 row; D-305 (7))” | One `stack-depth` row per recursive group with a cycle, derived (`d` in rows.txt's fifth field): a self-recursive function and a mutual pair give two rows, both `d`. | `sh:0` |
+| `vf0869b` | 869 | row | “in the first member the emission reaches” | A group's `stack-depth` row sits in the file of its first member the emission reaches. | untestable [internal] which member the emission reaches first is the emitter's order, which the text does not fix |
+| `vf0869c` | 869 | row | “DERIVED by the runners from the group's `terminate` call rows” | The row's verdict is derived by the runners: `discharged` when every member states `decreases` and every call row is discharged, `open` otherwise. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0869d` | 869 | row | “no query, no guard, elides nothing (the stack check stays in every build)” | A `stack-depth` row elides nothing: the stack check stays in the verified build. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0870` | 870 | row | “\| `err-exit` \| the `TbbErr` guard's condition (D-144 as amended, D-278)” | A comparison of two computed `tbb32` values is one `err-exit` row. | `sh:0` |
+| `vf0870b` | 870 | row | “neither operand is ERR at a comparison on a twisted value” | Comparing a `tbb8` holding ERR traps TbbErr. | `run:110` (M10 `m12_tbb_compare_on_err_traps`) |
+| `vf0870c` | 870 | row | “the operand is not ERR at a cast out of its family (both spellings)” | An ERR `tbb8` cast out of its family with `=>!` traps TbbErr. | `trap:TbbErr` |
+| `vf0870d` | 870 | row | “a cast out of its family (both spellings)” | An ERR `tbb8` cast out of its family with the checked `=>` traps TbbErr too. | `trap:TbbErr` |
+| `vf0870e` | 870 | row | “a checked crossing into or within a family lands in the target's range” | A checked crossing into `tbb8` of a value outside its range (1000 from int64) traps TbbErr. | `trap:TbbErr` |
+| `vf0870f` | 870 | row | “a twisted division has no row” | A `tbb32` `/` or `%` by a computed divisor has no row at all (no div-zero, div-min or err-exit). | `sh:0` |
+| `vf0870g` | 870 | row | “(a zero divisor is ERR)” | A `tbb` division or remainder by zero yields ERR without a trap. | `run:0` (M10 `v18_tbb_div_by_zero_is_err`) |
+| `vf0871` | 871 | row | “\| `failsafe-post` \| `failsafe` returns a positive value (D-014)” | Every `exit` in `failsafe` is checked positive, one `failsafe-post` row each. | `sh:0` |
+| `vf0872` | 872 | row | “\| `loop-step` \| a counted loop's computed step is positive (D-022)” | A counted loop with a computed step is one `loop-step` row; one with a literal step has none. | `sh:0` |
+| `vf0872b` | 872 | row | “the compare at the loop's entry, `BadStep`” | A computed step of zero traps BadStep at the loop's entry. | `run:113` (M10 `l21_zero_step_computed_traps`) |
+| `vf0872c` | 872 | row | “a literal step is the checker's (TYPE-068) and has no row” | A literal zero step is refused by the checker (TYPE-068). | `refuse:NITPICK-TYPE-068` (M10 `l19_zero_step_literal_refused`) |
+| `vf0873` | 873 | row | “\| `shift-range` \| a shift's COMPUTED amount is inside `0..width-1` (D-277)” | A shift by a computed amount (`<<` or `>>`) is one `shift-range` row; a shift by a literal amount has none. | `sh:0` |
+| `vf0873b` | 873 | row | “the compare before the shift, `ShiftRange`” | A computed shift amount equal to the width traps ShiftRange. | `run:111` (M10 `s04_shift_amount_equals_width`) |
+| `vf0873c` | 873 | row | “a known amount is the checker's (TYPE-070) and has no row” | A literal amount outside the range is refused, NITPICK-TYPE-070. | `refuse:NITPICK-TYPE-070` (M10 `s07_shift_literal_amount_refused`) |
+| `vf0873d` | 873 | row | “a `simd` shift's any-lane guard is one row over the lanes (D-282)” | A `simd<uint8, 8>` shift by a computed splat is ONE `shift-range` row. | `sh:0` |
+| `vf0874` | 874 | row | “\| `prove` \| a `prove(...)` holds under its path conditions” | A `prove(...)` statement is one `prove` row with a solver query (fifth field `1`). | `sh:0` |
+| `vf0874b` | 874 | row | “\| `prove` \| a `prove(...)` holds under its path conditions \| no \|” | `prove` has no guard: in the plain build a `prove` that is false at run time is not checked, and the program runs on. | `run:0` |
+| `vf0875` | 875 | row | “\| `assert-static` \| an `assert_static(...)` folds to true (the frontend)” | An `assert_static(...)` statement is one `assert-static` row, decided by the frontend (`c` in the fifth field). | `sh:0` |
+| `vf0875b` | 875 | row | “an `assert_static(...)` folds to true” | An `assert_static` whose proposition folds to false is refused. | `refuse` |
+| `vf0876` | 876 | row | “\| `disjoint` \| two accesses of one root through computed indices name disjoint storage” | Two `$$m` claims on one array through computed indices are one `disjoint` row. | `sh:0` |
+| `vf0876b` | 876 | row | “the byte-range compare at the second access, `BorrowOverlap`” | Two live `$$m` claims through computed indices that name the same element trap BorrowOverlap at the second access. | `trap:BorrowOverlap` |
+| `vf0876c` | 876 | row | “a static overlap is the aliasing analysis's (BORROW-013) and has no row” | Two live `$$m` claims of the same literal element are refused, BORROW-013. | `refuse:BORROW-013` |
+| `vf0877` | 877 | row | “\| `floor-spec` \| a clause of a floor symbol's section in `runtime/npkrt.spec` holds” | A `floor-spec` row states a clause of a floor symbol's spec section of its IR; its rows land in runtime/npkrt.obligations. | untestable [tool] a claim about the floor writer (npkg/floor_smt.npk and its modules, run by `npkg verify` or tools/floorspec.npk over runtime/npkrt.ll and runtime/npkrt.spec), which this session neither builds nor runs |
+| `vf0877b` | 877 | row | “rows from the floor writer (1.5.6), never the compiler” | The compiler never writes a `floor-spec` row. | `sh:0` |
+| `vf0878` | 878 | row | “\| `floor-model` \| a bounded protocol model's bad predicate is unreachable within its depth and preemption bound” | A `floor-model` row states that a protocol model's bad predicate is unreachable within its bounds. | untestable [tool] a claim about the protocol models (runtime/models/*.model), their unroller npkg/floor_model.npk or the explicit-state belt npkg/floor_explore.npk; not run here |
+| `vf0878b` | 878 | row | “rows from the floor writer over `runtime/models/`” | The compiler never writes a `floor-model` row. | `sh:0` |
+| `vf0886` | 886 | rule | “already refuses a lossy crossing at compile time (D-095)” | A checked integer `=>` that could lose data (int64 to int32) is refused at compile time. | `refuse` (M10 `c03_narrow_signed_refused`) |
+| `vf0888` | 888 | rule | “now traps `CastRange`” | A float's `=>!` to an integer is guarded by a CastRange trap (4117) in the emission. | `ir:@npk_trap\(i32 -?4117\)` |
+| `vf0895` | 895 | rule | “`(\|npk.len\| base)` -- an uninterpreted function of the base” | `.len` of a slice is the uninterpreted `\|npk.len\|` applied to the base in the obligation text. | `sh:0` |
+| `vf0898` | 898 | rule | “against are the same symbol and the row discharges” | Inside `for (i in 0...xs.len)` the loop bound and the element row's length are one symbol, so the row discharges. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0899` | 899 | rule | “length term (DEF-14's rule: a name a pointer may write is never named)” | An escaped name, and a length read through a call, have no length term: a row over a parameter's element is `open` unless the loop bounds it. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0902` | 902 | rule | “A RANGE SLICE IS ONE ROW for the pair the emitter tests in one `and`” | A range slice is ONE `bounds` row for the pair. | `sh:0` |
+| `vf0903` | 903 | rule | “recorded at the RANGE node -- the index expression's rhs, not the index” | The range slice's row is keyed on the RANGE node, the key the emitter asks with. | untestable [internal] which AST node keys the row is internal; its effect (the guard elided under a discharged row) needs a discharged row of a range slice, which only z3 gives honestly |
+| `vf0908` | 908 | rule | “A GUARD INSIDE A `defer` BODY IS ONE ROW AND SEVERAL TRAPS (DEF-82)” | A guarded index inside a `defer` body that runs at two exits is ONE `bounds` row. | `sh:0` |
+| `vf0912` | 912 | rule | “one copy's traps times the copies” | That row's traps field is one copy's traps times the copies: 2 for a `defer` written at two exits. | `sh:0` |
+| `vf0919` | 919 | rule | “checked positive at the `exit` (EnsuresViolated, the trap route's re-entry” | `failsafe`'s `exit` operand is checked positive: a computed zero is EnsuresViolated, and the trap route's re-entry rule ends the process at 70. | `run:70` |
+| `vf0920` | 920 | rule | “a literal that is not positive refused by” | A literal `exit` operand in `failsafe` that is not positive is refused by the checker, REACH-004. | `refuse:REACH-004` |
+| `vf0921` | 921 | rule | “so a discharged row elides that check” | A discharged `failsafe-post` row elides the `exit`'s positivity check in the verified build. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0925` | 925 | rule | “The guard a discharged row elides is the CALLEE's” | In the verified build a direct call whose `limit-subsume` row is discharged calls `<symbol>.body`, skipping the callee's entry check; in the plain build it calls the entry. | `sh:0` |
+| `vf0927` | 927 | rule | “its body under `<symbol>.body` and its ordinary symbol as the checked entry” | A sync function with a limited parameter emits a second define, `<symbol>.body`. | `ir:^define [^\n]*narrow\.body"?\(` |
+| `vf0928` | 928 | rule | “(the entry checks, then a tail call of the body)” | The ordinary symbol is the checked entry, which ends in a tail call of the body. | `ir:tail call [^\n]*narrow\.body` |
+| `vf0929` | 929 | rule | “the manifest discharged names the body, every other call -- and every” | Without a manifest no call names the body except the entry's own tail call: the plain build's direct call names the entry. | `ir!:(?s)call [^\n]*narrow\.body"?\(.*call [^\n]*narrow\.body"?\(` |
+| `vf0931` | 931 | rule | “A coroutine callee keeps one symbol and its call sites carry no” | An async callee with a limited parameter has no `.body` twin and its call site no `limit-subsume` row. | `sh:0` |
+| `vf0933` | 933 | rule | “runners hold the belt: every `.body` occurrence in an emission is its own” | The runners' belt: every `.body` occurrence is its define, the wrapper's tail call or a direct call, and the direct calls equal the discharged rows. | untestable [tool] a claim about the runners (`npkg verify`, the harness's verify/parity stages) and their belts, which need the pinned z3 and the full tree |
+| `vf0937` | 937 | rule | “`exhaustive` (one” | `exhaustive` is one row per `pick`, both spellings: a `pick` statement and a `pick` expression give two rows. | `sh:0` |
+| `vf0940` | 940 | rule | “`c` in `rows.txt`” | `exhaustive` and `assert-static` rows are inventory lines: `c` in rows.txt's fifth field. | `sh:0` |
+| `vf0941` | 941 | rule | “query, tier `-`, word `none`” | A checker row's tier is `-`. | `sh:0` |
+| `vf0941b` | 941 | rule | “`prove` is decided by z3 like a guarded kind” | A `prove` row carries a solver query (fifth field `1`). | `sh:0` |
+| `vf0942` | 942 | rule | “and is the ONE kind whose non-discharge refuses the verified build” | The verified build refuses a program whose `prove` row is not discharged (NITPICK-VERIFY-001), while the plain build accepts it. | `sh:0` |
+| `vf0944` | 944 | rule | “a computed step's compare, a literal step being the checker's” | A negative computed step traps BadStep at the loop's entry. | `run:113` (M10 `l22_negative_step_computed_traps`) |
+| `vf0946` | 946 | rule | “`err-exit` produces rows, and the” | `err-exit` rows are produced: a tbb comparison has one (see vf0870). | `sh:0` |
+| `vf0947` | 947 | rule | “twisted kinds are terms. A `tbb`/`tfp`/`dim256`/`trit`/`tryte`/`nit`/`nyte`” | A twisted value is an Int in its carrier's range, ERR the carrier's most negative value; `ERR` is MIN, `is_err(x)` is `(= x MIN)`, a symbol's axiom 'ERR or inside the valid range'. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0953` | 953 | rule | “emitter's own `ite`: saturate-to-ERR on `+ - *` and negation” | Twisted `+ - *` and negation saturate to ERR, and ERR is sticky. | `run:0` (M10 `m13_tbb_err_sticky`) |
+| `vf0954` | 954 | rule | “floor multiply `(div (* a b) 2^F)` and truncating divide `(npk_sdiv (* a” | The encoder models `tfp`'s `*` as the floor multiply and `/` as the truncating divide, narrowed by the range test, as the emitter computes them. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0955` | 955 | rule | “a zero divisor ERR” | A twisted division by zero is ERR. | `run:0` (M10 `v18_tbb_div_by_zero_is_err`) |
+| `vf0956` | 956 | rule | “digits' `&`/`\|` as min/max” | The ternary digits' `&` and `\|` are the Kleene min and max: 1 & -1 is -1, 1 \| -1 is 1, 0 & 1 is 0, 0 \| -1 is 0. | `run:0` |
+| `vf0956b` | 956 | rule | “`dim256` is `tfp256`” | To the solver `dim256` is `tfp256`. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0957` | 957 | rule | “one per `-4100` site” | The `TbbErr` guard is a `-4100` trap site: a comparison of computed tbb values emits `@npk_trap(i32 -4100)`. | `ir:@npk_trap\(i32 -4100\)` |
+| `vf0958` | 958 | rule | “comparison, the operand not ERR at a cast out of its family (both” | An ERR operand at a cast out of its family traps TbbErr (the `=>!` spelling). | `trap:TbbErr` |
+| `vf0960` | 960 | rule | “its fact is a hypothesis after the site (every continuing” | An err-exit row's fact is a hypothesis after its site. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0961` | 961 | rule | “and a discharged row's guard is one `llvm.assume`” | A discharged err-exit row's guard becomes one `llvm.assume`. | `sh:0` |
+| `vf0962` | 962 | rule | “A `frac` or a tfp-element `complex` guard is a row over an aggregate the” | A `frac32` comparison's TbbErr guard is one `err-exit` row, `unencoded` (fifth field `0`). | `sh:0` |
+| `vf0963` | 963 | rule | “its trap kept” | The frac guard's trap is kept: comparing a `frac32` ERR traps TbbErr. | `trap:TbbErr` |
+| `vf0965` | 965 | rule | “twisted division has no row: it never traps.” | A twisted division has no row (see vf0870f's program). | `sh:0` |
+| `vf0966` | 966 | rule | “subject encodes (its `$` the Int term)” | A `limit` over a twisted subject is an encoded row (fifth field `1`). | `sh:0` |
+| `vf0967` | 967 | rule | “`$` as the subject and each clause as a fact for the next (the predicate” | A rule's predicate traps on its FIRST false clause: with `{ $ != 0, 100 / $ > 1 }` a zero traps LimitViolated, never DivByZero. | `trap:LimitViolated` |
+| `vf0968` | 968 | rule | “A guard's fact is never pushed under a” | A guard's fact is never pushed under a quiet encoding nor from inside a contract clause encoded for its own row (DEF-33). | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0975` | 975 | rule | “FLOATS ARE TERMS IN TWO TIERS, and” | A float obligation's row carries the tier the encoder names: a `prove` over `flt64` values has tier `fp` in rows.txt's eleventh field. | `sh:0` |
+| `vf0977` | 977 | rule | “value is a term of the IEEE sort (`(_ FloatingPoint 8 24)` / `(_” | A `flt32` value is a term of sort `(_ FloatingPoint 8 24)` and a `flt64` one of `(_ FloatingPoint 11 53)` in the obligation text. | `sh:0` |
+| `vf0979` | 979 | rule | “under SMT-LIB's IEEE semantics — `fp.add`/`sub`/`mul`/`div` under RNE” | A float division is `fp.div` under RNE in the obligation text. | `sh:0` |
+| `vf0980` | 980 | rule | “`#sqrt` as `fp.sqrt RNE`” | `#sqrt` is `fp.sqrt` under RNE in the obligation text. | `sh:0` |
+| `vf0981` | 981 | rule | “`fcmp` writes (`==` is `fp.eq`, `!=` its negation, so NaN compares as the” | The machine's float compares are the ordered ones with `!=` their negation: NaN == NaN is false, NaN != NaN is true, and NaN < 1 and NaN >= 1 are both false. | `run:0` |
+| `vf0983` | 983 | rule | “text denotes (a `flt32` literal rounded twice, as the emitter's double-then-” | A `flt32` literal is rounded twice, to double then to float: 1.0000000596046448309 (just above the midpoint 1 + 2^-24) becomes 1 + 2^-24 as a double and then 1.0 (a tie, to even) as a flt32, where a single rounding gives 1 + 2^-23. | `run:0` |
+| `vf0984` | 984 | rule | “an integer entering `to_fp RNE (to_real x)`, a” | An integer entering a float is `to_fp RNE`, a widening exact, a narrowing `=>!` rounded, in the obligation text. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0985` | 985 | rule | “`%` (`frem`) and a float LEAVING” | A float `%` and a float leaving to an integer are opaque values to the solver. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0987` | 987 | rule | “itself carries a `cast-range` row over the operand since 1.5.8b step 5” | A float's `=>!` to an integer is a `cast-range` row over the float operand. | `sh:0` |
+| `vf0988` | 988 | rule | “`flt128` is storage (D-143) and has no term.” | `flt128` has no term to the solver. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf0988b` | 988 | rule | “Every float value is NAMED and its definition” | Every float value is a named symbol whose definition is recorded. | untestable [internal] the encoder's naming of float values; no outcome depends on it outside the verdicts |
+| `vf0989` | 989 | rule | “Floats never trap: no row” | Float arithmetic has no rows: a function of float `+ - * /` and one of float `%` have none. | `sh:0` |
+| `vf0990` | 990 | rule | “is theirs — what the terms buy is that a `limit`, a contract, an” | Over floats, a `limit`, a `prove` and the `TbbErr` guard of a float entering `tbb` are encoded rows (fifth field `1`). | `sh:0` |
+| `vf0992` | 992 | rule | “THE TIER COLUMN: `rows.txt`'s eleventh” | rows.txt's eleventh field is the tier: `int` for an Int/Bool cone, `bv` where a bit-vector crossing is, `fp` where a float sort is, `-` for an unencoded or checker row. | `sh:0` |
+| `vf0995` | 995 | rule | “runners carry it into the manifest” | Both runners carry the tier into the manifest. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf0996` | 996 | rule | “(D-218 (5)): for every `fp` row the encoder also writes a twin query” | For an `fp` row whose floats are bounded by literal comparisons (a `limit` rule), the encoder writes a twin `NNNN.t2.smt2` beside the tier-1 file and names it in `index.t2.txt`. | `sh:0` |
+| `vf0998` | 998 | rule | “Real — an operation a fresh Real within `eps·\|v\| + eta` of its exact” | In the twin every float is a Real and every operation a fresh Real within eps·\|v\| + eta of its exact result; a square root r >= 0 with r² inside v·(1 ∓ eps)². | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1001` | 1001 | rule | “CONDITIONS, else no twin: (i) every float symbol no hypothesis defines is” | Condition (i): with the floats unbounded (plain parameters), the same `#sqrt` prove gets no twin. | `sh:0` |
+| `vf1004` | 1004 | rule | “(ii) every operation's magnitude within the normal range, a” | Condition (ii): every operation's magnitude in the normal range, divisors nonzero and roots' arguments non-negative are conjoined to the twin's goal. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1007` | 1007 | rule | “(iii) the goal a comparison or a Boolean combination of comparisons — an” | Condition (iii): a goal that is an `fp.eq` (`prove(a == a)`) stays tier 1: no twin, even with the float bounded. | `sh:0` |
+| `vf1008` | 1008 | rule | “The runner asks tier 1 first” | The runner asks tier 1 first and the twin once for a `budget` row; `unsat` discharges it with tier `real`; a tier-1 `sat` is never retried. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1011` | 1011 | rule | “`flt_tier2.npk` is the shape D-218 (5)” | `#sqrt(a*a + b*b) >= 0.0` under bounded a, b is `unknown` in QF_FP and `unsat` in the twin. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1015` | 1015 | rule | “A `simd<T, N>` value is N scalar” | A `simd<T, N>`'s any-lane guards are one row each: its division one `div-zero` row, its shift one `shift-range` row. | `sh:0` |
+| `vf1016` | 1016 | rule | “The lanes ride EXPRESSIONS” | A simd value's lanes are terms carried by expression and by binding (constructor, splat, lane-wise operations, `[i]`, `.len`, `.any()`/`.all()`, `sum`/`min`/`max`, casts). | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1028` | 1028 | rule | “Anything else (a call's value, a computed” | A call's value or a computed index is N opaque lanes; the vector itself has no scalar term. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1029` | 1029 | rule | “THE ROWS: a” | A `simd` division's any-lane guard is ONE `div-zero` row over the lanes' conjunction. | `sh:0` |
+| `vf1031` | 1031 | rule | “of the lanes' conditions and, for a signed element, one `div-min` row” | For a signed element the simd division also has one `div-min` row; an unsigned element none. | `sh:0` |
+| `vf1032` | 1032 | rule | “likewise; a `simd` shift's any-lane guard one `shift-range` row over its” | A `simd` shift's any-lane guard is one `shift-range` row. | `sh:0` |
+| `vf1033` | 1033 | rule | “conjunction — the emitter's one trap per site, one group” | A simd any-lane guard is one trap per site: the simd division's `div-zero` row keeps one trap (traps field 1). | `sh:0` |
+| `vf1034` | 1034 | rule | “The `unencoded` producers of 1.5.0 and” | A `simd` division and a `simd` shift are no longer `unencoded`: their rows carry a query (fifth field `1`). | `sh:0` |
+| `vf1036` | 1036 | rule | “producers are a `limit` over a subject no theory covers (a string, a struct,” | A `limit` over a struct subject is an `unencoded` row (fifth field `0`). | `sh:0` |
+| `vf1037` | 1037 | rule | “and the `TbbErr` guards over a `frac` or a tfp-`complex`” | The TbbErr guard of a `frac32` comparison is an `unencoded` row. | `sh:0` |
+| `vf1039` | 1039 | rule | “The verdict column is `discharged` (unsat), `open` (sat” | The manifest's verdict is `discharged` (unsat), `open` (sat), `budget` (unknown under the rlimit), `unencoded` or `checker`. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1043` | 1043 | rule | “The elision” | The manifest's elision column is `elided`, `retained`, or `none` for a kind with no guard. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1050` | 1050 | rule | “a proposition holds only where its evaluation does not trap” | A proposition holds only where its evaluation does not trap: a `requires` clause whose own division meets a zero divisor traps DivByZero at run time, not RequiresViolated. | `trap:DivByZero` |
+| `vf1051` | 1051 | rule | “Every guard met inside a contract clause, an” | Every guard met inside a clause, invariant conjunct, rule clause or `prove` is conjoined into the proposition's term and pushed as a hypothesis nowhere. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1063` | 1063 | rule | “`intN`/`uintN` symbol is an `Int` with the axiom of its range” | A plain integer is an unbounded `Int` to the solver: the obligation file of an int32 division declares Int symbols and no bit-vector sort. | `sh:0` |
+| `vf1065` | 1065 | rule | “truncating `npk_sdiv`/`npk_srem` as the machine's, with the D-007 pair as” | `/` and `%` are the truncating `npk_sdiv` / `npk_srem` in the obligation text (a quotient or remainder inside another division's cone). | `sh:0` |
+| `vf1066` | 1066 | rule | “rows. A `bool` is `Bool`, a pattern's literal is read under the selector's” | A `bool` is `Bool`, a pattern's literal is read under the selector's type, and a path condition is a hypothesis in its arm. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1069` | 1069 | rule | “`x << n` and `x >> n` are defined for” | `x >> n` with a computed n equal to the width traps ShiftRange: shifts are defined for 0 <= n < width only. | `run:111` (M10 `s06_right_shift_amount_width`) |
+| `vf1071` | 1071 | rule | “known amount outside the range is `NITPICK-TYPE-070` at the shift (both” | A known amount outside the range is NITPICK-TYPE-070 for `>>` in its compound spelling too: `x >>= 32i32` on an int32. | `refuse:NITPICK-TYPE-070` |
+| `vf1072` | 1072 | rule | “operators, both spellings, the folder's bound the type's width)” | The folder's bound is the operand type's width: `int8 << 8i8` is NITPICK-TYPE-070. | `refuse:NITPICK-TYPE-070` |
+| `vf1073` | 1073 | rule | “amount is one unsigned compare on its carrier (`n <u W`, a negative amount” | A negative computed amount reads as huge and traps ShiftRange. | `run:111` (M10 `s05_shift_amount_negative`) |
+| `vf1074` | 1074 | rule | “reading as huge) trapping `ShiftRange` (−4115)” | A computed shift's guard is a `ShiftRange` trap, code -4115, in the emission. | `ir:@npk_trap\(i32 -4115\)` |
+| `vf1075` | 1075 | rule | “and, discharged, one `llvm.assume`” | In the verified build a discharged `shift-range` row's guard is one `llvm.assume` and no ShiftRange trap. | `sh:0` |
+| `vf1076` | 1076 | rule | “hypothesis after the site either way” | A shift's range goal is a hypothesis after the site whether or not its row is discharged. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1081` | 1081 | rule | “Wherever an operand is a numeral the encoder knows” | With a numeral operand a bitwise operation is Int arithmetic: `(k & 7) + 1` as a divisor crosses into no bit-vector theory (no `int2bv`, tier `int`). | `sh:0` |
+| `vf1087` | 1087 | rule | “`x & (2^j − 1)` is `(mod x 2^j)`” | The Int forms: `x << k`, `x >> k`, `x & (2^j - 1)`, `x & 2^j`, `x & ~(2^j - 1)`, `~x` as `mod`/`div`/`*` arithmetic, at any width. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1090` | 1090 | rule | “Every other shape crosses at a word of at” | Any other bitwise shape crosses into bit-vectors at 64 bits or less: `(k & m) \| 1` over int32 has `int2bv` in its file and tier `bv`. | `sh:0` |
+| `vf1095` | 1095 | rule | “is exact — and `bvshl`/`bvlshr`/`bvashr` for a shift by a non-numeral” | A shift by a non-numeral amount inside a crossing is `bvshl` (for `<<`). | `sh:0` |
+| `vf1096` | 1096 | rule | “Above 64 bits a” | Above 64 bits a general bitwise operation stays opaque: `(k & m) \| 1` over int128 has no `int2bv`. | `sh:0` |
+| `vf1098` | 1098 | rule | “measured 191 rlimit at 32 and 64 bits” | The crossing's measured cost per width (191 rlimit at 32 and 64 bits, 883,930 at 128, ...). | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1103` | 1103 | rule | “A function with a crossing emits `(set-logic” | A function whose obligations hold a crossing emits `(set-logic ALL)`; one without does not. | `sh:0` |
+| `vf1105` | 1105 | rule | “A flag family (D-230) is an unsigned 32-bit word to the” | A flag family is an unsigned 32-bit word to the encoder; `int32 =>! oflags` and back re-sign the bit pattern. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1109` | 1109 | rule | “THE GATE (D-280): every row” | Every row discharged before a crossing is discharged after it; measured over the re-recorded manifest. | untestable [tool] a claim about the runners (`npkg verify`, the harness's verify/parity stages) and their belts, which need the pinned z3 and the full tree |
+| `vf1116` | 1116 | rule | “value is an `Int` in the” | A twisted value is an Int in its carrier's range with ERR the most negative value, a value the terms carry. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1123` | 1123 | rule | “`+ - *` and negation saturate to ERR outside the” | Twisted `+ - *` and negation saturate to ERR outside the valid range. | `run:0` (M10 `m13_tbb_err_sticky`) |
+| `vf1125` | 1125 | rule | “`tfp`'s `*` is `(div (* a b) 2^F)` and its `/` `(npk_sdiv (* a 2^F) b)`” | `tfp`'s `*` and `/` are modelled as the emitter's floor multiply and truncating divide. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1126` | 1126 | rule | “each narrowed by the range test, a zero divisor is ERR, `/` and `%` at the” | A twisted `/` and `%` truncate: tbb32 -7 / 2 is -3 and -7 % 2 is -1. | `run:0` |
+| `vf1128` | 1128 | rule | “the truncating quotient or remainder, the ternary digits' `&`/`\|` are the” | The ternary digits' `&`/`\|` are the Kleene min/max. | `run:0` |
+| `vf1129` | 1129 | rule | “Kleene min/max, `dim256` is `tfp256`. Each raw result is named once” | Each raw twisted result is named once without an axiom before the range test reads it. | untestable [internal] how the encoder names a raw result; no outcome but the verdicts depends on it |
+| `vf1132` | 1132 | rule | “The rows are `err-exit`'s (§7b): one per” | One `err-exit` row per TbbErr guard: two tbb comparisons in a function are two rows. | `sh:0` |
+| `vf1133` | 1133 | rule | “A twisted division has” | A twisted division never traps: a zero divisor yields ERR. | `run:0` (M10 `v18_tbb_div_by_zero_is_err`) |
+| `vf1134` | 1134 | rule | “A `limit` over a twisted subject encodes” | A `limit` over a `tbb32` subject is an encoded row. | `sh:0` |
+| `vf1136` | 1136 | rule | “for the next (the predicate traps on the first false clause)” | A rule's predicate traps on its first false clause (LimitViolated), before a later clause's own guard. | `trap:LimitViolated` |
+| `vf1137` | 1137 | rule | “tfp-element `complex` is an aggregate the walk has no term for: its guards” | A `frac`'s TbbErr guard is `unencoded` (fifth field `0`). | `sh:0` |
+| `vf1138` | 1138 | rule | “are `unencoded`, their traps kept.” | The unencoded frac guard's trap is kept: comparing a `frac32` ERR traps TbbErr. | `trap:TbbErr` |
+| `vf1142` | 1142 | rule | “53)`) with NO range axiom — NaN and the infinities are values of it, and a” | A float term has no range axiom: NaN and the infinities are its values. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1144` | 1144 | rule | “the emitter's instruction under SMT-LIB's IEEE semantics: `fp.add`/`sub`/” | A float obligation's arithmetic is SMT-LIB's IEEE operations: a product and a sum in a `#sqrt` prove appear as `fp.mul` and `fp.add`. | `sh:0` |
+| `vf1146` | 1146 | rule | “predicates the emitter's `fcmp` writes (`==` is `fp.eq`, `!=` its negation,” | NaN compares as the machine's ordered `fcmp` does, `!=` being `==`'s negation. | `run:0` |
+| `vf1149` | 1149 | rule | “the two agree by correct rounding; a `flt32` literal rounded twice, as the” | A `flt32` literal is rounded to double and then to float (1.0000000596046448309f32 is 1.0). | `run:0` |
+| `vf1151` | 1151 | rule | “(to_real x)`, a widening exact, a narrowing `=>!` rounded; `%` (`frem`, a” | A float `%` is `frem`, a truncated fmod and not IEEE's remainder: 5.5 % 2.0 is 1.5 and -5.5 % 2.0 is -1.5. | `run:0` |
+| `vf1153` | 1153 | rule | “opaque as VALUES -- the crossing itself carries a `cast-range` row over the” | A float leaving to an integer carries a `cast-range` row over the operand. | `sh:0` |
+| `vf1155` | 1155 | rule | “compares; `flt128` is storage (D-143) and has no term.” | `flt128` has no term. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1156` | 1156 | rule | “Every float value is NAMED — a fresh symbol defined equal to the operation,” | Every float value is a fresh named symbol defined equal to its operation. | untestable [internal] the encoder's naming; no outcome depends on it outside the verdicts |
+| `vf1158` | 1158 | rule | “Floats never trap (D-007): no row is theirs” | Float arithmetic never traps: 1.0 / 0.0 is +infinity and 1.0 % 0.0 is NaN, with no trap. | `run:0` |
+| `vf1159` | 1159 | rule | “`limit`, a contract clause, an `invariant`, a `prove` and the `err-exit` row” | Over floats a `limit`, a `prove` and a float entering `tbb` are encoded rows. | `sh:0` |
+| `vf1160` | 1160 | rule | “Measured: a” | A bounded quotient's `prove` discharges in QF_FP in 3.9 s. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1162` | 1162 | rule | “TIER 2, the Real-interval abstraction: for every row whose cone holds a” | For a float row meeting the conditions the encoder writes a twin `NNNN.t2.smt2` beside the tier-1 file, named in `index.t2.txt`. | `sh:0` |
+| `vf1165` | 1165 | rule | “Real: an input symbol a free Real, a named operation a fresh Real `r` with” | The twin's Real model: each operation a fresh Real within ε·\|v\| + η of its exact value. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1172` | 1172 | rule | “The twin is written at all only under THREE CONDITIONS, else the row stays” | Without the conditions no twin is written: an unbounded float `prove` has none. | `sh:0` |
+| `vf1176` | 1176 | rule | “`requires` clause, a path condition; a negated comparison is not a bound,” | A negated comparison is not a bound (it holds of NaN): floats bounded only by `!($ < 1.0)` and `!($ > 2.0)` get no twin. | `sh:0` |
+| `vf1179` | 1179 | rule | “operation's magnitude within the normal range (`\|v\| ≤ MAX_NORMAL` per” | The twin conjoins every operation's normal-range magnitude, nonzero divisors and non-negative root arguments to its goal. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1183` | 1183 | rule | “combination of comparisons over symbols and the Int fragment — an `fp.eq`,” | An `fp.eq` goal stays tier 1 only: no twin for `prove(a == a)` over a bounded float. | `sh:0` |
+| `vf1184` | 1184 | rule | “with its NaN reading, stays tier 1 only, and an uninterpreted function in” | An uninterpreted function in the cone excludes the row from tier 2. | untestable [vague] which float cones hold an uninterpreted function (a `pure` float callee in a contract) is not spelled out enough to build one that surely meets the other two conditions |
+| `vf1185` | 1185 | rule | “The runners ask tier 1 first; for a `budget` row” | The runners ask tier 1 first and the twin once for a `budget` row under the same profile and net; `--explain` names the tier that decided. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1189` | 1189 | rule | “Measured: `#sqrt(a*a + b*b) >= 0.0` under bounded” | The flt_tier2 shape is `unknown` in QF_FP and `unsat` in the twin. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1193` | 1193 | rule | “A `simd<T, N>` value is N scalar terms” | A `simd<T, N>` value is N scalar terms under its element's theory and has no term of its own. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1198` | 1198 | rule | “with a numeral index the lane's term (a computed index opaque, its `bounds`” | A computed lane index `v[i]` is one `bounds` row. | `sh:0` |
+| `vf1201` | 1201 | rule | “right; `min`/`max` as its `select` over the strict compare, `fcmp olt`/`ogt`” | A float `simd` `.min()` folds with a select over the ordered strict compare, false on NaN, so a NaN lane is passed over: min of (1, 3, 0.5, NaN) is 0.5. | `run:0` |
+| `vf1204` | 1204 | rule | “AND through bindings: a `simd` local's lanes are N” | A `simd` local's lanes are N symbols, a new set at every write, fresh and opaque at every invalidation, restore and merge. | untestable [z3] how the encoder states a value to the solver; its truth shows only in the verdicts z3 reaches |
+| `vf1209` | 1209 | rule | “is N opaque lanes. A `simd` division's any-lane guard is ONE `div-zero`” | A `simd` division's any-lane guard is ONE `div-zero` row, a signed element's also one `div-min` row. | `sh:0` |
+| `vf1211` | 1211 | rule | “one `div-min` row; a `simd` shift's any-lane guard one `shift-range` row” | A `simd` shift's any-lane guard is one `shift-range` row. | `sh:0` |
+| `vf1213` | 1213 | rule | “the site as a scalar's is — and a discharged any-lane row elides its guard” | In the verified build a discharged any-lane `div-zero` row (an unsigned `simd` division, which has no `div-min` row) becomes exactly one `llvm.assume`. | `sh:0` |
+| `vf1220` | 1220 | rule | “**The tier column (D-281).** `rows.txt`'s eleventh field, read off the” | rows.txt's eleventh field is the tier: `int`, `bv`, `fp`, or `-` for an unencoded or checker row. | `sh:0` |
+| `vf1224` | 1224 | rule | “`real` is written by” | `real` is written by the runner for a row tier 2 discharged. | untestable [z3] a verdict, a manifest word or an elision decided by `npkg verify` with the pinned z3 (not in this environment) |
+| `vf1228` | 1228 | rule | “**What is still outside the fragment.** A `limit` over a string, a struct” | A `limit` over a string subject is `unencoded` (fifth field `0`). | `sh:0` |
+| `vf1228b` | 1228 | rule | “over a string, a struct” | A `limit` over a struct subject is `unencoded`. | `sh:0` |
+| `vf1229` | 1229 | rule | “or an array (P-12's residue)” | A `limit` over an array subject is `unencoded`. | `sh:0` |
+| `vf1230` | 1230 | rule | “tfp-element `complex` are `unencoded`, their guards kept” | The guard of a limit over a string is kept: breaking the rule traps LimitViolated. | `trap:LimitViolated` |
+| `vf1232` | 1232 | rule | “`cast-range` rows; D-210's overflow rows are 1.5.8's, over the lane” | A `simd`'s integer lanes trap as scalars do: a lane `+` past the maximum traps IntOverflow. | `run:93` (M10 `o22_simd_lane_overflow`) |
+| `vf1234` | 1234 | rule | “The compiler's own” | The compiler's own manifest at 1.5.4b's close: 368 rows in 197 files, 329 int, 11 bv, 28 -, no fp. | untestable [tree] a measurement or a record of what a step landed, about the compiler's tree and its records rather than what it does with a program |
+| `vf1244` | 1244 | rule | “A `limit` over a string, a struct or an” | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` |
+| `vf1245` | 1245 | rule | “array and the `TbbErr` guards over a `frac` or a tfp-element `complex` are” | Still at 1.5.8b: the TbbErr guard of a `frac` is `unencoded`. | `sh:0` |

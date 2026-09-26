@@ -1,0 +1,33 @@
+// M11 cc0636 -- meta/specs/CONCURRENCY_REFERENCE.md:636 (rule)
+// quote: `failsafe` runs on the trapping thread as a
+// claim: failsafe runs on the trapping thread: a trap on a spawned thread runs failsafe on that thread (its gettid is not the process id).
+// expect: run:0
+// wrong: 10 (failsafe ran on the main thread) or 11
+mod:cc0636;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+fixed Duration:J2 = Duration{ ns: 2000000000i64 };
+thread async func:boom = NIL(int32:zero) joins J2 {
+    await sleep(raw duration_ms(10i64)) ?| NIL;
+    int32:q = 10i32 / zero;
+    discard(q);
+    pass NIL;
+};
+
+async func:main = int32(cstring[]:_~argv) {
+    drop boom(raw v32(0i32));
+    await sleep(raw duration_ms(3000i64)) ?| NIL;
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    int64:tid = sys(186i64) ?| 0i64;
+    int64:me = sys(39i64) ?| 0i64;
+    if (tid == me) { exit 10i32; }
+    pick (e) {
+        (DivByZero) { exit 0i32; },
+        (*) { exit 11i32; }
+    }
+    exit 12i32;
+};

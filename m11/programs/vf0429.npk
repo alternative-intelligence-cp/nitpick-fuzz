@@ -1,0 +1,58 @@
+// M11 vf0429 -- meta/specs/VERIFICATION_REFERENCE.md:429 (rule)
+// quote: PROGRAM-INVALID state, not a value
+// claim: A contract violation is a trap, never a Result: a violated requires traps RequiresViolated even when the caller offers a `?|` default.
+// expect: trap:RequiresViolated
+// wrong: the Result intercept: the default taken, exit 10
+mod:vf0429;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:divide = int32(int32:a, int32:b)
+    requires b != 0i32
+    ensures result > 0i32
+{
+    pass(10i32); // Hardcoded for example
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int32:y = divide(raw v32(10i32), raw v32(0i32)) ?| 5i32;
+    exit 10i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

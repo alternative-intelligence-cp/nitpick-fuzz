@@ -1,0 +1,77 @@
+// M11 cc0115 -- meta/specs/CONCURRENCY_REFERENCE.md:115 (rule)
+// quote: A task resumes on the thread it suspended on.
+// claim: A task resumes on the thread it suspended on (no migration, no work-stealing): its gettid is the same after every await, while two other threads are busy.
+// expect: run:0
+// wrong: 10 (main's task moved) or 82 (a thread's task moved)
+mod:cc0115;
+
+error:E1;
+error:E2;
+error:E3;
+fixed Duration:J2 = Duration{ ns: 2000000000i64 };
+thread async func:busy = NIL(int32:n) joins J2 {
+    int64:t0 = sys(186i64) ?! E1;
+    int32:i = 0i32;
+    while (i < n) decreases n - i {
+        await sleep(raw duration_ms(2i64)) ?| NIL;
+        int64:t = sys(186i64) ?! E1;
+        if (t != t0) { fail E2; }
+        i = i + 1i32;
+    }
+    pass NIL;
+};
+
+async func:main = int32(cstring[]:_~argv) {
+    drop busy(20i32);
+    drop busy(20i32);
+    int64:m0 = sys(186i64) ?! E3;
+    int32:i = 0i32;
+    while (i < 20i32) decreases 20i32 - i {
+        await sleep(raw duration_ms(2i64)) ?| NIL;
+        int64:t = sys(186i64) ?! E3;
+        if (t != m0) { exit 10i32; }
+        i = i + 1i32;
+    }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
+        (E2) { exit 82i32; },
+        (E3) { exit 83i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

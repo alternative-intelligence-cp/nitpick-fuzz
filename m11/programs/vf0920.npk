@@ -1,0 +1,28 @@
+// M11 vf0920 -- meta/specs/VERIFICATION_REFERENCE.md:920 (rule)
+// quote: a literal that is not positive refused by
+// claim: A literal `exit` operand in `failsafe` that is not positive is refused by the checker, REACH-004.
+// expect: refuse:REACH-004
+// wrong: accepted: failsafe may report success
+mod:vf0920;
+
+error:E9;
+func:broken = int32() { fail E9; };
+func:main = int32(cstring[]:_~argv) {
+    int32:v = broken() ?! E9;
+    exit (v + 1i32);
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (E9) { exit 0i32; },
+        (EnsuresViolated) { exit 33i32; },
+        (IntOverflow) { exit 93i32; },
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

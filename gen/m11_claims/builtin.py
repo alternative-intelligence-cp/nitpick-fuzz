@@ -1,6 +1,8 @@
 """M11 claims: BUILTIN_REFERENCE.md, lines 1-447 (the session's own extraction)."""
 from m11lib import *
 
+covers("BUILTIN", 1)
+
 D = "BUILTIN"
 
 # ------------------------------------------------------------------ the preamble

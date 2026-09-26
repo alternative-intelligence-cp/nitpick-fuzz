@@ -1,0 +1,19 @@
+// M11 cc0646 -- meta/specs/CONCURRENCY_REFERENCE.md:646 (rule)
+// quote: is the exit-70 stop
+// claim: A re-entering failsafe holder is the exit-70 stop: a trap inside failsafe ends the process with 70.
+// expect: run:70
+// wrong: a hang, a recursion into failsafe, or 97
+mod:cc0646;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:x = raw v32(2147483647i32) + 1i32;
+    exit x;
+};
+
+func:failsafe = int32(Error:_~e) {
+    int32:z = raw v32(0i32);
+    int32:q = 10i32 / z;
+    exit q;
+};

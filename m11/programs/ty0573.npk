@@ -1,0 +1,57 @@
+// M11 ty0573 -- meta/specs/TYPE_REFERENCE.md:573 (rule)
+// quote: The seven SI base units are compiler-declared
+// claim: The seven SI base units Kilograms, Meters, Seconds, Amperes, Kelvin, Moles and Candela are declared.
+// expect: run:0
+// wrong: a base unit missing (refused), or a wrong value (10)
+mod:ty0573;
+
+func:main = int32(cstring[]:_~argv) {
+    dim256<Kilograms>:a = 1.0dim256<Kilograms>;
+    dim256<Meters>:b = 1.0dim256<Meters>;
+    dim256<Seconds>:c = 1.0dim256<Seconds>;
+    dim256<Amperes>:d = 1.0dim256<Amperes>;
+    dim256<Kelvin>:e = 1.0dim256<Kelvin>;
+    dim256<Moles>:f = 1.0dim256<Moles>;
+    dim256<Candela>:g = 1.0dim256<Candela>;
+    tfp256:s = (a => tfp256) + (b => tfp256) + (c => tfp256) + (d => tfp256) + (e => tfp256) + (f => tfp256) + (g => tfp256);
+    if (s != 7.0tfp256) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

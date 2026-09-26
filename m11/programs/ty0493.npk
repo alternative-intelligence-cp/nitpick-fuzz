@@ -1,0 +1,58 @@
+// M11 ty0493 -- meta/specs/TYPE_REFERENCE.md:493 (row)
+// quote: | `tfp128` |
+// claim: `tfp128` is 16 bytes, alignment 16, format Q64.64: the least step is 2^-64 and the integer part tops out at 2^63 - 1.
+// expect: run:0
+// wrong: 10: tfp128 is not 16 bytes; 11: it does not sit at offset 16 after an int8 (an alignment other than 16); 12: another fraction width; 13: an integer part narrower than Q64.64; 14: wider (no ERR past the top)
+mod:ty0493;
+
+struct:P0 = { int8:a; tfp128:v; };
+func:vtf128 = tfp128(tfp128:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if (#size_of<tfp128>() != 16i64) { exit 10i32; }
+    if (#size_of<P0>() != 32i64) { exit 11i32; }
+    tfp128:eps = raw vtf128(0.0000000000000000000542101086242752217003726400434970855712890625tfp128);
+    if (((eps * 4294967296.0tfp128) * 4294967296.0tfp128) != 1.0tfp128) { exit 12i32; }
+    tfp128:top = raw vtf128(9223372036854775807.5tfp128);
+    if (is_err(top + 0.25tfp128)) { exit 13i32; }
+    if (!(is_err(top + 1.0tfp128))) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

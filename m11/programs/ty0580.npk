@@ -1,0 +1,61 @@
+// M11 ty0580 -- meta/specs/TYPE_REFERENCE.md:580 (example)
+// quote: ```nitpick
+// claim: Unit declarations of this form compile, and a declared name is its vector's name (Furlongs is Meters).
+// expect: run:0
+// wrong: refused (a program may not write the prelude's Hertz/Newtons again, or the form does not parse), or a wrong value (10-12)
+mod:ty0580;
+
+unit:Hertz = 1 / Seconds;
+unit:Newtons = Kilograms * Meters / (Seconds * Seconds);
+pub unit:Furlongs = Meters;   // a name is a name for a VECTOR — this one
+                              // equals Meters' vector; declare it only to
+                              // write it in annotations
+
+func:main = int32(cstring[]:_~argv) {
+    dim256<Furlongs>:x = 3.0dim256<Furlongs>;
+    dim256<Meters>:y = x + 1.0dim256<Meters>;
+    if ((y => tfp256) != 4.0tfp256) { exit 10i32; }
+    dim256<Hertz>:f = 1.0tfp256 / 4.0dim256<Seconds>;
+    if ((f => tfp256) != 0.25tfp256) { exit 11i32; }
+    dim256<Newtons>:n = (2.0dim256<Kilograms> * 3.0dim256<Meters>) / (1.0dim256<Seconds> * 1.0dim256<Seconds>);
+    if ((n => tfp256) != 6.0tfp256) { exit 12i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,70 @@
+// M11 ty0084 -- meta/specs/TYPE_REFERENCE.md:84 (rule)
+// quote: The ladder is `int8` … `int4096`
+// claim: The signed ladder is int8 through int4096: each rung exists and its sign bit is bit W-1 (1 << (W-1) is negative).
+// expect: run:0
+// wrong: a rung refused, or a rung of another width (10-19 name int8 ... int4096)
+mod:ty0084;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+func:v16 = int16(int16:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
+func:vi128 = int128(int128:x) never fails { pass x; };
+
+func:w256 = int256(int256:x) never fails { pass x; };
+func:w512 = int512(int512:x) never fails { pass x; };
+func:w1024 = int1024(int1024:x) never fails { pass x; };
+func:w2048 = int2048(int2048:x) never fails { pass x; };
+func:w4096 = int4096(int4096:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    if (!((raw v8(1i8) << raw v8(7i8)) < 0i8)) { exit 10i32; }
+    if (!((raw v16(1i16) << raw v16(15i16)) < 0i16)) { exit 11i32; }
+    if (!((raw v32(1i32) << raw v32(31i32)) < 0i32)) { exit 12i32; }
+    if (!((raw v64(1i64) << raw v64(63i64)) < 0i64)) { exit 13i32; }
+    if (!((raw vi128(1i128) << raw vi128(127i128)) < 0i128)) { exit 14i32; }
+    if (!((raw w256(1i256) << raw w256(255i256)) < 0i256)) { exit 15i32; }
+    if (!((raw w512(1i512) << raw w512(511i512)) < 0i512)) { exit 16i32; }
+    if (!((raw w1024(1i1024) << raw w1024(1023i1024)) < 0i1024)) { exit 17i32; }
+    if (!((raw w2048(1i2048) << raw w2048(2047i2048)) < 0i2048)) { exit 18i32; }
+    if (!((raw w4096(1i4096) << raw w4096(4095i4096)) < 0i4096)) { exit 19i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

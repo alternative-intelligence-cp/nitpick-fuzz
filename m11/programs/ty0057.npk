@@ -1,0 +1,53 @@
+// M11 ty0057 -- meta/specs/TYPE_REFERENCE.md:57 (rule)
+// quote: Signedness picks the family
+// claim: Unsigned `+ - *` lower through the unsigned family llvm.uadd/usub/umul.with.overflow and not the signed one.
+// expect: ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11u"?\((?=(?:(?!\n\}).)*?@llvm\.uadd\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.usub\.with\.overflow\.i32\()(?=(?:(?!\n\}).)*?@llvm\.umul\.with\.overflow\.i32\()(?!(?:(?!\n\}).)*?@llvm\.s(?:add|sub|mul)\.with\.overflow)
+// wrong: an unsigned operation guarded by the signed intrinsics (a wrong overflow bit)
+mod:ty0057;
+
+func:vu32 = uint32(uint32:x) never fails { pass x; };
+
+func:m11u = uint32(uint32:a, uint32:b) never fails { pass ((a * b) - (a + b)); };
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw m11u(raw vu32(3u32), raw vu32(4u32)) != 5u32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,70 @@
+// M11 mc0278 -- meta/specs/MACRO_REFERENCE.md:278 (rule)
+// quote: the scan afterwards cannot
+// claim: The expansion walk reaches every statement kind (a miss would arrive as a refusal): invocations in an if condition, a while condition and measure, a for body, a pick arm, a when body and then block, a nested block, a struct literal, an array literal, a call argument and a give all expand.
+// expect: run:0
+// wrong: a refusal naming an invocation in a statement kind the walk missed, or a wrong count (10-13, 20, 21)
+mod:mc0278;
+
+macro:one = () { 1i32; };
+macro:three = () { 3i32; };
+
+struct:Pt = { int32:x; int32:y; };
+
+func:add_one_to = int32(int32:a) never fails { pass (a + #one()); };
+
+func:main = int32(cstring[]:_~argv) {
+    int32:n = 0i32;
+    if (#one() == 1i32) { n = n + #one(); }
+    while (n < #three()) decreases #three() - n { n = n + #one(); }
+    for (int64:i in 0i64...3i64) { n = n + #one(); discard(i); }
+    pick (n) { (6i32) { n = n + #one(); }, (*) { exit 20i32; } }
+    when (n < 9i32) decreases 9i32 - n { n = n + #one(); } then { n = n + #one(); } end { exit 21i32; }
+    { n = n + #one(); }
+    n = n + (raw add_one_to(#one()));
+    Pt:p = Pt{ x: #one(), y: #three() };
+    int32[2]:arr = [#one(), #three()];
+    int32:g = pick (n) { (13i32) { give #one(); }, (*) { give 0i32; } };
+    if (n != 13i32) { exit 10i32; }
+    if ((p.x + p.y) != 4i32) { exit 11i32; }
+    if (arr[1i64] != 3i32) { exit 12i32; }
+    if (g != 1i32) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

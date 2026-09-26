@@ -1,0 +1,31 @@
+// M11 vf0919 -- meta/specs/VERIFICATION_REFERENCE.md:919 (rule)
+// quote: checked positive at the `exit` (EnsuresViolated, the trap route's re-entry
+// claim: `failsafe`'s `exit` operand is checked positive: a computed zero is EnsuresViolated, and the trap route's re-entry rule ends the process at 70.
+// expect: run:70
+// wrong: unchecked: the process exits 0 (a trap reported as success), or failsafe re-entered (33)
+mod:vf0919;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+error:E9;
+func:broken = int32() { fail E9; };
+func:main = int32(cstring[]:_~argv) {
+    int32:v = broken() ?! E9;
+    exit (v + 1i32);
+};
+func:failsafe = int32(Error:e) {
+    int32:z = raw v32(0i32);
+    pick (e) {
+        (E9) { exit z; },
+        (EnsuresViolated) { exit 33i32; },
+        (IntOverflow) { exit 93i32; },
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
