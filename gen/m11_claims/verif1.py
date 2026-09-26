@@ -2823,3 +2823,25 @@ claim("vf0836", D, 836, "surfaces as a", "rule",
 claim("vf0839", D, 839, "The flag is documented as verifying", "rule",
       "The flag verifies data-race and lock-order freedom, not deadlock freedom.",
       untestable="[vague] about a struck flag's documentation")
+
+
+# ------------------------------------------------------------------ after run 1 (S45, S53)
+# The rows helper matched `main`'s rows by the module prefix (`<cid>.` or `<cid>.main`), but
+# `main`'s symbol in rows.txt is `@main`: every count in main read 0 (run 1). The helper now
+# maps `<cid>.main` to `@main` and lets a bare `<cid>.` match `@main` too; failsafe's rows
+# (`@npk_failsafe`) still never match. Every script that embeds it changed its TEXT, its
+# expectation not; a script that agreed in run 1 is re-measured with the rest.
+_HIT = ("function hit(s) { if (m ~ /\\.main$/) return s == \"@main\"; "
+        "if (m ~ /\\.$/) return index(s, m) > 0 || s == \"@main\"; return index(s, m) > 0 } ")
+ROWS_FN2 = ("rows() { awk -F'\\t' -v k=\"$1\" -v m=\"$2\" '" + _HIT + "$3 == k && hit($6)' obl/rows.txt"
+            " | wc -l | tr -d ' '; }\n"
+            "field() { awk -F'\\t' -v k=\"$1\" -v m=\"$2\" -v f=\"$3\" '" + _HIT +
+            "$3 == k && hit($6) { print $f }' obl/rows.txt; }")
+for _c in [c for c in CLAIMS if c["module"] == "verif1" and c["sh"] and ROWS_FN in c["sh"]]:
+    refix(_c["id"], "the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): "
+          "the helper was corrected in every script that embeds it", [(ROWS_FN, ROWS_FN2)], field="sh")
+refix("vf0138b", "a refinement leads a Rules block's list (`{ limit<r>, clause }`, as vf0276's example): "
+      "written after a clause it does not parse (PARSE-001); it now leads, which still tells the "
+      "orders apart (0 traps LimitViolated by the refinement before the clause divides by it)",
+      [("Rules<int32>:r_div = { 100i32 / $ > 1i32, limit<r_nz> };",
+        "Rules<int32>:r_div = { limit<r_nz>, 100i32 / $ > 1i32 };")])

@@ -12,7 +12,7 @@ func:main = int32(cstring[]:_~argv) {
     int256:w = raw v64(-5i64) => int256;
     if (w != -5i256) { exit 10i32; }
     uint256:u = raw vu64(18446744073709551615u64) => uint256;
-    if (u != 18446744073709551615u256) { exit 11i32; }
+    if (u != (18446744073709551615u64 => uint256)) { exit 11i32; }
     exit 0i32;
 };
 

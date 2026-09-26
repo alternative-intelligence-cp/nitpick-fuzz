@@ -312,7 +312,7 @@ cc0609c	CONCURRENCY	609	rule	m11/programs/cc0609c.npk	run:0	-
 cc0614	CONCURRENCY	614	rule	m11/programs/cc0614.npk	refuse	-
 cc0628	CONCURRENCY	628	rule	m11/programs/cc0628.npk	run:96	-
 cc0632	CONCURRENCY	632	rule	m11/programs/cc0632.npk	run:93	-
-cc0636	CONCURRENCY	636	rule	m11/programs/cc0636.npk	run:0	-
+cc0636	CONCURRENCY	636	rule	m11/programs/cc0636.npk	run:42	-
 cc0637	CONCURRENCY	637	rule	m11/programs/cc0637.npk	refuse	-
 cc0646	CONCURRENCY	646	rule	m11/programs/cc0646.npk	run:70	-
 io0014	IO	14	rule	m11/programs/io0014.npk	run:0	-

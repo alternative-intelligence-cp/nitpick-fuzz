@@ -9,7 +9,7 @@ mod:p;
 
 func:v32 = int32(int32:x) never fails { pass x; };
 
-Rules<int32>:r_pos = { $ > 0i32 };
+Rules<int32>:r_pos = { $ >= 0i32 };
 struct:Tk = { limit<r_pos> int32:n; int32:m; };
 Rules<Tk>:r_tk = { $.m >= 0i32 };
 func:ff1 = int32(int32:a) never fails {

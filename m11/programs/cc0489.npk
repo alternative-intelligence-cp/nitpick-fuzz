@@ -8,7 +8,7 @@ mod:cc0489;
 error:E1;
 error:E2;
 error:E3;
-async func:make = Channel<int32, 3i32, 2i64>() {
+async func:make = Channel<int32, 3i32, 2i64>() gives {
     Channel<int32, 3i32, 2i64>:ch = channel() ?! E1;
     await ch.send(7i32, raw duration_ms(100i64)) ?! E2;
     pass ch;

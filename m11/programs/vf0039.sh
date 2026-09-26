@@ -50,8 +50,8 @@ func:failsafe = int32(Error:e) {
 NPK
 "$NPKC" vf0039.npk --obligations obl -o vf0039.ll >npkc.out 2>&1 || exit 3
 [ -f obl/rows.txt ] || exit 4
-rows() { awk -F'\t' -v k="$1" -v m="$2" '$3 == k && index($6, m) > 0' obl/rows.txt | wc -l | tr -d ' '; }
-field() { awk -F'\t' -v k="$1" -v m="$2" -v f="$3" '$3 == k && index($6, m) > 0 { print $f }' obl/rows.txt; }
+rows() { awk -F'\t' -v k="$1" -v m="$2" 'function hit(s) { if (m ~ /\.main$/) return s == "@main"; if (m ~ /\.$/) return index(s, m) > 0 || s == "@main"; return index(s, m) > 0 } $3 == k && hit($6)' obl/rows.txt | wc -l | tr -d ' '; }
+field() { awk -F'\t' -v k="$1" -v m="$2" -v f="$3" 'function hit(s) { if (m ~ /\.main$/) return s == "@main"; if (m ~ /\.$/) return index(s, m) > 0 || s == "@main"; return index(s, m) > 0 } $3 == k && hit($6) { print $f }' obl/rows.txt; }
 [ "$(rows assert-static vf0039.)" -eq 1 ] || exit 1
 [ "$(field assert-static vf0039. 5 | sort -u)" = "c" ] || exit 1
 exit 0

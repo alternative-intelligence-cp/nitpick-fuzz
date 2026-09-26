@@ -127,6 +127,26 @@ def covers(doc, first, last=None):
     COVERS.append(dict(doc=doc, first=first, last=last, module=_MODULE[0]))
 
 
+def refix(cid, why, pairs, field="src", expect=None):
+    """After a run (PROGRESS.md S45): change claim `cid`'s program TEXT by replacing
+    each (old, new) of `pairs` in `field` ("src" or "sh"; each `old` must occur),
+    and record `why` in its `fixed`. The expectation never changes, except by
+    `expect=` under S45's one recorded exception (a claim read inside `failsafe`
+    signals the reference's answer with exit 42, since REACH-004 forbids exit 0)."""
+    c = next((c for c in CLAIMS if c["id"] == cid), None)
+    if c is None:
+        raise KeyError("refix: no claim %s" % cid)
+    text = c[field]
+    for old, new in pairs:
+        if old not in text:
+            raise ValueError("refix %s: %r not in its %s" % (cid, old[:60], field))
+        text = text.replace(old, new)
+    c[field] = text
+    if expect is not None:
+        c["expect"] = expect
+    c["fixed"] = why
+
+
 def covered_ranges(doc, module=None):
     """[(first, last)] of `doc` declared by every module (or by `module`), `last`
     resolved to the reference's last line, sorted."""

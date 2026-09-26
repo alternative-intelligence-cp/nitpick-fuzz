@@ -430,7 +430,7 @@ Tables whose rows are not claims:
 | `cc0628` | 628 | rule | “`exit` already” | `exit` routes to failsafe when a wild allocation is still live. | `trap:WildLeak` |
 | `cc0632` | 632 | rule | “No coroutine is resumed on any thread, no `defer` runs” | A trap is a whole-program event: a suspended task's `defer` (which would divide by zero) does not run, and failsafe sees the original IntOverflow. | `trap:IntOverflow` |
 | `cc0635` | 635 | rule | “stop *before* `failsafe` gets control” | Other threads stop before failsafe gets control. | untestable [timing] an ordering between threads at the moment of a trap |
-| `cc0636` | 636 | rule | “`failsafe` runs on the trapping thread as a” | failsafe runs on the trapping thread: a trap on a spawned thread runs failsafe on that thread (its gettid is not the process id). | `run:0` |
+| `cc0636` | 636 | rule | “`failsafe` runs on the trapping thread as a” | failsafe runs on the trapping thread: a trap on a spawned thread runs failsafe on that thread (its gettid is not the process id). | `run:42` |
 | `cc0637` | 637 | rule | “plain call and **may not be `async`**” | `failsafe` may not be `async`: an async failsafe is refused. | `refuse` |
 | `cc0641` | 641 | rule | “thread registry (64 slots” | The floor keeps a 64-slot thread registry, claimed and published before the clone. | untestable [internal] the registry's layout; the text states no outcome for a 65th live thread |
 | `cc0646` | 646 | rule | “is the exit-70 stop” | A re-entering failsafe holder is the exit-70 stop: a trap inside failsafe ends the process with 70. | `run:70` |

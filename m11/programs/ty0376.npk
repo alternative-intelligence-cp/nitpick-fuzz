@@ -6,8 +6,7 @@
 mod:ty0376;
 
 func:main = int32(cstring[]:_~argv) {
-    string:t = raw trim(" 	 ab 
-");
+    string:t = raw trim(" \t ab \n");
     if (!(string_equals(t, "ab"))) { exit 10i32; }
     exit 0i32;
 };

@@ -2152,3 +2152,12 @@ want "encoded field of the frac32 comparison's err-exit row" "$(col ffr err-exit
       wrong="an encoded row")
 
 # @@END@@
+
+
+# --------------------------------------------------------------------- after run 1 (S45, S53)
+# The program's field rule refused the vacant 0 (TYPE-077), so the count was never reached;
+# `$ >= 0` admits it and leaves the rows the claim counts unchanged. TEXT only.
+for _cid in ("vf0866c", "vf0866d"):
+    refix(_cid, "the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, "
+          "and the write points the claim counts are the same",
+          [("Rules<int32>:r_pos = { $ > 0i32 };", "Rules<int32>:r_pos = { $ >= 0i32 };")], field="sh")

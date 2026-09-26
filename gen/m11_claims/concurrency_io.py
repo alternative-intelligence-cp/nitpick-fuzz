@@ -2843,3 +2843,32 @@ claim("io0280", I, 280, "and only epoll", "rule",
       "The readiness mechanism is epoll only, with no timerfd; io_uring is refused.",
       untestable="[internal] the executor's syscalls are the runtime's, not visible to a "
                  "program")
+
+
+# ================================================================== after run 1 (S45, S53)
+# Each program below failed for a mistake of its own; its TEXT changed, its expectation not
+# (cc0636's under S45's one recorded exception: a claim read inside failsafe exits 42).
+refix("cc0489", "a function that creates and returns a channel says `gives` after its parameter list "
+      "(TYPE-007, D-183)",
+      [("async func:make = Channel<int32, 3i32, 2i64>() {", "async func:make = Channel<int32, 3i32, 2i64>() gives {")])
+refix("cc0636", "`tid` is a reserved word (PARSE-002): the local is `t_id`; failsafe names every identity "
+      "that can reach it (REACH-002); and the reference's answer is signalled with exit 42, since "
+      "REACH-004 forbids failsafe an exit of 0 (S45's exception)",
+      [("    int64:tid = sys(186i64) ?| 0i64;", "    int64:t_id = sys(186i64) ?| 0i64;"),
+       ("    if (tid == me) { exit 10i32; }", "    if (t_id == me) { exit 10i32; }"),
+       ("        (DivByZero) { exit 0i32; },\n        (*) { exit 11i32; }",
+        "        (DivByZero) { exit 42i32; },\n" +
+        "\n".join("        (%s) { exit %di32; }," % t for t in TRAPS if t[0] != "DivByZero") +
+        "\n        (*) { exit 11i32; }")],
+      expect="run:42")
+refix("cc0646", "failsafe carries a pick naming every identity that can reach it (REACH-001); the "
+      "division that traps inside failsafe comes before it",
+      [("func:failsafe = int32(Error:_~e) {\n    int32:z = raw v32(0i32);\n    int32:q = 10i32 / z;\n    exit q;\n};\n",
+        failsafe_text("").replace("func:failsafe = int32(Error:e) {\n",
+                                  "func:failsafe = int32(Error:e) {\n    int32:z = raw v32(0i32);\n"
+                                  "    int32:q = 10i32 / z;\n    discard(q);\n", 1))])
+for _cid in ("io0158", "io0163"):
+    refix(_cid, "the script's program named only IntOverflow in failsafe; REACH-002 demands every "
+          "identity that can reach it (Unreachable, DeadlineExceeded, ...), so it now names them all",
+          [("func:failsafe = int32(Error:e) {\n    pick (e) {\n        (IntOverflow) { exit 93i32; },\n"
+            "        (*) { exit 99i32; }\n    }\n    exit 9i32;\n};\n", failsafe_text(""))], field="sh")

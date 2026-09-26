@@ -9,11 +9,11 @@ error:E1;
 
 func:main = int32(cstring[]:_~argv) {
     cstring:c = to_cstring("abc") ?! E1;
-    wild char8->:p = c.ptr;
-    char8:t = p[c.len];
-    char8:f = p[0i64];
-    if (t != '\0') { exit 10i32; }
-    if (f != 'a') { exit 11i32; }
+    wild uint8->:p = c.ptr;
+    uint8:t = p[c.len];
+    uint8:f = p[0i64];
+    if (t != 0u8) { exit 10i32; }
+    if (f != 97u8) { exit 11i32; }
     exit 0i32;
 };
 

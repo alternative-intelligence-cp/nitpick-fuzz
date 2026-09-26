@@ -8,7 +8,7 @@ mod:vf0138b;
 func:v32 = int32(int32:x) never fails { pass x; };
 
 Rules<int32>:r_nz = { $ != 0i32 };
-Rules<int32>:r_div = { 100i32 / $ > 1i32, limit<r_nz> };
+Rules<int32>:r_div = { limit<r_nz>, 100i32 / $ > 1i32 };
 
 func:main = int32(cstring[]:_~argv) {
     limit<r_div> int32:x = raw v32(0i32);

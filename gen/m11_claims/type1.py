@@ -2486,3 +2486,17 @@ claim("ty0648", D, 648, "```llvm", "example",
 claim("ty0654", D, 654, "The dimensional annotation is attached to the AST type node", "rule",
       "The annotation lives on the AST type node; the type checker verifies the algebra and codegen ignores it.",
       untestable="[internal] the AST's type node is not observable; codegen's ignoring the unit is ty0593's IR test")
+
+
+# ------------------------------------------------------------------ after run 1 (S45, S53)
+# Each program below failed for a mistake of its own; its TEXT changed, its expectation not.
+refix("ty0376", "the Python string made `\\t` and `\\n` a real tab and newline inside the literal "
+      "(LEX-005); the escapes are now written as escapes",
+      [('" \t ab \n"', '" \\t ab \\n"')])
+refix("ty0399b", "a cstring's `.ptr` is `uint8->`, not `char8->` (TYPE-007): the bytes are read as uint8",
+      [("wild char8->:p = c.ptr;", "wild uint8->:p = c.ptr;"), ("char8:t = p[c.len];", "uint8:t = p[c.len];"),
+       ("char8:f = p[0i64];", "uint8:f = p[0i64];"), ("if (t != '\\0')", "if (t != 0u8)"),
+       ("if (f != 'a')", "if (f != 97u8)")])
+refix("ty0476b", "a u256 literal is outside the 64-bit literal envelope (LEX-004, D-148): the expected value "
+      "is built by widening the u64 maximum",
+      [("if (u != 18446744073709551615u256)", "if (u != (18446744073709551615u64 => uint256))")])
