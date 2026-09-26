@@ -1,0 +1,31 @@
+mod:c0107_str_for_binding_at_free_ra;
+func:mk = string() never fails {
+    pass string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+};
+func:obs_s = int32(string:v) never fails {
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+func:at_fr = NIL(string->:p) never fails {
+    string:t = move(<-p);
+    pass NIL;
+};
+func:main = int32(cstring[]:_~argv) {
+    string[2]:arr = [raw mk(), raw mk()];
+    for (string:x in arr) {
+        drop at_fr(@x);
+    }
+    int32:o1 = raw obs_s(arr[0i64]);
+    if (o1 != 21i32) { exit o1; }
+    exit 0i32;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

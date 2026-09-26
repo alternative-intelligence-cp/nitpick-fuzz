@@ -1,0 +1,28 @@
+mod:for_field_write_read_elem0;
+struct:Box = { string:s; };
+func:obs = int32(string:v) never fails {
+    if (string_byte_length(v) == 0i64) { pass 23i32; }
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 97u8) { pass 21i32; }
+    if (bs[0i64] == 120u8) { pass 22i32; }
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    Box[2]:arr = [Box{ s: string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c") }, Box{ s: string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c") }];
+    for (Box:x in arr) {
+        x.s = string_concat("xyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "w");
+    }
+    int32:o = raw obs(arr[0i64].s);
+    exit o;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

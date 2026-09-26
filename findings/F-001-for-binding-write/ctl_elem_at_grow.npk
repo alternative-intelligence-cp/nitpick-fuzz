@@ -1,0 +1,39 @@
+mod:ctl_elem_at_grow;
+func:mkl = List<int64>(int64:v) never fails {
+    List<int64>:l = raw list_init::<int64>(1i64);
+    drop list_push::<int64>(@l, v);
+    pass l;
+};
+func:grow = NIL(List<int64>->:p) never fails {
+    drop list_push::<int64>(p, 7i64);
+    drop list_push::<int64>(p, 8i64);
+    pass NIL;
+};
+func:obs_l = int32(List<int64>:v) never fails {
+    if (v.count == 0i64) { pass 23i32; }
+    int64:e = v[0i64];
+    if (e == 424242i64) { pass 21i32; }
+    if (e == -6148914691236517206i64) { pass 70i32; }
+    pass 24i32;
+};
+func:run = int32() never fails {
+    List<int64>[2]:arr = [raw mkl(424242i64), raw mkl(424242i64)];
+    drop grow(@arr[0i64]);
+    if (arr[0i64].count != 3i64) { pass 24i32; }
+    int32:o = raw obs_l(arr[0i64]);
+    pass o;
+};
+func:main = int32(cstring[]:_~argv) {
+    int32:r = raw run();
+    exit r;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

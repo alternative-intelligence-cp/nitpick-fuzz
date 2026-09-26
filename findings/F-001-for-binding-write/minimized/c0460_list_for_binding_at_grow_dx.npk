@@ -1,0 +1,32 @@
+mod:c0460_list_for_binding_at_grow_dx;
+func:mkl = List<int64>(int64:v) never fails {
+    List<int64>:l = raw list_init::<int64>(1i64);
+    pass l;
+};
+func:at_gr = NIL(List<int64>->:p) never fails {
+    drop list_push::<int64>(p, 12i64);
+    drop list_push::<int64>(p, 13i64);
+    drop list_push::<int64>(p, 14i64);
+    pass NIL;
+};
+func:run = int32() never fails {
+    List<int64>[2]:arr = [raw mkl(424242i64), raw mkl(424242i64)];
+    for (List<int64>:x in arr) {
+        drop at_gr(@x);
+    }
+    pass 0i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    int32:r = raw run();
+    exit r;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

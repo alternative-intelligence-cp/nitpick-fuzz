@@ -12,7 +12,8 @@ committed. A session that starts here resumes at the first unticked box.
 - [x] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
   — 4.1 and 4.2 done and pushed (session 1); 4.3: on 2026-09-26 the author said
   to continue with M5 and M6, at the same HUNT `6fb85d3` (session 2).
-- [ ] **M5** — the hunt — in progress (session 2)
+- [x] **M5** — the hunt: 956 cells at HUNT, 82 anomalies, 62 known, 20 new
+  in 2 findings (F-001, F-002), both also present at the baseline
 - [ ] **M6** — the report
 
 ## Compilers
@@ -262,6 +263,30 @@ At the baseline the same script accounts for all 114 of M3's anomalies: 32
 DEF-99, 24 DEF-106, 24 DEF-102, 8 DEF-105, 6 DEF-104, and the same 20
 candidates.
 
+**5.2 (b)–(e) — the two candidate shapes, taken through the remaining steps:**
+- **(b)** `gen/minimize.py` reduced eight representative cells (`c0107`,
+  `c0108`, `c0275`, `c0276`, `c0459`, `c0460`, `c0887`, `c0888`) to 26–35
+  lines each, in 37–61 builds per cell. Its outputs are kept in each finding's
+  `minimized/`. The findings' programs are those outputs with the grid's full
+  observer and fail-safe restored, plus the controls (S17).
+- **(c)** `gen/run_findings.py` ran every finding program twice at HUNT. Both
+  runs agree for all 23 programs (17 in F-001, 6 in F-002) on both legs.
+- **(d)** Once at the baseline: every verdict is identical to HUNT's, so both
+  shapes are old defects, not regressions.
+- **(e)** Written:
+
+| finding | shape | grid cells | HUNT = baseline verdicts | deduplication, in short |
+|---|---|---|---|---|
+| [`F-001`](findings/F-001-for-binding-write/) | a write through a `for` binding (`x.s = …`, or `@x` to a callee that frees or grows) frees the array's element | 16 | read 70/70 (22/22 at element 0), drop 95/95; 4 controls clean | DEF-102's defect at a second place: the compiler refuses a *move* of this binding with the lent parameter's own `TYPE-047` message; 3g might cover it, not measurable at HUNT |
+| [`F-002`](findings/F-002-generic-move-of-loan/) | `T:y = move(x);` of a lent `T` in a generic body frees the caller's value | 4 | read 70/70, drop 95/95; the concrete twin refused `TYPE-047`, the `move T:x` twin 21/21 | DEF-104's family, an operator its fix does not name; `move` and `pass` ask one rule, which returns early when `type_drops` says no |
+
+**5.3 — M5's counts.** Cells run at HUNT: **956** (100 in session 1, 856 here).
+Anomalies at HUNT: **82** (78 `DEFECT`, 4 `OVERRESTRICT`, no `CRASH`,
+timeout or other). Known: **62** (DEF-106 24, DEF-102 24, DEF-105 8, DEF-104
+6). New: **20** cells in **2** findings (F-001 16, F-002 4). Both new
+findings are present at the baseline as well. Neither is a regression, and
+nothing regressed between the two compilers (5.1).
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -364,6 +389,25 @@ HTTPS goes through an agent proxy.
   was checked to be byte-identical (above) and the committed first-100 HUNT
   records were reproduced exactly. The M5 cells are appended to the same
   `results/6fb85d3/cells.jsonl`.
+- **S16 — a function with a declared result and no `pass` compiles** and
+  returns a zero value: 0 for `int32`, an empty string for `string`. `main`
+  without `exit` exits 0. This was probed at both compilers (npkc 0, 0/0),
+  after the first minimiser run produced programs leaning on it. No reference
+  sentence says so (searched: TYPE, CONTROL, MEMORY, SPEC_GAPS). It is outside
+  the grid's definition of a defect, since a zero `string` is a vacancy and
+  its drop is a no-op, so it is recorded here and in REPORT.md, not
+  investigated (CLAUDE.md rule 8).
+- **S17 — minimisation.** `gen/minimize.py` deletes single lines and
+  brace-balanced blocks while the verdict (npkc, -O0, -O2) stays exactly the
+  cell's. It never deletes a bare `pass …;`/`exit …;` line (S16): a reproducer
+  must not rest on an implicit zero result. A finding's committed programs are
+  the minimiser's output with the grid's full observer (21/22/23/70) and
+  fail-safe restored, so that each exit code names what it saw. The raw
+  outputs stay in `minimized/` and are measured as well.
+- **S18 — one finding per shape, not per cell.** The 16 `for_binding` cells
+  are one shape (three write paths through one binding, as DEF-102 counts
+  every write path as one defect), and the 4 generic `move` cells are another.
+  Each finding keeps a program per write path and observer, plus its controls.
 
 ## Log
 
@@ -376,3 +420,10 @@ HTTPS goes through an agent proxy.
   fixed in a baseline shakedown.
   M3 done: whole grid at c3bdae2 in 58 s; every known shape flagged, no miss.
   M4.1-4.2 done: 100 cells at HUNT; stopped at the calibration checkpoint.
+- 2026-09-26 (session 2, branch `claude/awesome-cannon-b092si`, the cloud VM):
+  the author said to continue (M4.3). The toolchain was rebuilt by M0's
+  commands, byte-identical, and the machine change was checked (S15). DEF-106
+  was added (S14). M5.1: the remaining 856 cells ran at HUNT in 43 s; 40 cells
+  moved from the baseline, all to `TYPE-084`. M5.2: 82 anomalies, 62 known;
+  20 new in two shapes, minimised, confirmed twice, run at the baseline, and
+  written up as F-001 and F-002. M5 done.

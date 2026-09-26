@@ -1,0 +1,29 @@
+mod:gen_move_read;
+func:take<T> = NIL(T:x) never fails {
+    T:y = move(x);
+    pass NIL;
+};
+func:obs = int32(string:v) never fails {
+    if (string_byte_length(v) == 0i64) { pass 23i32; }
+    uint8[]:bs = string_bytes(v);
+    if (bs[0i64] == 97u8) { pass 21i32; }
+    if (bs[0i64] == 120u8) { pass 22i32; }
+    if (bs[0i64] == 170u8) { pass 70i32; }
+    pass 24i32;
+};
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "c");
+    drop take::<string>(s);
+    int32:o = raw obs(s);
+    exit o;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; }, (HeapOom) { exit 92i32; }, (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; }, (Unreachable) { exit 95i32; }, (WildLeak) { exit 96i32; },
+        (StackExhausted) { exit 106i32; }, (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; }, (DecreasesViolated) { exit 109i32; }, (TbbErr) { exit 110i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

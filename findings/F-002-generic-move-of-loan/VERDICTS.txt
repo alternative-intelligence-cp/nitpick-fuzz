@@ -1,0 +1,22 @@
+# F-002-generic-move-of-loan — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-09-26 03:56 UTC; HUNT 6fb85d3 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_concrete_move                            6fb85d3  run 1  npkc=1  codes=NITPICK-TYPE-047  O0=-  O2=-
+ctl_gen_move_param                           6fb85d3  run 1  npkc=0  codes=-  O0=21  O2=21
+gen_move_drop                                6fb85d3  run 1  npkc=0  codes=-  O0=95  O2=95
+gen_move_read                                6fb85d3  run 1  npkc=0  codes=-  O0=70  O2=70
+minimized/c0887_gen_str_generic_param_move_ra 6fb85d3  run 1  npkc=0  codes=-  O0=70  O2=70
+minimized/c0888_gen_str_generic_param_move_dx 6fb85d3  run 1  npkc=0  codes=-  O0=95  O2=95
+ctl_concrete_move                            6fb85d3  run 2  npkc=1  codes=NITPICK-TYPE-047  O0=-  O2=-
+ctl_gen_move_param                           6fb85d3  run 2  npkc=0  codes=-  O0=21  O2=21
+gen_move_drop                                6fb85d3  run 2  npkc=0  codes=-  O0=95  O2=95
+gen_move_read                                6fb85d3  run 2  npkc=0  codes=-  O0=70  O2=70
+minimized/c0887_gen_str_generic_param_move_ra 6fb85d3  run 2  npkc=0  codes=-  O0=70  O2=70
+minimized/c0888_gen_str_generic_param_move_dx 6fb85d3  run 2  npkc=0  codes=-  O0=95  O2=95
+ctl_concrete_move                            c3bdae2  run 1  npkc=1  codes=NITPICK-TYPE-047  O0=-  O2=-
+ctl_gen_move_param                           c3bdae2  run 1  npkc=0  codes=-  O0=21  O2=21
+gen_move_drop                                c3bdae2  run 1  npkc=0  codes=-  O0=95  O2=95
+gen_move_read                                c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70
+minimized/c0887_gen_str_generic_param_move_ra c3bdae2  run 1  npkc=0  codes=-  O0=70  O2=70
+minimized/c0888_gen_str_generic_param_move_dx c3bdae2  run 1  npkc=0  codes=-  O0=95  O2=95
