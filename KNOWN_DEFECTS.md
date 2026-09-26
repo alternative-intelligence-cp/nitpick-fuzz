@@ -213,6 +213,24 @@ DEF-131 … DEF-133), so HUNT2 `9126350` and `9f6f370` still carry them.
   a POINTER (`q.peek()` with `Box->:q`, `peek = int64(Box:self)`) reads the
   pointer's bits as the struct — a silent wrong answer at every pin.
 
+## M11's findings, registered by the compiler seat — deduplicate against these
+
+Registered on 2026-09-26, each citing this repository's `findings/` and `main` `3d7d924`; **fixed in the compiler's
+subcycle 1.6.1e**, planned after 1.6.1d step 3 — so HUNT2, `9f6f370` and `1b4f0c6` still carry them. A resumed M11
+must not report these again.
+
+- **DEF-144** — F-018: a macro's free name, alone or as a comparison's operand, reads the call site's local.
+- **DEF-145** — F-019: a `'\u{…}'` escape is typed `char8` and truncated to its low byte.
+- **DEF-146** — F-020: the scope-exit join relays the last-spawned child's error, not the first.
+- **DEF-147** — F-021: an expired `timedwait` returns success after the full wait.
+- **DEF-148** — F-022: a shared arena destroyed while a spawned thread holds it.
+- **DEF-149** — F-023: an un-awaited `async` method call is accepted and emits an undefined symbol.
+- **DEF-150** — F-024: `npkc` traps (exit 3) on three macro and depth shapes.
+- **DEF-151** — F-025: `--extra-picky=no-wildx` refuses every program, at the prelude.
+- **DEF-152** — F-026: `tfp64<Meters>` is accepted and its unit ignored.
+- **DEF-153** — F-027: the sixteen lower-priority rows.
+- **DEF-154** — F-028: the ninety-four documentation rows.
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.
