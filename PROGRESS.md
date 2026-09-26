@@ -25,12 +25,14 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 8.5 HUNT2 against `6fb85d3`, cell by cell: 148 moved, 136 expected, 0 missing, 12 changed codes explained (bisected to 3h)
   - [x] 8.6 the anomalies at HUNT2 through M5's five steps: none to take
   - [x] 8.7 `REPORT.md` §9; stop (M9 waits for the author)
-- [ ] **M9** — widen the ownership grid into its named gaps (session 4, in progress)
-  - [ ] 9.1 the leak observer
-  - [ ] 9.2 the reuse-proof read
-  - [ ] 9.3 types, 9.4 places, 9.5 operations
-  - [ ] 9.6 the recall gate kept; every new expectation written before its first run
-  - [ ] 9.7 the widened grid at the baseline and HUNT2, triaged; `REPORT.md` §10; stop
+- [x] **M9** — the ownership grid widened into its named gaps (session 4): 7 571
+  cells; the recall gate holds; at HUNT2 197 anomalies in four families; eight
+  findings (F-003–F-010), two of them memory faults at HUNT2 (F-003, F-004)
+  - [x] 9.1 the leak observer (the `heap:` line read from the runtime and 0.1.4b; a 1 MiB probe after `run`; calibrated by controls)
+  - [x] 9.2 the reuse-proof read (a same-sized sentinel; read-now at the loop places)
+  - [x] 9.3 types, 9.4 places, 9.5 operations (sections B–E of `gen/grid9.py`)
+  - [x] 9.6 the recall gate kept: every known shape flagged at the baseline; every expectation written in the generator before the first run
+  - [x] 9.7 the grid at the baseline and HUNT2, triaged by M5's five steps; `REPORT.md` §10; stop (M10 waits for the author)
 
 ## Compilers
 
@@ -660,6 +662,78 @@ known shape is flagged in the widened grid, by the new observers as well.
 | a consuming `pick`'s binding escapes the move rules | 32 | `DEFECT:uaf`, `double_free`, `segv`, `wrong_value` |
 | a write through a `$$i` claim (the expectation REFUSE, `BORROW-013`) | 16 | `DEFECT:wrong_value`: the write happened |
 
+**9.7 — triage by M5's five steps.**
+- **(a) Deduplicated.** Nothing at HUNT2 is a known shape.
+- **(b) Minimised.** Where a family came from a grid cell, the minimiser ran on
+  a representative cell at HUNT2, with `--live` for a leak: 28–36 lines, 62–81
+  builds each, in each finding's `minimized/`. Probe-found shapes were written
+  small by hand.
+- **(c) Confirmed** twice at HUNT2, both legs; the runs agree for every
+  program.
+- **(d) Run at the baseline.**
+- **(e) Written:**
+
+| finding | shape | class | cells | HUNT2 `9126350` | baseline |
+|---|---|---|---|---|---|
+| F-003 | a consuming `pick`'s binding escapes the move rules | use-after-free, double free | 44 | 0/95/95, 0/70/70; a local: `MOVE-001` | the same |
+| F-004 | a view's root freed by a callee that moves out through `@x` or `$$i x` | use-after-free | probe | 0/70/70; `$$m x`, an overwriting callee and a direct move: `BORROW-015` | the same (there, DEF-107 itself) |
+| F-005 | a store through a pointer, `(<-p) = v`, never frees the old value | leak | 121 | live 46; churn 46 × N + 43; an `OwnedFd` left open (26) | the same |
+| F-006 | a consuming `pick`'s named binding is never dropped at the arm's end | leak | 32 | live 46 with an empty arm; `_`, the lending form and a moved-out binding: 0 | the same |
+| F-007 | `to_cstring`'s buffer is never freed | leak | probe | peak 10 × N; an owning `string`: 9 | the same |
+| F-008 | a write through a `$$i` claim's holder compiles, which the reference's table names `BORROW-013` | a rule not enforced | 40 | 0/22/22; the root's write under `$$i`: `BORROW-013` | the same |
+| F-009 | a `move` parameter re-initialised after a move cannot be read | over-restriction (lower priority) | 72 | `MOVE-001`; a local: 22 | the same |
+| F-010 | a swap through a lent `dyn`'s method is refused `BORROW-002` | over-restriction (lower priority) | 12 | `BORROW-002` | 0/22/22: **new at HUNT2** |
+
+**The expectations the compiler did not meet, at HUNT2.**
+- 84 REFUSE cells were accepted: F-003's 44 and F-008's 40.
+- 374 SAFE cells were refused:
+  - 262 are `MOVE-001` by D-065's whole-binding rule (a swap or a move through
+    a field, an element or a range: the generator's reading, not the
+    compiler's);
+  - 72 are F-009;
+  - 28 are `TYPE-047` on `pass self.v` through a receiver (a refusal);
+  - 12 are F-010.
+
+Details in REPORT.md §10.7.
+
+**What the new observers added, on section A's same 478 M2 programs.**
+- The leak observer: 42 HUNT2 cells, and 66 at the baseline, that the M2
+  drop-at-exit twin called clean.
+- The read-now observer: 2 baseline cells, which turn a reused-block 22 into
+  the poison.
+- The sentinel read its own bytes through the original in 54 baseline cells
+  (reuse proven), against 2 that still read the poison.
+
+**Observations for M10 and M11**, measured and not findings here:
+- `?` is `?|` since D-175, but TYPE_REFERENCE §11.2 and MEMORY_REFERENCE §4.2
+  still spell `?`.
+- No string literal types as `cstring`, against TYPE_REFERENCE §3.2.1.
+- `fd => int64` zero-extends a vacant `OwnedFd`'s −1 to 4 294 967 295.
+
+**The estimate for M10, for the author** (reasoned from this session's
+measured costs, not measured):
+- **Compute is small.**
+  - The rebuild on a fresh VM costs about 7 min (LLVM 281 s, two builds of
+    about 55 s).
+  - M10's programs are small, one per checklist item or claim: a few hundred
+    at most. They build and run at about 10 per second per compiler at 4 jobs,
+    so under 5 min for both compilers.
+- **The work is reading and writing.** Each checklist item needs its reference
+  sentence found, and its expected exit code written from the TEXT before the
+  run. The sources:
+  - TYPE_REFERENCE (2 122 lines) for defaults, conversions and overflow;
+  - CONTROL_REFERENCE for `pick`, `when`, `defer` and loop ranges;
+  - BUILTIN_REFERENCE for string lengths;
+  - OP_REFERENCE for operators.
+
+  M9 already found three sentences the compiler contradicts (above). So
+  documentation findings are likely, and each costs a reading of the rule
+  against the compiler's behaviour.
+- **Overall:** one session. M9 ran from 10:27 UTC to its final commit, about 11:50 UTC, under 1.5 h,
+  of which compute was about 25 min. M10 is likely 1–2.5 h. The size of the
+  checklist sets the low end, and the number of disagreements to confirm and
+  write up sets the high end.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -923,3 +997,22 @@ A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
   (S23): DEF-105's fix at work on the grid's own spelling. 8.6: nothing to
   take; no new finding. 8.7: `REPORT.md` §9 written, the M9 estimate above.
   M8 done; stopped for the author before M9.
+- 2026-09-26 (session 4, branch `claude/focused-ride-3dfwa8`, a fresh cloud
+  VM): M9.
+  - **Setup.** M8 was fast-forwarded in first (S24). The toolchain was rebuilt
+    by M0's commands, byte-identical to session 3's, and the M2 grid re-ran
+    identical in 956/956 cells at both compilers.
+  - **9.1.** The `heap:` line read at the baseline and in `nitpick-time`'s
+    0.1.4b (`1cfd3f0`): it prints no live-at-exit figure. The leak observer is
+    a 1 MiB probe after `run`, calibrated by controls.
+  - **9.2.** A same-sized reuse sentinel, and read-now at the loop places.
+  - **9.3–9.5.** `gen/grid9.py`, sections A–E: 7 571 cells, 28 519 skipped
+    with reasons. Two shakedowns fixed four generator bugs before any result
+    counted (S29).
+  - **9.6.** Every known shape flagged at the baseline.
+  - **9.7.** The baseline in 340 s: 840 anomalies, 618 known. HUNT2 in 325 s:
+    197 anomalies, all candidates, in four families. Eight findings, F-003 to
+    F-010, each minimised, confirmed twice at HUNT2, run at the baseline and
+    written up. Two are memory faults at HUNT2: F-003, and F-004 (a gap in
+    DEF-107's fix). `REPORT.md` §10 written.
+  - M9 done; stopped for the author before M10.

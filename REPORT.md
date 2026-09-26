@@ -28,6 +28,21 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
   148 cells moved from HUNT. 136 are the expected moves, and 12 changed
   refusal code, which a bisection traces to DEF-105's fix. There is no new
   finding.
+- **M9, the widened grid (section 10).**
+  - **What was added:** a leak observer, a reuse sentinel and a read-now
+    observer, plus new types, places, operations and exits. That is 7 571
+    cells, and 28 519 combinations skipped with reasons.
+  - **The recall gate holds.**
+  - **At HUNT2:** 197 anomalies in four families, and **eight findings** in
+    all. Two are **memory faults at HUNT2**:
+    - **F-003**, a consuming `pick`'s binding escapes the move rules (a use
+      after free, a double free);
+    - **F-004**, a view's root freed through a callee that moves out, a gap
+      in DEF-107's fix.
+  - **The others:** three leaks (F-005 a store through a pointer, F-006,
+    F-007), a claim rule not enforced (F-008), and two lower-priority
+    over-restrictions.
+  - **Seven of the eight are present at the baseline too.**
 
 ## 1. The two compilers
 
@@ -500,4 +515,234 @@ python3 gen/run.py .work/hunt2                        # results/9126350/cells.js
 python3 gen/classify.py results/9126350/cells.jsonl
 python3 gen/dedup.py results/9126350/ --fixed DEF-99 DEF-102 DEF-104 DEF-105 DEF-106
 python3 gen/compare.py results/6fb85d3/ results/9126350/   # MOVES.md
+```
+
+## 10. M9 — the ownership grid widened into its named gaps
+
+Written 2026-09-26 by session 4, on a fresh 4-vCPU cloud VM. Every number is
+measured by the committed scripts. The records are:
+- `results/c3bdae2/` and `results/9126350/`: `cells9.jsonl`, `SUMMARY9.md`,
+  `classified9.jsonl` and `DEDUP9.md`;
+- `results/GRID9.md`: the denominators;
+- `findings/F-003` … `F-010`, each with `VERDICTS.txt` and, where it came from
+  the grid, `CELLS.txt`.
+
+The build record is in `PROGRESS.md`'s M9 section.
+
+### 10.1 The compilers
+
+The same two as section 9: the baseline `c3bdae2`, and HUNT2 `9126350`, which
+was still the compiler's `origin/main` at 10:28 UTC. Both were rebuilt by M0's
+commands, byte-identical to session 3's, and passed the commissioning check
+and the canaries. The M2 grid re-run on this VM is identical to the committed
+records in 956 of 956 cells at each.
+
+### 10.2 The new observers (9.1, 9.2)
+
+- **Leak (`lk`).**
+  - *Why a probe:* the runtime's `heap:` line prints bytes requested,
+    peak_live and the allocation count, and **no live-at-exit figure**. It was
+    read in `npkrt.ll` at the baseline and in `nitpick-time`'s
+    `meta/roadmap/0.1/0.1.4b.md` at `1cfd3f0`. 0.1.4b's §1.2 states the
+    consequence: `peak_live` alone cannot tell a leak at exit.
+  - *How:* the cell's drop-at-exit program, then `main` allocates a
+    1 048 576-byte probe and exits. `peak_live − 1 048 576` is the bytes live
+    after `run` returned, exact whenever `allocated − 1 048 576 < 1 048 576`,
+    which the same line shows.
+  - *Calibration:* a program that frees everything reads 0. One that keeps a
+    46-byte string (`exit` runs no drop) reads 46, where a peak-only reading
+    gives 46 for both.
+  - *`OwnedFd`:* the leak is a descriptor. `main` counts the descriptors 3..15
+    still open after `run`.
+- **Reuse sentinel (`rs`).** The read-after program, with a same-sized sentinel
+  allocated between the operation and the reads. A freed body that is still
+  free is taken by the sentinel, and the original then reads the sentinel's
+  bytes (25).
+- **Read now (`rn`), at the loop places.** The original is read inside the loop
+  right after the first iteration's operation, before the next iteration
+  allocates.
+
+**What they added, measured**, on section A's same 478 M2 programs, against
+each program's M2 twin:
+
+| observer | at the baseline | at HUNT2 |
+|---|---|---|
+| leak, against the M2 drop-at-exit twin | 66 cells the twin called clean leak | **42** cells the twin called clean leak |
+| read now, against the M2 read-after twin | 2 cells turn the twin's reused-block 22 into the poison, 70 (F-001's field writes) | none (every loop write is refused) |
+| reuse sentinel | 54 read cells read the sentinel through the original, **reuse proven**; 2 still read the poison | 3 cells read the sentinel (F-003) |
+
+### 10.3 The widened grid (9.3–9.5) and its denominators
+
+`gen/grid9.py` writes `cells9/`, and `gen/grid.py`'s 956 cells are unchanged.
+Its `--selfcheck` renders the M2 programs with the new builder, byte-identical
+in 956 of 956. **7 571 cells, and 28 519 combinations skipped with their
+reasons: 36 090 in all.** Expectations: REFUSE 3 210, SAFE 4 361, each written
+in the generator before the grid's first run (9.6).
+
+| section | crossed | cells | skipped |
+|---|---|---|---|
+| A | the M2 grid's 478 combinations × the leak and sentinel observers (read now at the loop place) | 986 | 448 |
+| B | **types**: `List<string>` (growth moves owning elements), a struct in a struct (`h.v.s`), `string[3]`, `Box[3]`, a generic `T` at `List<string>` and at `string[2]`, `buffer`, `OwnedFd`, `dyn` × the M2 places and operations | 1 700 | 4 600 |
+| C | **places**: `for` over an index range of an array or a `List`; `for` over a slice parameter from an array or a `List`; a lending and a consuming `pick`; a `Self->` receiver on an owned and a lent holder; a lent `dyn`'s method; `$$m`; `$$i`; a temporary; the `Result` paths (`?|` success, `?|` failure, `relay`) × the M2 operations, the partial move and the swap | 2 076 | 13 224 |
+| D | **operations**: a partial move, a swap, a conditional move taken and not taken, a move in a loop with and without re-initialisation × every place | 2 396 | 9 844 |
+| E | **exits with live owners**: `break`, `continue`, an early `pass`, an early `pass` of an owner, `relay`, `relay` past a temporary, a trap to failsafe, a trap past a temporary × holders × types | 413 | 403 |
+
+Where the language has no spelling, the cell is skipped with the reason:
+- `for` over a local slice view is `BORROW-009`;
+- `for` over a `List` is `TYPE-033`;
+- `dyn T[2]` and `dyn T->` parse as `dyn (T[2])` and `dyn (T->)`;
+- a generic `T` cannot be grown.
+
+Two shakedowns fixed four generator bugs before any result counted
+(`PROGRESS.md` S29). No expectation was changed.
+
+### 10.4 The recall gate, kept (9.6)
+
+At the baseline every known shape is flagged in the widened grid, by the new
+observers as well (`gen/recall9.py`):
+
+| known | cells of the shape | flagged `DEFECT` | read-after / drop / leak / sentinel / read-now |
+|---|---|---|---|
+| DEF-99 | 348 | 224 | 45 / 51 / 71 / 57 / 0 |
+| DEF-106 | 116 | 64 | 10 / 10 / 22 / 22 / 0 |
+| DEF-102 (the pointer-receiver call on a loan included) | 305 | 175 | 32 / 29 / 70 / 44 / 0 |
+| F-001 (a `for` over a slice parameter included) | 235 | 133 | 17 / 15 / 51 / 25 / 25 |
+| DEF-104 | 36 | 22 | 2 / 4 / 12 / 4 / 0 |
+| F-002 | 12 | 12 | 2 / 2 / 4 / 4 / 0 |
+| DEF-105 | 14 | 4, and case 1's four refused controls | 0 / 0 / 2 / 2 / 0 |
+
+### 10.5 The widened grid at both compilers (9.7; 4 jobs)
+
+| class | baseline `c3bdae2` (340 s) | HUNT2 `9126350` (325 s) |
+|---|---|---|
+| refused | 2 584 | 3 500 |
+| clean | 4 168 | 3 874 |
+| `DEFECT:double_free` | 260 | 16 |
+| `DEFECT:leak` | 214 | 149 |
+| `DEFECT:leg_mismatch` | 149 | 0 |
+| `DEFECT:uaf` | 109 | 6 |
+| `DEFECT:wrong_value` | 46 | 24 |
+| `DEFECT:segv` | 37 | 2 |
+| `OVERRESTRICT` | 4 | 0 |
+| `CRASH:npkc`, `timeout`, `other` | 0 | 0 |
+| **total** | **7 571** | **7 571** |
+
+Deduplication (`gen/dedup9.py`):
+- At the baseline, **840 anomalies: 618 of known shapes** (DEF-99 224,
+  DEF-102 175, F-001 133, DEF-106 44, DEF-104 22, F-002 12, DEF-105 8), and
+  222 candidates.
+- At HUNT2, which carries every fix, **197 anomalies, all candidates**. They
+  fall into four families, with nothing left over, and each family is a
+  finding below.
+
+### 10.6 The findings
+
+Each was taken through M5's five steps.
+- **Minimised:** by `gen/minimize.py` where it came from a grid cell, with
+  `--live` keeping a leak's reading, and by hand where it came from a probe.
+- **Confirmed** twice at HUNT2 on both legs, and **run** at the baseline.
+- **Written up** with controls in `findings/F-NNN-*/`.
+
+"live" is the leak reading.
+
+| id | shape | class | grid cells | HUNT2 `9126350` | baseline `c3bdae2` |
+|---|---|---|---|---|---|
+| [F-003](findings/F-003-consuming-pick-move-rules/) | a consuming `pick`'s binding escapes the move rules: a second move and a read after a move compile | **use-after-free, double free** | 44 | 0 / **95** / **95**; 0 / **70** / **70** (a local: `MOVE-001`) | the same |
+| [F-004](findings/F-004-view-root-freed-through-callee/) | a view's root freed by a callee that moves the value out through `@x` or `$$i x` | **use-after-free** | probe | 0 / **70** / **70** (`$$m x`, an overwriting callee and a direct move: `BORROW-015`) | the same, as DEF-107 itself |
+| [F-005](findings/F-005-store-through-pointer-leak/) | a store through a pointer, `(<-p) = v`, never frees the old value | **leak** | 121 | live **46** per store; 46 × N + 43 over N calls; an `OwnedFd` left open (26) | the same |
+| [F-006](findings/F-006-consuming-pick-binding-not-dropped/) | a consuming `pick`'s named binding is never dropped at the arm's end | **leak** | 32 | live **46**, with an empty arm (the lending form, a moved-out binding and `_`: 0) | the same |
+| [F-007](findings/F-007-to-cstring-leak/) | `to_cstring`'s buffer is never freed | **leak** | probe | `peak_live` = 10 × N (an owning `string`: 9) | the same |
+| [F-008](findings/F-008-shared-claim-holder-write/) | a write through a `$$i` claim's holder compiles, where the reference's table names it `BORROW-013` | a rule not enforced (with a view it is F-004) | 40 | 0 / 22 / 22 (the root's write under `$$i`: `BORROW-013`) | the same |
+| [F-009](findings/F-009-move-param-reinit-refused/) | a `move` parameter re-initialised after a move cannot be read | over-restriction, lower priority | 72 | 1, `MOVE-001` (a local: 22) | the same |
+| [F-010](findings/F-010-lent-dyn-swap-refused/) | a swap through a lent `dyn`'s method is refused `BORROW-002` | over-restriction, lower priority; **new at HUNT2** | 12 | 1, `BORROW-002` | 0 / 22 / 22 |
+
+- **Two memory faults at HUNT2**, F-003 and F-004. F-004 is a gap in DEF-107's
+  fix: the fix refuses three spellings of the same free, and not a callee that
+  moves out.
+- **Three leaks**, F-005, F-006 and F-007, visible only to the new leak
+  observer. **One claim rule not enforced**, F-008: with a view it is F-004's
+  `$$i` spelling.
+- **All but F-010 are old defects**, with identical verdicts at the baseline.
+  F-010 is DEF-115's fix (1.6.1 step 0) refusing where no borrow exists.
+
+### 10.7 The expectations the compiler did not meet, each explained
+
+At HUNT2, **84 cells expected REFUSE were accepted**: F-003's 44 and F-008's
+40.
+
+**374 cells expected SAFE were refused:**
+- 262 are `MOVE-001` by D-065's whole-binding rule. MEMORY_REFERENCE §1.1c:
+  a move out of a part invalidates the root, and assigning the part does not
+  re-initialise it. These are a swap or a move through a field, an element or
+  a range. *The generator's reading was wrong; the rule is stated.*
+- 72 are F-009.
+- 28 are `TYPE-047` on `pass self.v` through a `Self->` receiver, whose
+  message is "`pass` would hand the caller a copy". It is a refusal. *An
+  observation:* the grid's `pass (<-x)` of a whole pointee is accepted and
+  leaves the vacant value.
+- 12 are F-010.
+
+### 10.8 Observations for M10 and M11 (measured; not findings of this milestone)
+
+- **`?` is not the `Result` fallback.** A bare `expr ? default` is
+  `PARSE-011` (D-175: write `?|`). TYPE_REFERENCE §11.2's unwrap table, and
+  MEMORY_REFERENCE §4.2's `get(h) ? 0i64`, still spell `?`. A documentation
+  mismatch, for M11.
+- **No string literal types as `cstring`.** `cstring:dn = "/dev/null";` and a
+  literal passed to `open` are both `TYPE-007`. TYPE_REFERENCE §3.2.1 lists
+  "string literal in `cstring` position" as a source. For M11.
+- **`fd => int64` zero-extends.** A vacant `OwnedFd`'s `value` (−1, D-225)
+  converts to 4 294 967 295. D-042 makes `fd` an `i32` and does not say
+  whether it is signed. For M10's conversion checks.
+
+### 10.9 What the widened grid still does not cover
+
+**Places and types.**
+- Views, beyond F-004's probe: the grid has no view place, and a view ×
+  claim × callee cross is the natural next axis.
+- Closures and function values, arenas and `Handle<T>`, channels, threads and
+  `async` frames.
+- `defer`, `when`, `Optional`, a `Result`'s `.value` as a place, `List<Box>`
+  growth, and a nesting deeper than `h.v.s`.
+- An array of, or a pointer to, a `dyn`, which has no spelling.
+
+**Observers.**
+- A `buffer`'s bytes are read only through pointer indexing, so `buffer` has
+  no sentinel, and its read-after sees vacancy and length only.
+- An `OwnedFd` closed twice at scope exit is silent: EBADF, unless another
+  descriptor took the number between the two closes.
+- No drop runs on a trap and failsafe's region is not counted, so the leak
+  observer has no reading after a trap.
+- The sentinel can prove reuse only while the freed block is still free when
+  the sentinel is allocated.
+- Section 7's remaining blind spots stand: one leg pair, one target, and
+  exit-code comparison between the legs.
+
+### 10.10 Cost, for calibration (the cloud VM, 4 jobs)
+
+| step | time |
+|---|---|
+| LLVM 20.1.2 fetch, test and extract | 281 s (the download 10 s) |
+| the two compiler builds | 52.5 s and 54.4 s |
+| the M2 grid at both compilers (the machine check) | 41 s and 44 s |
+| the widened grid, 7 571 cells | 340 s at the baseline, 325 s at HUNT2 (twice, with the superseded run) |
+| the two shakedowns and the `OwnedFd` re-run | about 12 min |
+| the minimiser, four cells in parallel | about 3 min (62–81 builds each) |
+| the findings' programs, HUNT2 twice and the baseline once | about 3 min |
+
+The session ran from 10:27 UTC to its last commit, which `PROGRESS.md`'s log
+records.
+
+### 10.11 Reproducing
+
+```
+python3 gen/grid9.py                     # cells9/, 7 571 programs (--selfcheck: the M2 programs byte-identical)
+python3 gen/grid9_stats.py               # results/GRID9.md, the denominators
+python3 gen/run.py .work/base  --cells cells9 --out results/c3bdae2/cells9.jsonl
+python3 gen/run.py .work/hunt2 --cells cells9 --out results/9126350/cells9.jsonl
+python3 gen/classify9.py results/9126350/cells9.jsonl
+python3 gen/dedup9.py results/9126350/ --fixed DEF-99 DEF-102 DEF-104 DEF-105 DEF-106 F-001 F-002
+python3 gen/recall9.py results/c3bdae2/  # the recall gate
+python3 gen/run_findings.py F-003 F-004 F-005 F-006 F-007 F-008 F-009 F-010 --hunt .work/hunt2 --base .work/base --heap
+python3 gen/snip.py FILE.npk --heap      # one program, both compilers, both legs
 ```
