@@ -12,16 +12,22 @@ still exactly --want. The units tried are single lines and brace-balanced
 blocks (a whole function, a whole `for` or `if` block); passes repeat until
 one deletes nothing. The result is printed with the number of builds tried.
 
+M9: --live N also requires the leak observer's reading, peak_live - 1048576
+under NPK_HEAP_STATS (gen/snip.py's build), to be N on both legs, so that a
+leak's reproducer keeps its leak. The probe line (`buffer_new(1048576i64)`) is
+protected as `pass`/`exit` are.
+
 A bare `pass …;` or `exit …;` line is never deleted on its own: a function
 with a declared result and no `pass` compiles and returns a zero value (probed
 at both compilers, 2026-09-26), and a reproducer must not lean on that.
 """
 import argparse, os, re, shutil, sys, tempfile
 
-PROTECTED = re.compile(r"^\s*(pass|exit)\b")
+PROTECTED = re.compile(r"^\s*(pass|exit)\b|buffer_new\(1048576i64\)")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from run_known import build_and_run  # noqa: E402
+import snip  # noqa: E402
 
 
 def depth_change(line):
@@ -75,6 +81,7 @@ def main():
     ap.add_argument("--want", required=True, help="npkc,O0,O2 e.g. 0,70,70")
     ap.add_argument("--out", default=None)
     ap.add_argument("--llvm", default=os.path.join(".work", "llvm"))
+    ap.add_argument("--live", type=int, default=None, help="the leak reading both legs must keep")
     a = ap.parse_args()
     want = tuple(x.strip() for x in a.want.split(","))
     comp, llvm = os.path.abspath(a.compiler), os.path.abspath(a.llvm)
@@ -93,6 +100,12 @@ def main():
         scratch = os.path.join(work, "build")
         shutil.rmtree(scratch, ignore_errors=True)
         os.makedirs(scratch)
+        if a.live is not None:
+            r = snip.build_and_run(os.path.join(d, name), comp, llvm, heap=True)
+            lives = [(h[1] - 1048576) if h else None for h in (r["heap_O0"], r["heap_O2"])]
+            if lives != [a.live, a.live]:
+                return ("live", str(lives), "")
+            return (str(r["npkc"]), str(r["O0"]), str(r["O2"]))
         rc, codes, o0, o2, _ = build_and_run(os.path.join(d, name), comp, llvm, scratch)
         return (str(rc), str(o0), str(o2))
 

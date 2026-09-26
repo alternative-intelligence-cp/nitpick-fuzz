@@ -135,6 +135,7 @@ func:fd_open = bool(int64:n) never fails {
 func:obs_fd = int32(OwnedFd:v) never fails {
     int64:n = v.value => int64;
     if (n == -1i64) { pass 23i32; }
+    if (n == 4294967295i64) { pass 23i32; }
     if (!(raw fd_open(n))) { pass 70i32; }
     if (n < (raw fdt())) { pass 21i32; }
     pass 22i32;

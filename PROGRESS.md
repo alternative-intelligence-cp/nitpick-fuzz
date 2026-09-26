@@ -579,6 +579,87 @@ around; to be taken through M5's steps in triage):
   - `for` over a `string[]` PARAMETER compiles;
   - `gid` is a reserved kernel-identifier type (`PARSE-001` at HUNT2).
 
+**The shakedown (before any result counted), and the generator's fixes.**
+- **First shakedown.** The whole grid (then 7 826 cells) ran at the baseline
+  into scratch. Two generator bugs showed, and nothing else of the
+  generator's own:
+  - `use` is a keyword, so every `self_lent` and `dyn_recv` cell stopped at
+    `PARSE-002`;
+  - `dyn T[2]` and `dyn T->` parse as `dyn (T[2])` and `dyn (T->)`
+    (`TYPE-006`).
+
+  The helper was renamed, and a `dyn` is no longer crossed with the array and
+  pointer places or the `at_*` operations (`e0d3d1c`… see git log, `M9 (2)`).
+- **Second shakedown.** The first full run at both compilers showed two more
+  gaps. They were fixed and that run was superseded; its records are kept in
+  scratch (`M9 (3)`):
+  - the generic body had no `at_grow`, so 16 cells performed no operation;
+  - the descriptor observer's number test cannot follow a loop's reuse.
+- **An observer bug found in triage.** A vacant `OwnedFd`'s `value => int64`
+  reads 4 294 967 295 (the i32 −1, zero-extended; D-042 makes `fd` an `i32`),
+  and `obs_fd` compared the value with `-1i64` only. So the observer called a
+  vacant descriptor "closed" (70). `obs_fd` now takes either spelling of −1.
+  Only helper text changed, so the ids are stable, and the 403 `OwnedFd`
+  cells were re-run at both compilers and their records replaced.
+- **No expectation was changed** by any of these fixes (S29).
+
+**The widened grid** (`gen/grid9.py`; the denominators are in
+`results/GRID9.md`): **7 571 cells** and **28 519 skipped** combinations, each
+with its reason; 36 090 in all. REFUSE 3 210, SAFE 4 361.
+
+| section | what | cells | skipped |
+|---|---|---|---|
+| A | the M2 grid's 478 combinations × the new observers (leak, reuse sentinel; read-now at the loop place) | 986 | 448 |
+| B | the new types (`List<string>`, a nested struct, `string[3]`, `Box[3]`, generic `T` at `List<string>` and `string[2]`, `buffer`, `OwnedFd`, `dyn`) × the M2 places and operations | 1 700 | 4 600 |
+| C | the new places (`for` over a range of an array or a `List`, over a slice parameter from an array or a `List`, a lending and a consuming `pick`, a `Self->` receiver on an owned and on a lent holder, a lent `dyn`'s method, `$$m`, `$$i`, a temporary, the `Result` paths `?|`-success, `?|`-failure and `relay`) × the M2 operations and the partial move and swap | 2 076 | 13 224 |
+| D | the new value operations (a partial move, a swap, a conditional move taken and not taken, a move in a loop with and without re-initialisation) × every place | 2 396 | 9 844 |
+| E | the control-flow exits with live owners (`break`, `continue`, an early `pass`, an early `pass` of an owner, `relay`, `relay` past a temporary, a trap, a trap past a temporary) × holders × types | 413 | 403 |
+
+**9.7 — the runs** (4 jobs; `results/<commit>/cells9.jsonl`, `SUMMARY9.md`,
+`classified9.jsonl`, `DEDUP9.md`): the baseline in 340 s and HUNT2 in 325 s,
+plus the 403 `OwnedFd` cells again at each.
+
+| class | baseline `c3bdae2` | HUNT2 `9126350` |
+|---|---|---|
+| refused | 2 584 | 3 500 |
+| clean | 4 168 | 3 874 |
+| `DEFECT:double_free` | 260 | 16 |
+| `DEFECT:leak` | 214 | 149 |
+| `DEFECT:leg_mismatch` | 149 | 0 |
+| `DEFECT:uaf` | 109 | 6 |
+| `DEFECT:wrong_value` | 46 | 24 |
+| `DEFECT:segv` | 37 | 2 |
+| `OVERRESTRICT` | 4 | 0 |
+| `CRASH`, timeout, other | 0 | 0 |
+| **total** | **7 571** | **7 571** |
+
+**9.6 — the recall gate holds** (`gen/recall9.py`, at the baseline): every
+known shape is flagged in the widened grid, by the new observers as well.
+
+| known | cells of the shape | flagged `DEFECT` | ra / dx / lk / rs / rn |
+|---|---|---|---|
+| DEF-99 | 348 | 224 | 45 / 51 / 71 / 57 / 0 |
+| DEF-106 | 116 | 64 | 10 / 10 / 22 / 22 / 0 |
+| DEF-102 (with the pointer-receiver call on a loan) | 305 | 175 | 32 / 29 / 70 / 44 / 0 |
+| F-001 (with a `for` over a slice parameter) | 235 | 133 | 17 / 15 / 51 / 25 / 25 |
+| DEF-104 | 36 | 22 | 2 / 4 / 12 / 4 / 0 |
+| F-002 | 12 | 12 | 2 / 2 / 4 / 4 / 0 |
+| DEF-105 | 14 | 4 (+ its 4 `OVERRESTRICT` controls, case 1) | 0 / 0 / 2 / 2 / 0 |
+
+**Deduplication** (`gen/dedup9.py`):
+- At the baseline, 840 anomalies: 618 are known shapes, and 222 are
+  candidates.
+- At HUNT2, which carries every fix, **197 anomalies, all candidates**. They
+  fall into four families, with nothing left over (triage below):
+
+| family (HUNT2) | cells | verdicts |
+|---|---|---|
+| a store through a pointer, `(<-p) = v`, does not drop the old value | 117 | `DEFECT:leak`: the original's bytes, or a descriptor left open |
+| a consuming `pick`'s binding is not dropped at the arm's end | 28 | `DEFECT:leak` |
+| the two at once (`pick_own` × `at_overwrite`) | 4 | `DEFECT:leak` |
+| a consuming `pick`'s binding escapes the move rules | 32 | `DEFECT:uaf`, `double_free`, `segv`, `wrong_value` |
+| a write through a `$$i` claim (the expectation REFUSE, `BORROW-013`) | 16 | `DEFECT:wrong_value`: the write happened |
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -792,6 +873,19 @@ A fresh VM of the same kind as sessions 2 and 3: `.work/` did not exist.
   `meta.json` says `"heap": true` runs under `NPK_HEAP_STATS=1`, and each leg
   records the `heap:` line's three words. Cells without the key run exactly as
   before.
+
+- **S29 — the shakedowns changed the generator, never an expectation.** M2's
+  practice was followed: a run into scratch, then its generator's own bugs
+  fixed before any result counts. Four such fixes were made (above), each
+  committed before the run that counts. Where a verdict differs from its
+  expectation because the language's rule is not the one the generator
+  assumed, the expectation stands as written, and the difference is explained
+  in the triage below. Examples are D-065's whole-binding rule refusing a swap
+  through a field, and `TYPE-047` refusing `pass self.v` through a receiver.
+- **S30 — the leak observer's verdict is the `heap:` line.** `gen/minimize.py`
+  gained `--live N`, which keeps a deletion only while the leak reading stays
+  N on both legs. `gen/run_findings.py` gained `--heap`, which records both
+  legs' `heap:` words beside the exit codes. Both are additive.
 
 ## Log
 
