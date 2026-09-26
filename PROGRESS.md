@@ -41,8 +41,10 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
   - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
-- [ ] **M11** — the reference, checked against the compiler (session 6)
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line
+- [ ] **M11** — the reference, checked against the compiler (session 6: **STOPPED
+  part-way on the author's word, 2026-09-26, the cloud credit nearly spent**;
+  resume from "M11 — the state at the stop" below)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN done and run; five ranges drafted, unreviewed (`gen/m11_claims/_wip_*.py`); nine not started
   - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2
   - [ ] 11.3 `REPORT.md` §12; stop
 
@@ -946,6 +948,76 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
   223 of 223 (npkc rc, codes, both legs, verdict; 16 s): 212 agree, 11 disagree, as
   recorded.
 
+### M11 — the state at the stop (read this first to resume)
+
+The author stopped the session at about 13:50 UTC because the cloud credit was
+nearly spent. Nothing below is ticked. Everything committed is consistent: no
+claim program ran except BUILTIN's, and every expectation was written from the
+text before its program's first run.
+
+**Done, committed and measured: BUILTIN_REFERENCE** (`gen/m11_claims/builtin.py`,
+the session's own extraction, S42): 227 claims (2 examples, 108 rows, 117
+rules), 194 testable (10 of them M10's programs), 33 untestable with reasons;
+every code block and table row covered; the uncovered-line check (below) clean
+but for history sentences. Its shakedown ran twice in scratch at HUNT2 (run 1:
+165 agree, 27 disagree; 21 programs then fixed for their own mistakes, each
+claim's `fixed` saying why, S45). **Run 2: 182 agree, 12 disagree**, and every
+one of the 12 gives the same verdict at the baseline `c3bdae2` and at
+`9f6f370` (old, not regressions). Triage is NOT done; the candidates:
+- **documentation**, the compiler right by the decisions:
+  - `#wild_ptr` (417b), `#ptr_add` (419b) and `atomic_from_ptr` (148c) are
+    accepted outside a `wild` context, which no reference defines (D-315 struck
+    the same rule from `#wild_slice` as "nothing ever enforced or defined it");
+  - `close(release_fd(move o))` (261): the row's own spelling is PARSE-001
+    (`move(o)` works, 261c agrees);
+  - `sys`'s "a nested bare-builtin call is refused" (348) is stale since D-201
+    typed every builtin (D-192's own text dates it);
+  - `--seccomp` (368) and `--extra-picky=no-sys` (375) exist in no tool: npkc
+    knows only `--extra-picky=no-wildx`, and npkg neither;
+  - §5's inline assembly, the row and the example (432, 439), is PARSE-002.
+- **compiler, lower priority:** `suspend_until` in a sync function (256) is
+  accepted by the checker and refused by the emitter, `EMIT-002`.
+- **the claim holds, more strictly than the program expected:** a store to a
+  sealed page (154) and a call of an unsealed one (141) are refused at compile
+  time (`WILDX-001`, `WILDX-002`) where the programs expected a run-time fault.
+- Not a finding: a `shared_arena` alive in `main` at `exit 0` traps `WildLeak`,
+  which MEMORY_REFERENCE §4.3 states ("an un-destroyed shared arena is a
+  wild-role leak the exit check names").
+
+**Drafted by the sub-agents, NOT yet reviewed, and excluded from the loader**
+(a leading `_` makes `gen/m11.py` skip a module): the agents were stopped
+mid-work. `python3 gen/m11.py --check --module _wip_X --doc D --lines A-B` gives:
+
+| module | range | claims | check |
+|---|---|---|---|
+| `_wip_type1.py` | TYPE 1–660 | 322 | 0 errors: complete |
+| `_wip_macro_ast.py` | MACRO 1–413 | 124 | 0 errors: complete |
+| `_wip_macro_ast.py` | AST 1–645 | 0 | not started |
+| `_wip_concurrency_io.py` | CONCURRENCY 1–648 | 152 | 6 errors |
+| `_wip_concurrency_io.py` | IO 1–288 | 78 | 5 errors |
+| `_wip_verif1.py` | VERIFICATION 1–845 | 357 | 18 errors (quotes on neighbouring lines) |
+| `_wip_verif2.py` | VERIFICATION 846–2352 | 228 | 51 errors: stopped near line 1338 |
+
+**Not started:** TYPE 661–2123, TRAITS, MEMORY, MODULE, BUILD, OP, CONTROL,
+LEXICAL and AST (about 5 900 lines).
+
+**To resume (a later session):**
+1. The start checks and M0's rebuild as always (about 7 min).
+2. For each `_wip_` module: fix its check errors, read its claims against the
+   reference (the quotes are checked; the expectations and programs are not),
+   then drop the `_wip_` prefix. `m11/BRIEF.md` is the convention.
+3. Extract the nine ranges not started, by the brief: by the session, or by
+   fewer sub-agents than session 6 used, since eleven at once is what spent the
+   credit.
+4. Commit every module (expectations before runs), run all with
+   `gen/m11.py` then `gen/m11_run.py .work/hunt2` (about 10 s per 200
+   programs), fix program mistakes (text only, `fixed=`), run again, and check
+   every AGREEING refusal's first diagnostic: run 1 of BUILTIN had four
+   refusals that agreed for a reason other than the claim's.
+5. Triage by M5's steps; `gen/m11_report.py` writes `m11/RESULTS.md` and reads
+   the classes from a `gen/m11_triage.py` still to be written; then REPORT.md
+   §12.
+
 ## Environment
 
 *(session 6, measured 2026-09-26 13:03 UTC; M11 run here — the start check (a))*
@@ -1300,6 +1372,18 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   `Exists` 120, `CrossDevice` 121, `BadPath` 122. A program's own `E<k>` exits 80+k, and
   exit 0 is the reference's answer (S34, S39).
 
+- **S45 — a program's text may change after its first run, its expectation not.**
+  S36's rule, carried to M11: a claim's `fixed` field says why its program changed
+  (a spelling of the program's own, not the claim's). One exception is recorded
+  where it happens: a claim read inside `failsafe` signals the reference's answer
+  with exit 42, not 0, because REACH-004 forbids `failsafe` an exit of 0 (D-014);
+  the claim itself is unchanged (`bi0262`, `bi0263`). An `EMIT-002` never counts as
+  a claimed refusal: its message names itself a compiler defect (`gen/m11_run.py`).
+- **S46 — the session stopped mid-M11 on the author's word** (the credit nearly
+  spent). The eleven sub-agents were stopped; their partial modules are committed
+  as `gen/m11_claims/_wip_*.py`, unreviewed and outside the loader, so that nothing
+  committed claims more than was done.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -1382,3 +1466,13 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     - F-017, seven documentation findings.
   - **10.4.** `REPORT.md` §11, and the M11 estimate above. M10 done; stopped for
     the author before M11.
+- 2026-09-26 (session 6, branch `claude/pensive-allen-pdhqpv`, a fresh cloud VM):
+  M11, stopped part-way.
+  - **Setup.** The gate held (`origin/main` = `626c22d`, M10 ticked). The toolchain
+    and three compilers were rebuilt, byte-identical to sessions 3–5; the recall
+    suite and M10's 223 programs re-ran identical.
+  - **11.1–11.2, part.** The claim framework (`gen/m11lib.py`, `gen/m11.py`,
+    `gen/m11_run.py`, `gen/m11_report.py`) and the brief. BUILTIN extracted (227
+    claims) and run twice at HUNT2: 182 agree, 12 disagree, all old. Five other
+    ranges drafted by sub-agents, unreviewed; nine not started.
+  - **Stopped** on the author's word, the credit nearly spent (S46).
