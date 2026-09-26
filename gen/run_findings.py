@@ -2,14 +2,15 @@
 """M5.2 (c)/(d) — run each finding's programs twice at HUNT and once at the baseline.
 
 usage: python3 gen/run_findings.py [F-NNN ...] [--hunt .work/hunt] [--base .work/base]
-                                   [--runs 2] [--llvm .work/llvm]
+                                   [--runs 2] [--llvm .work/llvm] [--name VERDICTS.txt]
 
 For every findings/F-*/ (or the ones named), each *.npk in it and in its
 minimized/ folder is built and run by PLAN.md's recipe (gen/run_known.py's
 build_and_run, from the program's own directory): --runs times at the hunt
-compiler, once at the baseline. It writes findings/F-*/VERDICTS.txt, one line
-per program per run naming the compiler commit, and prints whether the HUNT
-runs agree with each other.
+compiler, once at the baseline. It writes findings/F-*/VERDICTS.txt (or the
+file --name gives, so that a later compiler's record sits beside the first),
+one line per program per run naming the compiler commit, and prints whether
+the HUNT runs agree with each other.
 """
 import argparse, os, shutil, subprocess, sys, tempfile, time
 
@@ -41,6 +42,7 @@ def main():
     ap.add_argument("--base", default=os.path.join(".work", "base"))
     ap.add_argument("--runs", type=int, default=2)
     ap.add_argument("--llvm", default=os.path.join(".work", "llvm"))
+    ap.add_argument("--name", default="VERDICTS.txt")
     a = ap.parse_args()
     llvm = os.path.abspath(a.llvm)
     comps = [(os.path.abspath(a.hunt), n + 1) for n in range(a.runs)] + [(os.path.abspath(a.base), 1)]
@@ -71,7 +73,7 @@ def main():
                    commit_of(comps[-1][0])),
                 "# HUNT runs agree for every program: %s" % ("yes" if not unstable else "NO: " + ", ".join(unstable)),
                 ""]
-        with open(os.path.join(fdir, "VERDICTS.txt"), "w") as fh:
+        with open(os.path.join(fdir, a.name), "w") as fh:
             fh.write("\n".join(head + rows) + "\n")
         print("%s: %d programs, %d lines, HUNT runs agree: %s"
               % (fdir, len(progs), len(rows), "yes" if not unstable else "NO " + ", ".join(unstable)))

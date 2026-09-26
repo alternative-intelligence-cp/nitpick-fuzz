@@ -15,6 +15,14 @@ committed. A session that starts here resumes at the first unticked box.
 - [x] **M5** — the hunt: 956 cells at HUNT, 82 anomalies, 62 known, 20 new
   in 2 findings (F-001, F-002), both also present at the baseline
 - [x] **M6** — the report: [`REPORT.md`](REPORT.md)
+- [ ] **M8** — the re-hunt at HUNT2 `9126350`, the compiler carrying the fixes (session 3)
+  - [x] 8.1 HUNT2 recorded (it carries 3g, 3h, 4b and 5c) and built; the baseline built too (8.3 applies)
+  - [x] 8.2 the recall suite at HUNT2: 19/19 rows match "once fixed"; F-001's 13 and F-002's 4 defect programs refused, every control as recorded
+  - [x] 8.3 DEF-108 is in HUNT2: every generated function already leaves explicitly (0 of 1 000 programs draw `FLOW-001`), so the generator is unchanged; the baseline re-run is identical in 956/956 cells
+  - [ ] 8.4 the grid at HUNT2
+  - [ ] 8.5 HUNT2 against `6fb85d3`, cell by cell
+  - [ ] 8.6 the anomalies at HUNT2 through M5's five steps
+  - [ ] 8.7 `REPORT.md` §9; stop
 
 ## Compilers
 
@@ -22,12 +30,14 @@ committed. A session that starts here resumes at the first unticked box.
 |---|---|---|---|---|
 | baseline | `c3bdae2` (`c3bdae270d63c93ab6e89825fddeec9425e2c6fd`), 2026-09-25 07:06:41 -0400 | 1.5.8d steps 1-3: the close of cycle 1.5 | 28 111 929 / `4029fc70efbe9cd3…` | 67 s |
 | hunt | `6fb85d3` (`6fb85d3d834fb7d5568ab996005f800d6d269e8f`), 2026-09-25 18:25:47 -0400 | 1.6.0 step 3f: DEF-99 — `NITPICK-TYPE-084` refuses the move out of `fixed` | 28 132 333 / `25eb7ee168604005…` | 69 s |
+| HUNT2 (M8) | `9126350` (`9126350d11d12d20bbcc087dc261405bf2729f29`), 2026-09-26 03:42:01 -0400 | 1.6.1 step 0, the NIKOS half (D-324) — docs and `meta/roadmap/1.6/` tools over `2eea6f4` (1.6.1 step 0: DEF-107, `NITPICK-BORROW-015`) | 28 857 206 / `2448b3b60d9eb189…` | 75.8 s |
 
 Other build products (M0.5):
 
 | role | `npkc` bytes / sha256 | `npkrt.o` bytes / sha256 |
 |---|---|---|
 | baseline | 9 724 232 / `0cbc150ced5d20f7…` | 72 576 / `162b897539285a77…` |
+| HUNT2 | 9 972 944 / `20d35e2822b99080…` | 72 576 / `162b897539285a77…` |
 | hunt | 9 739 968 / `a81223d352d316be…` | 72 576 / `162b897539285a77…` |
 
 **Commissioning check (M0.5): PASSED.** The baseline's `.internal/quickemit/npkc.ll`
@@ -287,6 +297,89 @@ timeout or other). Known: **62** (DEF-106 24, DEF-102 24, DEF-105 8, DEF-104
 findings are present at the baseline as well. Neither is a regression, and
 nothing regressed between the two compilers (5.1).
 
+## M8 — the re-hunt at HUNT2 (session 3)
+
+**The start checks.** (a) `uname -a` and `nproc` are under Environment below
+(4 cores, the hosted VM). (b) `CLAUDE.md` re-read: a silent wrong answer is a
+defect, exactly as a memory-safety fault is. (c) The VM was fresh, so the
+toolchain was rebuilt by M0's commands (below). (d) Resumed at the first
+unticked box, M8; nothing ticked was redone.
+
+**The rebuild (M0's commands).** LLVM 20.1.2 was fetched to a file and
+extracted as S13 records (download 19 s, total 345 s). The tarball's sha256
+is `3a392f151375eeed…`, as in session 2, and `llvm-config --version` prints
+`20.1.2`. The compiler was cloned to `.work/nitpick`, and the worktrees
+`.work/base` (`c3bdae2`) and `.work/hunt2` (HUNT2) were built one after the
+other by M0.5's command: HUNT2 in 75.8 s, the baseline in 75.4 s. The
+baseline's products are byte-identical to sessions 1 and 2's. Its `npkc.ll`
+is 28 111 929 bytes, sha256 `4029fc70efbe9cd3…`, so the commissioning check
+passes again. `npkrt.o` is the same 72 576 bytes at all three compilers.
+Canaries (M0.6), at both: `canary.npk` gives npkc 0 and runs 0/0;
+`canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no
+`.ll`. The old HUNT `6fb85d3` was not rebuilt: M8 compares with its committed
+records.
+
+**8.1 — HUNT2.** The compiler's `origin/main` was `2eea6f4` at the clone
+(09:58 UTC) and `9126350` at a re-fetch at 10:01 UTC, before any build. HUNT2
+is **`9126350`** (S20). It carries every fix this plan names; each was checked
+with `git merge-base --is-ancestor <sha> 9126350` (rc 0) and found by its
+subject in `git log --oneline origin/main | grep '1.6.0 step'`:
+
+| subject | commit | fixes | in HUNT2 |
+|---|---|---|---|
+| `1.6.0 step 3g` | `5bdae98` | DEF-102, DEF-103, DEF-104 (`TYPE-085`, `TYPE-047`, `PARSE-001`) | yes |
+| `1.6.0 step 3h` | `c1a4a05` | DEF-105 | yes |
+| `1.6.0 step 4b` | `f87d2df` | DEF-106 (`TYPE-086`) | yes |
+| `1.6.0 step 5c` | `c970483` | DEF-108 (`FLOW-001`) | yes |
+| `1.6.1 step 0` | `2eea6f4` | DEF-107 (`BORROW-015`), and DEF-109 to DEF-115 found by its probes | yes |
+
+The shas are the ones `KNOWN_DEFECTS.md` lists as planned. Every one of the
+five is an ancestor of HUNT2.
+
+**8.2 — the recall suite at HUNT2:** `results/known-9126350.txt`. Checked by
+`gen/check_known_fixed.py` (the "once fixed" column transcribed) with DEF-99,
+DEF-102, DEF-104 and DEF-105 counted as fixed: **19 rows judged, 19 match.**
+The DEF-102 rows `lent_field`, `lent_field_nodread` and
+`ctl_whole_lent_string` are refused `TYPE-085`, and `ctl_local` runs 22/22,
+`ctl_move_param` 0/0. The DEF-104 rows `gen_id`, `gen_id_read` and
+`ctl_concrete` are refused `TYPE-047`. DEF-105's cases 1–4, 6 and 7 run 0/0,
+and case 5 is refused `RESOLVE-001`. DEF-99's cases 1–3 are refused
+`TYPE-084`, and case 4 runs 0/0. The recall suite re-run at the baseline on
+this VM is identical to `results/known-c3bdae2.txt` line for line.
+
+**8.2 — F-001 and F-002 at HUNT2:** `findings/*/VERDICTS-9126350.txt`
+(`gen/run_findings.py --hunt .work/hunt2 --name VERDICTS-9126350.txt`, HUNT2
+twice, the baseline once; S21). The two HUNT2 runs agree for every program.
+
+| finding | defect programs (reproducers and `minimized/`) | controls |
+|---|---|---|
+| F-001 | all 13 refused `NITPICK-TYPE-085` | `ctl_elem_at_free` 23/23, `ctl_elem_at_grow` 21/21, `ctl_elem_field_write` 22/22, `ctl_for_read` 21/21: as `VERDICTS.txt` |
+| F-002 | all 4 refused `NITPICK-TYPE-047` | `ctl_concrete_move` refused `TYPE-047`; `ctl_gen_move_param` 21/21: as `VERDICTS.txt` |
+
+The baseline lines are identical to the committed `VERDICTS.txt`'s (17 and 6).
+So `KNOWN_DEFECTS.md`'s "closed as faces" entries hold at HUNT2: F-001 is
+refused as DEF-102's `for`-binding face, and F-002 as DEF-104's `move` face.
+
+**8.3 — DEF-108 is in HUNT2, and the generator needs no change** (S22).
+Every function the generator emits already ends in `pass`, `exit` or `fail`:
+the helpers, the `at_*` callees, `hold`, `op`, `run`, `main` and `failsafe`.
+Measured two ways by `gen/check_leaves.py`:
+- statically: 7 930 functions in the 1 032 files of `cells/`, and none that
+  does not end in a leaver. The only static flag in `known/`, `findings/` and
+  `commission/` is `canary_malformed.npk`, which is malformed on purpose;
+- by HUNT2's own rule: all 1 000 root programs (the 956 cells, `known/`,
+  `findings/`, `commission/`) compiled at HUNT2 (577 npkc 0, 423 npkc 1), and
+  **0 carry `NITPICK-FLOW-001`**.
+
+The control for both checks is a planted fall-off: `c0092`'s `at_fr` with its
+one `pass NIL;` removed (the substitution asserted to match once). HUNT2
+refuses it with `FLOW-001` (npkc 1), the baseline accepts it (npkc 0), and the
+static check flags it. The grid regenerated by the unchanged `gen/grid.py`
+(last changed in M2, `de1130e`) is the same 956 cells, 1 284 skipped. **The
+whole grid re-run at the baseline on this VM (63 s) is identical to the
+committed `results/c3bdae2/cells.jsonl` in 956 of 956 cells** (npkc rc, codes,
+-O0, -O2). No verdict changed, since nothing in the generator changed.
+
 ## Environment
 
 *(M0.1, measured 2026-09-25)*
@@ -317,6 +410,20 @@ git:       2.43.0
 
 This is the cloud VM `PLAN.md` describes (4 vCPUs, 16 GB, 30 GB). Outbound
 HTTPS goes through an agent proxy.
+
+*(session 3, measured 2026-09-26 09:57 UTC; M8 run here — the start check (a))*
+
+```
+uname -a:  Linux vm 6.18.44-fc-v37 #1 SMP PREEMPT_DYNAMIC @0 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     4
+free -g:   Mem 15 total, 0 used, 15 free, 15 available; Swap 0
+df -h .:   /dev/vda  252G  7.1G used  30G avail (20%) -- 30 GB is the session's writable allowance
+os:        Ubuntu 24.04.4 LTS
+python3:   Python 3.11.15
+git:       2.43.0
+```
+
+A fresh VM of the same kind as session 2's: `.work/` did not exist.
 
 ## Decisions and deviations
 
@@ -409,6 +516,33 @@ HTTPS goes through an agent proxy.
   are one shape (three write paths through one binding, as DEF-102 counts
   every write path as one defect), and the 4 generic `move` cells are another.
   Each finding keeps a program per write path and observer, plus its controls.
+- **S19 — session 3 works on branch `claude/fervent-feynman-fhlm63`**, which
+  the session's harness names. It started at `7370a9d`, the commit that wrote
+  M8–M11 into `PLAN.md`.
+- **S20 — HUNT2 is `9126350`, not `2eea6f4`.** At the clone (09:58 UTC) the
+  compiler's `origin/main` was `2eea6f4` (1.6.1 step 0: DEF-107). A re-fetch
+  at 10:01 UTC, before anything was built, showed `9126350` (1.6.1 step 0, the
+  NIKOS half). PLAN.md 8.1 says HUNT2 is the newest `origin/main`, so it is
+  `9126350`. It differs from `2eea6f4` in six files, all docs and
+  `meta/roadmap/1.6/` tools (`CLAUDE.md`, `meta/NOTICES.md`,
+  `meta/roadmap/1.6/1.6.1.md`, `meta/roadmap/1.6/tools/engines.sh`,
+  `meta/roadmap/1.6/tools/pins.txt`, `meta/roadmap/OPEN_DECISIONS.md`), with
+  nothing under `src/`, `lib/`, `runtime/`, `bootstrap/` or `npkg/`. So its
+  compiler is built from the same sources as `2eea6f4`'s. The author confirmed
+  mid-session that the build needs LLVM 20.1.2 and nothing else (no z3, no
+  analyzer engines), and that M0's commands stand unchanged.
+- **S21 — a finding's record at a later compiler sits beside the first.**
+  `gen/run_findings.py` takes `--name`, so M8's F-001/F-002 runs are
+  `VERDICTS-9126350.txt`. The committed `VERDICTS.txt` (HUNT `6fb85d3`) is
+  kept as it was measured.
+- **S22 — 8.3 changed nothing in the generator, because nothing needed
+  changing.** The plan asks for "`pass NIL;` in each `NIL` function, and so
+  on". `gen/grid.py` has emitted an explicit `pass`/`exit` at the end of every
+  function since M2: the M5 minimiser leaned on implicit returns, not the grid
+  (S16, S17). This was measured statically and by HUNT2's own `FLOW-001`
+  (M8 section), with a planted fall-off as the control, rather than taken
+  from reading `grid.py`. `gen/check_leaves.py` is committed as the check.
+  The baseline was built and re-run anyway: 8.3 asks for it, and 8.6 needs it.
 
 ## Log
 
@@ -431,3 +565,11 @@ HTTPS goes through an agent proxy.
   denominators (956 generated + 1 284 skipped = 2 240; at HUNT 270 refused +
   604 clean + 82 anomalies = 956), the recall table with DEF-106 added, the
   findings table and the coverage gaps. M6 done. M7 only if the author asks.
+- 2026-09-26 (session 3, branch `claude/fervent-feynman-fhlm63`, a fresh cloud
+  VM): M8. The toolchain was rebuilt by M0's commands; the baseline's products
+  are byte-identical to sessions 1 and 2's. 8.1: HUNT2 is `9126350` (S20), and
+  it carries 3g, 3h, 4b and 5c. 8.2: the recall suite matches "once fixed" in
+  19/19 rows, and F-001 and F-002 are refused at HUNT2 with their controls as
+  recorded. 8.3: DEF-108 is in HUNT2; the grid already leaves explicitly
+  (0 `FLOW-001` in 1 000 programs), so the generator is unchanged, and the
+  baseline re-run is identical in 956/956 cells. Committed before any hunting.
