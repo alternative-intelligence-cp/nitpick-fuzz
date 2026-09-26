@@ -6,7 +6,7 @@ committed. A session that starts here resumes at the first unticked box.
 ## Milestones
 
 - [x] **M0** — the two compilers built and commissioned
-- [ ] **M1** — the recall suite (`known/`) run at both compilers and matched
+- [x] **M1** — the recall suite (`known/`) run at both compilers and matched
 - [ ] **M2** — the generator, the runner and the classifier
 - [ ] **M3** — the recall gate: the grid re-finds every known defect at `c3bdae2`
 - [ ] **M4** — CALIBRATION CHECKPOINT: ~100 cells at HUNT, then **stop and wait**
@@ -38,6 +38,26 @@ command in PLAN.md 0.2).
 **Canaries (M0.6), both compilers:** `commission/canary.npk` — npkc rc 0, links,
 runs to 0 on the -O0 leg and on the -O2 leg. `commission/canary_malformed.npk`
 — npkc rc 1, prints `NITPICK-PARSE-001`, writes no `.ll`.
+
+## M1 — the recall suite
+
+**1.2, baseline `c3bdae2`:** `results/known-c3bdae2.txt` — all 19 rows match
+`KNOWN_DEFECTS.md`'s `c3bdae2` columns line by line (npkc rc, codes, -O0, -O2).
+No mismatch, nothing to resolve.
+
+**1.3, HUNT `6fb85d3`:** `results/known-6fb85d3.txt`. Which fixes HUNT carries:
+
+| defect | fix | in HUNT? | how checked | HUNT verdicts |
+|---|---|---|---|---|
+| DEF-99 | `6fb85d3` (step 3f) | **yes** | `git merge-base --is-ancestor 6fb85d3 <HUNT>` (HUNT *is* the fix) | case1/2/3 refused `TYPE-084`; case4 0/0 — matches "once fixed" |
+| DEF-102 | step 3g | no | no `1.6.0 step 3g` subject in `git log <HUNT>` | identical to baseline (70/70, 95/95, 22, 21, 0) — still known at HUNT |
+| DEF-104 | step 3g | no | as above | identical to baseline (95/95, 70/70, `TYPE-047`) — still known at HUNT |
+| DEF-105 | step 3h | no | no `1.6.0 step 3h` subject in `git log <HUNT>` | identical to baseline — still known at HUNT |
+
+So at HUNT the deduplication list is DEF-102, DEF-104 and DEF-105 (their shapes
+are still present); DEF-99's shape is expected to appear as `refused TYPE-084`.
+The newest commit on the compiler's `main` at M0.3 was `6fb85d3`; the 3g/3h
+fixes the plan anticipated "on the night of 2026-09-25" had not landed.
 
 ## Environment
 
@@ -74,3 +94,5 @@ machine (the session was dispatched here by the workbench). See decision S1.
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
   M0 done: LLVM 20.1.2 fetched, compiler cloned, `base` (c3bdae2) and `hunt`
   (6fb85d3) worktrees built in 67 s / 69 s, digests recorded, both commissioned.
+  M1 done: recall suite matches at the baseline 19/19; HUNT carries only the
+  DEF-99 fix.
