@@ -10,12 +10,13 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**1828 claims: 1565 testable, 263 untestable** (each with its reason).
+**1938 claims: 1673 testable, 265 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
 | BUILTIN | 227 | 2 | 109 | 116 | 194 | 33 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
+| CONTROL | 110 | 14 | 7 | 89 | 108 | 2 |
 | IO | 78 | 5 | 9 | 64 | 67 | 11 |
 | MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
 | MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
@@ -33,7 +34,7 @@ extracted:
 | BUILD | 682 | — | 0 | 1–682 |
 | BUILTIN | 447 | 1–447 | 447 | — |
 | CONCURRENCY | 647 | 1–647 | 647 | — |
-| CONTROL | 415 | — | 0 | 1–415 |
+| CONTROL | 415 | 1–415 | 415 | — |
 | IO | 287 | 1–287 | 287 | — |
 | LEXICAL | 410 | — | 0 | 1–410 |
 | MACRO | 412 | 1–412 | 412 | — |
@@ -440,6 +441,121 @@ Tables whose rows are not claims:
 Tables whose rows are not claims:
 
 - line 174: an inventory of the archived prototype's stdlib files (line counts, C dependencies): facts about another source tree, not language behaviour
+
+## CONTROL (`meta/specs/CONTROL_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `ct0003` | 3 | rule | “C-style three-clause `for` loops are deliberately **not** among them” | There is no C-style three-clause for: it is refused. | `refuse` |
+| `ct0005` | 5 | rule | “**control flow blocks do NOT end with semicolons**” | A semicolon after an if block's closing brace is a syntax error. | `refuse` |
+| `ct0012` | 12 | rule | “Parentheses around the condition are required” | The if condition's parentheses are required: `if x == 1i32 { }` is refused. | `refuse` |
+| `ct0014` | 14 | example | “```nitpick” | if / else if / else picks the first true branch, the else catching the rest. | `run:0` |
+| `ct0026` | 26 | rule | “Case patterns must be wrapped in parentheses” | Case patterns must be parenthesised: a bare pattern is refused. | `refuse` |
+| `ct0027` | 27 | rule | “Cases must be separated by commas” | Cases must be separated by commas: two arms with none between them are refused. | `refuse` |
+| `ct0028` | 28 | rule | “The default/catch-all case is designated by `(*)`” | `(*)` is the catch-all: a value no other arm names takes it. | `run:0` |
+| `ct0029` | 29 | rule | “Nitpick does not implicitly fall through” | There is no implicit fallthrough. | `run:0` (M10 `p01_no_implicit_fallthrough`) |
+| `ct0030` | 30 | rule | “**The selector may not be an `Optional`**” | A pick's selector may not be an Optional: TYPE-065. | `refuse:TYPE-065` |
+| `ct0030b` | 30 | rule | “`pick (o ?? default) { … }`” | The Optional is reached with `??`: `pick (o ?? default)` is accepted. | `run:0` |
+| `ct0030c` | 30 | rule | “A frac (D-198) and a complex (D-199) are refused at the selector” | A frac selector is refused by the same rule. | `refuse` |
+| `ct0031` | 31 | rule | “**One rule set for both spellings**” | The expression form of pick yields through `give`: `int32:v = pick (s) { (A) { give 1i32; }, (*) { give 0i32; } };`. | `run:0` |
+| `ct0032` | 32 | rule | “a `move` of one, or a `pass` of one out of the function, is TYPE-047” | A lending pick binds a view: a `move` of an owning view is TYPE-047. | `refuse:TYPE-047` |
+| `ct0032b` | 32 | rule | “a copy of an owning view is TYPE-046” | A copy of an owning view is TYPE-046. | `refuse:TYPE-046` |
+| `ct0032c` | 32 | rule | “**A view has no address**” | A view has no address: assigning a view is TYPE-066. | `refuse:TYPE-066` |
+| `ct0032d` | 32 | rule | “**The selector is frozen while a view of it is live**” | The selector is frozen while a view of it lives: writing the selector in an arm that binds a name is TYPE-067. | `refuse:TYPE-067` |
+| `ct0032e` | 32 | rule | “an arm that binds nothing may write it” | An arm that binds nothing may write the selector. | `run:0` |
+| `ct0032f` | 32 | rule | “A CONSUMING `pick (move(v))` (D-216) takes the value apart” | A consuming pick's bindings own their payloads, and the selector is moved-from after: reading it is refused. | `refuse` |
+| `ct0034` | 34 | example | “```nitpick” | The fallthrough example: `fall two;` in arm one continues into arm two. | `run:0` |
+| `ct0047` | 47 | example | “```nitpick” | pick destructures struct and enum variants. | untestable [vague] the example's bodies are `...` and its types undeclared; the destructuring binding modes are ct0032 … ct0032f and ct0055 |
+| `ct0055` | 55 | rule | “In a lending `pick` these names are views of `event`'s fields and payload” | A lending pick's names are views of the payload: reading one is accepted. | `run:0` |
+| `ct0060` | 60 | rule | “**`fall label;`** — falls through to the labelled arm” | `fall label;` falls through to the labelled arm. | `run:0` (M10 `p02_fall_to_label`) |
+| `ct0061` | 61 | rule | “**`give expr;`** — yields a value out of the `pick` block” | `give` yields a value out of a pick used as an expression. | `run:0` (M10 `p09_pick_expression_give`) |
+| `ct0063` | 63 | rule | “**`(!)` is removed** (D-061)” | `(!)` is removed: an arm spelled `(!)` is refused. | `refuse` |
+| `ct0070` | 70 | rule | “is `#unreachable()`” | An arm whose body is `#unreachable()` traps when it is reached. | `trap:Unreachable` |
+| `ct0073` | 73 | rule | “**`pick` must be exhaustive**” | A pick must be exhaustive. | `refuse` (M10 `p10_int_pick_not_exhaustive`) |
+| `ct0074` | 74 | rule | “explicit `ERR:` arm” | A tbb selector requires an explicit ERR: arm; `(*)` may not absorb it. | `refuse` (M10 `p12_tbb_pick_needs_err_arm`) |
+| `ct0078` | 78 | rule | “individual arms can be guarded by a conditional `where` clause” | An arm guarded by a false `where` moves on to the next arm. | `run:0` (M10 `p08_guard_false_moves_on`) |
+| `ct0080` | 80 | example | “```nitpick” | pick matches a macro invocation pattern with a where guard: `MyMacro!(a, b) where (a > b)`. | `run:0` |
+| `ct0089` | 89 | rule | “explicitly uses the `is` keyword rather than `?`” | The ternary is `is`, not `?`: `a > b ? a : b` is refused. | `refuse` |
+| `ct0091` | 91 | example | “```nitpick” | `int32:max = is (a > b) : a : b;` is the larger. | `run:0` |
+| `ct0100` | 100 | rule | “`break;` to exit the innermost loop” | `break;` exits the innermost loop only. | `run:0` |
+| `ct0100b` | 100 | rule | “`continue;` to skip to the next iteration across all loop types” | `continue;` skips to the next iteration. | `run:0` (M10 `l27_continue_in_for`) |
+| `ct0108` | 108 | rule | “A `while`/`when` with neither” | A while with neither `decreases` nor `unbounded` is TYPE-072. | `refuse:TYPE-072` |
+| `ct0109` | 109 | rule | “or both, is `NITPICK-TYPE-072`” | A while with both `decreases` and `unbounded` is TYPE-072. | `refuse:TYPE-072` |
+| `ct0109b` | 109 | rule | “`for`, `loop` and `till` are bounded by” | for, loop and till take neither clause: a `for ... decreases` is refused. | `refuse` |
+| `ct0115` | 115 | example | “```nitpick” | `while (x < 10i32) decreases 10i32 - x { x += 1i32; }` runs until x is 10. | `run:0` |
+| `ct0122` | 122 | rule | “inherently tracks **whether the body ever executed**” | when tracks whether its body ever executed. | `run:0` (M10 `w01_when_ran_then`) |
+| `ct0124` | 124 | example | “```nitpick” | The when example: with x = 3 the body runs, then `then` runs and `end` does not. | `run:0` |
+| `ct0142` | 142 | row | “\| body ran ≥ 1 time, condition later became false \| `then` \|” | A body that ran and then saw its condition false takes `then`. | `run:0` (M10 `w01_when_ran_then`) |
+| `ct0143` | 143 | row | “\| body ran ≥ 1 time, exited early via `break` \| `then` \|” | A body that broke out takes `then`. | `run:0` (M10 `w03_when_break_then`) |
+| `ct0144` | 144 | row | “\| condition false initially — body never ran \| `end` \|” | A body that never ran takes `end`. | `run:0` (M10 `w02_when_never_ran_end`) |
+| `ct0146` | 146 | rule | “Both clauses are optional.” | Both clauses are optional: a when with neither `then` nor `end` compiles and runs. | `run:0` |
+| `ct0161` | 161 | example | “```nitpick” | `for (int64:i in 1..3)` visits 1, 2 and 3. | `run:0` |
+| `ct0170` | 170 | example | “```nitpick” | The C-style three-clause for, the first rejected form, is refused. | `refuse` |
+| `ct0172` | 172 | rule | “untyped binding — not supported” | An untyped for binding, `for (i in 0..10)`, is refused. | `refuse` |
+| `ct0181` | 181 | rule | “there is no `auto`, `var`, or `let`” | There is no `let`: an inferred declaration is refused. | `refuse` |
+| `ct0183` | 183 | rule | “a range, a slice, an array, or a” | for iterates a slice. | `run:0` |
+| `ct0183b` | 183 | rule | “an array” | for iterates an array in order. | `run:0` (M10 `l25_for_over_array_in_order`) |
+| `ct0184` | 184 | rule | “value whose type implements the prelude trait `Iterator`” | for iterates a value whose type implements Iterator (`next` returning `Item?`, NIL ending it). | `run:0` |
+| `ct0187` | 187 | rule | “Anything else is refused at the checker by” | A for binding of another type than the element's is refused by name, TYPE-033. | `refuse:NITPICK-TYPE-033` (M10 `l28_for_binding_type_mismatch`) |
+| `ct0191` | 191 | rule | “expose it inside the block via the special `$` keyword” | loop and till expose the counter as `$`. | `run:0` (M10 `l12_loop_ascending`) |
+| `ct0193` | 193 | rule | “inside a `Rules`” | Inside a Rules body `$` is the subject. | `run:0` |
+| `ct0198` | 198 | rule | “Counts **up from 0** to `limit`” | till counts up from 0 to limit (exclusive). | `run:0` (M10 `l10_till_counts_from_zero`) |
+| `ct0199` | 199 | example | “```nitpick” | `till(10i32, 1i32) { x += $; }` sums 0 to 9: 45. | `run:0` |
+| `ct0205` | 205 | rule | “**Direction is inferred**” | loop's direction is inferred from start and limit. | `run:0` (M10 `l13_loop_descending`) |
+| `ct0207` | 207 | example | “```nitpick” | `loop(0i32, 10i32, 1i32)` sums 0..9 (45); `loop(10i32, 0i32, 1i32)` sums 10..1 (55). | `run:0` |
+| `ct0220` | 220 | rule | “A negative step is a **compile error**” | A negative literal step is a compile error. | `refuse:NITPICK-TYPE-068` (M10 `l20_negative_step_literal_refused`) |
+| `ct0222` | 222 | rule | “falling back to a runtime check that traps to” | A computed step is checked at run time: a zero step traps. | `run:113` (M10 `l21_zero_step_computed_traps`) |
+| `ct0233` | 233 | row | “\| `step` negative or zero \| compile error \|” | A literal zero step is a compile error. | `refuse:NITPICK-TYPE-068` (M10 `l19_zero_step_literal_refused`) |
+| `ct0234` | 234 | row | “\| `start == limit` \| zero iterations \|” | start == limit is zero iterations. | `run:0` (M10 `l14_loop_start_equals_limit`) |
+| `ct0235` | 235 | row | “\| `till` with `limit <= 0` \| zero iterations” | till with limit <= 0 is zero iterations. | `run:0` (M10 `l11_till_nonpositive_limit`) |
+| `ct0236` | 236 | row | “\| a bound is `tbb` holding ERR \| traps to `failsafe`” | A loop bound that is a tbb holding ERR traps to failsafe (TbbErr). | `trap:TbbErr` |
+| `ct0242` | 242 | rule | “`loop` takes three arguments and `till` two” | loop takes three arguments: a two-argument loop is refused. | `refuse` |
+| `ct0255` | 255 | rule | “**There is no `loop { }` infinite form and no do-while construct.**” | There is no infinite `loop { }`: it is refused. | `refuse` |
+| `ct0255b` | 255 | rule | “`while (true)” | `while (true) unbounded` is the unbounded loop, left by break. | `run:0` |
+| `ct0258` | 258 | rule | “defines `till` as do-while” | till is not a do-while: with limit 0 the body never runs. | `run:0` (M10 `l11_till_nonpositive_limit`) |
+| `ct0266` | 266 | example | “```nitpick” | The labelled-loop example: `break outer` leaves both loops. | `run:0` |
+| `ct0278` | 278 | rule | “`break label;` and `continue label;` both target a labelled loop” | `continue label;` targets a labelled loop. | `run:0` (M10 `l26_labelled_continue`) |
+| `ct0286` | 286 | rule | “**`discard(expr);`**” | `discard(expr);` discards a value. | `run:0` |
+| `ct0287` | 287 | rule | “**`_~ expr;`**” | `_~ expr;` desugars to discard(). | `run:0` |
+| `ct0289` | 289 | example | “```nitpick” | The discard example compiles. | `run:0` |
+| `ct0306` | 306 | rule | “Blocks introduce a lexical” | A block introduces a lexical scope: its variables are invisible outside it. | `refuse` (M10 `h03_block_binding_invisible`) |
+| `ct0308` | 308 | rule | “bindings are destroyed at the closing brace” | Scope-managed bindings are destroyed at the block's closing brace: a list in a block is freed before a larger one after it, which peaks alone. | `run:0` heap `24000/16000/2` |
+| `ct0314` | 314 | rule | “**`NITPICK-IF-002`**” | An assignment inside an if condition is rejected as NITPICK-IF-002. | `refuse:IF-002` |
+| `ct0317` | 317 | rule | “**`NITPICK-IF-001`**” | An else without an immediately preceding if is NITPICK-IF-001. | `refuse:IF-001` |
+| `ct0319` | 319 | rule | “**`NITPICK-WHEN-001`**” | An orphaned `then` without a preceding when is NITPICK-WHEN-001. | `refuse:WHEN-001` |
+| `ct0323` | 323 | rule | “**`pass expr;`** — returns a successful `Result<T>`” | `pass expr;` returns a successful Result. | `run:0` |
+| `ct0324` | 324 | rule | “**`fail errCode;`** — returns an errored `Result<T>`” | `fail errCode;` returns an errored Result carrying the code. | `run:0` |
+| `ct0325` | 325 | rule | “*(expression, not a statement)* propagates” | relay propagates the same error code, verbatim. | `run:0` (M10 `r02_relay_same_error`) |
+| `ct0326` | 326 | rule | “if `expr` is an error the enclosing function returns immediately” | relay returns at once on an error. | `run:0` (M10 `r03_relay_returns_at_once`) |
+| `ct0332` | 332 | rule | “the literal form, the only way to return a value” | `return Result{ … };` returns a value and an error simultaneously. | `run:0` (M10 `r10_result_literal_both`) |
+| `ct0334` | 334 | rule | “**Every path of a function body ends in one of these” | Every path of a function body ends in pass, fail, exit or a trap: an empty body is FLOW-001. | `refuse:NITPICK-FLOW-001` (M10 `q01_empty_body`) |
+| `ct0337` | 337 | rule | “`NIL` function passes `NIL`” | A NIL function falling off its end is refused. | `refuse:NITPICK-FLOW-001` (M10 `q07_nil_function_falls_off`) |
+| `ct0338` | 338 | rule | “`main` exits” | main without exit is refused. | `refuse:NITPICK-FLOW-001` (M10 `q04_main_without_exit`) |
+| `ct0341` | 341 | rule | “an `if` without `else` completes” | A path past an if without else completes, so a missing pass after it is refused. | `refuse:NITPICK-FLOW-001` (M10 `q02_missing_path`) |
+| `ct0342` | 342 | rule | “`if`/`else` completes if either arm does” | An if/else whose arms both pass does not complete: no pass is needed after it. | `run:0` (M10 `q09_if_else_both_pass`) |
+| `ct0342b` | 342 | rule | “a `pick` if any arm's body does” | A pick whose arms all pass does not complete. | `run:0` (M10 `q10_pick_all_arms_pass`) |
+| `ct0343` | 343 | rule | “a `while (true)` with no” | A while (true) with no break never completes. | `run:0` (M10 `q08_while_true_never_completes`) |
+| `ct0344` | 344 | rule | “every other loop and `when` completes as a whole” | A for loop completes as a whole. | `refuse:NITPICK-FLOW-001` (M10 `q11_for_loop_completes`) |
+| `ct0347` | 347 | rule | “`ok()` is the taint-clearing” | `ok()` is the taint-clearing builtin: `ok(x)` compiles. | `run:0` |
+| `ct0348` | 348 | rule | “`err()` does not exist” | `err()` does not exist: calling it is refused. | `refuse` |
+| `ct0354` | 354 | rule | “a **compile-time** proof obligation discharged by Z3” | prove is a compile-time obligation discharged by z3 under --verify; a counterexample fails compilation. | untestable [z3] the verified build's verdict; the plain build lowers prove to nothing (VERIFICATION:78's claim) |
+| `ct0357` | 357 | rule | “**`assert_static(cond);`**” | assert_static halts compilation when its condition is false (TYPE-069). | `refuse:TYPE-069` |
+| `ct0365` | 365 | rule | “`NITPICK-TYPE-069` when it does not fold to a constant” | assert_static over a run-time value does not fold: TYPE-069. | `refuse:TYPE-069` |
+| `ct0366` | 366 | rule | “in a `comptime` body both statements are evaluated per call” | In a comptime body assert_static is evaluated per call: a call whose argument fails it is refused. | `refuse` |
+| `ct0375` | 375 | rule | “Pushes a block onto a stack to run when the enclosing lexical scope exits” | defer pushes onto a stack: defers run LIFO. | `run:0` (M10 `w04_defer_lifo`) |
+| `ct0377` | 377 | example | “```nitpick” | `wild int8->:buf = alloc(16i64); defer { dalloc(buf); }` frees the block at the scope's exit. | `run:0` |
+| `ct0382` | 382 | rule | “**after the exit's value is evaluated** (D-136)” | Defers run after the exit's value is evaluated: `pass v` returns the v read at the pass. | `run:0` (M10 `w05_pass_value_before_defer`) |
+| `ct0382b` | 382 | rule | “LIFO, innermost scope first” | Defers run innermost scope first. | `run:0` (M10 `w11_defer_inner_scope_first`) |
+| `ct0382c` | 382 | rule | “Runs on **every normal exit path**” | defer runs on fail. | `run:0` (M10 `w06_defer_on_fail`) |
+| `ct0384` | 384 | rule | “**`defer` does NOT run on a trap** (D-014)” | defer does not run on a trap. | `run:82` (M10 `w09_no_defer_on_trap`) |
+| `ct0393` | 393 | rule | “may appear only in `main` or” | exit may appear only in main or failsafe. | `refuse` (M10 `e03_exit_outside_main_refused`) |
+| `ct0397` | 397 | rule | “the `<wildx-states>` map must be empty” | A successful exit with live wildx memory triggers the failsafe trap (WildLeak). | `trap:WildLeak` |
+| `ct0397b` | 397 | rule | “Reaching `exit` with live” | Reaching exit with live wild memory triggers the failsafe trap. | `run:96` (M10 `e01_exit_zero_with_live_wild`) |
+| `ct0406` | 406 | rule | “a failure exit keeps its code” | A failure exit keeps its code. | `run:3` (M10 `e02_failure_exit_keeps_code`) |
+| `ct0409` | 409 | rule | “`wild_release_all()` and exit positive” | failsafe may call wild_release_all() and exit positive; its own exit is exempt from the check. | `run:42` |
+| `ct0411` | 411 | rule | “trap raised *inside* `failsafe` exits 70 directly” | A trap raised inside failsafe exits 70 directly. | `run:70` |
+| `ct0412` | 412 | rule | “`wild_live_count()` is the program-visible view of the set” | wild_live_count() is the program-visible view of the set. | `run:0` |
+| `ct0412b` | 412 | rule | “Managed-regime” | Managed storage is not in the set: a string alive at exit 0 is not reported. | `run:0` |
 
 ## IO (`meta/specs/IO_REFERENCE.md`)
 
