@@ -8,7 +8,7 @@ mod:tr0586;
 func:v32 = int32(int32:x) never fails { pass x; };
 
 struct:Box<T> = { T:v; };
-func:deep<T> = int32(move T:x) never fails { Box<T>:b = Box<T>{ v: move(x) }; pass (raw deep::<Box<T>>(move(b))); };
+func:deep<T> = int32(move T:x) never fails { Box<T>:b = Box{ v: move(x) }; pass (raw deep::<Box<T>>(move(b))); };
 
 func:main = int32(cstring[]:_~argv) {
     int32:v = raw deep::<int32>(raw v32(1i32));

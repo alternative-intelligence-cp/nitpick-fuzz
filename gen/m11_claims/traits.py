@@ -923,3 +923,30 @@ claim("tr0764", D, 764, "Lambdas without capture", "rule",
     discard(raw f(1i32));
     exit 0i32;"""),
       wrong="refused: no lambda expression (AST:476)")
+
+# ================================================================== after run 1 (S45, S53)
+# The programs' own mistakes; every expectation above is unchanged.
+WHY_LIT = ("a generic struct literal takes no type arguments (the binding's annotation gives them, as the "
+           "compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002")
+for _cid, _pairs in (
+        ("tr0146", [("Cell<int64>{", "Cell{")]),
+        ("tr0196", [("Box<Point>{", "Box{")]),
+        ("tr0198", [("Box<Point>{", "Box{")]),
+        ("tr0404", [("Container<int32>{", "Container{")]),
+        ("tr0536", [("Box<int32>{", "Box{")]),
+        ("tr0543", [("Box<int32>{", "Box{")]),
+        ("tr0602", [("Node<int64>{", "Node{")]),
+        ("tr0461", [("Lock<int64, 2>{", "Lock{")]),
+        ("tr0513", [("Pair<int32, int64>{", "Pair{")]),
+        ("tr0586", [("Box<T>{", "Box{")])):
+    refix(_cid, WHY_LIT + (" (it had agreed in run 1 for that reason, S55)" if _cid in ("tr0461", "tr0513", "tr0586") else ""),
+          _pairs)
+refix("tr0364", "`pub` on a struct field does not parse (PARSE-001), and run 2 agreed for that reason (S55); the "
+      "struct now has only the plain field the claim reads outside its module",
+      [("    pub struct:Acct = { int64:open; pub int64:shown; };", "    pub struct:Acct = { int64:open; int64:kept; };"),
+       ("Acct{ open: 1i64, shown: 2i64 }", "Acct{ open: 1i64, kept: 2i64 }")])
+refix("tr0686", "the impl's generic method was refused for its signature (TYPE-014), not the trait for `dyn` (S55); "
+      "the trait is now used as `dyn Bad` in a parameter, with no impl",
+      [("impl:S:Bad = { func:g<T> = int32(S:self, T:_~x) never fails { pass 1i32; }; };",
+        "func:takes = int32(dyn Bad:_~d) never fails { pass 0i32; };"),
+       ("    dyn Bad:d = move(s);\n", "")])

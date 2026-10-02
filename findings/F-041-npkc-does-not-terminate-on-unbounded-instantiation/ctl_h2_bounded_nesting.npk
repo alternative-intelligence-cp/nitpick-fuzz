@@ -1,19 +1,19 @@
-// M11 tr0364 -- meta/specs/TRAITS_REFERENCE.md:364 (rule)
-// quote: Struct fields follow module visibility — private by default, exported with `pub`.
-// claim: A struct field is private by default: a field without `pub` is not read outside its module.
-// expect: refuse
-// wrong: accepted: the field public by default
-mod:tr0364;
+mod:ctl_h2_bounded_nesting;
 
-mod:bank = {
-    pub struct:Acct = { int64:open; int64:kept; };
-    pub func:mk = Acct() never fails { Acct:a = Acct{ open: 1i64, kept: 2i64 }; pass a; };
-};
-use bank.{Acct};
+func:v32 = int32(int32:x) never fails { pass x; };
+
+struct:Box<T> = { T:v; };
+// The control: the same generic over a fixed nesting, three deep, written out. It compiles
+// at once and runs to 0.
+func:wrap<T> = int32(move T:x) never fails { Box<T>:b = Box{ v: move(x) }; discard(b); pass 1i32; };
 
 func:main = int32(cstring[]:_~argv) {
-    Acct:a = raw bank.mk();
-    if (a.open != 1i64) { exit 10i32; }
+    int32:a = raw wrap::<int32>(raw v32(1i32));
+    Box<int32>:b1 = Box{ v: 2i32 };
+    int32:b = raw wrap::<Box<int32>>(move(b1));
+    Box<Box<int32>>:c1 = Box{ v: Box{ v: 3i32 } };
+    int32:c = raw wrap::<Box<Box<int32>>>(move(c1));
+    if (a + b + c != 3i32) { exit 10i32; }
     exit 0i32;
 };
 

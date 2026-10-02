@@ -12,7 +12,7 @@ struct:Header<T> = {
 
 func:main = int32(cstring[]:_~argv) {
     Header<int64>:hdr;
-    Node<int64>:my_node = Node<int64>{ v: 1i64 };
+    Node<int64>:my_node = Node{ v: 1i64 };
     Handle<Node<int64>>:h1 = hdr.node_arena.alloc(my_node);
     exit 0i32;
 };

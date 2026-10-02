@@ -20,27 +20,28 @@ before the first run.
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 146 | 137 | 9 |
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
+| TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 115 | 99 | 16 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 2560 | 111 | 628 | 1821 | 363 | 2197 | 2197 | 1969 | 228 |
+| **total** | 2679 | 130 | 644 | 1905 | 367 | 2312 | 2312 | 2068 | 244 |
 
-**These denominators cover 7087 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 7853 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
 - `z3` 99 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `internal` 67 — a compiler internal no program observes (an AST field, a table's layout)
+- `internal` 68 — a compiler internal no program observes (an AST field, a table's layout)
 - `tree` 61 — a claim about the compiler's own source tree, generators, harness or documents
-- `vague` 57 — the sentence states no checkable outcome
+- `vague` 60 — the sentence states no checkable outcome
 - `tool` 44 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 3 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (228)
+## 2. The disagreements (244)
 
-By kind: `refused` 120, `wrong_exit` 41, `accepted` 33, `ir` 13, `emit_defect` 9, `other_code` 7, `crash` 5.
+By kind: `refused` 131, `wrong_exit` 42, `accepted` 36, `ir` 13, `emit_defect` 9, `other_code` 7, `crash` 6.
 
 | class | claims |
 |---|---|
@@ -48,13 +49,14 @@ By kind: `refused` 120, `wrong_exit` 41, `accepted` 33, `ir` 13, `emit_defect` 9
 | compiler: a lifetime rule not enforced, a use after destroy (F-022) | 2 |
 | compiler: accepted, then invalid IR (F-023) | 1 |
 | compiler: npkc traps, exit 3 (F-024) | 7 |
+| compiler: npkc does not terminate (F-041) | 1 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 30 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 144 |
+| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 31 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 157 |
 | known: deduplicated against KNOWN_DEFECTS.md | 18 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or no valid program can test it | 15 |
+| not a finding: the program tests more than its sentence, or no valid program can test it | 16 |
 
 Every disagreement below was also run at the baseline `c3bdae2` and at the compiler's newest
 `main` of its session (`1b4f0c6` for session 7's claims, `93bcb66` for session 8's); the last
@@ -207,6 +209,22 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `op0374` | OP:374 | `is cond : then : else` branches: `is x > 0 : 1 : -1` with x = 5 is 1. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-031: the ternary example `is x > 0 : 1 : -1` needs its condition parenthesised (PARSE-001; TYPE:2101's `is (cond) : then : else`) | same / same @93bcb66 |
 | `op0377` | OP:377 | `val \|> func()` passes val as func's first argument: 10 \|> minus(3) is 7. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-031: the pipe examples `val \|> func()` and `func() <\| val` are refused: a pipe's other side is the function itself, not a call (TYPE-007) | same / same @93bcb66 |
 | `op0378` | OP:378 | `func() <\| val` evaluates val and passes it to func. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-031: the pipe examples `val \|> func()` and `func() <\| val` are refused: a pipe's other side is the function itself, not a call (TYPE-007) | same / same @93bcb66 |
+| `tr0021` | TRAITS:21 | The Serializable example (a trait with `to_bytes = buffer(Self:self)`, an impl passing `result`) compiles. | `compile` | npkc 1 TYPE-060, -/- (`refused`) | F-043: the Serializable example passes `result` from a body: `result` is the ensures-only keyword since D-221 (TYPE-060) | same / same @93bcb66 |
+| `tr0097` | TRAITS:97 | Iterator with `assoc:Item`: the impl binds `Item = int32`, and `next` returns `self.current`. | `run:0` | npkc 1 RESOLVE-001, -/- (`refused`) | F-043: the Iterator example declares a trait the prelude owns (`Iterator`, RESOLVE-001) | same / same @93bcb66 |
+| `tr0109` | TRAITS:109 | An associated type may carry a default (`assoc:Error = string;`), inherited by an impl that omits it. | `compile` | npkc 1 RESOLVE-001, -/- (`refused`) | F-043: `assoc:Error = string;` names the compiler's own `Error` (D-179, D-239; RESOLVE-001) | same / same @93bcb66 |
+| `tr0124` | TRAITS:124 | An inherent impl: Point's `magnitude` (flt64_sqrt over a call-cast `flt64(…)`) compiles. | `compile` | npkc 1 PARSE-002, -/- (`refused`) | F-043: the inherent-impl example casts with `flt64(…)`, a call form the language has no (PARSE-002; casts are `=>`/`=>!`) | same / same @93bcb66 |
+| `tr0149` | TRAITS:149 | An inherent family method may take its receiver by pointer: `l.push(v)` beside `list_push(@l, v)`. | `compile` | npkc 1 TYPE-019, -/- (`refused`) | F-043: `l.push(v)`: the prelude's `List<T>` has no `push` method (TYPE-019) | same / same @93bcb66 |
+| `tr0350` | TRAITS:350 | A blanket impl does not apply to itself: `impl:<T: Loggable>:T:Loggable` is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | the sentence says a blanket impl does not APPLY to itself (its bound is not met by itself), not that the declaration is refused; the program expected a refusal | same / same @93bcb66 |
+| `tr0364` | TRAITS:364 | A struct field is private by default: a field without `pub` is not read outside its module. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-043: struct fields are not private by default: a plain field is read outside its module (D-313's `sealed`/`hidden` are the field qualifiers), and `pub` on a field does not parse | same / same @93bcb66 |
+| `tr0368` | TRAITS:368 | `opaque` is legal only inside an `extern` block: one at module level is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-042 a: an `opaque struct` is accepted at module level, against TRAITS:368 (as AST's F-039 e) | same / same @93bcb66 |
+| `tr0373` | TRAITS:373 | The storage_driver extern block (an opaque struct, db_open and db_rows) compiles. | `compile` | npkc 1 EXTERN-001, -/- (`refused`) | F-043: the storage_driver example is EXTERN-001: the `opaque` tier is reserved (D-190) and its methods take no `Bridge->`/`Duration` | same / same @93bcb66 |
+| `tr0384` | TRAITS:384 | An opaque value is not copied: `Handle:h2 = h;` is refused, NITPICK-OPAQUE-COPY-001. | `sh:0` | sh 1 (`wrong_exit`) | F-043: the opaque-copy example names `Handle` (a builtin type keyword) and a `handle_create` that does not exist; OPAQUE-COPY-001 is never reached | same / same @93bcb66 |
+| `tr0404` | TRAITS:404 | Container<T> and `extract_value<T>`: extracting from a `Container<int32>` gives its value. | `run:0` | npkc 1 TYPE-047, -/- (`refused`) | F-043: `extract_value` passes a lent `T` out (TYPE-047, D-065, D-264); it compiled at the baseline | npkc 0 , 0/0 / same @93bcb66 |
+| `tr0419` | TRAITS:419 | Bounds with `&`: `process<T: Renderable & Serializable>` calling `item.render();` compiles. | `compile` | npkc 1 TYPE-039, -/- (`refused`) | F-043: `item.render();` as a bare statement discards a `Result` (TYPE-039) | same / same @93bcb66 |
+| `tr0435` | TRAITS:435 | `struct:Mutex<T, comptime int32:LEVEL> = { … };` and `Mutex<Config, 2>:cfg_lock;` are the value parameter's spelling: they compile. | `compile` | npkc 1 PARSE-001, -/- (`refused`) | F-043: the value-parameter example declares `struct:Mutex`, a builtin name (PARSE-001); it compiled at the baseline | npkc 0 , 0/0 / same @93bcb66 |
+| `tr0586` | TRAITS:586 | Instantiation depth is capped at 64: an unbounded generic recursion is a compile error, not a crash or a silent truncation. | `refuse` | npkc T , -/- (`crash`) | F-041: npkc does not terminate on an unbounded generic instantiation (`deep<T>` calling `deep<Box<T>>`): no exit in 300 s at 4.4 GB, where TRAITS:586 caps the depth at 64 with a compile error | same / same @93bcb66 |
+| `tr0602` | TRAITS:602 | An `arena<Node<T>>` field in a generic struct, with chained access: `hdr.node_arena.alloc(my_node)`. | `compile` | npkc 1 TYPE-007, -/- (`refused`) | F-043: the arena example calls `alloc(my_node)`: an arena's `alloc` takes no arguments (TYPE-007) | same / same @93bcb66 |
+| `tr0764` | TRAITS:764 | Lambdas without capture remain as function values: one bound to a function-typed local compiles. | `compile` | npkc 1 PARSE-001,PARSE-002, -/- (`refused`) | F-043: "Lambdas without capture remain as function values": there is no lambda expression (PARSE-002; AST:476 says closures are removed and function pointers are named functions) | same / same @93bcb66 |
 | `ty0017` | TYPE:17 | The fundamental scalars map directly to LLVM primitive types: an int16 function is `i16` in, `i16` out, and a flt32 one `float`. | `ir:(?s)\A(?=.*?^define [^@\n]*\bi16 @"?(?:[\w$]+\.)*m11s16"?\(i16 )(?=.*?^define [^@\n]*\bfloat @"?(?:[\w$]+\.)*m11f32"?\(float )` | npkc 0 , 0/0 (`ir`) | the regex required `T @` as the return type; every function returns `{ T, i32 }`, and the value and parameter types are the claimed ones | same / same @1b4f0c6 |
 | `ty0032` | TYPE:32 | A bool local is an `i8` alloca, and a branch on it truncates the loaded `i8` to `i1`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11bl"?\((?=(?:(?!\n\}).)*?alloca i8\b)(?=(?:(?!\n\}).)*?trunc i8 %\S+ to i1)` | npkc 0 , 0/0 (`ir`) | F-028: a bool branch is `icmp ne`, not `trunc` | same / same @1b4f0c6 |
 | `ty0144` | TYPE:144 | tbb arithmetic uses the same overflow intrinsics: a tbb32 `+` lowers through llvm.sadd.with.overflow.i32. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11tb"?\((?=(?:(?!\n\}).)*?@llvm\.sadd\.with\.overflow\.i32\()` | npkc 0 , 0/0 (`ir`) | F-028: tbb arithmetic does not use the with.overflow intrinsics | same / same @1b4f0c6 |
@@ -291,7 +309,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (112; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (124; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -375,6 +393,18 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `op0197` | 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148): the start is `~0u64` |
 | `op0198` | 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148): the expected value is `~0u64` |
 | `op0358` | `-128i8` is not a literal (TYPE-031: 128 does not fit int8 before the negation): the minimum is built as -127 - 1 |
+| `tr0146` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0196` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0198` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0364` | `pub` on a struct field does not parse (PARSE-001), and run 2 agreed for that reason (S55); the struct now has only the plain field the claim reads outside its module |
+| `tr0404` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0461` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 (it had agreed in run 1 for that reason, S55) |
+| `tr0513` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 (it had agreed in run 1 for that reason, S55) |
+| `tr0536` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0543` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0586` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 (it had agreed in run 1 for that reason, S55) |
+| `tr0602` | a generic struct literal takes no type arguments (the binding's annotation gives them, as the compiler's own programs write `Box<int32>:a = Box{ v: 5i32 };`): `Name<…>{` was PARSE-002 |
+| `tr0686` | the impl's generic method was refused for its signature (TYPE-014), not the trait for `dyn` (S55); the trait is now used as `dyn Bad` in a parameter, with no impl |
 | `ty0376` | the Python string made `\t` and `\n` a real tab and newline inside the literal (LEX-005); the escapes are now written as escapes |
 | `ty0399b` | run 1: a cstring's `.ptr` is `uint8->`, not `char8->` (TYPE-007); run 2: a borrow cannot initialise a `wild` binding (BORROW-011, D-223): the bytes are now read through a view, `string_from_bytes(c.ptr, c.len + 1)`, as the compiler's own len_ceiling.npk reads a cstring |
 | `ty0476b` | run 1 and run 2: a literal of 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148), even with a u64 suffix: the u64 maximum is computed (`0 -% 1`), and zero-extension is checked through its half, 2^63 - 1 |
@@ -408,6 +438,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 2197 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 2312 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

@@ -11,7 +11,7 @@ struct:Cell<T> = { T:v; int32:n; };
 impl:<T>:Cell<T> = { func:count = int32(Cell<T>:self) never fails { pass self.n; }; };
 
 func:main = int32(cstring[]:_~argv) {
-    Cell<int64>:c = Cell<int64>{ v: 5i64, n: raw v32(3i32) };
+    Cell<int64>:c = Cell{ v: 5i64, n: raw v32(3i32) };
     if (!((raw c.count()) == 3i32)) { exit 10i32; }
     exit 0i32;
 };

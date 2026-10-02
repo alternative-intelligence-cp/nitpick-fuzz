@@ -49,15 +49,15 @@ committed. A session that starts here resumes at the first unticked box.
     extracted MEMORY, OP and CONTROL in turn, each to a clean point: F-029 … F-032. Its
     scope is done.
   - Session 9 (2026-10-02, the workbench's next brief, S60) extracts the ranges not
-    started, smallest first. MODULE, LEXICAL, AST and BUILD are done, each to a clean
-    point: F-033 … F-040, among them F-037, a use after free. BUILD's 38 tested claims
-    all agree.
-  - Extracted so far: 7 087 of 10 419 lines; 2 560 claims, 2 197 tested, 1 969 agree,
-    228 disagree.
+    started, smallest first. MODULE, LEXICAL, AST, BUILD and TRAITS are done, each to a
+    clean point: F-033 … F-043, among them F-037, a use after free, and F-041, an npkc
+    hang. BUILD's 38 tested claims all agree.
+  - Extracted so far: 7 853 of 10 419 lines; 2 679 claims, 2 312 tested, 2 068 agree,
+    244 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 969 agree, 228 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122 and VERIFICATION 1248–2351 not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 068 agree, 244 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -962,20 +962,20 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's BUILD (S60), after its MODULE, LEXICAL and AST:
-extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's TRAITS (S60), after its MODULE, LEXICAL, AST and
+BUILD: extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
-- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST
-  and BUILD whole, TYPE 1–660 and VERIFICATION 1–1247. That is 7 087 of the references'
-  10 419 lines (S58 corrected the count).
-- **2 560 claims, 2 197 testable, 363 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 969 agree, 228 disagree**.
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST,
+  BUILD and TRAITS whole, TYPE 1–660 and VERIFICATION 1–1247. That is 7 853 of the
+  references' 10 419 lines (S58 corrected the count).
+- **2 679 claims, 2 312 testable, 367 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 068 agree, 244 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-040:
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-043:
 - MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
   documentation rows);
 - OP's is F-031 (five documentation rows);
@@ -988,11 +988,15 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-040:
   - F-037: **a use after free**, a trait object built by `x => dyn Trait`;
   - F-038: npkc traps on `give`/`fall` outside a pick;
   - F-039: four lower-priority compiler rows;
-  - F-040: twenty documentation rows.
+  - F-040: eighteen documentation rows (two classes corrected at BUILD's clean point);
+- TRAITS' are:
+  - F-041: **npkc does not terminate** on an unbounded generic instantiation;
+  - F-042: one lower-priority compiler row;
+  - F-043: thirteen documentation rows.
 
-**Not started:** TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS. About 3 330 lines,
-roughly 1 650 claims. Session 9's brief (S60) takes them smallest first: TRAITS,
-VERIFICATION 1248–2351, TYPE 661–2122.
+**Not started:** TYPE 661–2122 and VERIFICATION 1248–2351. About 2 570 lines, roughly
+1 280 claims. Session 9's brief (S60) takes them smallest first: VERIFICATION 1248–2351,
+then TYPE 661–2122.
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -1006,7 +1010,7 @@ VERIFICATION 1248–2351, TYPE 661–2122.
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-041.
+   and extend `REPORT.md` §12. Findings number on from F-044.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1396,6 +1400,35 @@ the brief says.
     `assoc:Error`, `flt64(…)` as a cast, `Mutex` and `Handle` as type names, a lent
     `T` passed out, `item.render();` as a bare statement, a lambda. The run says
     which still stand.
+- **Run 1:** 96 agree, 19 disagree.
+- **The fixes** (12 programs, over two runs):
+  - A generic struct literal takes no type arguments: it is `Box{ … }` with the type on
+    the binding, as the compiler's own programs write it. This affected 10 programs.
+    Three of them (`tr0461`, `tr0513`, `tr0586`) had agreed in run 1 for that
+    PARSE-002 (S55).
+  - `pub` on a struct field does not parse (`tr0364`).
+  - An impl's generic method was refused for its signature (`tr0686`). Both had agreed
+    in run 2 for those reasons, and were re-spelled.
+- **Runs 2 and 3:** 100, then 99 agree.
+  - Run 3 took `tr0586`'s record from run 2, since its program had not changed. That
+    saved a 120 s timeout.
+  - The final full run of all 2 312 claims: 2 068 agree, 244 disagree. The 2 197 earlier
+    claims re-ran identical.
+- **Triage of the 16**, each run at the baseline and `93bcb66`:
+  - **F-041, npkc does not terminate** on an unbounded generic instantiation (`tr0586`).
+    Measured by hand at three compilers: no exit in 300 s, 4.4 GB resident (`timeout
+    300` under `ulimit -v 8000000`). TRAITS:586 caps the depth at 64 with a compile
+    error.
+  - F-042: `opaque` accepted outside an extern block (`tr0368`), as F-039 e;
+  - F-043: 13 documentation rows;
+  - 1 not a finding (`tr0350`): the sentence says a blanket impl does not apply to
+    itself, not that it is refused.
+
+  All stand at `93bcb66`. At the baseline, `tr0404` (the lent `T`) and `tr0435`
+  (`struct:Mutex`) compiled.
+- **The screen.** TRAITS' agreeing refusals were screened after each run (S55). Five had
+  agreed for a reason of their own and were re-spelled; each now agrees or disagrees for
+  the claim's reason.
 
 ## Environment
 
@@ -2108,3 +2141,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **BUILD.** 97 claims, 38 testable, committed before any run (`e880214`). Run 1: 37
     agree, 1 disagree, a script's own mistake. Final: 38 agree, 0 disagree. No finding.
     One observation: npkg's unknown-stage message omits `explore`.
+  - **TRAITS.** 119 claims, 115 testable, committed before any run (`423a68d`). Run 1: 96
+    agree, 19 disagree. 12 programs fixed. Final: 99 agree, 16 disagree. Triaged: **F-041,
+    an npkc hang**; F-042 (1 lower-priority compiler row); F-043 (13 documentation rows);
+    1 not a finding.

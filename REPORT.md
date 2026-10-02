@@ -1029,13 +1029,13 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 Written 2026-09-26 by session 7 and extended by sessions 8 and 9 (2026-10-02), all on
 the author's machine (48 cores), from the committed scripts. **M11 is not finished.**
-These denominators cover the ranges extracted so far, 7 087 of the fourteen references'
+These denominators cover the ranges extracted so far, 7 853 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
 - extracted whole: BUILTIN, CONCURRENCY, IO, MACRO; by session 8, MEMORY, OP and
-  CONTROL; by session 9, MODULE, LEXICAL, AST and BUILD;
+  CONTROL; by session 9, MODULE, LEXICAL, AST, BUILD and TRAITS;
 - extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
-- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS.
+- not yet extracted: TYPE 661–2122 and VERIFICATION 1248–2351.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
@@ -1045,7 +1045,7 @@ The records are:
   and `results/93bcb66/m11-disagree.jsonl` (sessions 8 and 9): the disagreeing claims at
   the baseline and at the compiler's newest `main` of each session;
 - `gen/m11_triage.py` (the class of each disagreement);
-- `findings/F-018` … `F-040`.
+- `findings/F-018` … `F-043`.
 
 ### 12.1 The denominators
 
@@ -1062,14 +1062,15 @@ The records are:
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 137 | 9 |
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
+| TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 99 | 16 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
 | VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **2 560** | 111 | 628 | 1 821 | **363** | **2 197** | **1 969** | **228** |
+| **total** | **2 679** | 130 | 644 | 1 905 | **367** | **2 312** | **2 068** | **244** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
 - `z3` 99: needs `npkg verify` with the pinned z3;
-- `vague` 57: no checkable outcome;
-- `internal` 67 (AST's 19 are rows that list only a node's fields);
+- `vague` 60: no checkable outcome;
+- `internal` 68 (AST's 19 are rows that list only a node's fields);
 - `tree` 61: the compiler's own tree;
 - `tool` 44: a running driver process, a package in the compiler's tree, or `npkg test`, which
   builds the compiler first (BUILD's 28);
@@ -1087,7 +1088,9 @@ one under S45's recorded exception (`cc0636`). Each change carries its reason (`
 listed in `m11/RESULTS.md` §3). Session 7's run 1 gave 1 093 agree and 169 disagree;
 its final run gives 1 118 and 144. Sessions 8 and 9 changed 21 and 30 more programs the
 same way. AST's 2 were a borrow live at a read and a `move` of a call's `Result`.
-BUILD's 1 was a script that took a diagnostic's note for its error's place. LEXICAL's 4 were a contract measure calling a helper, a `%%` left in a check,
+BUILD's 1 was a script that took a diagnostic's note for its error's place. TRAITS' 12
+were a generic struct literal's spelling (10: `Box{ … }`, never `Box<int32>{ … }`), a `pub`
+field and an impl's generic method (S55). LEXICAL's 4 were a contract measure calling a helper, a `%%` left in a check,
 and a generic identity passing out its lent parameter (2). MODULE's 24 were three
 mistakes:
 - `hidden`, a reserved word (14);
@@ -1102,14 +1105,15 @@ mistakes:
 | compiler: memory — a use after destroy (F-022); **a use after free through a `=> dyn` cast (AST's F-037)** | 1 + 1 |
 | compiler: accepted, then invalid IR (F-023) | 1 |
 | compiler: npkc traps, exit 3 (F-024; AST's F-038) | 4 + 3 |
+| compiler: npkc does not terminate (TRAITS' F-041) | 1 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039) | 16 + 5 + 4 + 5 |
-| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040) | 94 + 8 + 5 + 6 + 7 + 6 + 18 |
+| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039; TRAITS' F-042) | 16 + 5 + 4 + 5 + 1 |
+| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040; TRAITS' F-043) | 94 + 8 + 5 + 6 + 7 + 6 + 18 + 13 |
 | known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135; MODULE's DEF-153; LEXICAL's DEF-131; AST's DEF-131 and DEF-153) | 7 + 1 + 2 + 4 + 1 + 1 + 2 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) + 1 (AST) |
-| **total** | **228** |
+| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) + 1 (AST) + 1 (TRAITS) |
+| **total** | **244** |
 
 **Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
 codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
@@ -1126,7 +1130,10 @@ at `93bcb66`. AST's all stand at both but its two known, which compile at `93bcb
 explicit cast, `x => dyn Trait`, points at freed storage, and its method reads the
 allocator's poison (0xAA in every byte). This holds at HUNT2, the baseline and `93bcb66`,
 on both legs. The implicit coercion `dyn Trait:d = move(x);` is correct. It also found a
-second npkc trap shape, F-038: `give` or `fall` outside a pick arm.
+second npkc trap shape, F-038: `give` or `fall` outside a pick arm. TRAITS' run found
+F-041: npkc never terminates on an unbounded generic instantiation (300 s, 4.4 GB, at all
+three compilers), where the reference caps the depth at 64. TRAITS' rows all stand at
+`93bcb66`. Two of its examples compiled at the baseline and no longer do.
 
 ### 12.3 The findings
 
@@ -1154,12 +1161,15 @@ second npkc trap shape, F-038: `give` or `fall` outside a pick arm.
 | F-037 | a trait object built by `x => dyn Trait` reads freed memory: the method returns the 0xAA poison | **memory: use after free** | 0, 10/10 | the same | the same (at `93bcb66`) |
 | F-038 | npkc traps (exit 3, no message) on `give` or `fall` outside a pick arm | compiler crash | 3 | 3 | 3 (at `93bcb66`) |
 | F-039 | AST's safe departures: a `comptime` value parameter EMIT-002, the backward pipe's function on the right, a non-constant `joins`, any attribute name accepted, an `opaque struct` outside an extern block | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
+| F-041 | npkc does not terminate on an unbounded generic instantiation (no exit in 300 s, 4.4 GB), against the reference's depth cap of 64 | compiler: hang | no exit | no exit | no exit (at `93bcb66`) |
+| F-042 | TRAITS' safe departure: an `opaque struct` accepted outside an extern block (as F-039 e) | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
+| F-043 | TRAITS' thirteen stale claims (eleven examples, the field visibility sentence, the lambdas sentence) | documentation | per row | the same, two compiled | the same (at `93bcb66`) |
 | F-040 | AST's eighteen stale claims (retired spellings, the error model before D-179, the extern rows before D-149, and four more) | documentation | per row | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 3 330 lines: at the drafts' density,
-  roughly 1 650 more claims.
+- **The ranges not yet extracted** (above), about 2 570 lines: at the drafts' density,
+  roughly 1 280 more claims.
 - **BUILD's own process.** 59 of BUILD's 97 claims are the compiler's ladder, its test
   runners and its verified build, which a scratch project cannot reach (`npkg build` reads
   the compiler tree's `runtime/npkrt.ll`). Its 38 tested claims are `npkg`'s refusals

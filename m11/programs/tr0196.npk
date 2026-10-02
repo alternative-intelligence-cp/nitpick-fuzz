@@ -10,7 +10,7 @@ struct:Point = { int32:x; };
 struct:Box<T> = { T:v; };
 
 func:main = int32(cstring[]:_~argv) {
-    Box<Point>:b = Box<Point>{ v: Point{ x: 1i32 } };
+    Box<Point>:b = Box{ v: Point{ x: 1i32 } };
     discard(b);
     exit 0i32;
 };

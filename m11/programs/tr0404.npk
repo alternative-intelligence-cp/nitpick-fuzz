@@ -16,7 +16,7 @@ func:extract_value<T> = T(Container<T>:c) {
 };
 
 func:main = int32(cstring[]:_~argv) {
-    Container<int32>:c = Container<int32>{ value: raw v32(5i32) };
+    Container<int32>:c = Container{ value: raw v32(5i32) };
     int32:v = extract_value(c) ?| 0i32;
     if (!(v == 5i32)) { exit 10i32; }
     exit 0i32;

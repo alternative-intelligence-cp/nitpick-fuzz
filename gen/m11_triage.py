@@ -12,6 +12,7 @@ GROUPS = {
     "mem": "compiler: a lifetime rule not enforced, a use after destroy (F-022)",
     "ir": "compiler: accepted, then invalid IR (F-023)",
     "crash": "compiler: npkc traps, exit 3 (F-024)",
+    "hang": "compiler: npkc does not terminate (F-041)",
     "flag": "compiler: a flag that refuses every program (F-025)",
     "unit": "compiler: a unit annotation accepted and ignored (F-026)",
     "comp": "compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027)",
@@ -248,6 +249,42 @@ for _t, _ids in DOC40:
 put("known", "DEF-131 (F-015): `<=>` refused by the emitter (EMIT-002); it compiles and runs at 93bcb66", "as0295b")
 put("known", "DEF-153 (F-027 c): a string literal in `cstring` position is TYPE-007; it compiles at 93bcb66",
     "as0492")
+
+# ---- session 9: TRAITS_REFERENCE (F-041 a compiler hang, F-042 lower-priority compiler rows,
+#      F-043 documentation rows)
+put("hang", "F-041: npkc does not terminate on an unbounded generic instantiation (`deep<T>` calling "
+    "`deep<Box<T>>`): no exit in 300 s at 4.4 GB, where TRAITS:586 caps the depth at 64 with a compile error",
+    "tr0586")
+put("comp", "F-042 a: an `opaque struct` is accepted at module level, against TRAITS:368 (as AST's F-039 e)",
+    "tr0368")
+DOC43 = (
+    ("F-043: the Serializable example passes `result` from a body: `result` is the ensures-only keyword since "
+     "D-221 (TYPE-060)", ("tr0021",)),
+    ("F-043: the Iterator example declares a trait the prelude owns (`Iterator`, RESOLVE-001)", ("tr0097",)),
+    ("F-043: `assoc:Error = string;` names the compiler's own `Error` (D-179, D-239; RESOLVE-001)", ("tr0109",)),
+    ("F-043: the inherent-impl example casts with `flt64(…)`, a call form the language has no (PARSE-002; casts "
+     "are `=>`/`=>!`)", ("tr0124",)),
+    ("F-043: `l.push(v)`: the prelude's `List<T>` has no `push` method (TYPE-019)", ("tr0149",)),
+    ("F-043: struct fields are not private by default: a plain field is read outside its module (D-313's "
+     "`sealed`/`hidden` are the field qualifiers), and `pub` on a field does not parse", ("tr0364",)),
+    ("F-043: the storage_driver example is EXTERN-001: the `opaque` tier is reserved (D-190) and its methods take "
+     "no `Bridge->`/`Duration`", ("tr0373",)),
+    ("F-043: the opaque-copy example names `Handle` (a builtin type keyword) and a `handle_create` that does not "
+     "exist; OPAQUE-COPY-001 is never reached", ("tr0384",)),
+    ("F-043: `extract_value` passes a lent `T` out (TYPE-047, D-065, D-264); it compiled at the baseline",
+     ("tr0404",)),
+    ("F-043: `item.render();` as a bare statement discards a `Result` (TYPE-039)", ("tr0419",)),
+    ("F-043: the value-parameter example declares `struct:Mutex`, a builtin name (PARSE-001); it compiled at "
+     "the baseline", ("tr0435",)),
+    ("F-043: the arena example calls `alloc(my_node)`: an arena's `alloc` takes no arguments (TYPE-007)",
+     ("tr0602",)),
+    ("F-043: \"Lambdas without capture remain as function values\": there is no lambda expression (PARSE-002; "
+     "AST:476 says closures are removed and function pointers are named functions)", ("tr0764",)),
+)
+for _t, _ids in DOC43:
+    put("doc", _t, *_ids)
+put("extract", "the sentence says a blanket impl does not APPLY to itself (its bound is not met by itself), not "
+    "that the declaration is refused; the program expected a refusal", "tr0350")
 
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")

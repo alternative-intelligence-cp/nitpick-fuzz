@@ -7,11 +7,10 @@ mod:tr0686;
 
 struct:S = { int32:n; };
 trait:Bad = { func:g<T> = int32(Self:self, T:_~x) never fails; };
-impl:S:Bad = { func:g<T> = int32(S:self, T:_~x) never fails { pass 1i32; }; };
+func:takes = int32(dyn Bad:_~d) never fails { pass 0i32; };
 
 func:main = int32(cstring[]:_~argv) {
     S:s = S{ n: 1i32 };
-    dyn Bad:d = move(s);
     exit 0i32;
 };
 

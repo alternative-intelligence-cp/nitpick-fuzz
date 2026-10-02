@@ -10,7 +10,7 @@ struct:Pair<A, B> = { A:a; B:b; };
 impl:<T>:Pair<T, T>:Sum = { func:sum = int32(Pair<T, T>:self) never fails { pass 1i32; }; };
 
 func:main = int32(cstring[]:_~argv) {
-    Pair<int32, int64>:p = Pair<int32, int64>{ a: 1i32, b: 2i64 };
+    Pair<int32, int64>:p = Pair{ a: 1i32, b: 2i64 };
     int32:s = raw p.sum();
     exit 0i32;
 };

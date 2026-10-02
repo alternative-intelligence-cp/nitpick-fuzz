@@ -1,0 +1,8 @@
+# F-041-npkc-does-not-terminate-on-unbounded-instantiation — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-02 18:03 UTC; HUNT 93bcb66 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_h2_bounded_nesting                       93bcb66  run 1  npkc=0  codes=-  O0=0  O2=0
+h1_unbounded_instantiation                   93bcb66  run 1  npkc=T  codes=-  O0=-  O2=-
+ctl_h2_bounded_nesting                       c3bdae2  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+h1_unbounded_instantiation                   c3bdae2  run 1  npkc=T  codes=-  O0=-  O2=-

@@ -1,19 +1,17 @@
-// M11 tr0364 -- meta/specs/TRAITS_REFERENCE.md:364 (rule)
-// quote: Struct fields follow module visibility — private by default, exported with `pub`.
-// claim: A struct field is private by default: a field without `pub` is not read outside its module.
-// expect: refuse
-// wrong: accepted: the field public by default
-mod:tr0364;
+mod:h1_unbounded_instantiation;
 
-mod:bank = {
-    pub struct:Acct = { int64:open; int64:kept; };
-    pub func:mk = Acct() never fails { Acct:a = Acct{ open: 1i64, kept: 2i64 }; pass a; };
-};
-use bank.{Acct};
+func:v32 = int32(int32:x) never fails { pass x; };
+
+struct:Box<T> = { T:v; };
+// TRAITS_REFERENCE:586: instantiation depth is capped at 64, and exceeding it is a compile
+// error with the instantiation stack printed. `deep<int32>` instantiates `deep<Box<int32>>`,
+// which instantiates `deep<Box<Box<int32>>>`, without end. The reference's answer is npkc
+// exit 1. Measured: npkc does not exit (300 s and 4.4 GB by hand; the runner's 120 s here).
+func:deep<T> = int32(move T:x) never fails { Box<T>:b = Box{ v: move(x) }; pass (raw deep::<Box<T>>(move(b))); };
 
 func:main = int32(cstring[]:_~argv) {
-    Acct:a = raw bank.mk();
-    if (a.open != 1i64) { exit 10i32; }
+    int32:v = raw deep::<int32>(raw v32(1i32));
+    if (v != 0i32) { exit 10i32; }
     exit 0i32;
 };
 

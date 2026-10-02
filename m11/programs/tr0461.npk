@@ -9,7 +9,7 @@ struct:Lock<T, comptime int32:LEVEL> = { T:v; };
 func:f = int32(Lock<int64, 3>:_~l) never fails { pass 0i32; };
 
 func:main = int32(cstring[]:_~argv) {
-    Lock<int64, 2>:a = Lock<int64, 2>{ v: 1i64 };
+    Lock<int64, 2>:a = Lock{ v: 1i64 };
     int32:r = raw f(a);
     exit 0i32;
 };

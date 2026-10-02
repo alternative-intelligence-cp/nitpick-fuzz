@@ -11,7 +11,7 @@ struct:Box<T> = { T:v; int32:n; };
 func:count<T> = int32(Box<T>:b) never fails { pass b.n; };
 
 func:main = int32(cstring[]:_~argv) {
-    Box<int32>:c = Box<int32>{ v: raw v32(5i32), n: 3i32 };
+    Box<int32>:c = Box{ v: raw v32(5i32), n: 3i32 };
     if (!((raw count(c)) == 3i32)) { exit 10i32; }
     exit 0i32;
 };
