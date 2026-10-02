@@ -11,21 +11,22 @@ before the first run.
 |---|---|---|---|---|---|---|---|---|---|
 | BUILTIN | 227 | 2 | 109 | 116 | 33 | 194 | 194 | 182 | 12 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 122 | 101 | 21 |
+| CONTROL | 110 | 14 | 7 | 89 | 2 | 108 | 108 | 98 | 10 |
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 67 | 60 | 7 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 119 | 98 | 21 |
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 146 | 137 | 9 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 1828 | 69 | 442 | 1317 | 263 | 1565 | 1565 | 1403 | 162 |
+| **total** | 1938 | 83 | 449 | 1406 | 265 | 1673 | 1673 | 1501 | 172 |
 
-**These denominators cover 4636 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL none of 415; IO 1–287 of 287; LEXICAL none of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE none of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 5051 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL none of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE none of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
-- `z3` 91 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `vague` 44 — the sentence states no checkable outcome
+- `z3` 92 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
+- `vague` 45 — the sentence states no checkable outcome
 - `internal` 44 — a compiler internal no program observes (an AST field, a table's layout)
 - `tree` 42 — a claim about the compiler's own source tree, generators, harness or documents
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
@@ -33,9 +34,9 @@ Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 2 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (162)
+## 2. The disagreements (172)
 
-By kind: `refused` 86, `accepted` 27, `wrong_exit` 24, `ir` 13, `emit_defect` 6, `other_code` 3, `crash` 3.
+By kind: `refused` 89, `accepted` 27, `wrong_exit` 27, `ir` 13, `other_code` 7, `emit_defect` 6, `crash` 3.
 
 | class | claims |
 |---|---|
@@ -46,8 +47,8 @@ By kind: `refused` 86, `accepted` 27, `wrong_exit` 24, `ir` 13, `emit_defect` 6,
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
 | compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 16 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 107 |
-| known: deduplicated against KNOWN_DEFECTS.md | 10 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 113 |
+| known: deduplicated against KNOWN_DEFECTS.md | 14 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or no valid program can test it | 12 |
 
@@ -90,6 +91,16 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `cc0523` | CONCURRENCY:523 | With R = NIL, `ask` is an acknowledgement: it yields Result<NIL>. | `run:0` | npkc 1 TYPE-001,TYPE-043, -/- (`refused`) | F-028: there is no Actor type | same / same @1b4f0c6 |
 | `cc0535` | CONCURRENCY:535 | `ThreadPool<LEVEL, CAP>:pool = ThreadPool.create(n)?;` and `await pool.submit(move(job), deadline)?;` compile and run. | `run:0` | npkc 1 PARSE-011, -/- (`refused`) | F-028: `ThreadPool.create(n)?` is two stale spellings (a bare `?`, a static method) | same / same @1b4f0c6 |
 | `cc0568b` | CONCURRENCY:568 | `timedwait` is the form: with no signal it returns an error when its deadline expires. | `run:0` | npkc 0 , 10/10 (`wrong_exit`) | F-021: timedwait that expires with no signal reports success | same / same @1b4f0c6 |
+| `ct0034` | CONTROL:34 | The fallthrough example: `fall two;` in arm one continues into arm two. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-032: the fallthrough example calls `println`, which no prelude declares (RESOLVE-002) | same / same @93bcb66 |
+| `ct0080` | CONTROL:80 | pick matches a macro invocation pattern with a where guard: `MyMacro!(a, b) where (a > b)`. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-032: the guards-and-macros example's pattern `MyMacro!(a, b) where (a > b)` is removed (PARSE-001; MACRO:374, and macro invocation is `#name(args)`) | same / same @93bcb66 |
+| `ct0187` | CONTROL:187 | A for binding of another type than the element's is refused by name, TYPE-033. | `refuse:NITPICK-TYPE-033` | npkc 1 TYPE-007, -/- (`other_code`) | DEF-133 (F-017 d6): a for binding of another type is TYPE-007, not TYPE-033 | same / same @93bcb66 |
+| `ct0235` | CONTROL:235 | till with limit <= 0 is zero iterations. | `run:0` | npkc 0 , 10/10 (`wrong_exit`) | DEF-130 (F-014): till with a non-positive limit; agrees at 93bcb66 | same / npkc 0 , 0/0 @93bcb66 |
+| `ct0236` | CONTROL:236 | A loop bound that is a tbb holding ERR traps to failsafe (TbbErr). | `run:110` | npkc 0 , 10/10 (`wrong_exit`) | DEF-135 (the compiler seat's own, registered at 1.6.1d step 2): a tbb bound holding ERR ran the loop in silence; traps TbbErr at 93bcb66 | same / npkc 0 , 110/110 @93bcb66 |
+| `ct0258` | CONTROL:258 | till is not a do-while: with limit 0 the body never runs. | `run:0` | npkc 0 , 10/10 (`wrong_exit`) | DEF-130 (F-014): till with a non-positive limit; agrees at 93bcb66 | same / npkc 0 , 0/0 @93bcb66 |
+| `ct0314` | CONTROL:314 | An assignment inside an if condition is rejected as NITPICK-IF-002. | `refuse:IF-002` | npkc 1 PARSE-001,PARSE-002, -/- (`other_code`) | F-032: §4.2 names NITPICK-IF-002, -IF-001 and -WHEN-001; the compiler refuses each program with a PARSE code (OP:65: IF-002 "describes a diagnostic for a program that cannot be written") | same / same @93bcb66 |
+| `ct0317` | CONTROL:317 | An else without an immediately preceding if is NITPICK-IF-001. | `refuse:IF-001` | npkc 1 PARSE-002, -/- (`other_code`) | F-032: §4.2 names NITPICK-IF-002, -IF-001 and -WHEN-001; the compiler refuses each program with a PARSE code (OP:65: IF-002 "describes a diagnostic for a program that cannot be written") | same / same @93bcb66 |
+| `ct0319` | CONTROL:319 | An orphaned `then` without a preceding when is NITPICK-WHEN-001. | `refuse:WHEN-001` | npkc 1 PARSE-002, -/- (`other_code`) | F-032: §4.2 names NITPICK-IF-002, -IF-001 and -WHEN-001; the compiler refuses each program with a PARSE code (OP:65: IF-002 "describes a diagnostic for a program that cannot be written") | same / same @93bcb66 |
+| `ct0347` | CONTROL:347 | `ok()` is the taint-clearing builtin: `ok(x)` compiles. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-032: `ok()` is not "the taint-clearing builtin" (CONTROL:347): it is removed (D-097, OP:172) | same / same @93bcb66 |
 | `io0022` | IO:22 | `Stream` is the trait every readable or writable thing implements: it can bound a generic parameter. | `run:0` | npkc 1 TYPE-001, -/- (`refused`) | F-028: there is no Stream trait | same / same @1b4f0c6 |
 | `io0045` | IO:45 | Every stream operation is async: `r.read(..)` without await is refused. | `refuse` | npkc 0 , llc!1/opt!1 (`accepted`) | F-023: an un-awaited async METHOD call is accepted and emits a call to an undefined symbol | same / same @1b4f0c6 |
 | `io0075` | IO:75 | End of input is the error code `E_EOF`: a read of an exhausted stream fails with it. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-028: the EOF identity is IoEof, not E_EOF | same / same @1b4f0c6 |
@@ -220,7 +231,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (71; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (81; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -250,6 +261,16 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `cc0646` | failsafe carries a pick naming every identity that can reach it (REACH-001); the division that traps inside failsafe comes before it |
 | `io0158` | the script's program named only IntOverflow in failsafe; REACH-002 demands every identity that can reach it (Unreachable, DeadlineExceeded, ...), so it now names them all |
 | `io0163` | the script's program named only IntOverflow in failsafe; REACH-002 demands every identity that can reach it (Unreachable, DeadlineExceeded, ...), so it now names them all |
+| `ct0031` | a unit variant's pattern is qualified by its enum: `(St.A)` (RESOLVE-002 for `(A)`) |
+| `ct0032` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
+| `ct0032b` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
+| `ct0032c` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
+| `ct0032d` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
+| `ct0032e` | a unit variant's pattern is qualified by its enum: `(St.Idle)`, `(St.Running)` |
+| `ct0032f` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not; run 1 AGREED for that reason, not for the moved-from selector |
+| `ct0055` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
+| `ct0199` | `$` is the counter, an int64 whatever the bounds' type (TYPE-007 for an int32 `x += $`); the example leaves x untyped, so the program's x is an int64 |
+| `ct0207` | `$` is the counter, an int64 whatever the bounds' type (TYPE-007 for an int32 `x += $`); the example leaves x untyped, so the program's x is an int64 |
 | `mc0312b` | it agreed for another reason: `assert_static comptime(...)` is refused for its spelling (PARSE-001; mc0312's row), so the program now writes `assert_static(comptime(...))` and the refusal it expects is the false proposition's |
 | `me0120` | `buffer` is a reserved word in expression position (LEXICAL:122): a binding declared `buffer` compiles but cannot be referenced (PARSE-002); the program's binding is `buf` (the example's own line, which never references it, is the documentation row this observation adds) |
 | `me0179` | `buffer` is a reserved word in expression position (LEXICAL:122): a binding declared `buffer` compiles but cannot be referenced (PARSE-002); the program's binding is `buf`; run 1 AGREED for that reason, not for the use after move |
@@ -296,6 +317,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 1565 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 1673 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

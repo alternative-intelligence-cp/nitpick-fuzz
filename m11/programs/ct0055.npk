@@ -13,7 +13,7 @@ func:main = int32(cstring[]:_~argv) {
     int32:r = 0i32;
     pick (e) {
         (Som(x)) { if (string_bytes(x)[0i64] == 97u8) { r = 1i32; } },
-        (Non) { r = 2i32; }
+        (Opt.Non) { r = 2i32; }
     }
     if (!(r == 1i32)) { exit 10i32; }
     exit 0i32;

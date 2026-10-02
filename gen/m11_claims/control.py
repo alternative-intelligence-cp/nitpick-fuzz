@@ -745,3 +745,23 @@ claim("ct0412b", D, 412, "Managed-regime", "rule",
 %s
     exit 0i32;""" % chk("string_bytes(s)[0i64] == 97u8")),
       wrong="96: managed storage counted")
+
+
+# ================================================================== after run 1 (S45, S53)
+# Each program below failed for a mistake of its own; its TEXT changed, its expectation not.
+_QUAL = ("a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare "
+         "`(Non)`), as a payload variant's `(Som(x))` is not")
+refix("ct0031", "a unit variant's pattern is qualified by its enum: `(St.A)` (RESOLVE-002 for `(A)`)",
+      [("pick (s) { (A) { give 1i32; }", "pick (s) { (St.A) { give 1i32; }")])
+for _cid in ("ct0032", "ct0032b", "ct0032c", "ct0032d", "ct0055"):
+    refix(_cid, _QUAL, [("(Non) {", "(Opt.Non) {")])
+refix("ct0032e", "a unit variant's pattern is qualified by its enum: `(St.Idle)`, `(St.Running)`",
+      [("(Idle) {", "(St.Idle) {"), ("(Running) {", "(St.Running) {")])
+refix("ct0032f", _QUAL + "; run 1 AGREED for that reason, not for the moved-from selector",
+      [("        (Non) { exit 11i32; }", "        (Opt.Non) { exit 11i32; }"),
+       ("pick (e) { (Non) { exit 12i32; }", "pick (e) { (Opt.Non) { exit 12i32; }")])
+_DOLLAR = ("`$` is the counter, an int64 whatever the bounds' type (TYPE-007 for an int32 `x += $`); the "
+           "example leaves x untyped, so the program's x is an int64")
+refix("ct0199", _DOLLAR, [("    int32:x = 0i32;", "    int64:x = 0i64;"), ("x == 45i32", "x == 45i64")])
+refix("ct0207", _DOLLAR, [("    int32:x = 0i32;", "    int64:x = 0i64;"), ("x == 45i32", "x == 45i64"),
+                          ("    x = 0i32;", "    x = 0i64;"), ("x == 55i32", "x == 55i64")])

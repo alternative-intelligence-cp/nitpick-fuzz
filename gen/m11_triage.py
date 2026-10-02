@@ -142,6 +142,20 @@ put("extract", "no well-typed program tells the two readings apart: `|` takes in
 put("extract", "the program's `!!b` is two negations, which nothing forbids; the struck `!!` is the old "
     "emphatic token (`asm!!`), refused elsewhere (BUILTIN's bi0378)", "op0295")
 
+# ---- session 8: CONTROL_REFERENCE (documentation rows are F-032)
+put("doc", "F-032: the fallthrough example calls `println`, which no prelude declares (RESOLVE-002)", "ct0034")
+put("doc", "F-032: the guards-and-macros example's pattern `MyMacro!(a, b) where (a > b)` is removed "
+    "(PARSE-001; MACRO:374, and macro invocation is `#name(args)`)", "ct0080")
+put("doc", "F-032: §4.2 names NITPICK-IF-002, -IF-001 and -WHEN-001; the compiler refuses each program with a "
+    "PARSE code (OP:65: IF-002 \"describes a diagnostic for a program that cannot be written\")",
+    "ct0314", "ct0317", "ct0319")
+put("doc", "F-032: `ok()` is not \"the taint-clearing builtin\" (CONTROL:347): it is removed (D-097, OP:172)",
+    "ct0347")
+put("known", "DEF-133 (F-017 d6): a for binding of another type is TYPE-007, not TYPE-033", "ct0187")
+put("known", "DEF-130 (F-014): till with a non-positive limit; agrees at 93bcb66", "ct0235", "ct0258")
+put("known", "DEF-135 (the compiler seat's own, registered at 1.6.1d step 2): a tbb bound holding ERR ran the "
+    "loop in silence; traps TbbErr at 93bcb66", "ct0236")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

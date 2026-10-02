@@ -9,8 +9,8 @@ enum:St = { Idle; Running; };
 
 func:main = int32(cstring[]:_~argv) {
     St:state = St.Idle;
-    pick (state) { (Idle) { state = St.Running; }, (*) { exit 10i32; } }
-    pick (state) { (Running) { exit 0i32; }, (*) { exit 11i32; } }
+    pick (state) { (St.Idle) { state = St.Running; }, (*) { exit 10i32; } }
+    pick (state) { (St.Running) { exit 0i32; }, (*) { exit 11i32; } }
     exit 12i32;
 };
 

@@ -12,7 +12,7 @@ func:main = int32(cstring[]:_~argv) {
     Opt:e = Opt.Som(raw mk());
     pick (e) {
         (Som(x)) { string:t = x; exit 10i32; },
-        (Non) { exit 11i32; }
+        (Opt.Non) { exit 11i32; }
     }
     exit 0i32;
 };

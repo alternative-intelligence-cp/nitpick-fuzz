@@ -12,9 +12,9 @@ func:main = int32(cstring[]:_~argv) {
     Opt:e = Opt.Som(raw mk());
     pick (move(e)) {
         (Som(x)) { if (string_bytes(x)[0i64] != 97u8) { exit 10i32; } },
-        (Non) { exit 11i32; }
+        (Opt.Non) { exit 11i32; }
     }
-    pick (e) { (Non) { exit 12i32; }, (*) { exit 13i32; } }
+    pick (e) { (Opt.Non) { exit 12i32; }, (*) { exit 13i32; } }
     exit 0i32;
 };
 

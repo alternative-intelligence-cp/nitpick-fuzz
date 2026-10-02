@@ -6,16 +6,16 @@
 mod:ct0207;
 
 func:main = int32(cstring[]:_~argv) {
-    int32:x = 0i32;
+    int64:x = 0i64;
     loop(0i32, 10i32, 1i32) {
         x += $;  // ascending:  0, 1, ..., 9
     }
-    if (!(x == 45i32)) { exit 10i32; }
-    x = 0i32;
+    if (!(x == 45i64)) { exit 10i32; }
+    x = 0i64;
     loop(10i32, 0i32, 1i32) {
         x += $;  // descending: 10, 9, ..., 1
     }
-    if (!(x == 55i32)) { exit 11i32; }
+    if (!(x == 55i64)) { exit 11i32; }
     exit 0i32;
 };
 

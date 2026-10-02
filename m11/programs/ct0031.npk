@@ -9,7 +9,7 @@ enum:St = { A; B; };
 
 func:main = int32(cstring[]:_~argv) {
     St:s = St.A;
-    int32:v = pick (s) { (A) { give 1i32; }, (*) { give 0i32; } };
+    int32:v = pick (s) { (St.A) { give 1i32; }, (*) { give 0i32; } };
     if (!(v == 1i32)) { exit 10i32; }
     exit 0i32;
 };
