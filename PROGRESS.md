@@ -1387,6 +1387,16 @@ the brief says.
 - **The screen.** Every BUILD script's last line was read; each refusal is the claim's own
   (the toolchain pin, `edition`, the lock, `update`, the `[[test]]` schema).
 
+**TRAITS (all 766 lines), `gen/m11_claims/traits.py`.** The week read 89% before it.
+- **The extraction.** 119 claims (19 examples, 16 rows, 84 rules); 115 testable, 4
+  untestable (3 `vague`, 1 `internal`). No M10 item tests a TRAITS sentence. Committed
+  before any of its programs ran.
+  - Every example is tested as written, around declarations it needs. Several use
+    spellings other references retired: a `buffer` return with `pass result;`,
+    `assoc:Error`, `flt64(…)` as a cast, `Mutex` and `Handle` as type names, a lent
+    `T` passed out, `item.render();` as a bare statement, a lambda. The run says
+    which still stand.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*

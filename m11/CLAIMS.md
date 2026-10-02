@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**2560 claims: 2197 testable, 363 untestable** (each with its reason).
+**2679 claims: 2312 testable, 367 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -25,6 +25,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
 | MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
 | OP | 159 | 0 | 87 | 72 | 157 | 2 |
+| TRAITS | 119 | 19 | 16 | 84 | 115 | 4 |
 | TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 457 | 128 |
 
@@ -45,7 +46,7 @@ extracted:
 | MEMORY | 533 | 1–533 | 533 | — |
 | MODULE | 300 | 1–300 | 300 | — |
 | OP | 403 | 1–403 | 403 | — |
-| TRAITS | 766 | — | 0 | 1–766 |
+| TRAITS | 766 | 1–766 | 766 | — |
 | TYPE | 2122 | 1–660 | 660 | 661–2122 |
 | VERIFICATION | 2351 | 1–845, 846–1247 | 1247 | 1248–2351 |
 
@@ -1764,6 +1765,130 @@ Tables whose rows are not claims:
 | `op0401` | 401 | row | “\| `//` \| Line Comment \|” | `//` comments out the rest of the line. | `run:0` |
 | `op0402` | 402 | row | “\| `/*` \| Block Start \|” | `/*` begins a block comment that spans lines. | `run:0` |
 | `op0403` | 403 | row | “\| `*/` \| Block End \|” | `*/` ends a block comment: code after it on the same line runs. | `run:0` |
+
+## TRAITS (`meta/specs/TRAITS_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `tr0011` | 11 | rule | “Nitpick uses strict **composition over inheritance**” | There is no class inheritance; traits and structs compose. | untestable [vague] no inheritance spelling is named whose refusal a program could check |
+| `tr0021` | 21 | example | “```nitpick” | The Serializable example (a trait with `to_bytes = buffer(Self:self)`, an impl passing `result`) compiles. | `compile` |
+| `tr0037` | 37 | rule | “`Self` denotes the implementing type inside a `trait` or `impl` body” | `Self` is invalid outside a trait or impl body: a free function taking `Self` is refused. | `refuse` |
+| `tr0040` | 40 | rule | “spells these `trait:Reader { … };` (no `=`)” | The struck form `trait:Reader { … };` (no `=`) is refused. | `refuse` |
+| `tr0041` | 41 | rule | “`impl Reader for FileStream { … }` (space-separated)” | The struck form `impl Reader for FileStream { … }` is refused. | `refuse` |
+| `tr0045` | 45 | rule | “Chapter 13's own `impl:Trait:for:Type` is also superseded” | `impl:Trait:for:Type` is superseded: refused. | `refuse` |
+| `tr0048` | 48 | example | “> ```ebnf” | `impl:Type:Trait = { … };` is the impl form: it compiles and the method is called. | `run:0` |
+| `tr0059` | 59 | rule | “`never fails` (`NITPICK-TYPE-041`)” | An impl may not drop a trait method's `never fails`: NITPICK-TYPE-041. | `refuse:NITPICK-TYPE-041` |
+| `tr0060` | 60 | rule | “The reverse is fine — an impl may be” | An impl may be `never fails` where its trait is not; the guarantee shows on the concrete receiver: `raw l.say()` compiles. | `run:0` |
+| `tr0067` | 67 | rule | “Impls that omit the method inherit it; any impl” | An impl may override a default method: the override is called. | `run:0` |
+| `tr0070` | 70 | example | “```nitpick” | Describable: an impl giving only `name` inherits `describe`'s default, "an object". | `run:0` |
+| `tr0084` | 84 | example | “```nitpick” | `trait:Ordered = Equatable & { … };` declares a supertrait requirement: it compiles. | `compile` |
+| `tr0090` | 90 | rule | “Requirements are enforced **transitively**” | Requirements are transitive: implementing C (which requires B, which requires A) without A is refused. | `refuse` |
+| `tr0097` | 97 | example | “```nitpick” | Iterator with `assoc:Item`: the impl binds `Item = int32`, and `next` returns `self.current`. | `run:0` |
+| `tr0109` | 109 | rule | “Associated types may carry defaults — `assoc:Error = string;`” | An associated type may carry a default (`assoc:Error = string;`), inherited by an impl that omits it. | `compile` |
+| `tr0124` | 124 | example | “```nitpick” | An inherent impl: Point's `magnitude` (flt64_sqrt over a call-cast `flt64(…)`) compiles. | `compile` |
+| `tr0132` | 132 | rule | “Inherent methods dispatch **statically via UFCS**” | Inherent methods dispatch statically; `p.magnitude()` resolves to `Point_magnitude(p)`. | untestable [internal] the lowered name of an inherent method; tr0495 tests UFCS over a free function |
+| `tr0136` | 136 | rule | “**A trait name is a namespace, so a method may be called qualified** (D-172)” | A trait name qualifies a method: `Speaks.say(l)` is `l.say()`. | `run:0` |
+| `tr0138` | 138 | rule | “and is refused by name when” | The qualified call is refused by name when the receiver's type does not implement the trait. | `refuse` |
+| `tr0139` | 139 | rule | “This is how a call disambiguates” | The qualified call disambiguates: `Ta.tag(s)` and `Tb.tag(s)` give 1 and 2. | `run:0` |
+| `tr0140` | 140 | rule | “traits a type implements declare one name (`p.tag()` alone cannot choose, D-102)” | Two traits declaring one name: `p.tag()` alone is refused as ambiguous. | `refuse` |
+| `tr0146` | 146 | rule | “`impl:<T>:List<T> = { … }` names its target” | A generic subject has inherent impls: `impl:<T>:Cell<T>` gives every instance the method. | `run:0` |
+| `tr0149` | 149 | rule | “(`List<T>->:self`), so a generic struct's methods can mutate it” | An inherent family method may take its receiver by pointer: `l.push(v)` beside `list_push(@l, v)`. | `compile` |
+| `tr0158` | 158 | example | “```nitpick” | The seven derives on Config (an int32 and a string field) compile. | `compile` |
+| `tr0166` | 166 | rule | “Supported, and there are **seven** (D-123)” | There are seven derives: an eighth name (`Default`) is refused. | `refuse` |
+| `tr0169` | 169 | rule | “`Ord` compares **in declaration order**” | A derived `Ord` compares fields in declaration order: (1, 9) is Less than (2, 0). | `run:0` |
+| `tr0170` | 170 | rule | “`Hash` combines with **FNV-1a**” | A derived Hash combines the members with FNV-1a. | untestable [vague] the text names the function, not what bytes of each member it is fed in what order |
+| `tr0175` | 175 | rule | “A refusal **names the field that blocks it**, not the type.” | A derive's refusal names the blocking field: `List<int64>` in field `items` is named. | `sh:0` |
+| `tr0177` | 177 | rule | “**On a generic subject, derive writes the family form**” | `#[derive(Eq)]` on `struct:Box<T>` compiles (as `impl:<T>:Box<T>:Eq`). | `compile` |
+| `tr0196` | 196 | rule | “The bound is enforced where the impl is USED” | `Box<Point>` under a derived Ord is a fine type until `cmp` is called (Point implements nothing). | `compile` |
+| `tr0198` | 198 | rule | “refused naming the derive, the” | Calling `cmp` on `Box<Point>` (Point lacking Ord) is refused at the call, NITPICK-TYPE-017. | `refuse:NITPICK-TYPE-017` |
+| `tr0216` | 216 | rule | “program may not declare a name the prelude declares” | A program may not declare a name the prelude declares: `struct:Ordering` is refused. | `refuse` |
+| `tr0222` | 222 | rule | “**And the prelude IMPLEMENTS them for every scalar it can name**” | The prelude implements the derives for scalars: `a.cmp(b)` on two int32s is Less, `a.eq(a)` true. | `run:0` |
+| `tr0230` | 230 | rule | “only, answering `NIL` for `nan`” | A float's `partial_cmp` answers NIL for nan. | `run:0` |
+| `tr0233` | 233 | rule | “`string` has `Eq`, `Ord` (byte-lexicographic, the shorter prefix” | string's Ord is byte-lexicographic with the shorter prefix Less: "ab" is Less than "abc". | `run:0` |
+| `tr0235` | 235 | rule | “`eq`/`cmp` trap on ERR as the operator does” | A twisted scalar's `eq` traps on ERR, as the operator does. | `trap:TbbErr` |
+| `tr0236` | 236 | rule | “of a pair the prelude covers is TYPE-013” | A program's own impl of a pair the prelude covers (`impl:int32:Ord`) is NITPICK-TYPE-013. | `refuse:NITPICK-TYPE-013` |
+| `tr0237` | 237 | rule | “pair it does not cover (`impl:bool:Ord`) is admitted” | A pair the prelude does not cover (`impl:bool:Ord`) is admitted. | `compile` |
+| `tr0246` | 246 | row | “\| `Eq` \| `func:eq = bool(Self:self, Self:other);` \|” | Eq's method is `eq`, returning bool. | `compile` |
+| `tr0247` | 247 | row | “\| `Ord` \| `func:cmp = Ordering(Self:self, Self:other);` \|” | Ord's method is `cmp`, returning Ordering. | `compile` |
+| `tr0248` | 248 | row | “\| `PartialOrd` \| `func:partial_cmp = Ordering?(Self:self, Self:other);` \|” | PartialOrd's method is `partial_cmp`, returning Ordering?. | `compile` |
+| `tr0249` | 249 | row | “\| `Clone` \| `func:clone = Self(Self:self);` \|” | Clone's method is `clone`, returning Self. | `compile` |
+| `tr0250` | 250 | row | “\| `Hash` \| `func:hash = uint64(Self:self);` \|” | Hash's method is `hash`, returning uint64. | `compile` |
+| `tr0251` | 251 | row | “\| `ToString` \| `func:to_string = string(Self:self);` \|” | ToString's method is `to_string`, returning string. | `compile` |
+| `tr0252` | 252 | row | “\| `Debug` \| `func:debug = string(Self:self);` \|” | Debug's method is `debug`, returning string. | `compile` |
+| `tr0254` | 254 | rule | “`Ordering` is a prelude enum — `Less`, `Equal`, `Greater`” | `Ordering` is a prelude enum with Less, Equal and Greater. | `run:0` |
+| `tr0255` | 255 | rule | “integer**: the prototype returned `int32`” | An ordering is not an integer: binding one to an int32 is refused. | `refuse` |
+| `tr0266` | 266 | rule | “All seven generate for a struct and for an enum” | All seven generate for an enum, `string` and bare `T` payloads included: `enum:Opt<T> = { Some(T); None; }`. | `compile` |
+| `tr0280` | 280 | rule | “**DERIVE-005** — a `simd` field under anything but `Eq`” | A `simd` field under Ord is refused, NITPICK-DERIVE-005. | `refuse:NITPICK-DERIVE-005` |
+| `tr0283` | 283 | rule | “**DERIVE-006** — a member no derived body can be written for” | An owning builtin member (`List<int64>`) under Eq is refused, NITPICK-DERIVE-006. | `refuse:NITPICK-DERIVE-006` |
+| `tr0296` | 296 | rule | “RE-HOMED to the derive's” | A checker verdict inside a derive is re-homed to the declaration, naming the field: `bool` under Ord. | `sh:0` |
+| `tr0306` | 306 | rule | “**`Default` and `Display` were listed here and are removed (D-123).**” | `Display` is removed: `#[derive(Display)]` is refused. | `refuse` |
+| `tr0327` | 327 | example | “```nitpick” | A blanket impl `impl:<T: Printable>:T:Loggable` gives every Printable type `log_str`: "[LOG]". | `run:0` |
+| `tr0335` | 335 | rule | “**Concrete” | A concrete impl takes priority over the blanket one. | `run:0` |
+| `tr0342` | 342 | rule | “**At most one blanket impl per trait.**” | Two blanket impls of one trait are refused. | `refuse` |
+| `tr0347` | 347 | rule | “**A blanket impl must name a trait.**” | A blanket impl naming no trait (`impl:<T: Printable>:T = { … };`) is refused. | `refuse` |
+| `tr0350` | 350 | rule | “**A blanket impl does not apply to itself.**” | A blanket impl does not apply to itself: `impl:<T: Loggable>:T:Loggable` is refused. | `refuse` |
+| `tr0356` | 356 | rule | “spells this `impl:Loggable:for:T:where:Printable = { … };`” | Chapter 13's `impl:Loggable:for:T:where:Printable` is refused. | `refuse` |
+| `tr0364` | 364 | rule | “Struct fields follow module visibility — private by default, exported with `pub`.” | A struct field is private by default: a field without `pub` is not read outside its module. | `refuse` |
+| `tr0368` | 368 | rule | “it is legal **only inside an” | `opaque` is legal only inside an `extern` block: one at module level is refused. | `refuse` |
+| `tr0373` | 373 | example | “```nitpick” | The storage_driver extern block (an opaque struct, db_open and db_rows) compiles. | `compile` |
+| `tr0384` | 384 | example | “```nitpick” | An opaque value is not copied: `Handle:h2 = h;` is refused, NITPICK-OPAQUE-COPY-001. | `sh:0` |
+| `tr0392` | 392 | rule | “The standalone `opaque:DatabaseHandle;` form previously shown here is **struck**” | The standalone `opaque:DatabaseHandle;` form is struck: refused. | `refuse` |
+| `tr0404` | 404 | example | “```nitpick” | Container<T> and `extract_value<T>`: extracting from a `Container<int32>` gives its value. | `run:0` |
+| `tr0419` | 419 | example | “```nitpick” | Bounds with `&`: `process<T: Renderable & Serializable>` calling `item.render();` compiles. | `compile` |
+| `tr0425` | 425 | rule | “places parameters **before** the name — `func<T: …>:process`” | Parameters before the name (`func<T>:process`) are struck: refused. | `refuse` |
+| `tr0432` | 432 | rule | “Parameters may carry a compile-time **value** as well as a type” | A struct may take a compile-time value parameter: `Lock<int64, 2>` is a type. | `compile` |
+| `tr0435` | 435 | example | “```nitpick” | `struct:Mutex<T, comptime int32:LEVEL> = { … };` and `Mutex<Config, 2>:cfg_lock;` are the value parameter's spelling: they compile. | `compile` |
+| `tr0448` | 448 | rule | “**A value argument stops below the binary operators.**” | A value argument stops below the binary operators: `Lock<int64, 2 > 1>` (unparenthesised) is refused. | `refuse` |
+| `tr0454` | 454 | rule | “**Only an integer literal is constant at this rung.**” | Only an integer literal is a constant value argument: a named constant is refused. | `refuse` |
+| `tr0456` | 456 | rule | “**An unsuffixed literal takes the parameter's declared type; a suffixed one must” | A suffixed value argument must already be the parameter's type: `2i64` against `comptime int32` is refused. | `refuse` |
+| `tr0461` | 461 | rule | “Two values are two arguments and therefore two types” | `Lock<T, 2>` and `Lock<T, 3>` are two types: one passed for the other is refused. | `refuse` |
+| `tr0466` | 466 | rule | “**A bare type parameter is move-only in the body that names it (D-264,” | A bare `T` is move-only in a generic body: a plain copy `T:y = x;` is refused, NITPICK-TYPE-046. | `refuse:NITPICK-TYPE-046` |
+| `tr0483` | 483 | rule | “**a body may not use any capability its bounds do not” | A generic body may not use a capability its bounds do not declare; the refusal names the declared bound. | `sh:0` |
+| `tr0492` | 492 | rule | “**A bound set is transitively closed.**” | A bound set is transitively closed: under `T: Ordered` (Ordered = Equatable & …) the body uses Equatable's method. | `run:0` |
+| `tr0495` | 495 | rule | “**UFCS does not reach a free function through a parameter.**” | UFCS does not reach a free function through a type parameter: `x.magnitude()` on a `T` is refused. | `refuse` |
+| `tr0496` | 496 | rule | “and `magnitude(p)` are the same call for a concrete receiver (D-006)” | For a concrete receiver, `p.magnitude()` and `magnitude(p)` are the same call. | `run:0` |
+| `tr0501` | 501 | rule | “**A `comptime` value parameter is not a type.**” | A comptime value parameter is not a type: `LEVEL:x` is refused. | `refuse` |
+| `tr0504` | 504 | rule | “A parameter **shadows** a module-level type of the same name” | A type parameter shadows a module-level type of the same name: `func:f<T>` with `struct:T` declared compiles. | `compile` |
+| `tr0513` | 513 | rule | “(`Pair<T, T>` does not match `Pair<int32, int64>`)” | A family impl's repeated parameter binds one type: `impl:<T>:Pair<T, T>:Sum` does not apply to `Pair<int32, int64>`, so `sum` on it is refused. | `refuse` |
+| `tr0536` | 536 | example | “```nitpick” | Type arguments are inferred at the call: `extract(c)` with nothing written. | `run:0` |
+| `tr0543` | 543 | example | “```nitpick” | Explicit type arguments in an expression are the turbofish: `count::<int32>(c)`. | `run:0` |
+| `tr0549` | 549 | row | “\| Type \| bare brackets — `Handle<Node<int64>>:h;`, `struct:Container<T>` \|” | Type position takes bare brackets: `struct:Container<T>` and a `Container<Container<int64>>` parameter. | `compile` |
+| `tr0550` | 550 | row | “\| Expression \| turbofish, always — `extract_value::<int32>(c)` \|” | Expression position is the turbofish, always: `count<int32>(c)` without it is refused. | `refuse` |
+| `tr0551` | 551 | row | “\| `#`-builtin \| bare brackets — `#size_of<int32>()`” | A `#`-builtin takes bare brackets: `#size_of<int32>()` is 4. | `run:0` |
+| `tr0554` | 554 | rule | “`enum:Opt<T: Pr> = { Some(T); None; }` instantiated as `Opt<Point>`” | An enum instance is judged like a struct's: `Opt<Point>` with Point lacking `Pr` is refused, NITPICK-TYPE-017. | `refuse:NITPICK-TYPE-017` |
+| `tr0561` | 561 | rule | “naming the parameter (TYPE-022)” | A variant constructor whose instance nothing decides is refused naming the parameter, NITPICK-TYPE-022. | `refuse:NITPICK-TYPE-022` |
+| `tr0563` | 563 | rule | “The earlier form — implicit `f<int32>(x)`” | The implicit `f<int32>(x)` is struck: refused. | `refuse` |
+| `tr0575` | 575 | example | “```nitpick” | Nested generics close with `>>`: `Handle<Node<int64>>` is a type. | `compile` |
+| `tr0586` | 586 | rule | “Instantiation depth is capped at **64**” | Instantiation depth is capped at 64: an unbounded generic recursion is a compile error, not a crash or a silent truncation. | `refuse` |
+| `tr0589` | 589 | rule | “**mangled names are readable and” | Instantiations' names are readable, no hash: `idt` at `int32` is named by both. | `sh:0` |
+| `tr0593` | 593 | rule | “There is **no specialization**” | No specialization: an impl for `Box<int32>` beside the family `impl:<T>:Box<T>` is refused. | `refuse` |
+| `tr0602` | 602 | example | “```nitpick” | An `arena<Node<T>>` field in a generic struct, with chained access: `hdr.node_arena.alloc(my_node)`. | `compile` |
+| `tr0622` | 622 | rule | “There is **at most one implementation** of a given trait for a given type.” | Two impls of one trait for one type are refused, reported at the SECOND impl. | `sh:0` |
+| `tr0633` | 633 | row | “\| `impl:Item:T` twice \| overlap — the plain case \|” | The same impl twice is an overlap: refused. | `refuse` |
+| `tr0634` | 634 | row | “\| `impl:<T>:Box<T>:S` and `impl:Box<int32>:S` \| **overlap**” | A family impl and an instance's are an overlap: refused. | `refuse` |
+| `tr0635` | 635 | row | “\| `impl:<T>:Box<T>:S` and `impl:<U>:Box<U>:S` \| **overlap**” | Two family impls over one declaration are an overlap: refused. | `refuse` |
+| `tr0636` | 636 | row | “\| two blanket impls of one trait \| overlap (§2.6, D-111) \|” | Two blanket impls of one trait are an overlap: refused. | `refuse` |
+| `tr0637` | 637 | row | “\| a blanket impl and a concrete one \| **not** an overlap (§2.6)” | A blanket impl and a concrete one are not an overlap: compiles. | `compile` |
+| `tr0638` | 638 | row | “\| impls of *different* traits on one type \| not an overlap” | Impls of different traits on one type are not an overlap: compiles. | `compile` |
+| `tr0653` | 653 | rule | “**Every overlap report carries a NOTE at the earlier impl**” | An overlap report carries a note at the earlier impl. | `sh:0` |
+| `tr0677` | 677 | rule | “every method takes a `self` parameter — no static methods” | A trait with a static method (no `self`) is not object-safe: `dyn Bad` is refused. | `refuse` |
+| `tr0678` | 678 | rule | “**`Self` appears nowhere but the receiver**” | A trait whose method returns `Self` is not object-safe: `dyn Bad` is refused. | `refuse` |
+| `tr0682` | 682 | rule | “**The receiver itself may be `Self` or `Self->`**” | A `Self->` receiver keeps a trait object-safe: `dyn Good` over one compiles. | `compile` |
+| `tr0686` | 686 | rule | “**no generic methods**” | A trait with a generic method is not object-safe: `dyn Bad` is refused. | `refuse` |
+| `tr0688` | 688 | rule | “**an `async` method requires a `Self->` receiver**” | An async method with a by-value `Self` receiver disqualifies: `dyn Bad` is refused. | `refuse` |
+| `tr0696` | 696 | rule | “A method whose signature mentions an **associated type** also disqualifies” | A method mentioning an associated type disqualifies: `dyn Bad` is refused. | `refuse` |
+| `tr0713` | 713 | rule | “**A bare trait is not a value type**” | A bare trait is not a value type: `Speaks:x` as a parameter is refused, NITPICK-TYPE-002. | `refuse:NITPICK-TYPE-002` |
+| `tr0721` | 721 | rule | “(`{ data_ptr, vtable_ptr }`, 16 bytes on 64-bit” | A single-bound `dyn` is a fat pointer of 16 bytes. | `run:0` |
+| `tr0724` | 724 | rule | “supertrait methods are not reachable” | Through `dyn Sub`, a supertrait's method is not reachable: calling it is refused. | `refuse` |
+| `tr0730` | 730 | example | “```nitpick” | `dyn Serializable:obj = msg;` builds a trait object, and the method dispatches through it. | `run:0` |
+| `tr0737` | 737 | example | “```nitpick” | `dyn Drawable & Serializable:obj = msg;` builds a multi-bound trait object. | `run:0` |
+| `tr0741` | 741 | rule | “`dyn A & B` is assignable to `dyn A` — widening by dropping bounds” | `dyn A & B` widens to `dyn A`: the widened object still dispatches `a`. | `run:0` |
+| `tr0743` | 743 | rule | “`{ data, vt_1 … vt_N }` — (N+1)×8 bytes” | `dyn` over N traits is (N+1)×8 bytes: `dyn A & B` is 24. | `run:0` |
+| `tr0748` | 748 | rule | “Chapter 13 uses `+` here while using `&` for supertraits and bounds” | `+` is not the bound combinator: `dyn A + B` is refused. | `refuse` |
+| `tr0751` | 751 | rule | “**`dyn` obscures the control-flow graph**” | `dyn` raises warnings under strict auditing profiles. | untestable [vague] no profile is named whose warning a program could check |
+| `tr0760` | 760 | rule | “`@cast<T>` and” | `@cast<T>` is removed: refused. | `refuse` |
+| `tr0762` | 762 | rule | “Integer-to-pointer casting is illegal outside” | Integer-to-pointer casting is illegal outside `#wild_ptr<T>(addr)` in wild context: `5i64 =>! int32->` is refused. | `refuse` |
+| `tr0764` | 764 | rule | “Lambdas without capture” | Lambdas without capture remain as function values: one bound to a function-typed local compiles. | `compile` |
 
 ## TYPE (`meta/specs/TYPE_REFERENCE.md`)
 

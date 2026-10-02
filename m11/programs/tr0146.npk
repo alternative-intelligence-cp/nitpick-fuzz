@@ -1,0 +1,55 @@
+// M11 tr0146 -- meta/specs/TRAITS_REFERENCE.md:146 (rule)
+// quote: `impl:<T>:List<T> = { … }` names its target
+// claim: A generic subject has inherent impls: `impl:<T>:Cell<T>` gives every instance the method.
+// expect: run:0
+// wrong: refused, or 10
+mod:tr0146;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+struct:Cell<T> = { T:v; int32:n; };
+impl:<T>:Cell<T> = { func:count = int32(Cell<T>:self) never fails { pass self.n; }; };
+
+func:main = int32(cstring[]:_~argv) {
+    Cell<int64>:c = Cell<int64>{ v: 5i64, n: raw v32(3i32) };
+    if (!((raw c.count()) == 3i32)) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
