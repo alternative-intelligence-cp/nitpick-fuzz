@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**1669 claims: 1408 testable, 261 untestable** (each with its reason).
+**1828 claims: 1565 testable, 263 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -19,6 +19,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | IO | 78 | 5 | 9 | 64 | 67 | 11 |
 | MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
 | MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
+| OP | 159 | 0 | 87 | 72 | 157 | 2 |
 | TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 457 | 128 |
 
@@ -38,7 +39,7 @@ extracted:
 | MACRO | 412 | 1–412 | 412 | — |
 | MEMORY | 533 | 1–533 | 533 | — |
 | MODULE | 300 | — | 0 | 1–300 |
-| OP | 403 | — | 0 | 1–403 |
+| OP | 403 | 1–403 | 403 | — |
 | TRAITS | 766 | — | 0 | 1–766 |
 | TYPE | 2122 | 1–660 | 660 | 661–2122 |
 | VERIFICATION | 2351 | 1–845, 846–1247 | 1247 | 1248–2351 |
@@ -837,6 +838,170 @@ Tables whose rows are not claims:
 | `me0526` | 526 | rule | “a program spawn and” | Threads are spawned and joined without limit: two hundred in sequence, each joined, run. | `run:0` |
 | `me0527` | 527 | rule | “The 65th LIVE thread is refused at its start” | The 65th live thread is refused at its start. | untestable [vague] the outcome of the refusal (a trap, an error, its identity) is not stated |
 | `me0530` | 530 | rule | “**A `stack` binding (§1.2) lives in the frame of the function that declares” | A `stack` binding lives in its function's frame: a large stack array is a large frame, refused at the prologue (StackExhausted). | `trap:StackExhausted` |
+
+## OP (`meta/specs/OP_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `op0005` | 5 | rule | “Operator overloading is strictly forbidden” | Operator overloading is forbidden: an impl of an operator for a user struct is refused. | `refuse` |
+| `op0015` | 15 | row | “\| 1 \| Postfix \|” | Postfix binds tightest: `-a[1]` is -(a[1]), and `~a[0]` is ~(a[0]). | `run:0` |
+| `op0016` | 16 | row | “\| **2** \| **Result unary** *(right-assoc)* \|” | The Result unary operators are looser than postfix and tighter than cast: `raw f(x) => int64` casts the unwrapped value. | `run:0` |
+| `op0017` | 17 | row | “\| 3 \| Pipeline \|” | The pipeline operators sit at level 3: `x \|> f()` passes x as f's first argument. | `run:0` |
+| `op0018` | 18 | row | “\| 4 \| Cast \| `=>` `=>!` \|” | Cast binds tighter than unary negation. | `run:0` (M10 `x01_cast_binds_tighter_than_negation`) |
+| `op0019` | 19 | row | “\| 5 \| Unary \|” | Unary binds tighter than multiplicative: `~a * b` is (~a) * b. | `run:0` |
+| `op0020` | 20 | row | “\| 6 \| Multiplicative \|” | Multiplicative binds tighter than additive: 2 + 3 * 4 is 14. | `run:0` |
+| `op0021` | 21 | row | “\| 7 \| Additive \|” | Additive binds tighter than shift. | `run:0` (M10 `x02_additive_before_shift`) |
+| `op0022` | 22 | row | “\| 8 \| Shift \|” | Shift binds tighter than relational: `1 << 2 < 5` is (1 << 2) < 5. | `run:0` |
+| `op0023` | 23 | row | “\| 9 \| Range / Spread \|” | Range binds looser than additive: `0...1 + 2` is 0...3, three iterations. | `run:0` |
+| `op0024` | 24 | row | “\| 10 \| Relational \|” | Relational binds tighter than equality: `a < b == c < d` is (a < b) == (c < d). | `run:0` |
+| `op0025` | 25 | row | “\| 11 \| Equality \|” | Equality binds tighter than bitwise AND. | `refuse` (M10 `x03_equality_before_bitand`) |
+| `op0026` | 26 | row | “\| 12 \| Bitwise AND \|” | AND binds tighter than XOR: 1 ^ 3 & 2 is 1 ^ (3 & 2) = 3. | `run:0` |
+| `op0027` | 27 | row | “\| 13 \| Bitwise XOR \|” | XOR binds tighter than OR: 1 \| 3 ^ 3 is 1 \| (3 ^ 3) = 1. | `run:0` |
+| `op0028` | 28 | row | “\| 14 \| Bitwise OR \|” | Bitwise OR binds tighter than logical AND: `false && true \| true` is false && (true \| true). | `run:0` |
+| `op0029` | 29 | row | “\| 15 \| Logical AND \| `&&` (short-circuiting) \|” | AND binds tighter than OR: `true \|\| false && false` is true \|\| (false && false). | `run:0` |
+| `op0030` | 30 | row | “\| 16 \| Logical OR \| `\\|\\|` (short-circuiting) \|” | `\|\|` short-circuits: its right side is not evaluated when the left is true. | `run:0` |
+| `op0031` | 31 | row | “\| 17 \| Null Coalescing \| `??` \|” | `??` unwraps an Optional: a NIL Optional coalesces to the right side. | `run:0` |
+| `op0032` | 32 | row | “\| 18 \| Ternary / Fallback \|” | `is` is the ternary: `is x > 0 : 1 : -1` picks by the condition. | `run:0` |
+| `op0033` | 33 | row | “\| 19 \| Assignment \|” | The assignment operators `= += -= *= /= %= &= \|= ^= <<= >>=` all assign in place. | `run:0` |
+| `op0037` | 37 | rule | “`raw a.eq(b)` takes the receiver or the call” | Level 2 is looser than postfix: `raw a.eq(b)` unwraps the call, not the receiver. | `run:0` |
+| `op0041` | 41 | rule | “`discard` / `_~` is absent because D-060 makes it a statement” | discard is a statement, not an expression: using it as a value is refused. | `refuse` |
+| `op0046` | 46 | rule | “**`->` removed from level 1.**” | `->` is not member access: `p->x` is refused. | `refuse` |
+| `op0049` | 49 | rule | “**`=>!` added to the Cast level**” | `=>!` shares the cast level, tighter than negation: `-x =>! int8` with x = 128 is -(x =>! int8), the negation of int8 -128, which traps IntOverflow. | `trap:IntOverflow` |
+| `op0051` | 51 | rule | “**`#` removed from the Unary level**” | `#` is not a unary operator: `#x` (the old pin) is refused. | `refuse` |
+| `op0056` | 56 | rule | “**Assignment is a statement, not an expression** (D-060)” | Assignment is a statement: `int32:y = (x = 5i32) + 2i32;` does not parse. | `refuse` |
+| `op0064` | 64 | rule | “`if (x = 3)` needs no dedicated rule rejecting” | `if (x = 3)` is not expressible: it is refused. | `refuse` |
+| `op0066` | 66 | rule | “Conditions must still be a strict `bool`” | Conditions are strictly bool: `if (x)` on an int32 is refused. | `refuse` |
+| `op0067` | 67 | rule | “**`&&` and `\|\|` short-circuit**” | `&&` and `\|\|` short-circuit. | `run:0` (M10 `x04_short_circuit`) |
+| `op0067b` | 67 | rule | “require strictly boolean operands” | `&&` requires boolean operands: `1i32 && 2i32` is refused. | `refuse` |
+| `op0068` | 68 | rule | “(spaceship) yields `int32`” | `<=>` yields an int32: -1, 0 or 1. | `run:0` (M10 `m06_spaceship`) |
+| `op0070` | 70 | rule | “`expr ?\| fallback` yields `expr`'s value” | `expr ?\| fallback` yields the value, or the fallback if it errored. | `run:0` (M10 `r01_fallback`) |
+| `op0073` | 73 | rule | “A bare `?`” | A bare `?` is refused by name, NITPICK-PARSE-011. | `refuse:PARSE-011` |
+| `op0074b` | 74 | rule | “and the word `defaults` are refused by name” | The word `defaults` is refused by name, NITPICK-PARSE-011. | `refuse:PARSE-011` |
+| `op0075` | 75 | rule | “The parser still reads the old form and refuses it by name” | `++` is struck: the parser refuses `x++` by name, NITPICK-PARSE-010. | `refuse:PARSE-010` |
+| `op0075b` | 75 | rule | “`x += 1` / `x -= 1` are the spellings” | `x += 1` and `x -= 1` are the increment's spellings. | `run:0` |
+| `op0083` | 83 | row | “\| `+` \| Add \| Safe addition. \|” | `+` is safe: a plain-integer overflow traps IntOverflow. | `run:93` (M10 `o01_int32_add`) |
+| `op0084` | 84 | row | “\| `-` \| Subtract \| Safe subtraction. \|” | `-` is safe: an overflow traps IntOverflow. | `run:93` (M10 `o02_int32_sub`) |
+| `op0085` | 85 | row | “\| `*` \| Multiply \| Safe multiplication. \|” | `*` is safe: an overflow traps IntOverflow. | `run:93` (M10 `o03_int32_mul`) |
+| `op0086` | 86 | row | “\| `/` \| Divide \| Safe division.” | Integer `/` by zero traps DivByZero (the plain-integer row of the type-directed rule). | `run:97` (M10 `v03_div_by_zero`) |
+| `op0087` | 87 | row | “\| `%` \| Modulo \| Remainder operation. Same divide-by-zero rule as `/`. \|” | `%` by zero follows `/`'s rule: it traps DivByZero. | `run:97` (M10 `v04_rem_by_zero`) |
+| `op0088` | 88 | row | “\| `**` \| Power \| Exponentiation (Standard Library expansion). \|” | `**` is exponentiation: 2 ** 8 is 256. | `run:0` |
+| `op0089` | 89 | row | “\| `+%` \| Add, wrapping \|” | `+%` adds modulo 2^N: the u64 maximum +% 1 is 0, with no trap. | `run:0` |
+| `op0090` | 90 | row | “\| `-%` \| Subtract, wrapping \| Subtraction modulo 2^N. \|” | `-%` subtracts modulo 2^N: 0 -% 1 at uint8 is 255. | `run:0` |
+| `op0091` | 91 | row | “\| `*%` \| Multiply, wrapping \|” | `*%` multiplies modulo 2^N: 0x80000000 *% 2 at uint32 is 0. | `run:0` |
+| `op0102` | 102 | rule | “The kinds that own their own arithmetic refuse it by name” | The kinds that own their arithmetic refuse the wrapping family by name: `+%` on a tbb8 is TYPE-078. | `refuse:TYPE-078` |
+| `op0106` | 106 | rule | “A constant wrap folds” | A constant wrap folds WITH the wrap. | `run:0` (M10 `o20_wrapping_folds_with_wrap`) |
+| `op0121` | 121 | row | “\| `tbb8`…`tbb256` \| yields **ERR**” | On tbb, overflow yields ERR and divide by zero yields ERR, neither a trap. | `run:0` |
+| `op0122` | 122 | row | “\| `int32`, `uint64`, … \| **wraps** — defined, no check, no trap \|” | Plain integers: the row says they wrap, and the note at line 138 supersedes it: `+ - *` trap IntOverflow since D-210. | `trap:IntOverflow` |
+| `op0122b` | 122 | row | “**traps to `failsafe`**” | Plain-integer divide by zero traps to failsafe. | `run:97` (M10 `v03_div_by_zero`) |
+| `op0123` | 123 | row | “\| `flt32`…`flt512` \| **IEEE 754** — `inf` / `nan`, no trap \|” | Floats overflow to infinity, with no trap. | `run:0` |
+| `op0123b` | 123 | row | “**IEEE 754** — `inf` / `nan` \| numeric work \|” | Float division by zero is IEEE: an infinity, with no trap. | `run:0` (M10 `v16_float_div_by_zero`) |
+| `op0144` | 144 | rule | “A `simd` integer lane traps as its” | A simd integer lane traps as its scalar does. | `run:93` (M10 `o22_simd_lane_overflow`) |
+| `op0150` | 150 | rule | “An integer `+ - *` or negation whose operands the compiler folds” | A folded constant is computed exactly at its type: a fixed product is its exact value. | `run:0` |
+| `op0153` | 153 | rule | “**A value that does not fit is `NITPICK-TYPE-076`**” | A constant that does not fit is NITPICK-TYPE-076 where it is written. | `refuse:NITPICK-TYPE-076` (M10 `o21_constant_overflow_refused`) |
+| `op0155` | 155 | rule | “`int8:x = 100 + 100;` is refused too” | An unsuffixed constant pair takes its width from the context: `int8:x = 100 + 100;` is refused. | `refuse:NITPICK-TYPE-076` (M10 `c26_constant_overflow_contextual`) |
+| `op0156` | 156 | rule | “**A value that fits is emitted as the constant**, with no guard” | A constant that fits is emitted as the constant: `-1i32` is no checked `sub` (no overflow intrinsic in the function that returns it). | `ir:(?s)^define [^@\n]*@"[^"]*\.negone"\((?!(?:(?!\n\}).)*?with\.overflow)` |
+| `op0158` | 158 | rule | “A width past 64 bits folds inside the 64-bit window only” | A width past 64 bits folds inside the 64-bit window only; beyond it the run-time guard stays. | untestable [internal] declining the fold changes no value (the guard computes the same product); only the emission differs, and no width past 64 bits is named to scope an IR test by |
+| `op0161` | 161 | rule | “`<<` loses the bits past its width (`1i8 << 7i8` is −128)” | The folder shifts as the machine does: `1i8 << 7i8` is -128 and `~5u8` is 250. | `run:0` (M10 `s03_shifts_folded`) |
+| `op0163` | 163 | rule | “a `uint64` divides, takes remainders, shifts right and orders UNSIGNED” | The folder divides and takes remainders unsigned for a uint64. | `run:0` (M10 `v15_unsigned_div_rem_folded`) |
+| `op0163b` | 163 | rule | “orders UNSIGNED” | The folder orders a uint64 unsigned. | `run:0` (M10 `m04_unsigned_ordering_folded`) |
+| `op0164` | 164 | rule | “a constant `MIN / −1` or `MIN % −1` is refused” | A constant MIN / -1 is refused as a constant division by zero is (TYPE-004). | `refuse:NITPICK-TYPE-004` (M10 `v13_constant_min_div_minus_one`) |
+| `op0166` | 166 | rule | “`uint64` values past 2^63−1 are built with bit operations” | uint64 values past 2^63-1 are built with bit operations: `~0u64` is the maximum and `(1u64 << 63u64) \| 1u64` is 2^63 + 1. | `run:0` |
+| `op0169` | 169 | rule | “ERR is **absorbing and overrides identities**” | ERR is absorbing: ERR * 0 is ERR, and ERR - ERR is ERR. | `run:0` |
+| `op0171` | 171 | rule | “Only an explicit check (`is_err`) or a fallback (`?`) leaves the state” | A fallback leaves the ERR state: an ERR tbb with a fallback yields the fallback. | `run:0` |
+| `op0172` | 172 | rule | “*(`ok()` was listed here and is removed — D-097.)*” | `ok()` is removed: calling it is refused. | `refuse` |
+| `op0174` | 174 | rule | “**comparing or” | Comparing or branching on an ERR value traps to failsafe. | `run:110` (M10 `m12_tbb_compare_on_err_traps`) |
+| `op0177` | 177 | rule | “Use `is_err(x)` to test without trapping, or a `pick` with an explicit” | A pick with an explicit ERR: arm branches on ERR without trapping. | `run:0` (M10 `p13_tbb_err_arm_taken`) |
+| `op0177b` | 177 | rule | “Use `is_err(x)` to test without trapping” | `is_err(x)` tests for ERR without trapping. | `run:0` |
+| `op0180` | 180 | rule | “Bitwise operators (`&`, `\|`, `^`, `~`, `<<`, `>>`) are **rejected on `tbb` types**” | Bitwise operators are rejected on tbb: `a & b` on tbb8 is refused. | `refuse` |
+| `op0182` | 182 | rule | “Cast to a plain integer first — which traps if the” | Casting an ERR tbb to a plain integer traps (TbbErr). | `trap:TbbErr` |
+| `op0191` | 191 | row | “\| `=` \| Assign \| Standard assignment. \|” | `=` assigns. | `run:0` |
+| `op0192` | 192 | row | “\| `+=` \| Add & Assign \|” | `+=` assigns in place: 7i32 += 5i32 gives 12. | `run:0` |
+| `op0193` | 193 | row | “\| `-=` \| Subtract & Assign \|” | `-=` assigns in place: 7i32 -= 5i32 gives 2. | `run:0` |
+| `op0194` | 194 | row | “\| `*=` \| Multiply & Assign \|” | `*=` assigns in place: 7i32 *= 5i32 gives 35. | `run:0` |
+| `op0195` | 195 | row | “\| `/=` \| Divide & Assign \|” | `/=` assigns in place: -7i32 /= 2i32 gives -3. | `run:0` |
+| `op0196` | 196 | row | “\| `%=` \| Modulo & Assign \|” | `%=` assigns in place: -7i32 %= 5i32 gives -2. | `run:0` |
+| `op0197` | 197 | row | “\| `+%=` \| Add wrapping & Assign \|” | `x +%= v` is `x = x +% v`: the u64 maximum +%= 1 is 0. | `run:0` |
+| `op0198` | 198 | row | “\| `-%=` \| Subtract wrapping & Assign \|” | `-%=` subtracts modulo 2^N: 0 -%= 1 at uint64 is the maximum. | `run:0` |
+| `op0199` | 199 | row | “\| `*%=` \| Multiply wrapping & Assign \|” | `*%=` multiplies modulo 2^N: 2^31 *%= 2 at uint32 is 0. | `run:0` |
+| `op0207` | 207 | row | “\| `==` \| Equality \|” | `==` compares: 3 == 3 is true. | `run:0` |
+| `op0208` | 208 | row | “\| `!=` \| Inequality \|” | `!=` compares: 3 != 4 is true. | `run:0` |
+| `op0209` | 209 | row | “\| `<` \| Less Than \|” | `<` compares: -5 < 3 is true. | `run:0` |
+| `op0210` | 210 | row | “\| `>` \| Greater Than \|” | `>` compares: 3 > -5 is true. | `run:0` |
+| `op0211` | 211 | row | “\| `<=` \| Less Than or Equal \|” | `<=` compares: 3 <= 3 is true. | `run:0` |
+| `op0212` | 212 | row | “\| `>=` \| Greater Than or Equal\|” | `>=` compares: -5 >= 3 is false. | `run:0` |
+| `op0213` | 213 | row | “\| `<=>` \| Spaceship \| 3-way comparison. Returns `-1`, `0`, or `1`. \|” | `<=>` returns -1, 0 or 1. | `run:0` (M10 `m06_spaceship`) |
+| `op0221` | 221 | row | “\| `!` \| Logical NOT \|” | !false is true. | `run:0` |
+| `op0222` | 222 | row | “\| `&&` \| Logical AND \|” | true && false is false. | `run:0` |
+| `op0223` | 223 | row | “\| `\\|\\|` \| Logical OR \|” | false \|\| true is true. | `run:0` |
+| `op0224` | 224 | row | “\| `~` \| Bitwise NOT \|” | ~5i32 is -6i32. | `run:0` |
+| `op0225` | 225 | row | “\| `&` \| Bitwise AND \|” | 12i32 & 10i32 is 8i32. | `run:0` |
+| `op0226` | 226 | row | “\| `\\|` \| Bitwise OR \|” | 12i32 \| 3i32 is 15i32. | `run:0` |
+| `op0227` | 227 | row | “\| `^` \| Bitwise XOR \|” | 12i32 ^ 10i32 is 6i32. | `run:0` |
+| `op0228` | 228 | row | “\| `<<` \| Left Shift \| Shifts bits left. \| `a << 2` \|” | `<<` shifts left: `a << 2` with a = 3 is 12 (the example's unsuffixed amount). | `run:0` |
+| `op0229` | 229 | row | “Shifts bits right (arithmetic/logical based on sign)” | `>>` is arithmetic on a signed operand and logical on an unsigned one: -8 >> 1 is -4, and 0xF0u8 >> 4 is 15. | `run:0` |
+| `op0232` | 232 | rule | “literal, a negated” | A known shift amount outside 0 <= n < width is NITPICK-TYPE-070 at the shift. | `refuse:NITPICK-TYPE-070` (M10 `s07_shift_literal_amount_refused`) |
+| `op0234` | 234 | rule | “shift, both operators and the compound spellings” | The amount check covers the compound spellings. | `run:111` (M10 `s08_compound_shift_amount`) |
+| `op0235` | 235 | rule | “amount is checked at run time by one unsigned compare” | A computed amount outside the range traps ShiftRange. | `run:111` (M10 `s04_shift_amount_equals_width`) |
+| `op0236` | 236 | rule | “negative amount reads as huge” | A negative computed amount reads as huge and traps ShiftRange. | `run:111` (M10 `s05_shift_amount_negative`) |
+| `op0237` | 237 | rule | “every `failsafe`” | Wherever a computed shift exists, every failsafe must name ShiftRange: one that does not is refused. | `refuse` |
+| `op0242` | 242 | rule | “The value of an in-range shift is unchanged” | An in-range shift is a bit operation with no overflow trap. | `run:0` (M10 `o18_shift_loses_bits_no_trap`) |
+| `op0243` | 243 | rule | “A `simd` shift's amount is a” | A simd shift's amount is checked any-lane: one lane's amount equal to the width traps ShiftRange. | `trap:ShiftRange` |
+| `op0253` | 253 | row | “\| `?\\|` \| Result Fallback \|” | `?\|` unwraps a Result: on an error it yields the default. | `run:0` (M10 `r01_fallback`) |
+| `op0254` | 254 | row | “\| `??` \| Null Coalesce \|” | `??` unwraps an Optional: a present value comes through. | `run:0` |
+| `op0255` | 255 | row | “**Takes exactly one argument**, an `Error` constant” | `?!` calls failsafe with its one argument, an Error constant. | `run:82` (M10 `r04_emphatic_unwrap_error`) |
+| `op0257` | 257 | rule | “take a `Result` and nothing else” | `?\|` takes a Result and nothing else: on a tbb value it is refused. | `refuse` |
+| `op0258` | 258 | rule | “\| `?.` \| Safe Navigation \|” | `?.` reaches a field through an Optional, and the result is an Optional of the field's type. | `run:0` |
+| `op0259` | 259 | rule | “Refused by name. \| — \|” | A bare `?` is refused by name. | `refuse:PARSE-011` |
+| `op0260` | 260 | rule | “Desugars to `drop expr`” | `_? f();` is `drop f();`, the void call of a never-fails NIL function. | `run:0` |
+| `op0260b` | 260 | rule | “refused otherwise, `TYPE-042`” | `drop` of a callee that may fail is refused, TYPE-042. | `refuse:NITPICK-TYPE-042` (M10 `r05_drop_of_fallible_refused`) |
+| `op0261` | 261 | rule | “Desugars to `raw expr`” | `_! f()` is `raw f()`: it unwraps a never-fails call's value. | `run:0` |
+| `op0262` | 262 | rule | “**propagates the error to the caller, verbatim**” | `_^ f()` is `relay f()`: it propagates the callee's error verbatim. | `run:0` |
+| `op0262b` | 262 | rule | “`defer` runs — it is a normal exit path” | relay's early return is a normal exit: its defers run. | `run:0` (M10 `w07_defer_on_relay`) |
+| `op0262c` | 262 | rule | “Illegal in `main` / `failsafe`” | relay is illegal in main: it is refused. | `refuse` |
+| `op0263` | 263 | rule | “As a statement it desugars to `discard(expr)`” | `_~ x;` is the statement `discard(x)`. | `run:0` |
+| `op0263b` | 263 | rule | “reading it anyway is an error, not a warning” | A parameter marked `_~` that the body reads is an error. | `refuse` |
+| `op0264` | 264 | rule | “Immediately invokes `failsafe(err)`” | `!!! E1;` invokes failsafe with E1 through the trap route. | `run:81` |
+| `op0268` | 268 | rule | “Neither takes a pointer.**” | `??` takes an Optional, never a pointer: `p ?? 0i32` on an int32-> is refused. | `refuse` |
+| `op0280` | 280 | rule | “`p == NULL` asks whether a pointer points anywhere” | `p == NULL` asks whether a pointer points anywhere: an address of a local is not NULL. | `run:0` |
+| `op0287` | 287 | row | “\| **leading** \| negation \| `!x`, `!=` \|” | A leading `!` negates: `!x` and `!=`. | `run:0` |
+| `op0288` | 288 | row | “\| **trailing or repeated** \| unchecked / emphatic \|” | A trailing or repeated `!` is unchecked or emphatic: `?!`, `=>!`, `_!` and `!!!` all compile. | `run:0` |
+| `op0295` | 295 | rule | “**`!!` no longer exists**” | `!!` no longer exists: it is refused. | `refuse` |
+| `op0303` | 303 | rule | “C-style `*` pointer” | C-style `*` pointer syntax is valid nowhere: `int32*:p` is refused. | `refuse` |
+| `op0310` | 310 | row | “\| `@` \| Address-Of \|” | `@` takes an l-value's address: `int32->:ptr = @val;`. | `run:0` |
+| `op0311` | 311 | row | “\| `$$i` \| Shared claim \|” | `$$i` is the address of a place under a shared claim: `int32->:p = $$i x;` reads it. | `run:0` |
+| `op0312` | 312 | row | “\| `$$m` \| Exclusive claim \|” | `$$m` is the address of a place under an exclusive claim: `int32->:p = $$m arr[i];` writes it. | `run:0` |
+| `op0313` | 313 | row | “\| `<-` \| Dereference \|” | `<-` extracts the value from a pointer. | `run:0` |
+| `op0314` | 314 | row | “\| `->` \| Pointer To \| In types: pointer declaration ONLY. \|” | `->` declares a pointer type. | `run:0` |
+| `op0315` | 315 | row | “\| `.` \| Member Access \|” | `.` handles all member access, dereferencing a pointer, and UFCS: `x.twice()` calls twice(x). | `run:0` |
+| `op0320` | 320 | rule | “anywhere else is” | A claim stands only as a whole call argument or a pointer local's whole value; anywhere else is NITPICK-BORROW-014. | `refuse:BORROW-014` |
+| `op0336` | 336 | rule | “**compiler-directive sigil**” | `#` is the compiler-directive sigil: `#name<T>(...)` calls a builtin. | `run:0` |
+| `op0339` | 339 | rule | “**Direction is semantic.**” | `->` points to, `<-` brings back, `=>` goes from one type to another. | untestable [vague] a mnemonic for the operators claimed at op0313, op0314 and op0351 |
+| `op0351` | 351 | row | “\| `=>` \| Safe Cast \|” | `=>` is a compile-time error where data loss is possible. | `refuse` (M10 `c03_narrow_signed_refused`) |
+| `op0352` | 352 | row | “\| `=>!` \| Unchecked Cast \|” | `=>!` is a direct bit-cast or truncation without checking. | `run:0` (M10 `c13_unchecked_cast_truncates_bits`) |
+| `op0356` | 356 | rule | “Every `tbb` cast checks for the sentinel and” | Every tbb cast maps ERR to the target's ERR: a tbb8 ERR widened to tbb32 is ERR, not -128. | `run:0` |
+| `op0358` | 358 | rule | “plain-integer→`tbb` traps on a source value that would forge one” | A plain integer that would forge the sentinel traps on its way into tbb (TbbErr). | `trap:TbbErr` |
+| `op0358b` | 358 | rule | “`=>!`” | `=>!` preserves the ERR state, not the bit pattern: a tbb8 ERR =>! tbb32 is ERR. | `run:0` |
+| `op0362` | 362 | rule | “**Integer→pointer casting is illegal.**” | Integer to pointer casting is illegal outside `#wild_ptr`: `x => int32->` is refused. | `refuse` |
+| `op0364` | 364 | rule | “\| `:` \| Type Annotation \|” | `:` annotates a declaration's type. | `run:0` |
+| `op0365` | 365 | rule | “the only form there (D-064). Bare `<T>` is type-position only” | Bare `<T>` is type-position only: `list_init<int64>(4i64)` in an expression is refused (the turbofish is the form). | `refuse` |
+| `op0365b` | 365 | rule | “\| `::<T>` \| Turbofish \|” | `::<T>` gives explicit type arguments in expression position. | `run:0` |
+| `op0366` | 366 | rule | “\| `<T>?` \| Optional Type \|” | `T?` declares an Optional: an `int64?` holds a value or NIL. | `run:0` |
+| `op0374` | 374 | row | “\| `is` \| Ternary Conditional \|” | `is cond : then : else` branches: `is x > 0 : 1 : -1` with x = 5 is 1. | `run:0` |
+| `op0375` | 375 | row | “\| `..` \| Inclusive Range \|” | `..` is the inclusive range [a, b]. | `run:0` (M10 `l01_for_inclusive`) |
+| `op0376` | 376 | row | “\| `...` \| Exclusive Range \|” | `...` is the exclusive range [a, b). | `run:0` (M10 `l02_for_exclusive`) |
+| `op0377` | 377 | row | “\| `\\|>` \| Pipe Forward \|” | `val \|> func()` passes val as func's first argument: 10 \|> minus(3) is 7. | `run:0` |
+| `op0378` | 378 | row | “\| `<\\|` \| Pipe Backward \|” | `func() <\| val` evaluates val and passes it to func. | `run:0` |
+| `op0379` | 379 | row | “\| `$` \| Iteration Variable\|” | `$` is the loop counter bound inside `loop` and `till`: summing $ over loop(0, 3, 1) gives 3. | `run:0` |
+| `op0387` | 387 | row | “\| `""` \| String Literal \|” | A string literal is UTF-8: "é" is two bytes. | `run:0` |
+| `op0388` | 388 | row | “\| `r""` \| Raw String Literal\|” | A raw string has no escape processing: r"C:\Path" is 7 bytes, the third a backslash. | `run:0` |
+| `op0389` | 389 | row | “\| `""" """`\| Triple Quote \|” | A triple-quoted literal spans lines and keeps the newline. | `run:0` |
+| `op0390` | 390 | row | “\| `''` \| Char Literal \|” | `'A'` is a char literal of 65. | `run:0` |
+| `op0391` | 391 | row | “\| Template Literal \|” | A backtick template with nothing interpolated is its text: `Hello` equals "Hello". | `run:0` |
+| `op0392` | 392 | row | “\| `&{ }` \| Interpolation \|” | `&{ }` interpolates an expression's value inside a template. | `run:0` (M10 `t11_template_interpolation`) |
+| `op0393` | 393 | row | “\| Escape \| Escape sequence character. \|” | `\n` is the newline byte and `\t` the tab. | `run:0` |
+| `op0401` | 401 | row | “\| `//` \| Line Comment \|” | `//` comments out the rest of the line. | `run:0` |
+| `op0402` | 402 | row | “\| `/*` \| Block Start \|” | `/*` begins a block comment that spans lines. | `run:0` |
+| `op0403` | 403 | row | “\| `*/` \| Block End \|” | `*/` ends a block comment: code after it on the same line runs. | `run:0` |
 
 ## TYPE (`meta/specs/TYPE_REFERENCE.md`)
 
