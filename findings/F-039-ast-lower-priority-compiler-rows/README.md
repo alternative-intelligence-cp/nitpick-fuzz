@@ -1,4 +1,4 @@
-# F-039 — AST_REFERENCE: four places where the compiler departs from the reference safely (lower priority)
+# F-039 — AST_REFERENCE: five places where the compiler departs from the reference safely (lower priority)
 
 None of these is a wrong answer at run time or a memory fault. The rows, with each claim's
 program and its verdicts at HUNT2 `9126350`, the baseline `c3bdae2` and the newest `main`
@@ -34,9 +34,20 @@ program and its verdicts at HUNT2 `9126350`, the baseline `c3bdae2` and the newe
   `#[nosuch_attribute]`, measured by hand at HUNT2 and `93bcb66`.
 - So no attribute name is checked, and a misspelt `#[derive]` or `#[align]` is silent.
 
+**e. An `opaque struct` is accepted outside an `extern` block** (`as0043`)
+- AST:43 says "`extern`-block item only", and TRAITS:367–371 says "legal **only inside an
+  `extern` block** (D-066, as narrowed by D-149)".
+- `opaque struct:OpHandle;` at module level compiles at all three compilers.
+- Inside an extern block it is EXTERN-001: "the `opaque` wire-handle tier (v3 §11) is
+  reserved for the LOAD_MODULE work and does not lower yet (D-190)" (MODULE's `md0241`).
+- So the one place the references allow it is refused, and the place they forbid is
+  accepted. *Reasoned:* the module-level declaration has no value semantics to misuse.
+  First triaged as a documentation row; moved here, since two references and two
+  decisions agree.
+
 ## Deduplication
 
-- None of the four is in KNOWN_DEFECTS.md, the registry at `93bcb66`, or F-027 …
+- None of the five is in KNOWN_DEFECTS.md, the registry at `93bcb66`, or F-027 …
   F-036's rows.
 - Row b corrects F-031's reading of `op0378` (above). It does not change that row's
   verdict.

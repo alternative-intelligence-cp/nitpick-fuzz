@@ -55,4 +55,4 @@ EOF
 "$NPKC" r.npk -o r.ll > npkc.out 2>&1; rc=$?
 head -3 npkc.out | cut -c1-120
 [ $rc -eq 1 ] || exit 3
-head -1 npkc.out | grep -q -E '^NITPICK-[A-Z]+-[0-9]{3} r\.npk:[0-9]+:[0-9]+: ' && grep -q -E '^note NITPICK-[A-Z]+-[0-9]{3} r\.npk:[0-9]+:[0-9]+: ' npkc.out
+grep -q -E '^NITPICK-[A-Z]+-[0-9]{3} r\.npk:[0-9]+:[0-9]+: ' npkc.out && grep -q -E '^note NITPICK-[A-Z]+-[0-9]{3} r\.npk:[0-9]+:[0-9]+: ' npkc.out

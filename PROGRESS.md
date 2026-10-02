@@ -49,14 +49,15 @@ committed. A session that starts here resumes at the first unticked box.
     extracted MEMORY, OP and CONTROL in turn, each to a clean point: F-029 … F-032. Its
     scope is done.
   - Session 9 (2026-10-02, the workbench's next brief, S60) extracts the ranges not
-    started, smallest first. MODULE, LEXICAL and AST are done, each to a clean point:
-    F-033 … F-040, among them F-037, a use after free.
-  - Extracted so far: 6 405 of 10 419 lines; 2 463 claims, 2 159 tested, 1 931 agree,
+    started, smallest first. MODULE, LEXICAL, AST and BUILD are done, each to a clean
+    point: F-033 … F-040, among them F-037, a use after free. BUILD's 38 tested claims
+    all agree.
+  - Extracted so far: 7 087 of 10 419 lines; 2 560 claims, 2 197 tested, 1 969 agree,
     228 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, TRAITS and BUILD not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 931 agree, 228 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 969 agree, 228 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -961,15 +962,15 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's AST (S60), after its MODULE and LEXICAL: extracted,
-run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's BUILD (S60), after its MODULE, LEXICAL and AST:
+extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
-- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL and
-  AST whole, TYPE 1–660 and VERIFICATION 1–1247. That is 6 405 of the references'
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST
+  and BUILD whole, TYPE 1–660 and VERIFICATION 1–1247. That is 7 087 of the references'
   10 419 lines (S58 corrected the count).
-- **2 463 claims, 2 159 testable, 304 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 931 agree, 228 disagree**.
+- **2 560 claims, 2 197 testable, 363 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 969 agree, 228 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
@@ -989,9 +990,9 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-040:
   - F-039: four lower-priority compiler rows;
   - F-040: twenty documentation rows.
 
-**Not started:** TYPE 661–2122, VERIFICATION 1248–2351, TRAITS and BUILD. About 4 010
-lines, roughly 2 000 claims. Session 9's brief (S60) takes them smallest first: BUILD,
-TRAITS, VERIFICATION 1248–2351, TYPE 661–2122.
+**Not started:** TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS. About 3 330 lines,
+roughly 1 650 claims. Session 9's brief (S60) takes them smallest first: TRAITS,
+VERIFICATION 1248–2351, TYPE 661–2122.
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -1335,12 +1336,18 @@ the brief says.
     - The implicit `dyn Trait:d = move(x);` is correct.
   - F-038: npkc traps (exit 3) on `give` or `fall` outside a pick arm (`as0202`,
     `as0203`, `as0267`), at all three compilers;
-  - F-039: 4 lower-priority compiler rows:
+  - F-039: 5 lower-priority compiler rows:
     - a `comptime` value parameter is EMIT-002;
     - `<|` takes its function on the right, as `|>` does;
     - a non-constant `joins` is accepted;
     - any attribute name is accepted;
-  - F-040: 20 documentation rows;
+    - an `opaque struct` is accepted outside an extern block;
+  - F-040: 18 documentation rows;
+  - 1 not a finding: `as0365` tested a free function named after an inherent method's
+    LOWERED name (TRAITS:132).
+  - Two corrections were made at BUILD's clean point, while reading TRAITS, and are
+    recorded there: `as0043` moved from F-040 to F-039 e, and `as0365` from F-040 to
+    not a finding.
   - 2 known: DEF-131's `<=>` and DEF-153's `cstring` literal. Both compile at `93bcb66`.
 
   All stand at the baseline and at `93bcb66`, but the two known.
@@ -1362,6 +1369,23 @@ the brief says.
     - the `[[test]]` schema refusals and the stage names, which `npkg test` refuses by
       name before anything runs;
     - every rule about what `npkc` emits.
+- **Run 1:** 37 agree, 1 disagree.
+  - `bd0529` was a script that took the first line of the output for the error. The note
+    at the declaration comes first, and the script now looks for both lines anywhere.
+  - The stage scripts were re-spelled once (run 2), and the re-spelling was withdrawn
+    before run 3. `explore`'s script had agreed because the runner refused its bogus
+    `kind`, so I suspected the runner refused a `kind` before checking the stage. A probe
+    showed the opposite: an unknown stage with a `kind` is refused for the stage. So the
+    first spelling was sound.
+  - What run 2 did measure: `npkg`'s refusal of an unknown stage lists "compile, parse,
+    resolve, check, accept, fixture, program, runtime, verify, cost". It leaves out
+    `explore`, which it accepts (`npkg/manifest.npk:41`) and the compiler's own
+    `nitpick.toml` uses (:224). The list in the message is stale. No claim disagrees
+    for it.
+- **Run 3:** 38 agree, 0 disagree. The final full run of all 2 197 claims: 1 969 agree,
+  228 disagree. The 2 159 earlier claims re-ran identical.
+- **The screen.** Every BUILD script's last line was read; each refusal is the claim's own
+  (the toolchain pin, `edition`, the lock, `update`, the `[[test]]` schema).
 
 ## Environment
 
@@ -2068,5 +2092,9 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     documentation rows), F-036 (2 lower-priority compiler rows), 1 known (DEF-131).
   - **AST.** 202 claims, committed before any run (`c7bdff7`). Run 1: 150 agree, 31
     disagree. Two programs fixed. Final: 151 agree, 30 disagree. Triaged: **F-037, a use
-    after free through a `=> dyn` cast**; F-038, an npkc trap; F-039 (4 lower-priority
-    compiler rows); F-040 (20 documentation rows); 2 known.
+    after free through a `=> dyn` cast**; F-038, an npkc trap; F-039 (5 lower-priority
+    compiler rows); F-040 (18 documentation rows); 2 known; 1 not a finding (two classes
+    corrected at BUILD's clean point).
+  - **BUILD.** 97 claims, 38 testable, committed before any run (`e880214`). Run 1: 37
+    agree, 1 disagree, a script's own mistake. Final: 38 agree, 0 disagree. No finding.
+    One observation: npkg's unknown-stage message omits `explore`.

@@ -438,3 +438,13 @@ claim("bd0653", D, 653, "**The descriptor ceiling (1.5.1b step 5).**", "rule",
       untestable="[tool] observable only in programs a run of `npkg test` spawns (bd0452)")
 claim("bd0669", D, 669, "**Test-target declaration.**", "rule", "Settled: see §7.1.",
       untestable="[tree] a settled open item")
+
+# ================================================================== after run 1 (S45, S53)
+# The programs' own mistakes; every expectation above is unchanged.
+# (A re-spelling of the eleven stage scripts after run 1 was withdrawn before run 3: the runner
+#  checks the stage before the kind, so a known stage is told from an unknown one as first
+#  written; PROGRESS.md records run 2.)
+refix("bd0529", "a note may come before its error (the note at the declaration came first): the script now "
+      "looks for an error line and a note line anywhere in the output, not the error first",
+      [("head -1 npkc.out | grep -q -E '^NITPICK-[A-Z]+-[0-9]{3} r\\.npk:[0-9]+:[0-9]+: ' && ",
+        "grep -q -E '^NITPICK-[A-Z]+-[0-9]{3} r\\.npk:[0-9]+:[0-9]+: ' npkc.out && ")], field="sh")

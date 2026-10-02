@@ -30,3 +30,9 @@ as HUNT2.
 | claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
 |---|---|---|---|---|---|---|
 | `as0583` | AST_REFERENCE.md:583 | `#[lexical_drop]` is removed: a struct carrying it is refused. | `refuse` | npkc 0, 0 / 0 | same | same |
+
+**F-039 e: an `opaque struct` is accepted at module level, against AST:43 and TRAITS:368 (extern-block item only, D-066 as narrowed by D-149); inside an `extern` block it is EXTERN-001, a tier reserved (D-190)**
+
+| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
+|---|---|---|---|---|---|---|
+| `as0043` | AST_REFERENCE.md:43 | An `opaque struct` is an extern-block item only: one at module level is refused. | `refuse` | npkc 0, 0 / 0 | same | same |

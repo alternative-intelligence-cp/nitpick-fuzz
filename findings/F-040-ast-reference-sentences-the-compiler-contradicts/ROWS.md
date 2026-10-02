@@ -7,12 +7,6 @@ compiler's newest `main` `93bcb66`; "same" is the same npkc, codes, both legs an
 as HUNT2.
 
 
-**F-040: UFCS reaches a free function named `magnitude(p)` (TRAITS:494), not `Point_magnitude(p)`, which `p.magnitude()` does not find (TYPE-019)**
-
-| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
-|---|---|---|---|---|---|---|
-| `as0365` | AST_REFERENCE.md:365 | UFCS: with a free function `Point_magnitude(Point:p)`, `p.magnitude()` calls it. | `run:0` | npkc 1 TYPE-019, - / - | same | same |
-
 **F-040: `++` and `--` are removed (D-174, PARSE-010)**
 
 | claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
@@ -74,12 +68,6 @@ as HUNT2.
 | claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
 |---|---|---|---|---|---|---|
 | `as0437` | AST_REFERENCE.md:437 | A cast target carries a memory qualifier: `p => wild int8->` compiles. | `compile` | npkc 1 BORROW-011, - / - | same | same |
-
-**F-040: an `opaque struct` is accepted at module level, and refused inside an `extern` block (EXTERN-001, D-190): the row's "`extern`-block item only" is reversed**
-
-| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `93bcb66` |
-|---|---|---|---|---|---|---|
-| `as0043` | AST_REFERENCE.md:43 | An `opaque struct` is an extern-block item only: one at module level is refused. | `refuse` | npkc 0, 0 / 0 | same | same |
 
 **F-040: an extern method's failure contract is not required (it compiles without one) and `never fails` on one is EXTERN-002: D-149 removed the contracts (MODULE:263-266)**
 

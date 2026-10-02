@@ -1,19 +1,22 @@
-# F-040 — AST_REFERENCE: twenty claims the compiler contradicts, where the compiler is right or at least safe (documentation findings)
+# F-040 — AST_REFERENCE: eighteen claims the compiler contradicts, where the compiler is right or at least safe (documentation findings)
 
 M11's claims over AST_REFERENCE (all 644 lines) at HUNT2: 202 claims, 181 tested, 151
 agree, 30 disagree. The 30:
-- twenty documentation rows (below);
+- eighteen documentation rows (below);
 - [F-037](../F-037-dyn-cast-reads-freed-memory/), a use after free through a `=> dyn`
   cast (`as0453`);
 - [F-038](../F-038-npkc-traps-on-give-or-fall-outside-a-pick/), npkc traps on
   `give`/`fall` outside a pick (`as0202`, `as0203`, `as0267`);
-- four lower-priority compiler rows, [F-039](../F-039-ast-lower-priority-compiler-rows/);
+- five lower-priority compiler rows, [F-039](../F-039-ast-lower-priority-compiler-rows/);
+- one not a finding (`as0365`): AST:365's `Point_magnitude(p)` is the lowering of an inherent
+  method (TRAITS:132), and the program had declared a free function of that name. UFCS itself
+  holds: `p.magnitude()` reaches a free `magnitude(p)` (measured by hand);
 - two known: DEF-131's `<=>` (`as0295b`) and DEF-153's `cstring` literal (`as0492`), both
   of which compile at `93bcb66`.
 
 AST_REFERENCE describes the parser's nodes, and its notes carry spellings that later
 decisions changed. The rows, with each claim's program and its verdicts at HUNT2, the
-baseline and `93bcb66`, are in [`ROWS.md`](ROWS.md). All twenty give the same result at
+baseline and `93bcb66`, are in [`ROWS.md`](ROWS.md). All eighteen give the same result at
 all three.
 
 - **Spellings retired by a later decision.**
@@ -36,15 +39,10 @@ all three.
     and `error`".
 - **The extern rows describe the D-002 era** (D-149 removed the contracts):
   - an extern method needs no failure contract (AST:128);
-  - `never fails` on one is EXTERN-002 (AST:137);
-  - an `opaque struct` is accepted at module level and refused inside an `extern` block
-    (EXTERN-001: the tier is reserved, D-190). That is the reverse of AST:43's
-    "extern-block item only".
+  - `never fails` on one is EXTERN-002 (AST:137).
 - **Other notes.**
   - Implicit generic arguments `f<int32>(x)` (AST:364): the turbofish is required
     (LEXICAL:239, D-064).
-  - UFCS: `p.magnitude()` reaches a free `magnitude(p)`, measured by hand (TRAITS:494).
-    It does not reach `Point_magnitude(p)`, the name AST:365 gives.
   - A bare-name builtin need not return `Result<T>` (AST:403): `string_byte_length`
     returns `int64`.
   - A cast to a `wild` target is `=>!`, D-019's one door. `p => wild int8->` (AST:437)
@@ -90,7 +88,7 @@ all three.
 - Several repeat, in AST's own words, a spelling another reference's row already
   records: `pub const` (MODULE's F-033), `++`/`--` (LEXICAL's F-035), the bare `?`
   (OP's F-031). Each is AST's own sentence, so it is AST's row.
-- The registry at `93bcb66` has no entry for any of the twenty.
+- The registry at `93bcb66` has no entry for any of the eighteen.
 
 ## Measured, and inferred
 

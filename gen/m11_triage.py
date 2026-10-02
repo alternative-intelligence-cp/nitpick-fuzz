@@ -213,9 +213,13 @@ put("comp", "F-039 c: a `joins` deadline that is no constant expression is accep
     "call, measured by hand)", "as0555")
 put("comp", "F-039 d: an attribute the language does not have is accepted and ignored: the removed "
     "`#[lexical_drop]`, and `#[nosuch_attribute]` (measured by hand)", "as0583")
+put("comp", "F-039 e: an `opaque struct` is accepted at module level, against AST:43 and TRAITS:368 (extern-block "
+    "item only, D-066 as narrowed by D-149); inside an `extern` block it is EXTERN-001, a tier reserved (D-190)",
+    "as0043")
+put("extract", "the sentence names the LOWERING of an inherent method (TRAITS:132: `impl:Point`'s `magnitude` is "
+    "`Point_magnitude(p)`); the program declared a free function of that name, which the sentence does not "
+    "say is reached. UFCS itself holds: `p.magnitude()` reaches a free `magnitude(p)` (measured by hand)", "as0365")
 DOC40 = (
-    ("F-040: an `opaque struct` is accepted at module level, and refused inside an `extern` block (EXTERN-001, "
-     "D-190): the row's \"`extern`-block item only\" is reversed", ("as0043",)),
     ("F-040: `pub const int32:MAX = 100i32;` and a `const` local qualifier do not parse (PARSE-001): `const` "
      "is retired (AST:505 says so)", ("as0044", "as0499")),
     ("F-040: `unit:Hertz = 1 / Seconds;` is RESOLVE-001: the prelude declares `Hertz` (another name compiles)",
@@ -229,8 +233,6 @@ DOC40 = (
     ("F-040: `++` and `--` are removed (D-174, PARSE-010)", ("as0297",)),
     ("F-040: generic arguments in an expression take the turbofish (LEXICAL:239, D-064): `f<int32>(x)` is "
      "PARSE-002", ("as0364",)),
-    ("F-040: UFCS reaches a free function named `magnitude(p)` (TRAITS:494), not `Point_magnitude(p)`, which "
-     "`p.magnitude()` does not find (TYPE-019)", ("as0365",)),
     ("F-040: `ok` is no bare-name builtin: it is removed (AST:329, D-097), RESOLVE-002", ("as0385b",)),
     ("F-040: a bare-name builtin need not return `Result<T>`: `string_byte_length` returns `int64` (TYPE-007 "
      "binding it to `Result<int64>`)", ("as0403",)),

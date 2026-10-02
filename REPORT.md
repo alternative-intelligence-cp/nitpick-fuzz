@@ -1029,13 +1029,13 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 Written 2026-09-26 by session 7 and extended by sessions 8 and 9 (2026-10-02), all on
 the author's machine (48 cores), from the committed scripts. **M11 is not finished.**
-These denominators cover the ranges extracted so far, 6 405 of the fourteen references'
+These denominators cover the ranges extracted so far, 7 087 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
 - extracted whole: BUILTIN, CONCURRENCY, IO, MACRO; by session 8, MEMORY, OP and
-  CONTROL; by session 9, MODULE, LEXICAL and AST;
+  CONTROL; by session 9, MODULE, LEXICAL, AST and BUILD;
 - extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
-- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351, TRAITS and BUILD.
+- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351 and TRAITS.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
@@ -1052,6 +1052,7 @@ The records are:
 | reference | claims | examples | rows | rules | untestable | testable = tested | agree | disagree |
 |---|---|---|---|---|---|---|---|---|
 | AST | 202 | 8 | 116 | 78 | 21 | 181 | 151 | 30 |
+| BUILD | 97 | 4 | 26 | 67 | 59 | 38 | 38 | 0 |
 | BUILTIN | 227 | 2 | 109 | 116 | 33 | 194 | 182 | 12 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 101 | 21 |
 | CONTROL | 110 | 14 | 7 | 89 | 2 | 108 | 98 | 10 |
@@ -1063,17 +1064,18 @@ The records are:
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
 | VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **2 463** | 107 | 602 | 1 754 | **304** | **2 159** | **1 931** | **228** |
+| **total** | **2 560** | 111 | 628 | 1 821 | **363** | **2 197** | **1 969** | **228** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
-- `z3` 93: needs `npkg verify` with the pinned z3;
-- `vague` 51: no checkable outcome;
-- `internal` 66 (AST's 19 are rows that list only a node's fields);
-- `tree` 44: the compiler's own tree;
+- `z3` 99: needs `npkg verify` with the pinned z3;
+- `vague` 57: no checkable outcome;
+- `internal` 67 (AST's 19 are rows that list only a node's fields);
+- `tree` 61: the compiler's own tree;
+- `tool` 44: a running driver process, a package in the compiler's tree, or `npkg test`, which
+  builds the compiler first (BUILD's 28);
 - `unobservable` 24;
-- `tool` 16: a running driver process, or a package manifest;
 - `timing` 8;
-- `platform` 2.
+- `platform` 3.
 
 Every expectation was written from the reference's text before its program first ran.
 Session 6 drafted five of the six modules with sub-agents. Session 7 reviewed them
@@ -1084,7 +1086,8 @@ the symbol is `@main`: 25 through one shared helper, S53). The expectation staye
 one under S45's recorded exception (`cc0636`). Each change carries its reason (`fixed`,
 listed in `m11/RESULTS.md` §3). Session 7's run 1 gave 1 093 agree and 169 disagree;
 its final run gives 1 118 and 144. Sessions 8 and 9 changed 21 and 30 more programs the
-same way. AST's 2 were a borrow live at a read and a `move` of a call's `Result`. LEXICAL's 4 were a contract measure calling a helper, a `%%` left in a check,
+same way. AST's 2 were a borrow live at a read and a `move` of a call's `Result`.
+BUILD's 1 was a script that took a diagnostic's note for its error's place. LEXICAL's 4 were a contract measure calling a helper, a `%%` left in a check,
 and a generic identity passing out its lent parameter (2). MODULE's 24 were three
 mistakes:
 - `hidden`, a reserved word (14);
@@ -1101,11 +1104,11 @@ mistakes:
 | compiler: npkc traps, exit 3 (F-024; AST's F-038) | 4 + 3 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039) | 16 + 5 + 4 + 4 |
-| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040) | 94 + 8 + 5 + 6 + 7 + 6 + 20 |
+| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039) | 16 + 5 + 4 + 5 |
+| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040) | 94 + 8 + 5 + 6 + 7 + 6 + 18 |
 | known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135; MODULE's DEF-153; LEXICAL's DEF-131; AST's DEF-131 and DEF-153) | 7 + 1 + 2 + 4 + 1 + 1 + 2 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) |
+| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) + 1 (AST) |
 | **total** | **228** |
 
 **Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
@@ -1150,13 +1153,18 @@ second npkc trap shape, F-038: `give` or `fall` outside a pick arm.
 | F-036 | LEXICAL's safe departures: `acquire`, `any`, `trit`, `nit` still name an uncallable function (DEF-103's residue), a literal's trailing underscore accepted | compiler, lower priority | per row | the same, and more words | the same (at `93bcb66`) |
 | F-037 | a trait object built by `x => dyn Trait` reads freed memory: the method returns the 0xAA poison | **memory: use after free** | 0, 10/10 | the same | the same (at `93bcb66`) |
 | F-038 | npkc traps (exit 3, no message) on `give` or `fall` outside a pick arm | compiler crash | 3 | 3 | 3 (at `93bcb66`) |
-| F-039 | AST's safe departures: a `comptime` value parameter EMIT-002, the backward pipe's function on the right, a non-constant `joins`, any attribute name accepted | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
-| F-040 | AST's twenty stale claims (retired spellings, the error model before D-179, the extern rows before D-149, and five more) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-039 | AST's safe departures: a `comptime` value parameter EMIT-002, the backward pipe's function on the right, a non-constant `joins`, any attribute name accepted, an `opaque struct` outside an extern block | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
+| F-040 | AST's eighteen stale claims (retired spellings, the error model before D-179, the extern rows before D-149, and four more) | documentation | per row | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 4 010 lines: at the drafts' density,
-  roughly 2 000 more claims.
+- **The ranges not yet extracted** (above), about 3 330 lines: at the drafts' density,
+  roughly 1 650 more claims.
+- **BUILD's own process.** 59 of BUILD's 97 claims are the compiler's ladder, its test
+  runners and its verified build, which a scratch project cannot reach (`npkg build` reads
+  the compiler tree's `runtime/npkrt.ll`). Its 38 tested claims are `npkg`'s refusals
+  before a build, the `[[test]]` schema and stage names, and what `npkc` emits. All 38
+  agree.
 - **The verified build.** 91 claims need `npkg verify` with the pinned z3, and are
   untestable here. Claims about what the compiler writes for verification were tested
   through `npkc --obligations`, which needs no z3.

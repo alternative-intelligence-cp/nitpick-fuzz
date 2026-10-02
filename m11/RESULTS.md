@@ -10,6 +10,7 @@ before the first run.
 | reference | claims | examples | rows | rules | untestable | testable | tested | agree | disagree |
 |---|---|---|---|---|---|---|---|---|---|
 | AST | 202 | 8 | 116 | 78 | 21 | 181 | 181 | 151 | 30 |
+| BUILD | 97 | 4 | 26 | 67 | 59 | 38 | 38 | 38 | 0 |
 | BUILTIN | 227 | 2 | 109 | 116 | 33 | 194 | 194 | 182 | 12 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 122 | 101 | 21 |
 | CONTROL | 110 | 14 | 7 | 89 | 2 | 108 | 108 | 98 | 10 |
@@ -21,21 +22,21 @@ before the first run.
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 2463 | 107 | 602 | 1754 | 304 | 2159 | 2159 | 1931 | 228 |
+| **total** | 2560 | 111 | 628 | 1821 | 363 | 2197 | 2197 | 1969 | 228 |
 
-**These denominators cover 6405 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST 1–644 of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 7087 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
-- `z3` 93 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `internal` 66 — a compiler internal no program observes (an AST field, a table's layout)
-- `vague` 51 — the sentence states no checkable outcome
-- `tree` 44 — a claim about the compiler's own source tree, generators, harness or documents
+- `z3` 99 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
+- `internal` 67 — a compiler internal no program observes (an AST field, a table's layout)
+- `tree` 61 — a claim about the compiler's own source tree, generators, harness or documents
+- `vague` 57 — the sentence states no checkable outcome
+- `tool` 44 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
-- `tool` 16 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `timing` 8 — a schedule, a race or a duration
-- `platform` 2 — another architecture or OS, root, the network, or more memory than the VM
+- `platform` 3 — another architecture or OS, root, the network, or more memory than the VM
 
 ## 2. The disagreements (228)
 
@@ -49,11 +50,11 @@ By kind: `refused` 120, `wrong_exit` 41, `accepted` 33, `ir` 13, `emit_defect` 9
 | compiler: npkc traps, exit 3 (F-024) | 7 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 29 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 146 |
+| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 30 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 144 |
 | known: deduplicated against KNOWN_DEFECTS.md | 18 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or no valid program can test it | 14 |
+| not a finding: the program tests more than its sentence, or no valid program can test it | 15 |
 
 Every disagreement below was also run at the baseline `c3bdae2` and at the compiler's newest
 `main` of its session (`1b4f0c6` for session 7's claims, `93bcb66` for session 8's); the last
@@ -61,7 +62,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 
 | id | line | claim | expected | measured | class | c3bdae2 / newest main |
 |---|---|---|---|---|---|---|
-| `as0043` | AST:43 | An `opaque struct` is an extern-block item only: one at module level is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-040: an `opaque struct` is accepted at module level, and refused inside an `extern` block (EXTERN-001, D-190): the row's "`extern`-block item only" is reversed | same / same @93bcb66 |
+| `as0043` | AST:43 | An `opaque struct` is an extern-block item only: one at module level is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-039 e: an `opaque struct` is accepted at module level, against AST:43 and TRAITS:368 (extern-block item only, D-066 as narrowed by D-149); inside an `extern` block it is EXTERN-001, a tier reserved (D-190) | same / same @93bcb66 |
 | `as0044` | AST:44 | A global is declared `pub const int32:MAX = 100i32;`: MAX is 100. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-040: `pub const int32:MAX = 100i32;` and a `const` local qualifier do not parse (PARSE-001): `const` is retired (AST:505 says so) | same / same @93bcb66 |
 | `as0045` | AST:45 | `unit:Hertz = 1 / Seconds;` declares a named unit for `dim256<U>`: a `dim256<Hertz>` value compiles. | `compile` | npkc 1 RESOLVE-001, -/- (`refused`) | F-040: `unit:Hertz = 1 / Seconds;` is RESOLVE-001: the prelude declares `Hertz` (another name compiles) | same / same @93bcb66 |
 | `as0062` | AST:62 | A generic parameter is a type or a compile-time value: `scale<comptime int32:K>` called `scale::<3i32>(2i32)` is 6. | `run:0` | npkc 1 EMIT-002, -/- (`emit_defect`) | F-039 a: a function with a `comptime` value parameter passes the checker and is EMIT-002 (a hole the compiler names) | same / same @93bcb66 |
@@ -78,7 +79,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `as0301` | AST:301 | `\|>` and `<\|` pipe a value into a function: `4 \|> dbl` is 8 and `dbl <\| 5` is 10. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-039 b: the backward pipe takes its function on the RIGHT, as `\|>` does: `dbl <\| x` is TYPE-007, and `x <\| dbl` computes dbl(x) (OP:378 says it passes to the LEFT function) | same / same @93bcb66 |
 | `as0307` | AST:307 | `Result{value: v, err: e}` constructs a Result: one with err 0 is not an error and holds v. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-040: a Result literal's `err` is an `Error` (D-179): `err: 0i32` is TYPE-007, and a success literal omits `err` (TYPE:1330) | same / same @93bcb66 |
 | `as0364` | AST:364 | Generic arguments may arrive implicitly: `idt<int32>(5i32)` is a call, as `idt::<int32>(5i32)` is. | `run:0` | npkc 1 PARSE-002, -/- (`refused`) | F-040: generic arguments in an expression take the turbofish (LEXICAL:239, D-064): `f<int32>(x)` is PARSE-002 | same / same @93bcb66 |
-| `as0365` | AST:365 | UFCS: with a free function `Point_magnitude(Point:p)`, `p.magnitude()` calls it. | `run:0` | npkc 1 TYPE-019, -/- (`refused`) | F-040: UFCS reaches a free function named `magnitude(p)` (TRAITS:494), not `Point_magnitude(p)`, which `p.magnitude()` does not find (TYPE-019) | same / same @93bcb66 |
+| `as0365` | AST:365 | UFCS: with a free function `Point_magnitude(Point:p)`, `p.magnitude()` calls it. | `run:0` | npkc 1 TYPE-019, -/- (`refused`) | the sentence names the LOWERING of an inherent method (TRAITS:132: `impl:Point`'s `magnitude` is `Point_magnitude(p)`); the program declared a free function of that name, which the sentence does not say is reached. UFCS itself holds: `p.magnitude()` reaches a free `magnitude(p)` (measured by hand) | same / same @93bcb66 |
 | `as0385b` | AST:385 | `ok` is one of the bare-name builtins: `ok(t)` is an ordinary call. | `compile` | npkc 1 RESOLVE-002, -/- (`refused`) | F-040: `ok` is no bare-name builtin: it is removed (AST:329, D-097), RESOLVE-002 | same / same @93bcb66 |
 | `as0403` | AST:403 | A bare-name builtin returns `Result<T>` like any function: `string_byte_length`'s call binds as a `Result<int64>`. | `compile` | npkc 1 TYPE-007, -/- (`refused`) | F-040: a bare-name builtin need not return `Result<T>`: `string_byte_length` returns `int64` (TYPE-007 binding it to `Result<int64>`) | same / same @93bcb66 |
 | `as0413` | AST:413 | `e ? d` unwraps with a default: `k(3i32) ? 0i32` is 3. | `run:0` | npkc 1 PARSE-011, -/- (`refused`) | F-040: the bare `?` fallback is struck (D-175, PARSE-011), and `?\|` is the fallback, not struck | same / same @93bcb66 |
@@ -290,12 +291,13 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (111; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (112; no expectation changed but where stated)
 
 | id | why |
 |---|---|
 | `as0300` | the `$$m` claim stays live to the end of its scope, so the read of `arr[2]` conflicted with it (BORROW-013); the claim and its write now sit in an inner block |
 | `as0352` | `move(mk())` was refused for the call's `Result` (TYPE-007, S55), not for its operand being a value; the operand is now `raw mk()`, a value and no place |
+| `bd0529` | a note may come before its error (the note at the declaration came first): the script now looks for an error line and a note line anywhere in the output, not the error first |
 | `bi0005` | run 1 wrote `list_init()`, refused TYPE-022 (T not inferable: the turbofish is the spelling), not for a missing import |
 | `bi0051` | run 1 called the `never fails` method without `raw` (TYPE-007) |
 | `bi0105b` | run 1 bound the result to an owning local, itself TYPE-061 (D-221); now the call alone |
@@ -406,6 +408,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 2159 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 2197 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).
