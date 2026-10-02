@@ -1,0 +1,56 @@
+// M11 me0101 -- meta/specs/MEMORY_REFERENCE.md:101 (rule)
+// quote: **A value whose type does
+// claim: A value whose type does not drop transfers nothing: `pass g.n` copies the number and g's drop still frees its owning sibling, so three calls peak at one list.
+// expect: run:0   heap 24000/8000/3
+// wrong: peak 24000: g's owning field leaked on every call (DEF-8's shape)
+mod:me0101;
+
+struct:G = { List<int64>:l; int64:n; };
+func:getn = int64() never fails {
+    G:g = G{ l: raw list_init::<int64>(1000i64), n: 7i64 };
+    pass g.n;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int64:t = raw getn() + raw getn() + raw getn();
+    if (t != 21i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

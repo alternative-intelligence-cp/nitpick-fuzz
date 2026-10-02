@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**1488 claims: 1262 testable, 226 untestable** (each with its reason).
+**1669 claims: 1408 testable, 261 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
 | IO | 78 | 5 | 9 | 64 | 67 | 11 |
 | MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
+| MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
 | TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 457 | 128 |
 
@@ -27,20 +28,20 @@ extracted:
 
 | reference | lines | extracted | lines extracted | not extracted |
 |---|---|---|---|---|
-| AST | 645 | — | 0 | 1–645 |
-| BUILD | 683 | — | 0 | 1–683 |
-| BUILTIN | 448 | 1–448 | 448 | — |
-| CONCURRENCY | 648 | 1–648 | 648 | — |
-| CONTROL | 416 | — | 0 | 1–416 |
-| IO | 288 | 1–288 | 288 | — |
-| LEXICAL | 411 | — | 0 | 1–411 |
-| MACRO | 413 | 1–413 | 413 | — |
-| MEMORY | 534 | — | 0 | 1–534 |
-| MODULE | 301 | — | 0 | 1–301 |
-| OP | 404 | — | 0 | 1–404 |
-| TRAITS | 767 | — | 0 | 1–767 |
-| TYPE | 2123 | 1–660 | 660 | 661–2123 |
-| VERIFICATION | 2352 | 1–845, 846–1247 | 1247 | 1248–2352 |
+| AST | 644 | — | 0 | 1–644 |
+| BUILD | 682 | — | 0 | 1–682 |
+| BUILTIN | 447 | 1–447 | 447 | — |
+| CONCURRENCY | 647 | 1–647 | 647 | — |
+| CONTROL | 415 | — | 0 | 1–415 |
+| IO | 287 | 1–287 | 287 | — |
+| LEXICAL | 410 | — | 0 | 1–410 |
+| MACRO | 412 | 1–412 | 412 | — |
+| MEMORY | 533 | 1–533 | 533 | — |
+| MODULE | 300 | — | 0 | 1–300 |
+| OP | 403 | — | 0 | 1–403 |
+| TRAITS | 766 | — | 0 | 1–766 |
+| TYPE | 2122 | 1–660 | 660 | 661–2122 |
+| VERIFICATION | 2351 | 1–845, 846–1247 | 1247 | 1248–2351 |
 
 ## BUILTIN (`meta/specs/BUILTIN_REFERENCE.md`)
 
@@ -650,6 +651,192 @@ Tables whose rows are not claims:
 | `mc0394` | 394 | rule | “a collision is an error like any other name declared” | Two module-level invocations of one declaration macro emit one name twice: a collision is an error. | `refuse` |
 | `mc0394b` | 394 | rule | “it emits** (D-128)” | Two splices of one field macro into one struct collide: refused. | `refuse` |
 | `mc0405` | 405 | rule | “currently carries the macro's” | A diagnostic inside an expansion carries the macro body's location: "cannot find only_local" is reported at the macro BODY's line, not the invocation's. | `sh:0` |
+
+## MEMORY (`meta/specs/MEMORY_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `me0005` | 5 | rule | “**There is no garbage collector** (D-003)” | There is no garbage collector: lifetimes are static. | untestable [vague] a design statement with no outcome of its own; the static lifetimes it names are claimed and tested at me0022 (scope), me0362 (handles) and me0119 (wild) |
+| `me0007` | 7 | rule | “Nothing relocates memory” | Nothing relocates memory implicitly, and there are no collection pauses. | untestable [unobservable] a program sees no address to compare and no pause to time |
+| `me0016` | 16 | rule | “a bare `T` is treated as owning” | In a generic body a bare T is owning: a copy of a T place is refused (TYPE-046), even when the only instantiation is int32. | `refuse:TYPE-046` |
+| `me0018` | 18 | rule | “unless spelled `move(...)` or `.clone()`” | The permitted twin: in a generic body `move(x)` of a T place is accepted, and at int32 the value arrives. | `run:0` |
+| `me0019` | 19 | rule | “`pick` binds a `T` payload as a VIEW in place” | A lending pick binds a T payload as a view in place (D-266) and a consuming one moves it. | untestable [internal] whether a T payload binds as a view or a move inside a generic body shows only through the loan rules' refusals; the grid's F-002 and DEF-104 cells measure those |
+| `me0020` | 20 | rule | “The `move` of a scalar is its copy” | The move of a scalar is its copy: a generic function moving its T at int64 hands the value back, and the caller's own copy is still the same value. | `run:0` |
+| `me0022` | 22 | rule | “a value's last textual use does not shorten its life” | A managed binding is dropped when its scope exits and at no earlier point: two lists in one block, the first last used before the second exists, are both live at once. | `run:0` heap `24000/24000/2` |
+| `me0022b` | 22 | rule | “after the scope's joins and `defer`s” | A binding is dropped after its scope's defers: a defer reading the string at the scope's exit sees it intact. | `run:0` |
+| `me0022c` | 22 | rule | “before its channel reclaims” | A scope's drops run before its channel reclaims. | untestable [unobservable] a channel's reclaim is not built (CONCURRENCY:489-490), so no order between it and a drop can be seen |
+| `me0023` | 23 | example | “```nitpick” | `int32:x = 42i32;` is a managed binding that holds 42. | `run:0` |
+| `me0031` | 31 | rule | “dropped **when its statement ends**” | A temporary is dropped when its statement ends: two statements each reading a field of a list nobody keeps peak at the larger list alone. | `run:0` heap `24000/16000/2` |
+| `me0035` | 35 | rule | “The same drop runs on every path out of the statement” | The temporary's drop runs on every path out of its statement, a `relay` included: three calls whose statement relays a failure after building a list peak at one list. | `run:0` heap `24000/8000/3` |
+| `me0037` | 37 | rule | “condition dies with the condition” | A temporary that feeds a loop's condition dies with the condition: four evaluations of a while's condition, each building a list, peak at one list. | `run:0` heap `32000/8000/4` |
+| `me0037b` | 37 | rule | “Under `await` the temporaries” | Under await the temporaries of the awaiting statement live in the frame. | untestable [internal] where a temporary is stored across a suspension is the lowering's; no program sees a frame slot |
+| `me0039` | 39 | rule | “`tests/backend/programs/temp_*.npk`” | The compiler's temp_*.npk programs and the cost stage's temporaries probe pin the rule. | untestable [tree] a statement about the compiler repository's tests and harness |
+| `me0045` | 45 | rule | “**Its buffer is managed storage (D-263, 1.5.2e).**” | A List's buffer is managed storage: a List alive in main at `exit 0` is not a leak the exit check reports. | `run:0` |
+| `me0052` | 52 | rule | “`alloc_managed` is the PRELUDE's own (TYPE-054 elsewhere)” | alloc_managed is the prelude's own: a program calling it is refused, TYPE-054. | `refuse:TYPE-054` |
+| `me0053` | 53 | rule | “hand-written `wild` container relies on D-151's count” | A wild block unpaired at a successful exit is counted: the exit check traps WildLeak. | `trap:WildLeak` |
+| `me0057` | 57 | rule | “its generated drop releases the” | A List's generated drop releases its elements through T's drop and hands the block back: a List of two lists dropped at its block's end leaves room, so a later list peaks alone. | `run:0` heap `48048/32000/4` |
+| `me0059` | 59 | rule | “vacant List (`cap == 0`, D-225) owns nothing” | A vacant List owns nothing: a list moved out of drops nothing at its scope's end (no double free). | `run:0` |
+| `me0061` | 61 | rule | “never copy it binding to binding” | List is move-only: copying a List binding to another is refused, TYPE-046. | `refuse:TYPE-046` |
+| `me0061b` | 61 | rule | “with a `move T:p` parameter” | A List is consumed by a `move T:p` parameter. | `run:0` |
+| `me0061c` | 61 | rule | “It is declared” | List and its functions are declared in the prelude. | untestable [tree] where the declaration is written; that List needs no import is the premise of every List claim here |
+| `me0068` | 68 | rule | “`items` is not touched (TYPE-080)” | Outside the prelude a List's `items` is not touched: reading it is refused, TYPE-080. | `refuse:TYPE-080` |
+| `me0068b` | 68 | rule | “and `count` and `cap` are read but” | Outside the prelude a List's `cap` is not written: assigning it is refused, TYPE-079. | `refuse:TYPE-079` |
+| `me0068c` | 68 | rule | “`count` and `cap` are read but” | count and cap are read outside the prelude. | `run:0` |
+| `me0074` | 74 | rule | “bounds-checked against `count`” | `l[i]` is bounds-checked against count, not cap: index 1 of a cap-4 list holding one element traps OutOfBounds. | `trap:OutOfBounds` |
+| `me0075` | 75 | rule | “read it, write it, compound it” | `l[i]` is a place: written, then compounded, it reads the result. | `run:0` |
+| `me0077` | 77 | rule | “owning element drops the old value” | Assigning over an owning element drops the old value: a list of lists whose element is replaced, then a larger list, peak without the old element. | `run:0` heap `32024/24024/4` |
+| `me0078` | 78 | rule | “element is live or vacant after a move” | An element moved out is vacant, never unowned: the list's drop does not free it again. | `run:0` |
+| `me0079` | 79 | rule | “is a checked `T[]` view of elements” | `l[lo...hi]` is a T[] view of elements lo to hi-1. | `run:0` |
+| `me0080` | 80 | rule | “list (D-249)” | A range view borrows the list: list_push while the view lives is refused, BORROW-015. | `refuse:BORROW-015` |
+| `me0081` | 81 | rule | “A list behind a pointer is `(<-p)[i]`” | A list behind a pointer is indexed as `(<-p)[i]`. | `run:0` |
+| `me0081b` | 81 | rule | “`p[i]` on a pointer to an array” | `p[i]` on a pointer to a List is refused, TYPE-082. | `refuse:TYPE-082` |
+| `me0085` | 85 | rule | “`list_push`, `list_reserve`” | list_push appends and list_reserve makes room for `need` more elements beyond the count. | `run:0` |
+| `me0086` | 86 | rule | “`list_pop` (the last element, moved out)” | list_pop moves the last element out. | `run:0` |
+| `me0087` | 87 | rule | “`list_truncate(l, n)` (drops `n…count−1`)” | list_truncate(l, n) keeps elements 0 to n-1. | `run:0` |
+| `me0088` | 88 | rule | “`list_clear`” | list_clear empties the list. | `run:0` |
+| `me0089` | 89 | rule | “`list_insert(l, i, v)` (`i` in `[0, count]`)” | list_insert(l, i, v) inserts at i for i in [0, count]: at 0 it shifts, at count it appends. | `run:0` |
+| `me0090` | 90 | rule | “`list_remove(l, i)` (order kept)” | list_remove(l, i) removes element i and keeps the order of the rest. | `run:0` |
+| `me0091` | 91 | rule | “`list_swap_remove(l, i)` (the last element moved into the hole)” | list_swap_remove(l, i) moves the last element into the hole. | `run:0` |
+| `me0093` | 93 | rule | “An index outside the list is `OutOfBounds`, whatever spells it” | An index outside the list is OutOfBounds whatever spells it: list_insert at count + 1 traps. | `trap:OutOfBounds` |
+| `me0093b` | 93 | rule | “whatever spells it” | list_remove at count traps OutOfBounds. | `trap:OutOfBounds` |
+| `me0099` | 99 | rule | “`pass` moves the returned value out implicitly” | `pass h.name` moves the field out and the root stops owning it: h's drop does not free it, and the caller reads it intact. | `run:0` |
+| `me0101` | 101 | rule | “**A value whose type does” | A value whose type does not drop transfers nothing: `pass g.n` copies the number and g's drop still frees its owning sibling, so three calls peak at one list. | `run:0` heap `24000/8000/3` |
+| `me0107` | 107 | rule | “**One exception (D-251, 1.5.2)**” | A move out of an owning field of a limit<Rules> binding is refused, TYPE-063. | `refuse:TYPE-063` |
+| `me0110` | 110 | rule | “move the whole binding, or copy the part” | The permitted twin: the whole limited binding moves. | `run:0` |
+| `me0113` | 113 | rule | “Forces explicit allocation onto the hardware call stack” | A `stack` binding is on the call stack, reclaimed exactly at its scope's exit, a pointer bump. | untestable [unobservable] where a scalar lives and when its stack slot is reclaimed are not visible; the frame-size consequence is me0530 |
+| `me0114` | 114 | example | “```nitpick” | `stack int32:counter = 0i32;` compiles and holds 0. | `run:0` |
+| `me0119` | 119 | rule | “If you fail to free a `wild` pointer” | A wild pointer never freed is a leak reported on exit: WildLeak. | `trap:WildLeak` |
+| `me0119b` | 119 | rule | “They explicitly bypass RAII tracking” | A wild pointer bypasses RAII: its block is not freed at its scope's exit (the exit check still sees it after the block). | `trap:WildLeak` |
+| `me0120` | 120 | example | “```nitpick” | `wild int8->:buffer = alloc(1024i64);` allocates a wild block (freed here with dalloc). | `run:0` |
+| `me0125` | 125 | rule | “adhering to W⊕X” | wildx memory follows W^X, with ASLR and guard pages. | untestable [unobservable] page permissions and placement are not visible; the W^X refusals are VERIFICATION:790-791's claims |
+| `me0126` | 126 | example | “```nitpick” | `wildx uint8->:code = wildx_alloc(4096i64);` allocates an executable page (freed here). | `compile` |
+| `me0132` | 132 | rule | “Casting an integer to a pointer is illegal in ordinary code” | Casting an integer to a pointer is refused in ordinary code. | `refuse` |
+| `me0133` | 133 | rule | “legal only in `wild` context (D-019)” | #wild_ptr is legal only in wild context: bound to a plain pointer, it is refused. | `refuse` |
+| `me0135` | 135 | example | “```nitpick” | `wild int8->:page = #wild_ptr<int8->>(addr);` builds a wild pointer from an address. | `run:0` |
+| `me0144` | 144 | rule | “Nitpick uses static analysis to prevent leaks at compile time” | Static analysis prevents wild leaks at compile time. | untestable [vague] no leak is named that the compiler refuses; the run-time check (me0053, me0119) is what the reference shows catching one |
+| `me0147` | 147 | rule | “This guarantees the free runs on every normal exit path” | A defer runs on every normal exit path, a `fail` included: the callee's wild block is freed, so main's `exit 0` finds no leak. | `run:0` |
+| `me0147b` | 147 | rule | “or `exit`)” | A defer runs on `exit`: main's deferred free runs before the exit check. | `run:0` |
+| `me0149` | 149 | rule | “**`defer` does not run on a trap.**” | A defer does not run on a `?!` trap: control reaches failsafe's arm for the raised error without the defer (which would divide by zero). | `run:81` |
+| `me0149b` | 149 | rule | “`!!!` and `?!` transfer control directly to” | `!!!` transfers control directly to failsafe without running a defer. | `run:81` |
+| `me0152` | 152 | rule | “`failsafe` receives the allocation registry intact” | failsafe receives the allocation registry intact: wild_live_count() inside it counts the block main left live. | `run:42` |
+| `me0155` | 155 | rule | “allocates from a preallocated REGION” | failsafe allocates from a preallocated region: a small allocation inside it succeeds. | `run:42` |
+| `me0158` | 158 | rule | “exhaustion is `HeapOom`” | The region is one mebibyte: a 2 MiB allocation inside failsafe is HeapOom there, which the re-entry rule ends at exit 70. | `run:70` |
+| `me0161` | 161 | rule | “`failsafe` that waited for it would hang with no deadline” | A failsafe never waits for the heap's mutex. | untestable [timing] a thread parked inside the allocator at the stop is a race no single run arranges |
+| `me0166` | 166 | example | “```nitpick” | `wild int8->:buf = alloc(16i64); defer { dalloc(buf); }` frees the block at the scope's exit. | `run:0` |
+| `me0172` | 172 | rule | “The `nodrop` keyword acts as a per-binding RAII opt-out” | `nodrop` opts one binding's initialiser out of the auto-drop tracker. | untestable [vague] the text gives no managed initialiser whose drop `nodrop` would suppress observably; the example (me0173) is a wild one |
+| `me0173` | 173 | example | “```nitpick” | `wild int8->:manual_buf = nodrop alloc(16i64);` compiles (freed here with dalloc). | `run:0` |
+| `me0179` | 179 | rule | “`move(place)` transfers ownership out of a binding and invalidates the source” | move(place) invalidates the source: freeing the moved-from wild binding is refused. | `refuse` |
+| `me0183` | 183 | example | “```nitpick” | The example: `free(buffer)` after `move(buffer)` is refused as NITPICK-019 (use after move). | `refuse:NITPICK-019` |
+| `me0191` | 191 | rule | “**Ownership moves only where `move` is written.**” | Passing an owning value to a function borrows it: the caller still owns it afterwards. | `run:0` |
+| `me0194` | 194 | rule | “Any read is” | A moved-from binding is invalid: any read of it is refused. | `refuse` |
+| `me0195` | 195 | rule | “**reinitialized by assignment**” | A moved-from binding may be reinitialized by assignment, after which it is live again. | `run:0` |
+| `me0196` | 196 | rule | “A `fixed` binding cannot be” | A fixed binding cannot be reinitialized: it cannot be assigned at all. | `refuse` |
+| `me0198` | 198 | rule | “`move` is **not** a memory qualifier” | `move` is not a memory qualifier: a declaration qualified `move` is refused. | `refuse` |
+| `me0199` | 199 | rule | “It is a keyword operator with a parenthesized operand” | move takes a parenthesized operand: `move s` without parentheses is refused. | `refuse` |
+| `me0202` | 202 | rule | “`$$m place` excludes every other access” | `$$m place` excludes every other access while it lives: reading the place is BORROW-013. | `refuse:BORROW-013` |
+| `me0203` | 203 | rule | “`$$i place` admits readers and excludes writers” | `$$i place` admits readers: a plain read beside it is accepted. | `run:0` |
+| `me0203b` | 203 | rule | “excludes writers” | `$$i place` excludes writers: assigning the place while it lives is BORROW-013. | `refuse:BORROW-013` |
+| `me0203c` | 203 | rule | “`@place` is a” | `@place` is a plain address with no claim: writing the place beside it is accepted, and the address sees the write. | `run:0` |
+| `me0206` | 206 | rule | “a computed-index overlap is” | A computed-index overlap of two `$$m` claims is guarded at run time: BorrowOverlap. | `trap:BorrowOverlap` |
+| `me0208` | 208 | rule | “**A view's root is frozen while the view is live**” | A view's root is frozen while the view lives: assigning the root is BORROW-015. | `refuse:BORROW-015` |
+| `me0217` | 217 | rule | “Reads, `$$i`, a disjoint field” | Reads of a view's root stay legal while the view lives. | `run:0` |
+| `me0221` | 221 | rule | “End the view's block” | Ending the view's block before writing its root is accepted. | `run:0` |
+| `me0225` | 225 | rule | “cannot travel up (`NITPICK-BORROW-001`” | A by-value parameter's frame storage cannot travel up: returning its address is BORROW-001. | `refuse:BORROW-001` |
+| `me0228` | 228 | rule | “is a view of a temporary” | A temporary handed to a callee that views it is a view of a temporary: BORROW-012. | `refuse:BORROW-012` |
+| `me0230` | 230 | rule | “**What a call stores is read off the callee's own body**” | What a call stores is read off the callee's own body (D-325's summaries). | untestable [internal] the analysis's method; its outcomes are the BORROW refusals and acceptances claimed at me0208-me0228 |
+| `me0242` | 242 | rule | “A plain by-value parameter of an OWNING type is a loan and is read-only” | A plain by-value parameter of an owning type is a read-only loan: assigning it is TYPE-085. | `refuse:TYPE-085` |
+| `me0245` | 245 | rule | “changes an owning value takes it as `move T:p`” | A callee that changes an owning value takes it as `move T:p`. | `run:0` |
+| `me0246` | 246 | rule | “a copyable parameter is a copy and keeps every write” | A copyable parameter is a copy: the callee's writes stay in the callee. | `run:0` |
+| `me0247` | 247 | rule | “A `fixed` binding has no address” | A fixed binding has no address: `@F` is TYPE-071. | `refuse:TYPE-071` |
+| `me0248` | 248 | rule | “cannot be moved out of” | An owning fixed binding cannot be moved out of: `move(FS)` is TYPE-084. | `refuse:TYPE-084` |
+| `me0250` | 250 | rule | “`.clone()` is” | `.clone()` is the reading of an owning fixed binding. | `run:0` |
+| `me0251` | 251 | rule | “and no PART of one is written after its declaration” | No part of a fixed binding is written after its declaration: an element store is TYPE-086. | `refuse:TYPE-086` |
+| `me0255` | 255 | rule | “`NITPICK-ASSIGN-002`” | The whole fixed binding's second assignment stays ASSIGN-002. | `refuse:ASSIGN-002` |
+| `me0262` | 262 | rule | “2^47 bytes (140,737,488,355,328” | A request above 2^47 bytes is a bad request: alloc(2^47 + 1) traps HeapBadRequest. | `trap:HeapBadRequest` |
+| `me0268` | 268 | rule | “a compare that reads a negative size as” | The one compare reads a negative size as a huge one: alloc(-1) traps HeapBadRequest. | `trap:HeapBadRequest` |
+| `me0269` | 269 | rule | “Exactly the ceiling is legal” | Exactly the ceiling is legal: alloc(2^47) is not a bad request, and the kernel's refusal is HeapOom. | `trap:HeapOom` |
+| `me0276` | 276 | rule | “**`alloc(size)`**: Allocate `size` uninitialized bytes” | alloc(size) gives size bytes the program can write and read back. | `run:0` |
+| `me0277` | 277 | rule | “**`calloc(count, size)`**: Allocate zero-initialized memory” | calloc(count, size) allocates zero-initialized memory. | `run:0` |
+| `me0278` | 278 | rule | “**`ralloc(ptr, new_size)`**: Resize the allocation” | ralloc resizes the allocation and keeps its contents. | `run:0` |
+| `me0278b` | 278 | rule | “Old pointer becomes invalid” | After ralloc the old pointer is invalid: freeing it is refused. | `refuse` |
+| `me0281` | 281 | rule | “There are **no aliases**” | There are no aliases: `realloc` is refused. | `refuse` |
+| `me0285` | 285 | rule | “**`aalloc(size, align)`**” | aalloc(size, align) serves an alignment above sixteen. | `run:0` |
+| `me0288` | 288 | rule | “a hidden 16-byte header” | Every heap allocation carries a hidden 16-byte header: the size and a keyed magic word. | untestable [internal] the header is out of the payload a program may read |
+| `me0290` | 290 | rule | “double-free and header corruption and routes them to `failsafe`” | The allocator detects a double free the static analysis cannot follow and routes it to failsafe (-4102, Unreachable): a pointer freed twice through a callee. | `trap:Unreachable` |
+| `me0292` | 292 | rule | “the multiply is CHECKED” | calloc's count x size is checked: an overflowing product traps HeapBadRequest. | `trap:HeapBadRequest` |
+| `me0293` | 293 | rule | “`ralloc(p, 0)`” | ralloc(p, 0) is a malformed request: HeapBadRequest. | `trap:HeapBadRequest` |
+| `me0293b` | 293 | rule | “a non-power-of-two alignment” | A non-power-of-two alignment is a malformed request: aalloc(64, 48) traps HeapBadRequest. | `trap:HeapBadRequest` |
+| `me0301` | 301 | rule | “binding is additionally a compile-time error (D-119)” | Double-free of a tracked binding is a compile-time error. | `refuse` |
+| `me0305` | 305 | rule | “a garbage” | dalloc proves a pointer lies in allocator-owned memory first: a garbage pointer is one of the allocator's traps, never a wild load (failsafe here maps HeapBadRequest, HeapOom and Unreachable to 42, MachineFault to 43). | `run:42` |
+| `me0306` | 306 | rule | “The heap is single-threaded at this” | The heap is single-threaded at this rung. | untestable [vague] a statement about a past rung; the heap has had a mutex since D-291 (line 160) |
+| `me0312` | 312 | rule | “from `alloc`, `aalloc`, `calloc` and a `ralloc` of one” | Every calloc block is counted: one unpaired at `exit 0` traps WildLeak. | `trap:WildLeak` |
+| `me0313` | 313 | rule | “never managed storage: a string's” | The exit check never counts managed storage: a string alive in main at `exit 0` is not reported. | `run:0` |
+| `me0316` | 316 | rule | “so an owning local of” | exit runs no drops, so an owning local of main is never dropped by a program that exits. | untestable [unobservable] a managed body freed or not at exit is the kernel's either way; no program reads it after exit |
+| `me0328` | 328 | rule | “**`wild_live_count()`**” | wild_live_count() counts the live wild blocks. | `run:0` |
+| `me0333` | 333 | rule | “with a non-empty set routes to `failsafe`” | A successful exit with a non-empty set routes to failsafe with -4105 (WildLeak). | `trap:WildLeak` |
+| `me0334` | 334 | rule | “A failure exit keeps its code” | A failure exit keeps its code: `exit 3` with a live wild block exits 3. | `run:3` |
+| `me0337` | 337 | rule | “followed by `exit` and by” | wild_release_all() is followed by exit and nothing else: another statement after it is TYPE-062. | `refuse:TYPE-062` |
+| `me0339` | 339 | rule | “drops every chunk and” | failsafe may call wild_release_all() then exit positive: the leak's handler exits 42. | `run:42` |
+| `me0342` | 342 | rule | “same flag makes a trap RAISED INSIDE failsafe exit 70 directly” | A trap raised inside failsafe exits 70 directly instead of recursing. | `run:70` |
+| `me0345` | 345 | rule | “**One registry mechanism, three clients**” | One registry mechanism serves the allocation tables, the stream registry and the driver registry. | untestable [internal] the runtime's table layout |
+| `me0358` | 358 | rule | “allocate the graph” | Arenas handle cycles: a graph is allocated in an arena and dropped wholesale. | untestable [vague] a pattern of use; the arena's operations are claimed at me0390-me0397 |
+| `me0362` | 362 | rule | “Attempting to use the old handle immediately fails safely” | A handle whose slot was freed fails safely through Result, never a silent use-after-free. | `run:0` |
+| `me0364` | 364 | rule | “Handles are **indices, not pointers**” | Handles are indices, safe across arena growth: ten slots in an arena made for two all read back. | `run:0` |
+| `me0368` | 368 | rule | “lowers into a 16-byte aligned struct” | Handle<T> is a 16-byte struct. | `run:0` |
+| `me0368b` | 368 | rule | “(`%Handle = type { i64, i32 }` in LLVM IR)” | Handle<T> is `{ i64, i32 }` in the IR: a function taking one has that parameter type. | `ir:^define [^\n]*@"[^"]*\.hh"\(\{ ?i64, i32 ?\}` |
+| `me0369` | 369 | rule | “**Bytes [0-7]**: `uint64:index`” | Bytes 0-7 are the index, 8-11 the generation, 12-15 padding. | untestable [internal] a handle's bytes are not readable from a program; the field order is me0368b's IR test |
+| `me0375` | 375 | rule | “Creation is the **`arena_make(cap)`** builtin” | Creation is arena_make(cap), type-directed by the annotation. | `run:0` |
+| `me0377` | 377 | rule | “wrote `arena<int64>.alloc(1000)`” | The old spelling `arena<int64>.alloc(1000)` (creation on the type) is not the language. | `refuse` |
+| `me0381` | 381 | example | “```nitpick” | The example compiles and runs: put 41, `get(h) ? 0i64` reads it, then free and destroy. | `run:0` |
+| `me0390` | 390 | rule | “The set is `alloc() -> Handle<T>`” | The arena's set is alloc, get, put, free, reset and destroy, with their stated results. | `run:0` |
+| `me0392` | 392 | rule | “`get` returns the element” | get returns the element by value: changing the copy leaves the slot. | `run:0` |
+| `me0394` | 394 | rule | “A stale handle fails” | A stale handle fails get, put and free with -4106 (StaleHandle) in Result.err, never a trap. | `run:0` |
+| `me0396` | 396 | rule | “`destroy` CONSUMES the arena” | destroy consumes the arena at compile time: using it afterwards is refused. | `refuse` |
+| `me0397` | 397 | rule | “un-destroyed arena is a wild-role leak the exit-time check names” | An un-destroyed arena is a wild-role leak the exit check names: WildLeak at `exit 0`. | `trap:WildLeak` |
+| `me0399` | 399 | rule | “`?` takes a **fallback value**” | `?` takes a fallback value: a stale get with `? 0i64` yields 0. | `run:0` |
+| `me0399b` | 399 | rule | “`?!` takes a **failsafe error” | `?!` takes a failsafe error code and traps: a stale get with `?! E2` reaches E2's arm. | `run:82` |
+| `me0404` | 404 | rule | “`.` handles all member access and auto-dereferences pointers” | `.` auto-dereferences a pointer: `p.n` through a Box-> reads the field. | `run:0` |
+| `me0408` | 408 | example | “```nitpick” | An arena embedded in a struct: `app.my_arena.alloc()` works as member-place addressing. | `compile` |
+| `me0418` | 418 | rule | “The surface `arena<T>` is a **fixed-slot** allocator” | The executor frame allocator is not arena<T>: arena<T> hands out fixed-slot indices. | untestable [internal] the coroutine frame allocator is the runtime's |
+| `me0424` | 424 | rule | “runtime-internal — no keyword, no” | The executor frame allocator is runtime-internal, no builtin: npk_frame_alloc is not callable. | `refuse` |
+| `me0434` | 434 | rule | “an un-destroyed executor is a countable leak” | The executor and its chunks are wild-role blocks; an un-destroyed executor is a countable leak. | untestable [internal] no program holds an executor to leave undestroyed |
+| `me0439` | 439 | rule | “`arena<T>` is **single-threaded**” | arena<T> is single-threaded: handing one to a thread is refused. | `refuse` |
+| `me0449` | 449 | row | “\| Threading \| single-threaded \| multi-threaded \|” | A shared_arena is multi-threaded: a thread allocates in it, and after the join the owner reads the value through the handle the thread returned on a channel. | `run:0` |
+| `me0450` | 450 | row | “\| Operations \| `alloc`, `get`, `free`, `reset`, `destroy` \|” | A shared_arena has only alloc, get and destroy: `reset` is refused. | `refuse` |
+| `me0451` | 451 | row | “\| Per-slot `free` \| yes \| **no** \|” | A shared_arena has no per-slot free: `s.free(h)` is refused. | `refuse` |
+| `me0452` | 452 | row | “\| Storage \| may reallocate on growth \| **chunked, never moves** \|” | A shared arena's storage is chunked and never moves; an arena<T>'s may reallocate. | untestable [unobservable] no operation yields an address to compare before and after growth |
+| `me0453` | 453 | row | “\| Cost \| zero \| one atomic bump per allocation \|” | An arena<T> allocation costs nothing extra; a shared arena's one atomic bump. | untestable [internal] the allocation paths are the runtime's (npk_arena_*, npk_sarena_*) |
+| `me0455` | 455 | rule | “Dropping per-slot `free` is what makes concurrency safe” | Dropping per-slot free makes concurrency safe without epochs, hazard pointers or counting. | untestable [vague] the rationale for the contract; the contract is me0450-me0451 |
+| `me0461` | 461 | rule | “`destroy` requires that no thread still holds handles” | destroy requires that no thread still holds the arena: destroying it while a spawned thread holds it is refused. | `refuse` |
+| `me0464` | 464 | rule | “creation is `shared_arena_make(cap)`” | Creation is shared_arena_make(cap), type-directed like arena_make. | `run:0` |
+| `me0465` | 465 | rule | “the surface value is ONE POINTER” | A shared_arena's surface value is one pointer: 8 bytes. | `run:0` |
+| `me0467` | 467 | rule | “**`alloc(v)` carries the value**, because there is no `put`” | A shared arena has no `put`: `s.put(h, v)` is refused. | `refuse` |
+| `me0471` | 471 | rule | “`get` COPIES” | A shared arena's get copies: changing the copy leaves the slot. | `run:0` |
+| `me0474` | 474 | rule | “RESERVES a capacity range with one atomic `fetch_add`” | Growth reserves a capacity range with one atomic fetch_add and publishes the chunk by CAS. | untestable [internal] the runtime's growth protocol; its model is VERIFICATION §9's |
+| `me0476` | 476 | rule | “chunk sizes are geometric” | Chunk sizes are geometric, capped at 65536 slots. | untestable [internal] chunk sizes are not visible to a program |
+| `me0479` | 479 | rule | “`arena<T>` issues generations starting at 2” | Shared handles carry generation 0 and arena<T>'s start at 2: an arena<T> handle in a shared get is refused as stale (StaleHandle), not read. | `run:0` |
+| `me0481` | 481 | rule | “`destroy` consumes the binding at compile time” | A shared arena's destroy consumes the binding at compile time: a use after it is MOVE-002. | `refuse:MOVE-002` |
+| `me0482` | 482 | rule | “an un-destroyed shared arena is a wild-role leak” | An un-destroyed shared arena is a wild-role leak the exit check names: WildLeak. | `trap:WildLeak` |
+| `me0488` | 488 | rule | “`ulimit -s` and `RLIMIT_STACK` do not size any” | ulimit -s does not size the main thread's stack: a recursion using about 4 MiB runs to 0 under `ulimit -s 512`. | `sh:0` |
+| `me0491` | 491 | rule | “Each stack is ONE anonymous mapping” | Each stack is one anonymous mapping, lowest address first. | untestable [internal] a mapping's layout is not visible to a program |
+| `me0496` | 496 | row | “\| guard (`PROT_NONE`) \| 4 KiB \| yes \| yes \| yes \|” | Each stack starts with a 4 KiB PROT_NONE guard (main, spawned and failsafe). | untestable [unobservable] reaching a guard page needs an address below the frame |
+| `me0497` | 497 | row | “\| signal stack \| 64 KiB \| yes \| yes \| — \|” | Main and spawned threads have a 64 KiB signal stack. | untestable [internal] the signal stack's size is not visible |
+| `me0498` | 498 | row | “\| guard (`PROT_NONE`) \| 4 KiB \| yes \| yes \| — \|” | A second 4 KiB guard sits above the signal stack. | untestable [unobservable] as me0496 |
+| `me0499` | 499 | row | “\| reserve (below the limit word) \| 64 KiB \| yes \| yes \| yes \|” | A 64 KiB reserve lies below the limit word. | untestable [internal] the reserve is the floor's; no emitted function may enter it |
+| `me0500` | 500 | row | “\| usable \| — \| 8 MiB \| 2 MiB \| 1 MiB \|” | The main thread's usable stack is 8 MiB: a recursion using about 4 MiB runs. | `run:0` |
+| `me0500b` | 500 | row | “\| 2 MiB \|” | A spawned thread's usable stack is 2 MiB: the same 4 MiB recursion on a thread traps StackExhausted. | `trap:StackExhausted` |
+| `me0502` | 502 | rule | “**The check is in every function the compiler emits.**” | Every function the compiler emits carries LLVM's split-stack prologue. | `ir:^define [^\n]*@"[^"]*\.plain"\([^)]*\) "split-stack"` |
+| `me0505` | 505 | rule | “Crossing it enters the trap route” | Crossing the limit enters the trap route as StackExhausted: an unbounded recursion traps it. | `trap:StackExhausted` |
+| `me0506` | 506 | rule | “which every `failsafe` names because every program” | Every failsafe names StackExhausted: one that does not is refused. | `refuse` |
+| `me0507` | 507 | rule | “A frame larger than a page is refused at the prologue” | A frame larger than a page is refused at its prologue: StackExhausted, not a jump over the guard. | `trap:StackExhausted` |
+| `me0509` | 509 | rule | “The” | The floor's own functions carry no prologue and fit in the reserve. | untestable [internal] the runtime's functions; a belt proves it (VERIFICATION §9.5) |
+| `me0512` | 512 | rule | “**`failsafe` runs on a stack of its own**” | failsafe runs on its own stack: entered by StackExhausted, it still has room for a recursion of about 512 KiB. | `run:42` |
+| `me0514` | 514 | rule | “an overflow inside `failsafe` meets” | An overflow inside failsafe meets the re-entry rule and exits 70. | `run:70` |
+| `me0515` | 515 | rule | “**Signals run on the thread's signal stack**” | Signals run on the thread's signal stack (SA_ONSTACK). | untestable [internal] which stack a signal frame lands on is not visible |
+| `me0520` | 520 | rule | “**A spawned thread's stack is released at its join**” | A spawned thread's stack is unmapped at its join. | untestable [unobservable] a mapping's release shows only in the process's maps, which a program here does not read |
+| `me0526` | 526 | rule | “a program spawn and” | Threads are spawned and joined without limit: two hundred in sequence, each joined, run. | `run:0` |
+| `me0527` | 527 | rule | “The 65th LIVE thread is refused at its start” | The 65th live thread is refused at its start. | untestable [vague] the outcome of the refusal (a trap, an error, its identity) is not stated |
+| `me0530` | 530 | rule | “**A `stack` binding (§1.2) lives in the frame of the function that declares” | A `stack` binding lives in its function's frame: a large stack array is a large frame, refused at the prologue (StackExhausted). | `trap:StackExhausted` |
 
 ## TYPE (`meta/specs/TYPE_REFERENCE.md`)
 

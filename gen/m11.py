@@ -235,7 +235,7 @@ def write(docs, out=OUT):
            "extracted:", "",
            "| reference | lines | extracted | lines extracted | not extracted |", "|---|---|---|---|---|"]
     for d in docs:
-        n = len(L.doc_lines(d))
+        n = L.doc_len(d)
         cov = L.covered_ranges(d)
         gaps, at = [], 1
         for a, b in cov:

@@ -147,10 +147,17 @@ def refix(cid, why, pairs, field="src", expect=None):
     c["fixed"] = why
 
 
+def doc_len(doc, tree="hunt2"):
+    """The reference's number of lines: its last line's number (the empty element
+    after a final newline is not a line)."""
+    L = doc_lines(doc, tree)
+    return len(L) - 1 if L and L[-1] == "" else len(L)
+
+
 def covered_ranges(doc, module=None):
     """[(first, last)] of `doc` declared by every module (or by `module`), `last`
     resolved to the reference's last line, sorted."""
-    n = len(doc_lines(doc))
+    n = doc_len(doc)
     return sorted((c["first"], c["last"] or n) for c in COVERS
                   if c["doc"] == doc and (module is None or c["module"] == module))
 

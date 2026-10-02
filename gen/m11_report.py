@@ -93,10 +93,10 @@ def main():
     cov = []
     for d in L.DOCS:
         r = L.covered_ranges(d)
-        n = len(L.doc_lines(d))
+        n = L.doc_len(d)
         cov.append("%s %s of %d" % (d, ", ".join("%d–%d" % x for x in r) or "none", n))
     ext = sum(b - a + 1 for d in L.DOCS for a, b in L.covered_ranges(d))
-    alln = sum(len(L.doc_lines(d)) for d in L.DOCS)
+    alln = sum(L.doc_len(d) for d in L.DOCS)
     out += ["**These denominators cover %d of the references' %d lines** (the ranges extracted; the" % (ext, alln),
             "rest is not yet extracted): " + "; ".join(cov) + ".", ""]
     ut = collections.Counter()

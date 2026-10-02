@@ -1,0 +1,52 @@
+// M11 me0081b -- meta/specs/MEMORY_REFERENCE.md:81 (rule)
+// quote: `p[i]` on a pointer to an array
+// claim: `p[i]` on a pointer to a List is refused, TYPE-082.
+// expect: refuse:TYPE-082
+// wrong: accepted: pointer arithmetic by another name
+mod:me0081b;
+
+func:main = int32(cstring[]:_~argv) {
+    List<int64>:l = raw list_init::<int64>(4i64);
+    drop list_push(@l, 7i64);
+    List<int64>->:p = @l;
+    int64:x = p[0i64];
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
