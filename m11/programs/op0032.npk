@@ -9,7 +9,7 @@ func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
     int32:x = raw v32(-3i32);
-    int32:r = is x > 0i32 : 1i32 : -1i32;
+    int32:r = is (x > 0i32) : 1i32 : -1i32;
     if (!(r == -1i32)) { exit 10i32; }
     exit 0i32;
 };

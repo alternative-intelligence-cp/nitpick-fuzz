@@ -127,6 +127,21 @@ put("doc", "F-030: an un-destroyed arena<T> is not a leak the exit check names: 
 put("known", "DEF-148 (F-022): destroy of a shared arena a live thread holds; refused BORROW-016 at 93bcb66",
     "me0461")
 
+# ---- session 8: OP_REFERENCE (documentation rows are F-031)
+put("doc", "F-031: there is no `**` operator (OP:88, \"Standard Library expansion\"): `2 ** 8` does not parse",
+    "op0088")
+put("doc", "F-031: line 171's \"a fallback (`?`)\" leaves the ERR state: a bare `?` is struck (line 73, D-175), and "
+    "`?|` takes a Result only (line 257); ERR leaves by is_err or a pick's ERR: arm", "op0171")
+put("doc", "F-031: the ternary example `is x > 0 : 1 : -1` needs its condition parenthesised (PARSE-001; "
+    "TYPE:2101's `is (cond) : then : else`)", "op0374")
+put("doc", "F-031: the pipe examples `val |> func()` and `func() <| val` are refused: a pipe's other side is "
+    "the function itself, not a call (TYPE-007)", "op0377", "op0378")
+put("known", "DEF-131 (F-015): `<=>` refused by the emitter; it compiles and runs at 93bcb66", "op0068", "op0213")
+put("extract", "no well-typed program tells the two readings apart: `|` takes integers and `&&` booleans "
+    "(TYPE-008), so `a | b && c` is ill-typed either way", "op0028")
+put("extract", "the program's `!!b` is two negations, which nothing forbids; the struck `!!` is the old "
+    "emphatic token (`asm!!`), refused elsewhere (BUILTIN's bi0378)", "op0295")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

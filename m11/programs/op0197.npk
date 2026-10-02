@@ -8,7 +8,7 @@ mod:op0197;
 func:vu64 = uint64(uint64:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    uint64:x = raw vu64(18446744073709551615u64);
+    uint64:x = ~raw vu64(0u64);
     x +%= 1u64;
     if (x != 0u64) { exit 10i32; }
     exit 0i32;

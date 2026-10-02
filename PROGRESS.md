@@ -46,13 +46,14 @@ committed. A session that starts here resumes at the first unticked box.
   - Session 7 (local, branch `local-m11`) reviewed, ran and triaged the drafted ranges:
     F-018 … F-028.
   - Session 8 (2026-10-02, on the workbench's brief from `nitpick-libs_12`, S57)
-    extracts MEMORY, OP and CONTROL in turn. MEMORY is done: F-029, F-030.
-  - Extracted so far: 4 233 of 10 419 lines; 1 669 claims, 1 408 tested, 1 255 agree,
-    153 disagree.
+    extracts MEMORY, OP and CONTROL in turn. MEMORY is done (F-029, F-030), and so is
+    OP (F-031).
+  - Extracted so far: 4 636 of 10 419 lines; 1 828 claims, 1 565 tested, 1 403 agree,
+    162 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, OP, CONTROL, TRAITS, BUILD, AST, LEXICAL and MODULE not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 255 agree, 153 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, CONTROL, TRAITS, BUILD, AST, LEXICAL and MODULE not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 403 agree, 162 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -962,20 +963,21 @@ clean point (extracted, run, triaged, committed, pushed). This block is rewritte
 each clean point.*
 
 **Done, committed and measured.**
-- Extracted: BUILTIN, CONCURRENCY, IO, MACRO and MEMORY whole, TYPE 1–660 and
-  VERIFICATION 1–1247. That is 4 233 of the references' 10 419 lines (S58 corrected the
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY and OP whole, TYPE 1–660 and
+  VERIFICATION 1–1247. That is 4 636 of the references' 10 419 lines (S58 corrected the
   count).
-- **1 669 claims, 1 408 testable, 261 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 255 agree, 153 disagree**.
+- **1 828 claims, 1 565 testable, 263 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 403 agree, 162 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for session 8's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-030. MEMORY's
-are F-029 (a reserved word accepted as a binding's name) and F-030 (eight documentation
-rows).
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-031:
+- MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
+  documentation rows);
+- OP's is F-031 (five documentation rows).
 
 **Not started:**
-- OP and CONTROL: session 8's scope, next;
+- CONTROL: session 8's scope, next;
 - TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST, LEXICAL and MODULE: out
   of session 8's scope.
 
@@ -991,7 +993,7 @@ rows).
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-031.
+   and extend `REPORT.md` §12. Findings number on from F-032.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1164,6 +1166,27 @@ the brief says.
   All are the same at the baseline, and at `93bcb66` but `me0461`.
 - **The screen.** The agreeing refusals were screened (S55). One, `me0179`, had agreed
   for the reserved word's sake, not the claim's.
+
+**OP (all 403 lines), `gen/m11_claims/op.py`.**
+- **The extraction.** 159 claims (87 rows, 72 rules); 157 testable, 38 of them linked to
+  the M10 item that tests exactly their sentence. The precedence table's rows are tested
+  by expressions whose two readings give different values. Committed before any of its
+  programs ran (`1161bad`).
+- **The runs.**
+  - Run 1: 143 agree, 14 disagree.
+  - Five programs were fixed for mistakes of their own: the literals outside the 64-bit
+    envelope, `-128i8`, the ternary's parentheses in the precedence row, and the
+    pipe's spelling. `op0017` needed two fixes: the pipe's right side is the function,
+    and its `Result` takes `?|`, not `raw`.
+  - Runs 2 and 3: 147, then 148 agree. The final full run of all 1 565 claims changed
+    nothing.
+- **Triage of the 9.**
+  - 5 documentation rows (F-031);
+  - `<=>` twice, DEF-131, which compiles and runs at `93bcb66`;
+  - 2 claims no program can test as written: no well-typed expression separates `|`
+    from `&&`, and `!!b` is two negations.
+- **The screen.** OP's agreeing refusals were screened, and each is the claim's own
+  reason.
 
 ## Environment
 
@@ -1801,3 +1824,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **MEMORY.** 181 claims, committed before any run. Run 1: 131 agree, 15 disagree.
     Seven programs fixed. Run 2: 137 agree, 9 disagree. Triaged: F-029 (lower-priority
     compiler), F-030 (8 documentation rows), 1 known (DEF-148).
+  - **OP.** 159 claims, committed before any run. Run 1: 143 agree, 14 disagree. Five
+    programs fixed over two runs. Final: 148 agree, 9 disagree. Triaged: F-031 (5
+    documentation rows), 2 known (DEF-131, fixed at `93bcb66`), 2 not testable as
+    written.

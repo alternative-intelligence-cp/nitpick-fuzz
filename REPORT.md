@@ -1029,13 +1029,13 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 Written 2026-09-26 by session 7 and extended by session 8 (2026-10-02), both on the
 author's machine (48 cores), from the committed scripts. **M11 is not finished.** These
-denominators cover the ranges extracted so far, 4 233 of the fourteen references'
+denominators cover the ranges extracted so far, 4 636 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
-- extracted whole: BUILTIN, CONCURRENCY, IO, MACRO and, by session 8, MEMORY;
+- extracted whole: BUILTIN, CONCURRENCY, IO, MACRO and, by session 8, MEMORY and OP;
 - extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
 - not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351, and TRAITS, MODULE, BUILD,
-  OP, CONTROL, LEXICAL and AST. Session 8's brief scopes OP and CONTROL next.
+  CONTROL, LEXICAL and AST. Session 8's brief scopes CONTROL next.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
@@ -1045,7 +1045,7 @@ The records are:
   and `results/93bcb66/m11-disagree.jsonl` (session 8): the disagreeing claims at the
   baseline and at the compiler's newest `main` of each session;
 - `gen/m11_triage.py` (the class of each disagreement);
-- `findings/F-018` … `F-030`.
+- `findings/F-018` … `F-031`.
 
 ### 12.1 The denominators
 
@@ -1056,14 +1056,15 @@ The records are:
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 60 | 7 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 98 | 21 |
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 137 | 9 |
+| OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
 | VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **1 669** | 69 | 355 | 1 245 | **261** | **1 408** | **1 255** | **153** |
+| **total** | **1 828** | 69 | 442 | 1 317 | **263** | **1 565** | **1 403** | **162** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
 - `z3` 91: needs `npkg verify` with the pinned z3;
-- `vague` 43: no checkable outcome;
-- `internal` 43;
+- `vague` 44: no checkable outcome;
+- `internal` 44;
 - `tree` 42: the compiler's own tree;
 - `unobservable` 24;
 - `tool` 8;
@@ -1091,16 +1092,16 @@ its final run gives 1 118 and 144.
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
 | compiler, lower priority (F-027) | 16 |
-| documentation (F-028; MEMORY's F-030) | 94 + 8 |
-| known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148) | 7 + 1 |
+| documentation (F-028; MEMORY's F-030; OP's F-031) | 94 + 8 + 5 |
+| known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice) | 7 + 1 + 2 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or cannot be written | 10 |
-| **total** | **153** |
+| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) |
+| **total** | **162** |
 
 **Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
 codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
-MEMORY rows all stand at `93bcb66` but `me0461`, DEF-148's shape, refused there
-(`BORROW-016`). MEMORY's run 1 also found F-029, a reserved word accepted as a binding's
+MEMORY and OP rows all stand at `93bcb66` but three: `me0461`, DEF-148's shape, is
+refused there (`BORROW-016`), and OP's two `<=>` claims (DEF-131) compile and run. MEMORY's run 1 also found F-029, a reserved word accepted as a binding's
 name, which no final disagreement carries, since the programs it broke were
 re-spelled.
 
@@ -1121,11 +1122,12 @@ re-spelled.
 | F-028 | ninety-four reference sentences the compiler contradicts, the compiler right or safe | documentation | per row | the same | the same |
 | F-029 | the reserved word `buffer` is accepted as a `wild` pointer binding's name, then unusable (`PARSE-002` at the use) | compiler, lower priority | 0, 3/3; use: 1 | the same | the same (at `93bcb66`) |
 | F-030 | MEMORY's eight stale sentences (examples, a struck rule, the arena leak) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-031 | OP's five stale sentences (no `**`, the ternary and pipe examples, line 171's `?`) | documentation | per row | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 6 200 lines: at the drafts' density,
-  roughly 3 000 more claims.
+- **The ranges not yet extracted** (above), about 5 800 lines: at the drafts' density,
+  roughly 2 900 more claims.
 - **The verified build.** 91 claims need `npkg verify` with the pinned z3, and are
   untestable here. Claims about what the compiler writes for verification were tested
   through `npkc --obligations`, which needs no z3.

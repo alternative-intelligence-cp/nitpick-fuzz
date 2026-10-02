@@ -8,7 +8,7 @@ mod:op0358;
 func:v8 = int8(int8:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    int8:x = raw v8(-128i8);
+    int8:x = raw v8(-127i8) - 1i8;
     tbb8:t = x => tbb8;
     exit 10i32;
 };

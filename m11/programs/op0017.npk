@@ -10,7 +10,7 @@ func:v32 = int32(int32:x) never fails { pass x; };
 func:twice = int32(int32:a) never fails { pass a * 2i32; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32:y = raw (raw v32(21i32) |> twice());
+    int32:y = (raw v32(21i32) |> twice) ?| 0i32;
     if (!(y == 42i32)) { exit 10i32; }
     exit 0i32;
 };

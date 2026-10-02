@@ -1002,3 +1002,25 @@ claim("op0403", D, 403, "| `*/` | Block End |", "row",
     if (x != 2i32) { exit 10i32; }
     exit 0i32;"""),
       wrong="refused or 10")
+
+
+# ================================================================== after run 1 (S45, S53)
+# Each program below failed for a mistake of its own; its TEXT changed, its expectation not.
+refix("op0017", "(first fix) the right side of a pipe is the function itself, not a call (TYPE-007): the precedence "
+      "row now pipes into `twice` (row 377's own spelling `func()` is the documentation row op0377)",
+      [("raw (raw v32(21i32) |> twice())", "raw (raw v32(21i32) |> twice)")])
+refix("op0032", "the ternary's condition is parenthesised (PARSE-001; TYPE:2101's `is (cond) : then : "
+      "else`): the precedence row now writes `is (x > 0i32)` (row 374's own spelling is op0374)",
+      [("int32:r = is x > 0i32 : 1i32 : -1i32;", "int32:r = is (x > 0i32) : 1i32 : -1i32;")])
+refix("op0197", "2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148): the start is `~0u64`",
+      [("    uint64:x = raw vu64(18446744073709551615u64);", "    uint64:x = ~raw vu64(0u64);")])
+refix("op0198", "2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148): the expected value is "
+      "`~0u64`",
+      [("    if (x != 18446744073709551615u64) { exit 10i32; }", "    if (x != ~0u64) { exit 10i32; }")])
+refix("op0358", "`-128i8` is not a literal (TYPE-031: 128 does not fit int8 before the negation): the "
+      "minimum is built as -127 - 1",
+      [("    int8:x = raw v8(-128i8);", "    int8:x = raw v8(-127i8) - 1i8;")])
+refix("op0017", "run 1: the right side of a pipe is the function itself, not a call (TYPE-007); run 2: a "
+      "pipe is not a call, so `raw` cannot unwrap it (TYPE-042), and its Result is unwrapped with `?|`. "
+      "Row 377's own spelling `func()` is the documentation row op0377",
+      [("raw (raw v32(21i32) |> twice)", "(raw v32(21i32) |> twice) ?| 0i32")])
