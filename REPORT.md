@@ -1027,26 +1027,26 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 ## 12. M11 — the reference, checked against the compiler (in part)
 
-Written 2026-09-26 by session 7 and extended by session 8 (2026-10-02), both on the
-author's machine (48 cores), from the committed scripts. **M11 is not finished.** These
-denominators cover the ranges extracted so far, 5 051 of the fourteen references'
+Written 2026-09-26 by session 7 and extended by sessions 8 and 9 (2026-10-02), all on
+the author's machine (48 cores), from the committed scripts. **M11 is not finished.**
+These denominators cover the ranges extracted so far, 5 351 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
-- extracted whole: BUILTIN, CONCURRENCY, IO, MACRO and, by session 8, MEMORY, OP and
-  CONTROL;
+- extracted whole: BUILTIN, CONCURRENCY, IO, MACRO; by session 8, MEMORY, OP and
+  CONTROL; by session 9, MODULE;
 - extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
-- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351, and TRAITS, MODULE, BUILD,
-  LEXICAL and AST, which are outside session 8's brief.
+- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351, and TRAITS, BUILD, LEXICAL
+  and AST.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
   `m11/RESULTS.md` (the results, claim by claim);
 - `results/9126350/m11.jsonl` (the final run), with runs 1–3 beside it;
 - `results/c3bdae2/m11-disagree.jsonl`, `results/1b4f0c6/m11-disagree.jsonl` (session 7)
-  and `results/93bcb66/m11-disagree.jsonl` (session 8): the disagreeing claims at the
-  baseline and at the compiler's newest `main` of each session;
+  and `results/93bcb66/m11-disagree.jsonl` (sessions 8 and 9): the disagreeing claims at
+  the baseline and at the compiler's newest `main` of each session;
 - `gen/m11_triage.py` (the class of each disagreement);
-- `findings/F-018` … `F-032`.
+- `findings/F-018` … `F-034`.
 
 ### 12.1 The denominators
 
@@ -1058,18 +1058,19 @@ The records are:
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 60 | 7 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 98 | 21 |
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 137 | 9 |
+| MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
 | VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **1 938** | 83 | 449 | 1 406 | **265** | **1 673** | **1 501** | **172** |
+| **total** | **2 077** | 90 | 452 | 1 535 | **280** | **1 797** | **1 610** | **187** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
 - `z3` 92: needs `npkg verify` with the pinned z3;
-- `vague` 45: no checkable outcome;
-- `internal` 44;
-- `tree` 42: the compiler's own tree;
+- `vague` 49: no checkable outcome;
+- `internal` 46;
+- `tree` 43: the compiler's own tree;
 - `unobservable` 24;
-- `tool` 8;
+- `tool` 16: a running driver process, or a package manifest;
 - `timing` 8;
 - `platform` 2.
 
@@ -1081,7 +1082,11 @@ of them one mistake in `verif1`'s scripts, reading `main`'s rows as `<module>.ma
 the symbol is `@main`: 25 through one shared helper, S53). The expectation stayed, except
 one under S45's recorded exception (`cc0636`). Each change carries its reason (`fixed`,
 listed in `m11/RESULTS.md` §3). Session 7's run 1 gave 1 093 agree and 169 disagree;
-its final run gives 1 118 and 144.
+its final run gives 1 118 and 144. Sessions 8 and 9 changed 21 and 24 more programs the
+same way. MODULE's 24 were three mistakes:
+- `hidden`, a reserved word (14);
+- `nbridge.npk`'s import of `nsys.npk`, which the scripts did not copy (9);
+- failsafe arms that REACH-002 asks for (8, seven of them also among the nine).
 
 ### 12.2 The disagreements, by class
 
@@ -1093,12 +1098,12 @@ its final run gives 1 118 and 144.
 | compiler: npkc traps, exit 3 (F-024) | 4 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority (F-027) | 16 |
-| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032) | 94 + 8 + 5 + 6 |
-| known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135) | 7 + 1 + 2 + 4 |
+| compiler, lower priority (F-027; MODULE's F-034) | 16 + 5 |
+| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033) | 94 + 8 + 5 + 6 + 7 |
+| known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135; MODULE's DEF-153) | 7 + 1 + 2 + 4 + 1 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) |
-| **total** | **172** |
+| not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) |
+| **total** | **187** |
 
 **Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
 codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
@@ -1106,7 +1111,8 @@ MEMORY, OP and CONTROL rows all stand at `93bcb66` but six, all known: `me0461`,
 DEF-148's shape, is refused there (`BORROW-016`); OP's two `<=>` claims (DEF-131)
 compile and run; and CONTROL's DEF-130 pair and DEF-135 agree there. MEMORY's run 1 also found F-029, a reserved word accepted as a binding's
 name, which no final disagreement carries, since the programs it broke were
-re-spelled.
+re-spelled. Session 9's MODULE rows all stand at the baseline and at `93bcb66` but one,
+known: `md0296b`, DEF-153's string literal in `cstring` position, compiles at `93bcb66`.
 
 ### 12.3 The findings
 
@@ -1127,15 +1133,18 @@ re-spelled.
 | F-030 | MEMORY's eight stale sentences (examples, a struck rule, the arena leak) | documentation | per row | the same | the same (at `93bcb66`) |
 | F-031 | OP's five stale sentences (no `**`, the ternary and pipe examples, line 171's `?`) | documentation | per row | the same | the same (at `93bcb66`) |
 | F-032 | CONTROL's six stale sentences (`println`, the macro pattern, three codes never emitted, `ok()`) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-033 | MODULE's seven stale claims (`pub const`, the `cuda_driver` example, the wire vocabulary beyond D-190's v1, `raw` on a driver method) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-034 | MODULE's safe departures: a byte payload's driver stub refused (TYPE-072 in the generated code), `use m.f;` refused against D-273, a cycle's diagnostic that names no cycle | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 5 400 lines: at the drafts' density,
-  roughly 2 700 more claims.
+- **The ranges not yet extracted** (above), about 5 070 lines: at the drafts' density,
+  roughly 2 500 more claims.
 - **The verified build.** 91 claims need `npkg verify` with the pinned z3, and are
   untestable here. Claims about what the compiler writes for verification were tested
   through `npkc --obligations`, which needs no z3.
 - **A program per claim.** One agreeing program shows the claim for that program, not
   for every program. The refusals that agreed were screened for a first diagnostic of
   another kind (a parse, lex, resolve or reach error). One was found (`mc0312b`), and
-  it now agrees for its own reason.
+  it now agrees for its own reason. Sessions 8 and 9 screened theirs the same way and
+  found four more (`me0179`, `ct0032f`, `md0099b`, `md0273`), each re-spelled.

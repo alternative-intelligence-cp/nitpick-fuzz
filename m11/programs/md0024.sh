@@ -35,7 +35,7 @@ cat > network/mod.npk <<'EOF'
 mod:network;
 pub func:connect = int32() never fails { pass 0i32; };
 pub fixed int32:MAX = 42i32;
-func:hidden = int32() never fails { pass 1i32; };
+func:kept_here = int32() never fails { pass 1i32; };
 EOF
 cat > r.npk <<'EOF'
 mod:r;

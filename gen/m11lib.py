@@ -129,19 +129,24 @@ def covers(doc, first, last=None):
 
 def refix(cid, why, pairs, field="src", expect=None):
     """After a run (PROGRESS.md S45): change claim `cid`'s program TEXT by replacing
-    each (old, new) of `pairs` in `field` ("src" or "sh"; each `old` must occur),
-    and record `why` in its `fixed`. The expectation never changes, except by
-    `expect=` under S45's one recorded exception (a claim read inside `failsafe`
-    signals the reference's answer with exit 42, since REACH-004 forbids exit 0)."""
+    each (old, new) of `pairs` in `field` ("src", "sh", or "files:<name>" for one
+    support file; each `old` must occur), and record `why` in its `fixed`. The
+    expectation never changes, except by `expect=` under S45's one recorded
+    exception (a claim read inside `failsafe` signals the reference's answer with
+    exit 42, since REACH-004 forbids exit 0)."""
     c = next((c for c in CLAIMS if c["id"] == cid), None)
     if c is None:
         raise KeyError("refix: no claim %s" % cid)
-    text = c[field]
+    sf = field[6:] if field.startswith("files:") else None
+    text = c["files"][sf] if sf else c[field]
     for old, new in pairs:
         if old not in text:
             raise ValueError("refix %s: %r not in its %s" % (cid, old[:60], field))
         text = text.replace(old, new)
-    c[field] = text
+    if sf:
+        c["files"] = dict(c["files"], **{sf: text})
+    else:
+        c[field] = text
     if expect is not None:
         c["expect"] = expect
     c["fixed"] = why

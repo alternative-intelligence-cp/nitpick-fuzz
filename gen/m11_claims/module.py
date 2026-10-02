@@ -1328,3 +1328,36 @@ claim("md0300", D, 300, "`any->`: Erased/Opaque pointer", "rule",
       src=main_("""    exit 0i32;""", "func:take = int32(any->:p) never fails { pass 0i32; };"),
       wrong="refused: `any->` is not a type",
       note="line 274 says `void*` is valid nowhere; this row names `any->` as `void*`")
+
+# ================================================================== after run 1 (S45, S53)
+# The programs' own mistakes; every expectation above is unchanged.
+WHY_KW = ("`hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the "
+          "claim does not name, is renamed `kept_here` (PARSE-001)")
+for cid in ("md0021", "md0026", "md0027", "md0027b", "md0028", "md0030", "md0031"):
+    refix(cid, WHY_KW, [("func:hidden =", "func:kept_here =")], field="files:network.npk")
+for cid in ("md0024", "md0042"):
+    refix(cid, WHY_KW, [("func:hidden =", "func:kept_here =")], field="sh")
+for cid in ("md0099", "md0099b", "md0100", "md0101", "md0102"):
+    refix(cid, WHY_KW, [("func:hidden =", "func:kept_here =")], field="files:sqlib.npk")
+refix("md0099b", WHY_KW + "; main reads `kept_here()` (it agreed in run 1 for the keyword's PARSE-002, S55)",
+      [("raw hidden()", "raw kept_here()")])
+WHY_NB = ("`nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it "
+          "now copies both")
+for cid in ("md0129b", "md0250", "md0259", "md0265", "md0270", "md0270b", "md0270c", "md0270d", "md0273"):
+    refix(cid, WHY_NB + (" (md0273 agreed in run 1 for that RESOLVE-005, S55)" if cid == "md0273" else ""),
+          [('lib/nbridge.npk" . || exit 5',
+            'lib/nbridge.npk" "$(dirname "$NPKC")/../../lib/nsys.npk" . || exit 5')], field="sh")
+refix("md0080b", "REACH-002 (D-179's arm contract) asked failsafe to name `md0080b.Boom`, though `classify` "
+      "handles every failure of `m.boom`; the program's own failsafe now names it",
+      [("    pass 0i32;\n};", "    pass 0i32;\n};\n\n" + failsafe_with("        (md0080b.Boom) { exit 80i32; },"))])
+
+# ================================================================== after run 2
+NB_ERRS = ("EShmCreate", "EShmSeal", "EShmMap", "EDriverSpawn", "EDriverProtocol", "EDriverFault",
+           "EDriverDeadline", "ERingFull", "EBridgePoisoned", "EDriverError")
+NB_ARMS = "".join("        (%s) { exit %di32; },\n" % (n, 60 + k) for k, n in enumerate(NB_ERRS))
+WHY_REACH = ("REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated "
+             "stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does")
+for cid in ("md0250", "md0259", "md0270", "md0270b", "md0270c", "md0270d", "md0273"):
+    prev = next(c for c in CLAIMS if c["id"] == cid)["fixed"]   # run 1's reason, kept
+    refix(cid, prev + "; then " + WHY_REACH, [("func:failsafe = int32(Error:e) {\n    pick (e) {\n",
+                            "func:failsafe = int32(Error:e) {\n    pick (e) {\n" + NB_ARMS)], field="sh")

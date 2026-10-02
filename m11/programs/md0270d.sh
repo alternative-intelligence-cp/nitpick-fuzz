@@ -30,7 +30,7 @@ accepted() {
     head -4 npkc.out
     [ $rc -eq 0 ] && [ -s p.ll ]
 }
-cp "$(dirname "$NPKC")/../../lib/nbridge.npk" . || exit 5
+cp "$(dirname "$NPKC")/../../lib/nbridge.npk" "$(dirname "$NPKC")/../../lib/nsys.npk" . || exit 5
 cat > r.npk <<'EOF'
 mod:r;
 use "./nbridge.npk".*;
@@ -46,6 +46,16 @@ func:main = int32(cstring[]:_~argv) {
 
 func:failsafe = int32(Error:e) {
     pick (e) {
+        (EShmCreate) { exit 60i32; },
+        (EShmSeal) { exit 61i32; },
+        (EShmMap) { exit 62i32; },
+        (EDriverSpawn) { exit 63i32; },
+        (EDriverProtocol) { exit 64i32; },
+        (EDriverFault) { exit 65i32; },
+        (EDriverDeadline) { exit 66i32; },
+        (ERingFull) { exit 67i32; },
+        (EBridgePoisoned) { exit 68i32; },
+        (EDriverError) { exit 69i32; },
         (HeapBadRequest) { exit 91i32; },
         (HeapOom) { exit 92i32; },
         (IntOverflow) { exit 93i32; },

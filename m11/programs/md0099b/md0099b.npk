@@ -8,7 +8,7 @@ mod:md0099b;
 use "./sqlib.npk".*;
 
 func:main = int32(cstring[]:_~argv) {
-    int32:v = raw hidden();
+    int32:v = raw kept_here();
     if (v != 0i32) { exit 10i32; }
     exit 0i32;
 };

@@ -156,6 +156,32 @@ put("known", "DEF-130 (F-014): till with a non-positive limit; agrees at 93bcb66
 put("known", "DEF-135 (the compiler seat's own, registered at 1.6.1d step 2): a tbb bound holding ERR ran the "
     "loop in silence; traps TbbErr at 93bcb66", "ct0236")
 
+# ---- session 9: MODULE_REFERENCE (documentation rows are F-033, compiler rows F-034)
+put("comp", "F-034 a: an extern method taking a byte payload (`int8[]`, or `uint8[]`; both in the v1 vocabulary) "
+    "generates a stub the compiler refuses: TYPE-072 at `<bridge-1>:10:5`, a `while` stating no `decreases`",
+    "md0270c")
+put("comp", "F-034 b: the single-name form over a logical path (`use network.connect;`, `use helpers.f;`, "
+    "`use core.math.sq;`) is RESOLVE-002, \"is a function, not a module\", against MODULE:68, :111 and :119 "
+    "and D-273 (2), which lists `use hidden.f;`", "md0068b", "md0105", "md0119")
+put("comp", "F-034 c: a constant cycle's diagnostic says each member \"is initialised from itself\"; it never "
+    "names the members in the order they refer to each other (MODULE:183)", "md0183")
+put("doc", "F-033: `pub const int32:MAX = 100i32;` does not parse (PARSE-001): a module constant is `fixed`",
+    "md0209", "md0212")
+put("doc", "F-033: the `cuda_driver` example is EXTERN-001: its `opaque struct` tier \"is reserved for the "
+    "LOAD_MODULE work and does not lower yet (D-190)\", and its methods take no `Bridge->` first and no "
+    "`Duration` last", "md0241")
+put("doc", "F-033: the wire vocabulary is v1's (D-190): a method's parameters are `int32`, `int64`, `int8[]` or "
+    "`uint8[]`; a POD struct, an `int16` and a typed handle are each EXTERN-001", "md0270", "md0270b", "md0270d")
+put("doc", "F-033: the example's `raw some_query(name)` and `_! some_query(name)` are TYPE-042: `raw`, which "
+    "`_!` spells too, needs a `never fails` callee (D-163), and a driver method never is one (MODULE:263-266, "
+    "EXTERN-002)", "md0289")
+put("known", "DEF-153 (F-027 c): a string literal in `cstring` position is TYPE-007; it compiles at 93bcb66",
+    "md0296b")
+put("extract", "the sentence gives the refusal's sense, \"is not a module\"; the compiler refuses (RESOLVE-002) "
+    "and says \"`helper` is a function, not a module\"", "md0122")
+put("extract", "the two IRs hold the same lines: only `fb`'s definition moves with the import order. The script "
+    "demanded a byte-identical file, which is more than \"the same program\"", "md0185")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

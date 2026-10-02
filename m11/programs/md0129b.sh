@@ -30,7 +30,7 @@ accepted() {
     head -4 npkc.out
     [ $rc -eq 0 ] && [ -s p.ll ]
 }
-cp "$(dirname "$NPKC")/../../lib/nbridge.npk" . || exit 5
+cp "$(dirname "$NPKC")/../../lib/nbridge.npk" "$(dirname "$NPKC")/../../lib/nsys.npk" . || exit 5
 cat > r.npk <<'EOF'
 mod:r;
 use "./nbridge.npk".*;

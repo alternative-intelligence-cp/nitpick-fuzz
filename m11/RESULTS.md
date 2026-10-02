@@ -15,28 +15,29 @@ before the first run.
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 67 | 60 | 7 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 119 | 98 | 21 |
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 146 | 137 | 9 |
+| MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 1938 | 83 | 449 | 1406 | 265 | 1673 | 1673 | 1501 | 172 |
+| **total** | 2077 | 90 | 452 | 1535 | 280 | 1797 | 1797 | 1610 | 187 |
 
-**These denominators cover 5051 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL none of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE none of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 5351 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL none of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
 - `z3` 92 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `vague` 45 — the sentence states no checkable outcome
-- `internal` 44 — a compiler internal no program observes (an AST field, a table's layout)
-- `tree` 42 — a claim about the compiler's own source tree, generators, harness or documents
+- `vague` 49 — the sentence states no checkable outcome
+- `internal` 46 — a compiler internal no program observes (an AST field, a table's layout)
+- `tree` 43 — a claim about the compiler's own source tree, generators, harness or documents
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
-- `tool` 8 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
+- `tool` 16 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 2 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (172)
+## 2. The disagreements (187)
 
-By kind: `refused` 89, `accepted` 27, `wrong_exit` 27, `ir` 13, `other_code` 7, `emit_defect` 6, `crash` 3.
+By kind: `refused` 97, `wrong_exit` 34, `accepted` 27, `ir` 13, `other_code` 7, `emit_defect` 6, `crash` 3.
 
 | class | claims |
 |---|---|
@@ -46,11 +47,11 @@ By kind: `refused` 89, `accepted` 27, `wrong_exit` 27, `ir` 13, `other_code` 7, 
 | compiler: npkc traps, exit 3 (F-024) | 4 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 16 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 113 |
-| known: deduplicated against KNOWN_DEFECTS.md | 14 |
+| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 21 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 120 |
+| known: deduplicated against KNOWN_DEFECTS.md | 15 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or no valid program can test it | 12 |
+| not a finding: the program tests more than its sentence, or no valid program can test it | 14 |
 
 Every disagreement below was also run at the baseline `c3bdae2` and at the compiler's newest
 `main` of its session (`1b4f0c6` for session 7's claims, `93bcb66` for session 8's); the last
@@ -138,6 +139,21 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `me0397` | MEMORY:397 | An un-destroyed arena is a wild-role leak the exit check names: WildLeak at `exit 0`. | `run:96` | npkc 0 , 0/0 (`wrong_exit`) | F-030: an un-destroyed arena<T> is not a leak the exit check names: its storage is managed since D-183 (1.2.5c; the runtime's npk_arena_make says so) | same / same @93bcb66 |
 | `me0399` | MEMORY:399 | `?` takes a fallback value: a stale get with `? 0i64` yields 0. | `run:0` | npkc 1 PARSE-011, -/- (`refused`) | F-030: the arena example and its note use a bare `?` as the fallback; it is `?\|` since D-175 (PARSE-011) | same / same @93bcb66 |
 | `me0461` | MEMORY:461 | destroy requires that no thread still holds the arena: destroying it while a spawned thread holds it is refused. | `refuse` | npkc 0 , 96/96 (`accepted`) | DEF-148 (F-022): destroy of a shared arena a live thread holds; refused BORROW-016 at 93bcb66 | same / npkc 1 BORROW-016, -/- @93bcb66 |
+| `md0068b` | MODULE:68 | `use network.connect;` binds the one member bare. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-034 b: the single-name form over a logical path (`use network.connect;`, `use helpers.f;`, `use core.math.sq;`) is RESOLVE-002, "is a function, not a module", against MODULE:68, :111 and :119 and D-273 (2), which lists `use hidden.f;` | same / same @93bcb66 |
+| `md0105` | MODULE:105 | The block's six logical-path imports compile together (with `nested`, `core.math` and a file import binding `helpers` declared), and each bound name works. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-034 b: the single-name form over a logical path (`use network.connect;`, `use helpers.f;`, `use core.math.sq;`) is RESOLVE-002, "is a function, not a module", against MODULE:68, :111 and :119 and D-273 (2), which lists `use hidden.f;` | same / same @93bcb66 |
+| `md0119` | MODULE:119 | Every form of the file imports works through a logical path: `use core.math.sq;` (one name) binds `sq`. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-034 b: the single-name form over a logical path (`use network.connect;`, `use helpers.f;`, `use core.math.sq;`) is RESOLVE-002, "is a function, not a module", against MODULE:68, :111 and :119 and D-273 (2), which lists `use hidden.f;` | same / same @93bcb66 |
+| `md0122` | MODULE:122 | A logical path whose first segment names a function is refused ("is not a module"). | `sh:0` | sh 1 (`wrong_exit`) | the sentence gives the refusal's sense, "is not a module"; the compiler refuses (RESOLVE-002) and says "`helper` is a function, not a module" | same / same @93bcb66 |
+| `md0183` | MODULE:183 | The cycle's diagnostic names its members (`FIRST`, `SECOND`) on its first line, not "circular import". | `sh:0` | sh 1 (`wrong_exit`) | F-034 c: a constant cycle's diagnostic says each member "is initialised from itself"; it never names the members in the order they refer to each other (MODULE:183) | same / same @93bcb66 |
+| `md0185` | MODULE:185 | The same module graph compiles to the same program whichever import the loader enters first: swapping the root's two import lines leaves the emitted IR identical. | `sh:0` | sh 1 (`wrong_exit`) | the two IRs hold the same lines: only `fb`'s definition moves with the import order. The script demanded a byte-identical file, which is more than "the same program" | same / same @93bcb66 |
+| `md0209` | MODULE:209 | The four `pub` declarations (a function, a struct, a `pub const`, a `pub mod`) compile in a file, and an importer uses each. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-033: `pub const int32:MAX = 100i32;` does not parse (PARSE-001): a module constant is `fixed` | same / same @93bcb66 |
+| `md0212` | MODULE:212 | `pub const int32:MAX = 100i32;` declares a public module constant: `MAX` is 100. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-033: `pub const int32:MAX = 100i32;` does not parse (PARSE-001): a module constant is `fixed` | same / same @93bcb66 |
+| `md0241` | MODULE:241 | The `cuda_driver` block (an opaque struct and two methods) is valid syntax: the program compiles. | `compile` | npkc 1 EXTERN-001, -/- (`refused`) | F-033: the `cuda_driver` example is EXTERN-001: its `opaque struct` tier "is reserved for the LOAD_MODULE work and does not lower yet (D-190)", and its methods take no `Bridge->` first and no `Duration` last | same / same @93bcb66 |
+| `md0270` | MODULE:270 | A POD struct of fixed-width scalars is in the wire vocabulary: a method taking one compiles. | `sh:0` | sh 1 (`wrong_exit`) | F-033: the wire vocabulary is v1's (D-190): a method's parameters are `int32`, `int64`, `int8[]` or `uint8[]`; a POD struct, an `int16` and a typed handle are each EXTERN-001 | same / same @93bcb66 |
+| `md0270b` | MODULE:270 | Every fixed-width scalar is in the wire vocabulary: a method taking an `int16` compiles. | `sh:0` | sh 1 (`wrong_exit`) | F-033: the wire vocabulary is v1's (D-190): a method's parameters are `int32`, `int64`, `int8[]` or `uint8[]`; a POD struct, an `int16` and a typed handle are each EXTERN-001 | same / same @93bcb66 |
+| `md0270c` | MODULE:270 | A sized byte payload is in the wire vocabulary: a method taking an `int8[]` compiles. | `sh:0` | sh 1 (`wrong_exit`) | F-034 a: an extern method taking a byte payload (`int8[]`, or `uint8[]`; both in the v1 vocabulary) generates a stub the compiler refuses: TYPE-072 at `<bridge-1>:10:5`, a `while` stating no `decreases` | same / same @93bcb66 |
+| `md0270d` | MODULE:270 | A typed handle is in the wire vocabulary: a method taking the block's `opaque struct` compiles. | `sh:0` | sh 1 (`wrong_exit`) | F-033: the wire vocabulary is v1's (D-190): a method's parameters are `int32`, `int64`, `int8[]` or `uint8[]`; a POD struct, an `int16` and a typed handle are each EXTERN-001 | same / same @93bcb66 |
+| `md0289` | MODULE:289 | A driver method's call is read with `raw` or with `_!`; both forms compile and give the value. | `run:0` | npkc 1 TYPE-042, -/- (`refused`) | F-033: the example's `raw some_query(name)` and `_! some_query(name)` are TYPE-042: `raw`, which `_!` spells too, needs a `never fails` callee (D-163), and a driver method never is one (MODULE:263-266, EXTERN-002) | same / same @93bcb66 |
+| `md0296b` | MODULE:296 | A string literal converts to a `cstring` at compile time: `cstring:c = "abc";` compiles. | `compile` | npkc 1 TYPE-007, -/- (`refused`) | DEF-153 (F-027 c): a string literal in `cstring` position is TYPE-007; it compiles at 93bcb66 | same / npkc 0 , 0/0 @93bcb66 |
 | `op0028` | OP:28 | Bitwise OR binds tighter than logical AND: `false && true \| true` is false && (true \| true). | `run:0` | npkc 1 TYPE-008, -/- (`refused`) | no well-typed program tells the two readings apart: `\|` takes integers and `&&` booleans (TYPE-008), so `a \| b && c` is ill-typed either way | same / same @93bcb66 |
 | `op0068` | OP:68 | `<=>` yields an int32: -1, 0 or 1. | `run:0` | npkc 1 EMIT-002, -/- (`emit_defect`) | DEF-131 (F-015): `<=>` refused by the emitter; it compiles and runs at 93bcb66 | same / npkc 0 , 0/0 @93bcb66 |
 | `op0088` | OP:88 | `**` is exponentiation: 2 ** 8 is 256. | `run:0` | npkc 1 PARSE-002, -/- (`refused`) | F-031: there is no `**` operator (OP:88, "Standard Library expansion"): `2 ** 8` does not parse | same / same @93bcb66 |
@@ -231,7 +247,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (81; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (105; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -279,6 +295,30 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `me0390` | a Result's `value` read after a combined `p.is_error \|\| g.is_error` test carries the unknown taint (TAINT-001): g is tested on its own |
 | `me0507` | run 1 called one 8 KiB frame with the stack nearly empty, which the prologue rightly lets run; the sentence is that a large frame CROSSING the limit is refused at the prologue rather than stepping over the guard (DEF-60), so the program now recurses with 8 KiB frames until one crosses |
 | `me0530` | run 1 called one 8 KiB frame with the stack nearly empty, which the prologue rightly lets run; the sentence is that a large frame CROSSING the limit is refused at the prologue rather than stepping over the guard (DEF-60), so the program now recurses with 8 KiB frames until one crosses |
+| `md0021` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0024` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0026` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0027` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0027b` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0028` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0030` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0031` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0042` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0080b` | REACH-002 (D-179's arm contract) asked failsafe to name `md0080b.Boom`, though `classify` handles every failure of `m.boom`; the program's own failsafe now names it |
+| `md0099` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0099b` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001); main reads `kept_here()` (it agreed in run 1 for the keyword's PARSE-002, S55) |
+| `md0100` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0101` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0102` | `hidden` is a reserved word (m11/BRIEF.md §5): the support file's private function, which the claim does not name, is renamed `kept_here` (PARSE-001) |
+| `md0129b` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both |
+| `md0250` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0259` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0265` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both |
+| `md0270` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0270b` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0270c` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0270d` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both; then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
+| `md0273` | `nbridge.npk` imports `./nsys.npk` (`pub use`), which the script did not copy (RESOLVE-005); it now copies both (md0273 agreed in run 1 for that RESOLVE-005, S55); then REACH-002: failsafe must name each of `nbridge.npk`'s ten error constants, which the generated stub can raise (the compiler's own `extern_stub.npk` names them); the script's failsafe now does |
 | `op0017` | run 1: the right side of a pipe is the function itself, not a call (TYPE-007); run 2: a pipe is not a call, so `raw` cannot unwrap it (TYPE-042), and its Result is unwrapped with `?\|`. Row 377's own spelling `func()` is the documentation row op0377 |
 | `op0032` | the ternary's condition is parenthesised (PARSE-001; TYPE:2101's `is (cond) : then : else`): the precedence row now writes `is (x > 0i32)` (row 374's own spelling is op0374) |
 | `op0197` | 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148): the start is `~0u64` |
@@ -317,6 +357,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 1673 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 1797 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

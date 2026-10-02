@@ -48,12 +48,14 @@ committed. A session that starts here resumes at the first unticked box.
   - Session 8 (2026-10-02, on the workbench's brief from `nitpick-libs_12`, S57)
     extracted MEMORY, OP and CONTROL in turn, each to a clean point: F-029 … F-032. Its
     scope is done.
-  - Extracted so far: 5 051 of 10 419 lines; 1 938 claims, 1 673 tested, 1 501 agree,
-    172 disagree.
+  - Session 9 (2026-10-02, the workbench's next brief, S60) extracts the ranges not
+    started, smallest first. MODULE is done, to a clean point: F-033, F-034.
+  - Extracted so far: 5 351 of 10 419 lines; 2 077 claims, 1 797 tested, 1 610 agree,
+    187 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST, LEXICAL and MODULE not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 501 agree, 172 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST and LEXICAL not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 610 agree, 187 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -958,26 +960,30 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*Session 8 stopped here, its brief done (S57): MEMORY, OP and CONTROL, each to a clean
-point (extracted, run, triaged, committed, pushed). M11 stays unticked.*
+*The last clean point is session 9's MODULE (S60): extracted, run, triaged, committed,
+pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
-- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP and CONTROL whole, TYPE
-  1–660 and VERIFICATION 1–1247. That is 5 051 of the references' 10 419 lines (S58
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL and MODULE whole,
+  TYPE 1–660 and VERIFICATION 1–1247. That is 5 351 of the references' 10 419 lines (S58
   corrected the count).
-- **1 938 claims, 1 673 testable, 265 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 501 agree, 172 disagree**.
+- **2 077 claims, 1 797 testable, 280 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 610 agree, 187 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
-  its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for session 8's.
+  its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
+  and 9's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-032:
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-034:
 - MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
   documentation rows);
 - OP's is F-031 (five documentation rows);
-- CONTROL's is F-032 (six documentation rows).
+- CONTROL's is F-032 (six documentation rows);
+- MODULE's are F-033 (seven documentation rows) and F-034 (three lower-priority compiler
+  rows).
 
-**Not started:** TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST, LEXICAL
-and MODULE. About 5 400 lines, roughly 2 700 claims; outside session 8's brief.
+**Not started:** TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST and LEXICAL.
+About 5 070 lines, roughly 2 500 claims. Session 9's brief (S60) takes them smallest
+first: LEXICAL, AST, BUILD, TRAITS, VERIFICATION 1248–2351, TYPE 661–2122.
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -991,7 +997,7 @@ and MODULE. About 5 400 lines, roughly 2 700 claims; outside session 8's brief.
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-033.
+   and extend `REPORT.md` §12. Findings number on from F-035.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1236,6 +1242,29 @@ the brief says.
   - 23 claims are shell scripts (S61): a support file in a subdirectory, a header the
     claim is about, an empty file, a diagnostic's wording, the IR's independence of the
     import order, and the `extern` blocks in HUNT2's form.
+- **Run 1:** 92 agree, 32 disagree (5 s).
+- **The fixes** (S45, through `refix()`, which now also reaches a support file, S62):
+  - `hidden` is a reserved word: 14 programs' support files. `md0099b` had agreed for
+    that reason (S55);
+  - `nbridge.npk` imports `nsys.npk`, which nine scripts did not copy. `md0273` had
+    agreed for that reason;
+  - REACH-002 asks `failsafe` to name every constant that can reach it. That is
+    `nbridge.npk`'s ten in seven scripts, and `md0080b.Boom`, which `classify` handles.
+- **Runs 2 and 3:** 107, then 109 agree. The final full run of all 1 797 claims: 1 610
+  agree, 187 disagree. The 1 673 earlier claims re-ran identical, and MODULE's are run 3's.
+- **Triage of the 15**, each run at the baseline and `93bcb66`:
+  - 7 documentation rows (F-033);
+  - 3 lower-priority compiler rows over 5 claims (F-034): a byte payload's driver stub is
+    TYPE-072 in its own generated code; `use m.f;` is refused against D-273 (2); a
+    constant cycle's diagnostic names no cycle;
+  - 1 known: DEF-153's `cstring` literal (`md0296b`), which compiles at `93bcb66`;
+  - 2 not findings: a message gives the sentence's sense in other words (`md0122`); the
+    IR's lines are the same for two import orders, and only one function moves
+    (`md0185`).
+
+  All stand at the baseline and at `93bcb66`, but `md0296b`.
+- **The screen.** MODULE's agreeing refusals were screened (S55). Two had agreed for a
+  reason of their own (`md0099b`, `md0273`), and both were re-spelled.
 
 ## Environment
 
@@ -1781,6 +1810,10 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   compiler's own `extern_stub.npk`), so each script copies the compiler's
   `lib/nbridge.npk` beside its program. The reference's own spelling of a block is
   tested separately, as a claim program (`md0241`).
+- **S62 — `refix()` reaches a support file:** `field="files:<name>"`. MODULE's run 1
+  showed that a support file can be where the program's own mistake sits (`hidden`).
+  A second `refix()` of one claim passes the first one's reason on, so the claim's
+  `fixed` names both.
 
 ## Log
 
@@ -1912,3 +1945,11 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     Nine programs fixed. Run 2: 98 agree, 10 disagree. Triaged: F-032 (6
     documentation rows), 4 known (DEF-133, DEF-130 twice, DEF-135).
   - **Stopped** with the brief's scope done; M11 stays unticked (about 5 400 lines left).
+- 2026-10-02 (session 9, branch `local-m11`, the author's machine): M11 resumed on the
+  workbench's next brief (S60), after session 8's handoff.
+  - **Setup.** `local-m11` = `origin/main` = `6eb5392`. `.work/` was intact, and the
+    machine checks were identical.
+  - **MODULE.** 139 claims, committed before any run (`aba1fec`). Run 1: 92 agree, 32
+    disagree. 24 programs fixed over two runs. Final: 109 agree, 15 disagree. Triaged:
+    F-033 (7 documentation rows), F-034 (3 lower-priority compiler rows), 1 known
+    (DEF-153), 2 not findings.

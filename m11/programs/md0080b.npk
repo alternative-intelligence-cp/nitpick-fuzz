@@ -25,16 +25,9 @@ func:classify = int32(int32:v) never fails {
     pass 0i32;
 };
 
-func:main = int32(cstring[]:_~argv) {
-    int32:c = raw classify(raw v32(5i32));
-    int32:d = raw classify(raw v32(-1i32));
-    if (!(c == 10i32)) { exit 10i32; }
-    if (!(d == 0i32)) { exit 11i32; }
-    exit 0i32;
-};
-
 func:failsafe = int32(Error:e) {
     pick (e) {
+        (md0080b.Boom) { exit 80i32; },
         (HeapBadRequest) { exit 91i32; },
         (HeapOom) { exit 92i32; },
         (IntOverflow) { exit 93i32; },
@@ -69,4 +62,13 @@ func:failsafe = int32(Error:e) {
         (*) { exit 99i32; }
     }
     exit 9i32;
+};
+
+
+func:main = int32(cstring[]:_~argv) {
+    int32:c = raw classify(raw v32(5i32));
+    int32:d = raw classify(raw v32(-1i32));
+    if (!(c == 10i32)) { exit 10i32; }
+    if (!(d == 0i32)) { exit 11i32; }
+    exit 0i32;
 };
