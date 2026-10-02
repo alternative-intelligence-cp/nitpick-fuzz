@@ -1029,13 +1029,13 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 Written 2026-09-26 by session 7 and extended by sessions 8 and 9 (2026-10-02), all on
 the author's machine (48 cores), from the committed scripts. **M11 is not finished.**
-These denominators cover the ranges extracted so far, 7 853 of the fourteen references'
+These denominators cover the ranges extracted so far, 8 957 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
 - extracted whole: BUILTIN, CONCURRENCY, IO, MACRO; by session 8, MEMORY, OP and
-  CONTROL; by session 9, MODULE, LEXICAL, AST, BUILD and TRAITS;
-- extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
-- not yet extracted: TYPE 661–2122 and VERIFICATION 1248–2351.
+  CONTROL; by session 9, MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION's rest;
+- extracted in part: TYPE 1–660;
+- not yet extracted: TYPE 661–2122.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
@@ -1064,16 +1064,17 @@ The records are:
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
 | TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 99 | 16 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
-| VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **2 679** | 130 | 644 | 1 905 | **367** | **2 312** | **2 068** | **244** |
+| VERIFICATION | 716 | 11 | 146 | 559 | 243 | 473 | 451 | 22 |
+| **total** | **2 810** | 132 | 693 | 1 985 | **482** | **2 328** | **2 084** | **244** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
-- `z3` 99: needs `npkg verify` with the pinned z3;
-- `vague` 60: no checkable outcome;
-- `internal` 68 (AST's 19 are rows that list only a node's fields);
-- `tree` 61: the compiler's own tree;
-- `tool` 44: a running driver process, a package in the compiler's tree, or `npkg test`, which
-  builds the compiler first (BUILD's 28);
+- `z3` 112: needs `npkg verify` with the pinned z3;
+- `vague` 62: no checkable outcome;
+- `internal` 69 (AST's 19 are rows that list only a node's fields);
+- `tree` 73: the compiler's own tree;
+- `tool` 131: a running driver process, a package in the compiler's tree, `npkg test`, which
+  builds the compiler first (BUILD's 28), or the verified build's runners, floor
+  translator, protocol models and schedule explorer (VERIFICATION 1248–2351's 87);
 - `unobservable` 24;
 - `timing` 8;
 - `platform` 3.
@@ -1168,8 +1169,11 @@ three compilers), where the reference caps the depth at 64. TRAITS' rows all sta
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 2 570 lines: at the drafts' density,
-  roughly 1 280 more claims.
+- **The range not yet extracted** (above), TYPE 661–2122, 1 462 lines: at the drafts'
+  density, roughly 730 more claims.
+- **VERIFICATION 1248–2351 is mostly the verified build's own machinery.** 115 of its 131
+  claims need z3 or the runners. Its 16 tested claims (what `npkc --obligations` writes,
+  the trap spellings, the stack's prologue and notes) all agree.
 - **BUILD's own process.** 59 of BUILD's 97 claims are the compiler's ladder, its test
   runners and its verified build, which a scratch project cannot reach (`npkg build` reads
   the compiler tree's `runtime/npkrt.ll`). Its 38 tested claims are `npkg`'s refusals

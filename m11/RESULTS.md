@@ -22,19 +22,19 @@ before the first run.
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 115 | 99 | 16 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
-| VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 2679 | 130 | 644 | 1905 | 367 | 2312 | 2312 | 2068 | 244 |
+| VERIFICATION | 716 | 11 | 146 | 559 | 243 | 473 | 473 | 451 | 22 |
+| **total** | 2810 | 132 | 693 | 1985 | 482 | 2328 | 2328 | 2084 | 244 |
 
-**These denominators cover 7853 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 8957 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247, 1248–2351 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
-- `z3` 99 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `internal` 68 — a compiler internal no program observes (an AST field, a table's layout)
-- `tree` 61 — a claim about the compiler's own source tree, generators, harness or documents
-- `vague` 60 — the sentence states no checkable outcome
-- `tool` 44 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
+- `tool` 131 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
+- `z3` 112 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
+- `tree` 73 — a claim about the compiler's own source tree, generators, harness or documents
+- `internal` 69 — a compiler internal no program observes (an AST field, a table's layout)
+- `vague` 62 — the sentence states no checkable outcome
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 3 — another architecture or OS, root, the network, or more memory than the VM
@@ -438,6 +438,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 2312 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 2328 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

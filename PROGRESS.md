@@ -49,15 +49,16 @@ committed. A session that starts here resumes at the first unticked box.
     extracted MEMORY, OP and CONTROL in turn, each to a clean point: F-029 … F-032. Its
     scope is done.
   - Session 9 (2026-10-02, the workbench's next brief, S60) extracts the ranges not
-    started, smallest first. MODULE, LEXICAL, AST, BUILD and TRAITS are done, each to a
-    clean point: F-033 … F-043, among them F-037, a use after free, and F-041, an npkc
-    hang. BUILD's 38 tested claims all agree.
-  - Extracted so far: 7 853 of 10 419 lines; 2 679 claims, 2 312 tested, 2 068 agree,
+    started, smallest first. MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION
+    1248–2351 are done, each to a clean point: F-033 … F-043, among them F-037, a use
+    after free, and F-041, an npkc hang. BUILD's 38 and VERIFICATION 1248–2351's 16
+    tested claims all agree.
+  - Extracted so far: 8 957 of 10 419 lines; 2 810 claims, 2 328 tested, 2 084 agree,
     244 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122 and VERIFICATION 1248–2351 not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 068 agree, 244 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION whole, TYPE 1–660 done; TYPE 661–2122 not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 084 agree, 244 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -962,15 +963,15 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's TRAITS (S60), after its MODULE, LEXICAL, AST and
-BUILD: extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's VERIFICATION 1248–2351 (S60), after its MODULE,
+LEXICAL, AST, BUILD and TRAITS: extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
 - Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST,
-  BUILD and TRAITS whole, TYPE 1–660 and VERIFICATION 1–1247. That is 7 853 of the
-  references' 10 419 lines (S58 corrected the count).
-- **2 679 claims, 2 312 testable, 367 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 068 agree, 244 disagree**.
+  BUILD, TRAITS and VERIFICATION whole, and TYPE 1–660. That is 8 957 of the references'
+  10 419 lines (S58 corrected the count).
+- **2 810 claims, 2 328 testable, 482 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 084 agree, 244 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
@@ -994,9 +995,8 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-043:
   - F-042: one lower-priority compiler row;
   - F-043: thirteen documentation rows.
 
-**Not started:** TYPE 661–2122 and VERIFICATION 1248–2351. About 2 570 lines, roughly
-1 280 claims. Session 9's brief (S60) takes them smallest first: VERIFICATION 1248–2351,
-then TYPE 661–2122.
+**Not started:** TYPE 661–2122, 1 462 lines, roughly 730 claims, the last range of
+session 9's brief (S60).
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -1442,6 +1442,10 @@ the brief says.
   - The tested claims are what the compiler emits: `npkc --obligations` scripts
     (verif2's scaffolding, copied) and `ir:` tests of the trap spellings (`@npk_trap(i32
     -4110)`, `-4099`, `-4119`; a program's raise `@npk_raise`).
+- **Run 1:** 16 agree, 0 disagree. Each agreeing refusal or script was read; each is the
+  claim's own reason (BORROW-013 for a static overlap; the rows' role, encoded, tier and
+  clause-context fields; hashes unmoved by blank lines). The final full run of all 2 328
+  claims: 2 084 agree, 244 disagree. The 2 312 earlier claims re-ran identical. No finding.
 
 ## Environment
 
@@ -2158,3 +2162,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     agree, 19 disagree. 12 programs fixed. Final: 99 agree, 16 disagree. Triaged: **F-041,
     an npkc hang**; F-042 (1 lower-priority compiler row); F-043 (13 documentation rows);
     1 not a finding.
+  - **VERIFICATION 1248–2351.** 131 claims, 16 testable, committed before any run
+    (`4f62a49`). Run 1: 16 agree, 0 disagree. No finding.
