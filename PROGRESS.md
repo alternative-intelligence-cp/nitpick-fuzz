@@ -41,14 +41,18 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
   - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
-- [ ] **M11** — the reference, checked against the compiler. **In part, and stopped
-  at a clean point (session 7, 2026-09-26, on the workbench's brief, S56).** Session 6
-  stopped part-way on the author's word, the cloud credit nearly spent. Session 7
-  (local, branch `local-m11`) reviewed, ran and triaged the drafted ranges, 3 704 of
-  10 433 lines: 1 488 claims, 1 262 tested, 1 118 agree, 144 disagree; findings
-  F-018 … F-028. Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2123, VERIFICATION 1248–2352 and eight references not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (final run: 1 118 agree, 144 disagree, all triaged)
+- [ ] **M11** — the reference, checked against the compiler. **In part.**
+  - Session 6 stopped part-way on the author's word, the cloud credit nearly spent.
+  - Session 7 (local, branch `local-m11`) reviewed, ran and triaged the drafted ranges:
+    F-018 … F-028.
+  - Session 8 (2026-10-02, on the workbench's brief from `nitpick-libs_12`, S57)
+    extracts MEMORY, OP and CONTROL in turn. MEMORY is done: F-029, F-030.
+  - Extracted so far: 4 233 of 10 419 lines; 1 669 claims, 1 408 tested, 1 255 agree,
+    153 disagree.
+
+  Resume from "M11 — the state at the stop" below.
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, OP, CONTROL, TRAITS, BUILD, AST, LEXICAL and MODULE not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 255 agree, 153 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -953,47 +957,41 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*Session 7 stopped here on the workbench's brief, at a clean point after the drafted
-modules (S50, S56). Nothing below is ticked: M11 is not finished.*
+*Session 8 is working through its brief (S57): MEMORY, then OP, then CONTROL, each to a
+clean point (extracted, run, triaged, committed, pushed). This block is rewritten at
+each clean point.*
 
-**Done, committed and measured: the drafted ranges.** The ranges are:
-- BUILTIN, CONCURRENCY, IO and MACRO, whole;
-- TYPE 1–660 and VERIFICATION 1–1247.
+**Done, committed and measured.**
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO and MEMORY whole, TYPE 1–660 and
+  VERIFICATION 1–1247. That is 4 233 of the references' 10 419 lines (S58 corrected the
+  count).
+- **1 669 claims, 1 408 testable, 261 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 255 agree, 153 disagree**.
+- Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
+  its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for session 8's.
 
-That is 3 704 of the references' 10 433 lines. On them:
-- **1 488 claims, 1 262 testable, 226 untestable** with reasons, in `m11/CLAIMS.md`;
-- every expectation written before its program's first run;
-- the final run at HUNT2 (`results/9126350/m11.jsonl`): **1 118 agree, 144 disagree**;
-- every disagreement triaged (`gen/m11_triage.py`) and run at the baseline and at the
-  newest `main` `1b4f0c6`, where all 144 give the same result.
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-030. MEMORY's
+are F-029 (a reserved word accepted as a binding's name) and F-030 (eight documentation
+rows).
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12, and findings F-018 … F-028:
-- the silent wrong answers F-018 … F-021;
-- a use after destroy, F-022;
-- invalid IR from an accepting compiler, F-023;
-- compiler traps, F-024;
-- a flag that refuses everything, F-025;
-- a unit annotation ignored, F-026;
-- the lower-priority rows, F-027;
-- the documentation rows, F-028.
-
-**Not started** (about 6 700 lines, roughly 3 300 claims at the drafts' density): TYPE
-661–2123, VERIFICATION 1248–2352 (§8 on), TRAITS, MEMORY, MODULE, BUILD, OP, CONTROL,
-LEXICAL and AST.
+**Not started:**
+- OP and CONTROL: session 8's scope, next;
+- TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST, LEXICAL and MODULE: out
+  of session 8's scope.
 
 **To resume (a later session):**
-1. The start checks and M0's rebuild (about 5 min; HUNT2 stays `9126350`).
-2. Extract the ranges not started into new modules of `gen/m11_claims/`. Each module
-   declares its lines with `covers()` (S52) and follows `m11/BRIEF.md`. The drafts show
-   the density and the helpers (`type1.py`'s layout and IR helpers, `verif1.py`'s and
-   `verif2.py`'s obligation scripts). Note `@main`: in `rows.txt`, `main`'s symbol is
-   `@main` (S53).
-3. Commit the modules, then `python3 gen/m11.py`, then `gen/m11_run.py .work/hunt2`
-   (about 210 s for 1 262 programs). Fix the programs' own mistakes with `refix()`
-   (text only, S45) and run again. Screen the agreeing refusals' first diagnostics.
-4. Triage into `gen/m11_triage.py` (it checks that every disagreement has a class).
-   Then `gen/m11_rows.py`, `gen/m11_report.py`, and extend `REPORT.md` §12; findings
-   number on from F-029.
+1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
+   the newest `main` for findings is `93bcb66`, unless the workbench names a newer one.
+2. Extract a range into a new module of `gen/m11_claims/`. The module declares its
+   lines with `covers()` (S52) and follows `m11/BRIEF.md`. `memory.py` shows the
+   `heap=` pattern: lists of known size and the requested-bytes figures.
+3. Commit the module, then `python3 gen/m11.py`, then run its claims with
+   `gen/m11_run.py .work/hunt2 --ids …`. Fix the programs' own mistakes with `refix()`
+   (text only, S45), run again, and screen the agreeing refusals' first diagnostics.
+4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
+   newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
+   run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
+   and extend `REPORT.md` §12. Findings number on from F-031.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1118,7 +1116,68 @@ about 6 600 lines, or roughly 3 300 claims at the drafts' density. That is far m
 the brief's "a few hours", so the session stops cleanly after the drafted modules, as
 the brief says.
 
+### M11, session 8 (local): the start checks, and MEMORY
+
+- **The gate.** The brief came from `nitpick-libs_12`, the workbench orchestrator,
+  with the author's approval. `local-m11` was fast-forwarded from `3d7d924` to
+  `origin/main` `41ba27b`: KNOWN_DEFECTS.md now carries M11's findings as DEF-144 …
+  DEF-154. M10 is ticked and M11 is not.
+- **(a)** `uname -a` and `nproc` are under Environment below.
+- **(b)** `CLAUDE.md` was re-read; it is unchanged at `41ba27b`.
+- **(c)** `.work/` survives from session 7. Its three builds were byte-identical to
+  session 7's digests (`npkc` `c7212b6b…`, `5fd636b9…`, `07de906a…`), so nothing was
+  rebuilt. The compiler's newest `main`, `93bcb66` (2026-10-01, 1.6.1e, landing 93),
+  is on GitHub's `main`. It was built as `.work/main93b` in 59.6 s, for the findings
+  only (S57):
+  - `npkc.ll` 31 367 470 bytes, `30b8f5b02191de09…`;
+  - `npkrt.o` 72 656, `c8e5033ad17c70f8…`;
+  - `npkc` 11 159 232, `0a8c9bf85ff680fb…`.
+- **(d)** M11 resumes from "the state at the stop".
+- **The machine checks.**
+  - The canaries give their four verdicts at HUNT2, the baseline and `93bcb66`.
+  - The recall suite is identical line for line at HUNT2 and the baseline (25 rows).
+  - M10's 223 programs re-ran identical at HUNT2.
+- **The week.** `jq .rate_limits.seven_day ~/.claude/usage-latest.json` read 86% at the
+  start. The brief's limits: no new reference at 91%, land at 93%.
+
+**MEMORY (all 533 lines), `gen/m11_claims/memory.py`.**
+- **The extraction.** 181 claims (10 examples, 11 rows, 160 rules); 146 testable, 35
+  untestable with reasons. Committed before any of its programs ran (`2f936bc`).
+- **Run 1:** 131 agree, 15 disagree (12 s).
+- **The fixes.** Seven programs were fixed for mistakes of their own (S53's `refix()`):
+  - `buffer` used as a name (`me0120`, `me0179`; `me0179` had agreed for that reason,
+    S55);
+  - `.clone()`'s `Result` (`me0250`);
+  - `drop` on a callee that is not `never fails` (`me0290`);
+  - a taint test (`me0390`);
+  - the large-frame programs (`me0507`, `me0530`). These had misread "refused at the
+    prologue": the prologue refuses a frame that crosses the limit, so they now recurse
+    until one does, and trap `StackExhausted` as the text says.
+- **Run 2:** 137 agree, 9 disagree. The final full run of all 1 408 claims changed
+  nothing.
+- **Triage:**
+  - 8 documentation rows (F-030);
+  - DEF-148's shape, `me0461`, known, and refused `BORROW-016` at `93bcb66`;
+  - F-029, found in run 1: `wild int8->:buffer` is accepted at its declaration and
+    refused at its use.
+
+  All are the same at the baseline, and at `93bcb66` but `me0461`.
+- **The screen.** The agreeing refusals were screened (S55). One, `me0179`, had agreed
+  for the reserved word's sake, not the claim's.
+
 ## Environment
+
+*(session 8, measured 2026-10-02 15:07 UTC; M11 resumed here — the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-34-generic #34~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Sep  4 15:38:29 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 22 used, 51 free, 134 available; Swap 15
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  1.7T used  4.9T avail (26%)
+python3:   Python 3.12.3
+llvm:      /usr/lib/llvm-20 (llvm-config 20.1.2), linked as .work/llvm
+earlyoom:  active
+```
 
 *(session 7, measured 2026-09-26 14:23 UTC; M11 resumed here, on the author's machine
 — the start check (a))*
@@ -1601,6 +1660,24 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
 - **S56 — the session stops after the drafted modules, with M11 unticked.** This is the
   brief's instruction (S50). The extraction left is about 6 700 lines. Its state and
   the way back are "M11 — the state at the stop" above.
+- **S57 — session 8 works on `local-m11`, on the brief from `nitpick-libs_12`.** The
+  scope is MEMORY, then OP, then CONTROL. Each reference stops at a clean point:
+  extracted, run, triaged, committed and pushed to `local-m11` only, with a message to
+  the workbench. The week's usage is read before each reference: no new reference at
+  91%, land at 93%. There are no sub-agents. The compiler's newest `main` for the
+  findings is `93bcb66`, which replaces `1b4f0c6` (S37, S49), and deduplication is also
+  against its registry, read with `git show 93bcb66:meta/roadmap/OPEN_DECISIONS.md`.
+  HUNT2 stays `9126350` (S41).
+- **S58 — a reference's length is its real last line** (`m11lib.doc_len`). The count
+  had included the empty element after each file's final newline: one line too many per
+  reference, 10 433 for 10 419. The workbench's brief named the right ends (TYPE 2122,
+  VERIFICATION 2351). Every expectation and claim is unaffected; only the "lines"
+  figures change.
+- **S59 — MEMORY's heap claims use lists of known size.** A `List<int64>` of capacity c
+  is one managed block of exactly 8c bytes, by the prelude's `list_init`. The `heap:`
+  line reports requested bytes, so "dropped at scope exit, not at last use" or "a
+  temporary dies at its statement's end" is an exact peak, read from the code and not
+  from a run. All six such claims agree.
 
 ## Log
 
@@ -1717,3 +1794,10 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     `m11/RESULTS.md` written.
   - **Stopped** after the drafted modules, as the brief says (S56). M11 stays unticked:
     about 6 700 lines are not yet extracted.
+- 2026-10-02 (session 8, branch `local-m11`, the author's machine): M11 resumed on the
+  workbench's brief (S57).
+  - **Setup.** Fast-forwarded to `41ba27b`. `.work/` was intact, and `93bcb66` was
+    built for the findings. The machine checks are identical.
+  - **MEMORY.** 181 claims, committed before any run. Run 1: 131 agree, 15 disagree.
+    Seven programs fixed. Run 2: 137 agree, 9 disagree. Triaged: F-029 (lower-priority
+    compiler), F-030 (8 documentation rows), 1 known (DEF-148).

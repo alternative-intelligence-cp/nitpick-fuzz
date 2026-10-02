@@ -5,10 +5,11 @@
 // wrong: refused or 10
 mod:me0250;
 
+error:E1;
 fixed string:FS = "abc";
 
 func:main = int32(cstring[]:_~argv) {
-    string:t = FS.clone();
+    string:t = FS.clone() ?! E1;
     if (string_bytes(t)[0i64] != 97u8) { exit 10i32; }
     exit 0i32;
 };
@@ -46,6 +47,7 @@ func:failsafe = int32(Error:e) {
         (Exists) { exit 120i32; },
         (CrossDevice) { exit 121i32; },
         (BadPath) { exit 122i32; },
+        (E1) { exit 81i32; },
         (*) { exit 99i32; }
     }
     exit 9i32;

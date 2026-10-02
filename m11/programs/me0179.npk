@@ -6,9 +6,9 @@
 mod:me0179;
 
 func:main = int32(cstring[]:_~argv) {
-    wild int8->:buffer = alloc(100i64);
-    wild int8->:moved = move(buffer);
-    dalloc(buffer);
+    wild int8->:buf = alloc(100i64);
+    wild int8->:moved = move(buf);
+    dalloc(buf);
     dalloc(moved);
     exit 0i32;
 };

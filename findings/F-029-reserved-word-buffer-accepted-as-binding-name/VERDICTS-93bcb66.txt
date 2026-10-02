@@ -1,0 +1,12 @@
+# F-029-reserved-word-buffer-accepted-as-binding-name — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-02 15:27 UTC; HUNT 93bcb66 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_k3_int64_buffer_refused                  93bcb66  run 1  npkc=1  codes=NITPICK-PARSE-002  O0=-  O2=-
+ctl_k4_wild_buf                              93bcb66  run 1  npkc=0  codes=-  O0=0  O2=0
+k1_wild_buffer_declared                      93bcb66  run 1  npkc=0  codes=-  O0=3  O2=3
+k2_wild_buffer_declared_then_used            93bcb66  run 1  npkc=1  codes=NITPICK-PARSE-002  O0=-  O2=-
+ctl_k3_int64_buffer_refused                  c3bdae2  run 1  npkc=1  codes=NITPICK-PARSE-002  O0=-  O2=-
+ctl_k4_wild_buf                              c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+k1_wild_buffer_declared                      c3bdae2  run 1  npkc=0  codes=-  O0=3  O2=3
+k2_wild_buffer_declared_then_used            c3bdae2  run 1  npkc=1  codes=NITPICK-PARSE-002  O0=-  O2=-

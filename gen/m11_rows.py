@@ -15,8 +15,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "gen"))
 import m11lib as L  # noqa: E402
 
-FINDINGS = {"comp": "F-027-lower-priority-compiler-rows",
-            "doc": "F-028-m11-reference-sentences-the-compiler-contradicts"}
+# a row finding: its id (the prefix of each claim's class text) -> its directory
+FINDINGS = {"F-027": "F-027-lower-priority-compiler-rows",
+            "F-028": "F-028-m11-reference-sentences-the-compiler-contradicts",
+            "F-030": "F-030-memory-reference-sentences-the-compiler-contradicts"}
+NEWEST = ("93bcb66", "1b4f0c6")   # the compiler's newest main, newest first (S37, S49)
 
 
 def load(path):
@@ -47,23 +50,26 @@ def main():
     spec.loader.exec_module(t)
     h = load("results/9126350/m11.jsonl")
     b = load("results/c3bdae2/m11-disagree.jsonl")
-    n = load("results/1b4f0c6/m11-disagree.jsonl")
+    newest = {c: load("results/%s/m11-disagree.jsonl" % c) for c in NEWEST
+              if os.path.exists(os.path.join(ROOT, "results", c, "m11-disagree.jsonl"))}
     key = lambda r: (r["verdict"], r["npkc"], tuple(r["codes"]), r["O0"], r["O2"], r["sh"])
-    for group, d in FINDINGS.items():
-        ids = sorted((i for i, v in t.CLASS.items() if v[0] == group),
+    for fid, d in FINDINGS.items():
+        ids = sorted((i for i, v in t.CLASS.items() if v[1].startswith(fid)),
                      key=lambda i: (t.CLASS[i][1], byid[i]["doc"], byid[i]["line"], i))
+        nc = next((c for c in NEWEST if c in newest and all(i in newest[c] for i in ids)), NEWEST[-1])
+        n = newest.get(nc, {})
         out = ["# %s — the rows (written by `gen/m11_rows.py`)" % d[:5], "",
                "One row per claim, grouped by what triage found (`gen/m11_triage.py`). The program is",
                "`m11/programs/<id>.npk` (or `.sh`); its expectation was written from the sentence before it",
                "first ran. Measured at HUNT2 `9126350` (the final run), the baseline `c3bdae2` and the",
-               "compiler's newest `main` `1b4f0c6`; \"same\" is the same npkc, codes, both legs and verdict",
+               "compiler's newest `main` `%s`; \"same\" is the same npkc, codes, both legs and verdict" % nc,
                "as HUNT2.", ""]
         cur = None
         for i in ids:
             what = t.CLASS[i][1]
             if what != cur:
                 out += ["", "**%s**" % md(what), "",
-                        "| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `1b4f0c6` |",
+                        "| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `%s` |" % nc,
                         "|---|---|---|---|---|---|---|"]
                 cur = what
             c, r = byid[i], h[i]

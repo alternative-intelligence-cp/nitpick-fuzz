@@ -56,7 +56,7 @@ def main():
     run2 = load_runs("m11.jsonl")
     run1 = load_runs("m11-run1.jsonl")
     other = {}
-    for c in ("c3bdae2", "1b4f0c6"):
+    for c in ("c3bdae2", "93bcb66", "1b4f0c6"):
         p = os.path.join(ROOT, "results", c, "m11-disagree.jsonl")
         if os.path.exists(p):
             other[c] = {json.loads(l)["id"]: json.loads(l) for l in open(p)}
@@ -127,20 +127,22 @@ def main():
             out.append("| %s | %d |" % (desc, len(ids)))
         out.append("")
     out += ["Every disagreement below was also run at the baseline `c3bdae2` and at the compiler's newest",
-            "`main` `1b4f0c6`; the last column says whether each gave the same result (npkc, codes, both",
-            "legs, verdict) as HUNT2.", ""]
-    out += ["| id | line | claim | expected | measured | class | c3bdae2 / 1b4f0c6 |", "|---|---|---|---|---|---|---|"]
+            "`main` of its session (`1b4f0c6` for session 7's claims, `93bcb66` for session 8's); the last",
+            "column says whether each gave the same result (npkc, codes, both legs, verdict) as HUNT2.", ""]
+    out += ["| id | line | claim | expected | measured | class | c3bdae2 / newest main |", "|---|---|---|---|---|---|---|"]
     for r in sorted(dis, key=lambda r: (r["doc"], r["line"], r["id"])):
         c = byid[r["id"]]
         meas = ("sh %s" % r["sh"]) if r["sh"] is not None else "npkc %s %s, %s/%s" % (
             r["npkc"], ",".join(x.replace("NITPICK-", "") for x in r["codes"]) or "", r["O0"], r["O2"])
         k = cls.get(r["id"], ("?", "not yet triaged"))
         same = []
-        for cm in ("c3bdae2", "1b4f0c6"):
+        nm = "93bcb66" if r["id"] in other.get("93bcb66", {}) else "1b4f0c6"
+        for cm in ("c3bdae2", nm):
             o = other.get(cm, {}).get(r["id"])
             key = lambda x: (x["verdict"], x["npkc"], tuple(x["codes"]), x["O0"], x["O2"], x["sh"])
             same.append("—" if o is None else ("same" if key(o) == key(r) else
                         "npkc %s %s, %s/%s" % (o["npkc"], ",".join(x.replace("NITPICK-", "") for x in o["codes"]), o["O0"], o["O2"])))
+        same[1] = "%s @%s" % (same[1], nm)
         out.append("| `%s` | %s:%d | %s | `%s` | %s (`%s`) | %s | %s |" % (
             r["id"], r["doc"], r["line"], md(c["text"]), r["expect"], meas, r["kind"], md(k[1]), " / ".join(same)))
     out.append("")

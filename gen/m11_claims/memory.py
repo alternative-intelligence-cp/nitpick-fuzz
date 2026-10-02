@@ -1537,3 +1537,32 @@ claim("me0530", D, 530, "**A `stack` binding (§1.2) lives in the frame of the f
     pass a[k] + a[1023i64];
 };""" % ", ".join(["0i64"] * 1024)),
       wrong="10: the large frame ran, or 139")
+
+
+# ================================================================== after run 1 (S45, S53)
+# Each program below failed for a mistake of its own; its TEXT changed, its expectation not.
+_BUF = ("`buffer` is a reserved word in expression position (LEXICAL:122): a binding declared "
+        "`buffer` compiles but cannot be referenced (PARSE-002); the program's binding is `buf`")
+refix("me0120", _BUF + " (the example's own line, which never references it, is the documentation "
+      "row this observation adds)",
+      [("wild int8->:buffer = alloc(1024i64);\n    dalloc(buffer);",
+        "wild int8->:buf = alloc(1024i64);\n    dalloc(buf);")])
+refix("me0179", _BUF + "; run 1 AGREED for that reason, not for the use after move",
+      [("    wild int8->:buffer = alloc(100i64);\n    wild int8->:moved = move(buffer);\n    dalloc(buffer);",
+        "    wild int8->:buf = alloc(100i64);\n    wild int8->:moved = move(buf);\n    dalloc(buf);")])
+refix("me0250", "`.clone()` of a string is a Result<string> (TYPE-007): it is unwrapped with `?! E1`",
+      [("    string:t = FS.clone();", "    string:t = FS.clone() ?! E1;"),
+       ('fixed string:FS = "abc";', 'error:E1;\nfixed string:FS = "abc";')])
+refix("me0290", "`drop` is licensed only by a never-fails callee (TYPE-042, D-163): the helper is `never fails`",
+      [("func:free_it = NIL(wild int8->:q) {", "func:free_it = NIL(wild int8->:q) never fails {")])
+refix("me0390", "a Result's `value` read after a combined `p.is_error || g.is_error` test carries the "
+      "unknown taint (TAINT-001): g is tested on its own",
+      [("    if (p.is_error || g.is_error) { exit 10i32; }",
+        "    if (p.is_error) { exit 10i32; }\n    if (g.is_error) { exit 10i32; }")])
+_FRAME = ("run 1 called one 8 KiB frame with the stack nearly empty, which the prologue rightly lets "
+          "run; the sentence is that a large frame CROSSING the limit is refused at the prologue rather "
+          "than stepping over the guard (DEF-60), so the program now recurses with 8 KiB frames until one "
+          "crosses")
+for _cid in ("me0507", "me0530"):
+    refix(_cid, _FRAME, [("    a[k] = k;\n    pass a[k] + a[1023i64];",
+                          "    a[k % 1024i64] = k;\n    pass (raw big(k + 1i64)) + a[1023i64];")])

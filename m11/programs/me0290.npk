@@ -5,7 +5,7 @@
 // wrong: 10: the second free went undetected; or refused
 mod:me0290;
 
-func:free_it = NIL(wild int8->:q) {
+func:free_it = NIL(wild int8->:q) never fails {
     dalloc(q);
     pass NIL;
 };

@@ -1025,24 +1025,27 @@ python3 gen/run_findings.py F-011 F-012 F-013 F-014 F-015 F-016 F-017 --hunt .wo
 python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cases among it
 ```
 
-## 12. M11 — the reference, checked against the compiler (in part: the drafted ranges)
+## 12. M11 — the reference, checked against the compiler (in part)
 
-Written 2026-09-26 by session 7, on the author's machine (48 cores), from the committed
-scripts. **M11 is not finished.** These denominators cover the ranges extracted so far,
-3 704 of the fourteen references' 10 433 lines:
-- extracted whole: BUILTIN, CONCURRENCY, IO and MACRO;
+Written 2026-09-26 by session 7 and extended by session 8 (2026-10-02), both on the
+author's machine (48 cores), from the committed scripts. **M11 is not finished.** These
+denominators cover the ranges extracted so far, 4 233 of the fourteen references'
+10 419 lines. Session 8 corrected the count, which had included the empty element after
+each file's final newline (10 433 before):
+- extracted whole: BUILTIN, CONCURRENCY, IO, MACRO and, by session 8, MEMORY;
 - extracted in part: TYPE 1–660 and VERIFICATION 1–1247;
-- not yet extracted: TYPE 661–2123, VERIFICATION 1248–2352, and TRAITS, MEMORY, MODULE,
-  BUILD, OP, CONTROL, LEXICAL and AST.
+- not yet extracted: TYPE 661–2122, VERIFICATION 1248–2351, and TRAITS, MODULE, BUILD,
+  OP, CONTROL, LEXICAL and AST. Session 8's brief scopes OP and CONTROL next.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
   `m11/RESULTS.md` (the results, claim by claim);
 - `results/9126350/m11.jsonl` (the final run), with runs 1–3 beside it;
-- `results/c3bdae2/m11-disagree.jsonl` and `results/1b4f0c6/m11-disagree.jsonl` (the
-  disagreeing claims at the baseline and at the compiler's newest `main`);
+- `results/c3bdae2/m11-disagree.jsonl`, `results/1b4f0c6/m11-disagree.jsonl` (session 7)
+  and `results/93bcb66/m11-disagree.jsonl` (session 8): the disagreeing claims at the
+  baseline and at the compiler's newest `main` of each session;
 - `gen/m11_triage.py` (the class of each disagreement);
-- `findings/F-018` … `F-028`.
+- `findings/F-018` … `F-030`.
 
 ### 12.1 The denominators
 
@@ -1052,18 +1055,19 @@ The records are:
 | CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 101 | 21 |
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 60 | 7 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 98 | 21 |
+| MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 137 | 9 |
 | TYPE (1–660) | 322 | 19 | 74 | 229 | 19 | 303 | 242 | 61 |
 | VERIFICATION (1–1247) | 585 | 9 | 97 | 479 | 128 | 457 | 435 | 22 |
-| **total** | **1 488** | 59 | 344 | 1 085 | **226** | **1 262** | **1 118** | **144** |
+| **total** | **1 669** | 69 | 355 | 1 245 | **261** | **1 408** | **1 255** | **153** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
 - `z3` 91: needs `npkg verify` with the pinned z3;
-- `tree` 40: the compiler's own tree;
-- `vague` 36: no checkable outcome;
-- `internal` 27;
-- `unobservable` 15;
+- `vague` 43: no checkable outcome;
+- `internal` 43;
+- `tree` 42: the compiler's own tree;
+- `unobservable` 24;
 - `tool` 8;
-- `timing` 7;
+- `timing` 8;
 - `platform` 2.
 
 Every expectation was written from the reference's text before its program first ran.
@@ -1087,15 +1091,18 @@ its final run gives 1 118 and 144.
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
 | compiler, lower priority (F-027) | 16 |
-| documentation (F-028) | 94 |
-| known (DEF-123, DEF-131, DEF-133) | 7 |
+| documentation (F-028; MEMORY's F-030) | 94 + 8 |
+| known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148) | 7 + 1 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or cannot be written | 10 |
-| **total** | **144** |
+| **total** | **153** |
 
-**Every disagreement gives the same result at the baseline and at `1b4f0c6`** (one,
-`cc0042`, with other codes at the baseline). So each is old, and each still stands at
-the tree the maintainers work on.
+**Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
+codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
+MEMORY rows all stand at `93bcb66` but `me0461`, DEF-148's shape, refused there
+(`BORROW-016`). MEMORY's run 1 also found F-029, a reserved word accepted as a binding's
+name, which no final disagreement carries, since the programs it broke were
+re-spelled.
 
 ### 12.3 The findings
 
@@ -1112,11 +1119,13 @@ the tree the maintainers work on.
 | F-026 | `tfp64<Meters>` accepted and its unit ignored: Meters + Seconds compiles | compiler: a refusal missing | 0, 10/10 | the same | the same |
 | F-027 | sixteen safe departures: accepted though refused, a named hole, refused though permitted, a diagnostic | compiler, lower priority | per row | the same | the same |
 | F-028 | ninety-four reference sentences the compiler contradicts, the compiler right or safe | documentation | per row | the same | the same |
+| F-029 | the reserved word `buffer` is accepted as a `wild` pointer binding's name, then unusable (`PARSE-002` at the use) | compiler, lower priority | 0, 3/3; use: 1 | the same | the same (at `93bcb66`) |
+| F-030 | MEMORY's eight stale sentences (examples, a struck rule, the arena leak) | documentation | per row | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The ranges not yet extracted** (above), about 6 700 lines: at the drafts' density,
-  roughly 3 300 more claims.
+- **The ranges not yet extracted** (above), about 6 200 lines: at the drafts' density,
+  roughly 3 000 more claims.
 - **The verified build.** 91 claims need `npkg verify` with the pinned z3, and are
   untestable here. Claims about what the compiler writes for verification were tested
   through `npkc --obligations`, which needs no z3.

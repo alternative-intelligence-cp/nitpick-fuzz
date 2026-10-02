@@ -109,6 +109,24 @@ put("doc", "F-028: a simd float-to-int cast has no cast-range row (its guard tra
 put("doc", "F-028: an await of a coroutine with a limited parameter has a limit-subsume row", "vf0867b", "vf0931")
 put("doc", "F-028: a simd float .min() returns a NaN in the last lane", "vf1201")
 
+# ---- session 8: MEMORY_REFERENCE (documentation rows are F-030)
+put("doc", "F-030: wildx_alloc's result is `int8->`: the example's `wildx uint8->:code = wildx_alloc(4096i64);` "
+    "is TYPE-007 (VERIFICATION's own programs cast it `=>! wildx uint8->`)", "me0126")
+put("doc", "F-030: #wild_ptr is accepted outside wild context, against MEMORY:133 (D-019); D-315 struck the "
+    "like rule from #wild_slice", "me0133")
+put("doc", "F-030: #wild_ptr's type argument is the pointee: the example's `#wild_ptr<int8->>(addr)` is "
+    "`int8->->` (TYPE-007)", "me0135")
+put("doc", "F-030: `nodrop` qualifies a wild binding (DECISIONS: \"nodrop requires wild or wildx\"); "
+    "`= nodrop alloc(...)` does not parse", "me0173")
+put("doc", "F-030: the move example uses malloc/free (§3:281: no aliases), a binding named `buffer` (a "
+    "reserved word) and the code NITPICK-019; it does not compile", "me0183")
+put("doc", "F-030: the arena example and its note use a bare `?` as the fallback; it is `?|` since D-175 "
+    "(PARSE-011)", "me0381", "me0399")
+put("doc", "F-030: an un-destroyed arena<T> is not a leak the exit check names: its storage is managed "
+    "since D-183 (1.2.5c; the runtime's npk_arena_make says so)", "me0397")
+put("known", "DEF-148 (F-022): destroy of a shared arena a live thread holds; refused BORROW-016 at 93bcb66",
+    "me0461")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

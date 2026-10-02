@@ -6,8 +6,8 @@
 mod:me0120;
 
 func:main = int32(cstring[]:_~argv) {
-    wild int8->:buffer = alloc(1024i64);
-    dalloc(buffer);
+    wild int8->:buf = alloc(1024i64);
+    dalloc(buf);
     exit 0i32;
 };
 

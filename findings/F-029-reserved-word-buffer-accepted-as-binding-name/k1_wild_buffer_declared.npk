@@ -1,23 +1,11 @@
-// M11 me0390 -- meta/specs/MEMORY_REFERENCE.md:390 (rule)
-// quote: The set is `alloc() -> Handle<T>`
-// claim: The arena's set is alloc, get, put, free, reset and destroy, with their stated results.
-// expect: run:0
-// wrong: refused (a member or a result type differs), or 10-12
-mod:me0390;
+mod:k1_wild_buffer_declared;
 
 func:main = int32(cstring[]:_~argv) {
-    arena<int64>:a = arena_make(4i64);
-    Handle<int64>:h = a.alloc();
-    Result<NIL>:p = a.put(h, 7i64);
-    Result<int64>:g = a.get(h);
-    if (p.is_error) { exit 10i32; }
-    if (g.is_error) { exit 10i32; }
-    if (g.value != 7i64) { exit 11i32; }
-    Result<NIL>:f = a.free(h);
-    if (f.is_error) { exit 12i32; }
-    a.reset();
-    a.destroy();
-    exit 0i32;
+    // LEXICAL_REFERENCE:122 reserves `buffer`, so it names no binding: the reference's
+    // answer is a refusal here. Measured: accepted; the program runs to its exit 3
+    // (a failure exit, so the leak check stays out of the way).
+    wild int8->:buffer = alloc(16i64);
+    exit 3i32;
 };
 
 func:failsafe = int32(Error:e) {
