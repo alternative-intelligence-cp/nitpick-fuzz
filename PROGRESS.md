@@ -1447,6 +1447,24 @@ the brief says.
   clause-context fields; hashes unmoved by blank lines). The final full run of all 2 328
   claims: 2 084 agree, 244 disagree. The 2 312 earlier claims re-ran identical. No finding.
 
+**TYPE 661–1176, `gen/m11_claims/type2.py`** (part A of TYPE 661–2122, S65). The workbench
+held the session at VERIFICATION's clean point, then relayed the author's go for TYPE, to
+land at a clean point by 95 % of the week. The week read 90 % before it.
+- **The extraction.** 268 claims (10 examples, 68 rows, 190 rules); 249 testable, 16 of
+  them M10's programs; 19 untestable: 5 `z3`, 4 `internal`, 4 `vague`, 3 `unobservable`,
+  2 `tree`, 1 `tool`. The range is §6 (tbb), §7 (the ternary and nonary kinds), §8 (the
+  flag families, one claim per member row) and §9 (structs with `sealed`/`hidden` and
+  `limit<Rules>` fields, fixed arrays, slices, tagged and generic enums). Committed before
+  any of its programs ran.
+  - Where the text says a cast "traps" and names no trap, the program's `failsafe` sends
+    every trap to 42 (`fs_any`), and the claim expects `run:42`.
+  - Every refusal of a `sealed`, `hidden` or `limit` rule expects the code the text names
+    (TYPE-079, -080, -081, -059, -063, -077), so a program refused for a spelling of its own
+    cannot agree.
+  - Reasoned while extracting, not measured: TYPE:805's two spellings `42` and `1T1T0t` are
+    not one value (balanced `1T1T0` is 81 − 27 + 9 − 3 = 60). The claim expects what the
+    text says.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
@@ -2008,6 +2026,14 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   entry with that stage and a bogus `kind`: the runner refuses the entry by name before
   anything runs. A known stage is refused for its kind, an unknown one for the stage. So
   no claim waits on the compiler's ladder.
+- **S65 — TYPE 661–2122 is taken in three parts, each to its own clean point.** The
+  workbench relayed the author's go with a softer landing line: TYPE lands at a clean point
+  by 95 % of the week, or stops at a clean point inside it. So the range is cut at section
+  boundaries: A, 661–1176 (§6–9, `type2.py`); B, 1177–1592 (§10–18, `type3.py`); C,
+  1593–2122 (§19–28, `type4.py`). Each part is extracted, committed, run, triaged, pushed
+  and reported on its own, as a reference is. A claims module may not import another (its
+  claims would load twice), so `type2.py` copies the scaffolding it shares with `type1.py`
+  and `verif3.py`.
 
 ## Log
 
