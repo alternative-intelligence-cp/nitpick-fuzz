@@ -1,0 +1,3 @@
+mod:elib;
+pub func:helper = int32() never fails { pass 1i32; };
+func:main = int32(cstring[]:_~argv) { exit 0i32; };

@@ -1,0 +1,3 @@
+mod:b;
+use "./c.npk".*;
+pub func:fb = int32() never fails { pass (raw fc()) + 1i32; };

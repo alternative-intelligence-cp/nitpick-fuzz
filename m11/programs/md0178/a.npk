@@ -1,0 +1,4 @@
+mod:a;
+use "./b.npk".*;
+pub struct:A = { int32:x; };
+pub func:fa = int32() never fails { pass (raw fb()) + 1i32; };

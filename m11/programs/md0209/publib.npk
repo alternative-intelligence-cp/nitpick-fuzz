@@ -1,0 +1,5 @@
+mod:publib;
+pub func:compute = int32() { pass 1i32; };
+pub struct:Point = { int32:x; };
+pub const int32:MAX = 100i32;
+pub mod:utils = { pub func:one = int32() never fails { pass 1i32; }; };

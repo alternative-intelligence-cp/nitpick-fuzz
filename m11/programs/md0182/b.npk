@@ -1,0 +1,3 @@
+mod:b;
+use "./a.npk".*;
+pub struct:SB = { SA:a; };

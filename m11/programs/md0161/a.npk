@@ -1,0 +1,4 @@
+mod:a;
+use "./b.npk".*;
+pub func:fa = int32() never fails { pass (raw fb()) + 1i32; };
+pub func:base = int32() never fails { pass 3i32; };

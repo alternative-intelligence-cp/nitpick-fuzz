@@ -1207,7 +1207,49 @@ the brief says.
   - DEF-130's and DEF-135's claims agree at `93bcb66`.
 - **The screen.** CONTROL's agreeing refusals were screened (S55).
 
+### M11, session 9 (local): the start checks, and MODULE
+
+- **The gate.** The brief came from `nitpick-libs_12`, the workbench orchestrator, with the
+  author's approval, after session 8's handoff (S60). `git fetch origin && git merge
+  --ff-only origin/main` was a no-op: `local-m11` = `origin/main` = `6eb5392`. M10 is
+  ticked and M11 is not.
+- **(a)** `uname -a` and `nproc` are under Environment below (the author's machine).
+- **(b)** `CLAUDE.md` was re-read; it is unchanged since `41ba27b`.
+- **(c)** `.work/` survives from session 8. Its three builds are byte-identical to the
+  recorded digests (`npkc` `c7212b6b…`, `5fd636b9…`, `0a8c9bf8…`; `npkc.ll` and `npkrt.o`
+  likewise), so nothing was rebuilt. The newest `main` for the findings stays `93bcb66`,
+  as the brief names it.
+- **(d)** M11 resumes from "the state at the stop".
+- **The machine checks.**
+  - The canaries give their four verdicts at HUNT2, the baseline and `93bcb66`.
+  - The recall suite is identical line for line at HUNT2 and the baseline (25 rows, 13 s).
+  - M10's 223 programs re-ran identical at HUNT2 (19 s): 212 agree, 11 disagree.
+- **The week.** `jq .rate_limits.seven_day ~/.claude/usage-latest.json` read 87% at the
+  start. The brief's limits: no new reference at 91%, land at 93%.
+
+**MODULE (all 300 lines), `gen/m11_claims/module.py`.**
+- **The extraction.** 139 claims (7 examples, 3 rows, 129 rules); 124 testable, 15
+  untestable with reasons (8 `tool`, 4 `vague`, 2 `internal`, 1 `tree`). No M10 item
+  tests a MODULE sentence. Committed before any of its programs ran.
+  - The programs' module spellings are the compiler's own module programs' at HUNT2
+    (`mod_qualified.npk`, `mod_file_import.npk`, `error_arm_forms.npk`).
+  - 23 claims are shell scripts (S61): a support file in a subdirectory, a header the
+    claim is about, an empty file, a diagnostic's wording, the IR's independence of the
+    import order, and the `extern` blocks in HUNT2's form.
+
 ## Environment
+
+*(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-34-generic #34~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Sep  4 15:38:29 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 21 used, 50 free, 135 available
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  1.7T used  4.9T avail (26%)
+python3:   Python 3.12.3
+llvm:      /usr/lib/llvm-20 (llvm-config 20.1.2), linked as .work/llvm
+earlyoom:  active
+```
 
 *(session 8, measured 2026-10-02 15:07 UTC; M11 resumed here — the start check (a))*
 
@@ -1720,6 +1762,25 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   line reports requested bytes, so "dropped at scope exit, not at last use" or "a
   temporary dies at its statement's end" is an exact peak, read from the code and not
   from a run. All six such claims agree.
+
+- **S60 — session 9 works on `local-m11`, on the brief from `nitpick-libs_12`.** Session 8
+  handed over with a pause until the week's reset. The workbench lifted it with the
+  author's approval: the machine is restarted only after every session has finished. The
+  scope is the ranges not started, smallest first: MODULE, LEXICAL, AST, BUILD, TRAITS,
+  VERIFICATION 1248–2351, TYPE 661–2122, as many as the week allows. The other rules are
+  S57's. Deduplication is against KNOWN_DEFECTS.md, the compiler's registry at `93bcb66`,
+  and F-029 … F-032 (the workbench's O-N35).
+- **S61 — a claim whose files the DSL cannot lay out is a shell script.** `files=` writes
+  support files beside the root only, and `gen/m11.py` requires each to open with its own
+  header. A claim about a subdirectory (`network/mod.npk`, `sub/a.npk`), about a header
+  (missing, wrong, or a file with no declarations), or about the `extern` vocabulary is
+  an `sh:0` script instead. It writes its files with heredocs, then either builds and
+  runs both legs by PLAN.md's recipe (`build`, `legs`), checks a refusal (`refused`, which
+  never counts an `EMIT-002`, as `gen/m11_run.py` does not), or checks an acceptance.
+  The `extern` blocks are written in HUNT2's form (`Bridge->` first, `Duration` last; the
+  compiler's own `extern_stub.npk`), so each script copies the compiler's
+  `lib/nbridge.npk` beside its program. The reference's own spelling of a block is
+  tested separately, as a claim program (`md0241`).
 
 ## Log
 

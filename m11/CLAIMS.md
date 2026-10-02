@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**1938 claims: 1673 testable, 265 untestable** (each with its reason).
+**2077 claims: 1797 testable, 280 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -20,6 +20,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | IO | 78 | 5 | 9 | 64 | 67 | 11 |
 | MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
 | MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
+| MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
 | OP | 159 | 0 | 87 | 72 | 157 | 2 |
 | TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 457 | 128 |
@@ -39,7 +40,7 @@ extracted:
 | LEXICAL | 410 | — | 0 | 1–410 |
 | MACRO | 412 | 1–412 | 412 | — |
 | MEMORY | 533 | 1–533 | 533 | — |
-| MODULE | 300 | — | 0 | 1–300 |
+| MODULE | 300 | 1–300 | 300 | — |
 | OP | 403 | 1–403 | 403 | — |
 | TRAITS | 766 | — | 0 | 1–766 |
 | TYPE | 2122 | 1–660 | 660 | 661–2122 |
@@ -954,6 +955,150 @@ Tables whose rows are not claims:
 | `me0526` | 526 | rule | “a program spawn and” | Threads are spawned and joined without limit: two hundred in sequence, each joined, run. | `run:0` |
 | `me0527` | 527 | rule | “The 65th LIVE thread is refused at its start” | The 65th live thread is refused at its start. | untestable [vague] the outcome of the refusal (a trap, an error, its identity) is not stated |
 | `me0530` | 530 | rule | “**A `stack` binding (§1.2) lives in the frame of the function that declares” | A `stack` binding lives in its function's frame: a large stack array is a large frame, refused at the prologue (StackExhausted). | `trap:StackExhausted` |
+
+## MODULE (`meta/specs/MODULE_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `md0013` | 13 | example | “```nitpick” | An inline module with a `pub` and a private function compiles, and its `pub` member is called qualified: `network.connect()` is 0. | `run:0` |
+| `md0016` | 16 | rule | “// Private” | A member written without `pub` is private: `network.internal()` from outside the module is refused. | `refuse` |
+| `md0021` | 21 | example | “```nitpick” | `mod:network;` after the header loads `network.npk` beside the file, and `network.connect()` calls into it. | `run:0` |
+| `md0024` | 24 | rule | “or `network/mod.npk` relative to the declaring file” | With no `network.npk`, `mod:network;` loads `network/mod.npk` (whose header is `mod:network;`). | `sh:0` |
+| `md0024b` | 24 | rule | “relative to the declaring file” | A `mod:b;` written in `sub/a.npk` loads `sub/b.npk`, not the `b.npk` beside the root. | `sh:0` |
+| `md0026` | 26 | rule | “`network.MAX` reads its binding” | After `mod:network;`, `network.MAX` reads the file's `pub` binding (42). | `run:0` |
+| `md0027` | 27 | rule | “`use network.*;`” | After `mod:network;`, `use network.*;` binds the file's `pub` names bare. | `run:0` |
+| `md0027b` | 27 | rule | “`use network.{connect};`” | After `mod:network;`, `use network.{connect};` binds `connect` bare. | `run:0` |
+| `md0028` | 28 | rule | “a `pub mod:network;` is” | A `pub mod:network;` in `mid.npk` is re-exported with its scope by `use "./mid.npk".*;`: `network.connect()` and `network.MAX` work in the importer. | `run:0` |
+| `md0030` | 30 | rule | “one meaning with `use "./network.npk" as network;`” | `use "./network.npk" as network;` gives the same symbol: `network.connect()` and `network.MAX` work through it. | `run:0` |
+| `md0030b` | 30 | rule | “one `inner` field” | The alias, the file import and the re-export share one `inner` field and one lookup. | untestable [internal] the symbol's field and lookup are the compiler's data structures; md0028 and md0030 test what a program sees of them |
+| `md0031` | 31 | rule | “The link is made when every module has been” | A re-export is linked after every module is collected: a name imported through a `pub mod:` that another file re-exports is bound, not empty. | `run:0` |
+| `md0034` | 34 | rule | “a `use` in any of its forms” | A `use "./lib.npk".*;` written inside an inline module binds into that module's scope. | `run:0` |
+| `md0034b` | 34 | rule | “a `pub use`” | A `pub use` inside an inline module re-exports through it: `m.f()` reaches the imported function. | `run:0` |
+| `md0035` | 35 | rule | “and a `mod:name;` written inside `mod:m = { … }` bind into `m`'s scope” | A `mod:lib;` written inside an inline module loads `lib.npk` beside the FILE and binds `lib` in the module's scope. | `run:0` |
+| `md0036` | 36 | rule | “under the same rounds and refusals as at” | An import inside an inline module is refused as at file level: a `use` of a file that does not exist is refused. | `refuse` |
+| `md0037` | 37 | rule | “and `use m.*;` binds what `m` re-exports” | `use m.*;` binds what the inline module `m` re-exports with `pub use`. | `run:0` |
+| `md0038` | 38 | rule | “sealed from its file's imports” | An inline module is sealed from its file's imports: a name the file imports is not visible inside the module. | `refuse` |
+| `md0042` | 42 | rule | “`mod:<dir>;` for a `dir/mod.npk`” | A `dir/mod.npk`'s header is `mod:<dir>;`: a `network/mod.npk` whose header is `mod:mod;` names another module and is refused, NITPICK-RESOLVE-012. | `sh:0` |
+| `md0043` | 43 | rule | “The header binds” | The header binds nothing: the file's own module name is not a symbol, so `md0043.f()` is refused. | `refuse` |
+| `md0044` | 44 | rule | “A file whose first” | A file whose first declaration is not its header is refused at that declaration, NITPICK-RESOLVE-012. | `sh:0` |
+| `md0045` | 45 | rule | “or a `mod:` naming another module, is refused” | A file whose header names another module (a sibling that exists) is refused, NITPICK-RESOLVE-012. | `sh:0` |
+| `md0046` | 46 | rule | “a file with no declarations at” | A file with no declarations at all is refused at its first line, NITPICK-RESOLVE-012. | `sh:0` |
+| `md0055` | 55 | rule | “Declared in any other module of the program” | `main` declared in an imported module is refused, NITPICK-RESOLVE-013. | `refuse:NITPICK-RESOLVE-013` |
+| `md0055b` | 55 | rule | “or inside an inline module” | `main` declared inside an inline module of the root is refused, NITPICK-RESOLVE-013. | `refuse:NITPICK-RESOLVE-013` |
+| `md0056` | 56 | rule | “either is refused (`NITPICK-RESOLVE-013`)” | `failsafe` declared in an imported module is refused, NITPICK-RESOLVE-013. | `refuse:NITPICK-RESOLVE-013` |
+| `md0056b` | 56 | rule | “the runtime calls both by name” | `failsafe` declared inside an inline module of the root is refused, NITPICK-RESOLVE-013. | `refuse:NITPICK-RESOLVE-013` |
+| `md0060` | 60 | rule | “Modules can be arbitrarily nested” | Modules nest: `mod:core = { mod:math = { … }; };` compiles, and `math` is reached inside `core`. | `run:0` |
+| `md0061` | 61 | rule | “Modules are private by default” | A nested module without `pub` is private: `core.math.sq(3i32)` from outside `core` is refused. | `refuse` |
+| `md0061b` | 61 | rule | “Use `pub mod` to expose them to outer scopes” | `pub mod` exposes a nested module: `core.math.sq(3i32)` from outside is 9. | `run:0` |
+| `md0063` | 63 | rule | “An inline module's members are reached QUALIFIED” | An inline module's member is not in scope bare outside it: `connect()` without a qualifier or an import is refused. | `refuse` |
+| `md0064` | 64 | rule | “the contract, purity, async” | A qualified call checks the member's `requires` as any named call does: a violated precondition traps RequiresViolated. | `trap:RequiresViolated` |
+| `md0065` | 65 | rule | “and argument rules of any named call” | A qualified call checks its arguments as any named call does: an `int64` passed for an `int32` parameter is refused. | `refuse` |
+| `md0065b` | 65 | rule | “`network.MAX` reads its binding” | `network.MAX` reads an inline module's `pub` binding (11). | `run:0` |
+| `md0066` | 66 | rule | “`network.E` names its error constant” | `m.Boom` names the inline module's error constant: `?! m.Boom` raises it, and failsafe's `(md0066.Boom)` arm sees it (signalled with 42, S45). | `run:42` |
+| `md0067` | 67 | rule | “(`core.math.sq(3i32)`)” | A member is reached qualified through any depth of nesting: `a.b.c.f()`, three modules down. | `run:0` |
+| `md0067b` | 67 | rule | “and IMPORTED with `use network.*;`” | `use network.*;` over an inline module binds its `pub` members bare. | `run:0` |
+| `md0068` | 68 | rule | “network.{connect, Point};`” | `use network.{connect, Point};` binds the function and the TYPE: `Point` is named bare outside the module. | `run:0` |
+| `md0068b` | 68 | rule | “`use network.connect;`” | `use network.connect;` binds the one member bare. | `run:0` |
+| `md0068c` | 68 | rule | “`use core.math as” | `use core.math as cm;` aliases a nested inline module: `cm.sq(3i32)` is 9. | `run:0` |
+| `md0069` | 69 | rule | “which is the only way an inline module's TYPES are named from” | An inline module's type is named from outside only by importing it: `network.Point:p` (qualified type) is refused. | `refuse` |
+| `md0070` | 70 | rule | “An alias (`use "./m.npk" as m;`)” | An alias carries its file's scope: after `use "./m.npk" as m;`, `m.f()` works across files. | `run:0` |
+| `md0071` | 71 | rule | “import carry their module's scope the same way” | A `pub mod:helpers = { … };` bound by a file import carries its scope: `helpers.f()` works in the importer. | `run:0` |
+| `md0072` | 72 | rule | “A module in value position is refused” | A module in value position is refused with "`m` is a module, not a value". | `sh:0` |
+| `md0073` | 73 | rule | “as is a type reached through one” | A type reached through a module, in value position, is refused (`int32:v = network.Point;`). | `refuse` |
+| `md0074` | 74 | rule | “member the module lacks is "module `m` has no member `x`"” | A member the module lacks is refused with "module `m` has no member `x`". | `sh:0` |
+| `md0077` | 77 | rule | “the basename of the declaring file, however deep the” | An error constant two inline modules deep is the FILE's identity: failsafe's `(md0077.Boom)` arm catches `a.b.Boom` (signalled with 42, S45). | `run:42` |
+| `md0079` | 79 | rule | “`use m.{Name};` then `(Name)` is the bare spelling” | After `use m.{Boom};`, the bare arm `(Boom)` catches the inline module's constant (signalled with 42, S45). | `run:42` |
+| `md0080` | 80 | rule | “SELECTOR IS CHECKED, in `failsafe` and in any other `pick`” | An arm over an `Error` in an ordinary `pick` is checked: `(nosuch.Boom)`, which no loaded file's constant hashes to, is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0080b` | 80 | rule | “`Error` SELECTOR IS CHECKED” | In an ordinary `pick` over an `Error`, the file-qualified arm `(md0080b.Boom)` catches the inline module's constant. | `run:0` |
+| `md0083` | 83 | rule | “`(m.Name)` with an inline module `m`” | A failsafe arm `(m.Boom)` qualified by the inline module, not the file, is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0083b` | 83 | rule | “`(file.Nosuch)`” | A failsafe arm `(file.Nosuch)` naming no constant of the file is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0083c` | 83 | rule | “`(nosuch.Name)`” | A failsafe arm `(nosuch.Boom)` naming no loaded file is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0084` | 84 | rule | “`(x.DivByZero)` (a system constant's code is explicit, never a hash)” | A failsafe arm `(x.DivByZero)` (a system constant under a qualifier) is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0087` | 87 | rule | “literal, a global, a range” | A literal arm over an `Error` selector is refused, NITPICK-TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `md0087b` | 87 | rule | “a global” | An arm naming a global (not an error constant) over an `Error` selector is refused, NITPICK-TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `md0087c` | 87 | rule | “a range” | A range arm over an `Error` selector is refused, NITPICK-TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `md0088` | 88 | rule | “three-plus segments” | A three-segment arm `(a.b.Boom)` over an `Error` selector is refused, NITPICK-TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `md0099` | 99 | rule | “**Wildcard** (All `pub` symbols)” | `use "./sqlib.npk".*;` binds every `pub` symbol of the file bare. | `run:0` |
+| `md0099b` | 99 | rule | “`use "path/module.npk".*;`” | The wildcard binds only `pub` symbols: the file's private `hidden()` is not bound by it. | `refuse` |
+| `md0100` | 100 | rule | “`use "path/module.npk".square;`” | `use "./sqlib.npk".square;` binds the one name. | `run:0` |
+| `md0101` | 101 | rule | “`use "path/module.npk".{square, pi};`” | `use "./sqlib.npk".{square, pi};` binds the two names. | `run:0` |
+| `md0102` | 102 | rule | “`use "path/module.npk" as math;`” | `use "./sqlib.npk" as math;` binds the namespace: `math.square(3i32)` and `math.pi`. | `run:0` |
+| `md0105` | 105 | example | “```nitpick” | The block's six logical-path imports compile together (with `nested`, `core.math` and a file import binding `helpers` declared), and each bound name works. | `run:0` |
+| `md0115` | 115 | rule | “`std` is the standard library's, resolved by the driver” | A logical path whose first segment is `std` is resolved by the driver against the standard library. | untestable [vague] the reference names no standard-library member whose signature a program could call, so what `use std.…` binds is not observable; md0105 and md0148 check that the forms compile |
+| `md0116` | 116 | rule | “other first segment must name a MODULE SYMBOL” | A logical path may start at a `use "…" as name;` alias: `use lib.{f};` after the alias binds `f`. | `run:0` |
+| `md0119` | 119 | rule | “last module's public names are then bound through the same binders” | Every form of the file imports works through a logical path: `use core.math.sq;` (one name) binds `sq`. | `run:0` |
+| `md0120` | 120 | rule | “forms use, in every form the file forms have” | Every form of the file imports works through a logical path: `use core.math.*;` binds `sq`. | `run:0` |
+| `md0121` | 121 | rule | “symbol in scope is refused by name (`NITPICK-RESOLVE-002`” | A logical path whose first segment names no module symbol in scope is refused, NITPICK-RESOLVE-002. | `refuse:NITPICK-RESOLVE-002` |
+| `md0122` | 122 | rule | “one naming a function or a binding "is not a module"” | A logical path whose first segment names a function is refused ("is not a module"). | `sh:0` |
+| `md0123` | 123 | rule | “the module lacks is `NITPICK-RESOLVE-007`” | A later segment the module lacks is refused, NITPICK-RESOLVE-007. | `refuse:NITPICK-RESOLVE-007` |
+| `md0124` | 124 | rule | “`NITPICK-RESOLVE-003`, exactly as for a named file import” | A later segment naming a private nested module is refused, NITPICK-RESOLVE-003. | `refuse:NITPICK-RESOLVE-003` |
+| `md0125` | 125 | rule | “so `use lib.*;` may stand” | Order never matters: `use lib.*;` written ABOVE the `use "./lib.npk" as lib;` that binds `lib` works. | `run:0` |
+| `md0127` | 127 | rule | “no program declares as a module (`NITPICK-RESOLVE-001`” | No program declares a module named `std`: `mod:std = { … };` is refused, NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `md0129` | 129 | rule | “same code refuses a module-level FUNCTION” | A module-level function named after a bare-name builtin (`mono_now`) is refused, NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `md0129b` | 129 | rule | “or an `extern` method, whose stub” | An `extern` method named after a bare-name builtin is refused, NITPICK-RESOLVE-001. | `sh:0` |
+| `md0133` | 133 | rule | “Methods are exempt” | A method named after a bare-name builtin is accepted: `b.mono_now()` is the method. | `run:0` |
+| `md0134` | 134 | rule | “refuses a CALLABLE binding of that name” | Inside a function, a parameter of function type named after a builtin is refused, NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `md0134b` | 134 | rule | “a parameter, a local” | Inside a function, a local of function type named after a builtin is refused, NITPICK-RESOLVE-001. | `refuse:NITPICK-RESOLVE-001` |
+| `md0134c` | 134 | rule | “CALLABLE binding” | Only a CALLABLE binding is refused: a plain `int64` local named after a builtin is accepted. | `run:0` |
+| `md0139` | 139 | rule | “strictly **not transitive**” | A plain `use` is not re-exported: a name `mid.npk` imports plain is not bound by `use "./mid.npk".*;`. | `refuse` |
+| `md0139b` | 139 | rule | “use `pub use` to expose them” | A `pub use` re-exports: a name `mid.npk` imports with `pub use` is bound by `use "./mid.npk".*;`. | `run:0` |
+| `md0139c` | 139 | rule | “re-exports it all the same” | A `pub use` of a path the module already imported plain (plain first) still re-exports it. | `run:0` |
+| `md0139d` | 139 | rule | “the two lines mean the same in either order” | The `pub use` re-exports in either order: `pub use` first, then the plain `use`. | `run:0` |
+| `md0146` | 146 | row | “\| `use "./util.npk"`, `use "../x/y.npk"` \| the **importing file's** directory \|” | A `../` path resolves against the IMPORTING file's directory: `sub/a.npk`'s `use "../x/y.npk"` loads `x/y.npk` beside the root. | `sh:0` |
+| `md0147` | 147 | row | “\| `use "nfs/path.npk"` \| the **dependency roots** \|” | A path not starting with `.` resolves against the dependency roots only: with no dependency, `use "nfs/path.npk"` is refused even with `nfs/path.npk` beside the importing file. | `sh:0` |
+| `md0148` | 148 | row | “\| `use std.math.*` \| the standard library \|” | `use std.math.*;` is a path the standard library resolves: the program compiles. | `compile` |
+| `md0150` | 150 | rule | “A dependency named `nfs` declared at `../nfs` roots at” | A dependency named `nfs` declared at `../nfs` roots at `../nfs/src/`. | untestable [tool] needs a package whose manifest declares a dependency (BUILD_REFERENCE §3); BUILD's claims test the manifest |
+| `md0153` | 153 | rule | “An ambiguous path is an error, not a first match.” | Two dependencies supplying the same path fail the build, naming both. | untestable [tool] needs a package whose manifest declares two dependencies (BUILD_REFERENCE §3) |
+| `md0160` | 160 | rule | “**A `use` cycle among modules is legal** (D-086)” | Two modules may import each other: `a.npk` and `b.npk`, each using the other's names, compile and run. | `run:0` |
+| `md0161` | 161 | rule | “and so may any longer ring” | A longer ring of imports is legal: a → b → c → a. | `run:0` |
+| `md0166` | 166 | rule | “Nitpick has no module-level execution” | There is no module-level execution: a statement at module level is refused. | `refuse` |
+| `md0178` | 178 | rule | “**Collect every declaration in every module in the graph before resolving any” | Every declaration of every module is collected before any body resolves: a struct of `a.npk` used in `b.npk`'s body, across an import cycle, resolves. | `run:0` |
+| `md0179` | 179 | rule | “lets a function refer to one” | A function may refer to one declared below it in the same file. | `run:0` |
+| `md0182` | 182 | rule | “depends on itself other than through a pointer” | A struct whose size depends on itself across two modules (by value) is refused. | `refuse` |
+| `md0182b` | 182 | rule | “other than through a pointer” | A struct cycle through a pointer is legal: `SA = { SB->:b; }` and `SB = { SA:a; }` compile. | `run:0` |
+| `md0182c` | 182 | rule | “or a `const` whose initialiser” | A module constant whose initialiser depends on itself (through another) is refused. | `refuse` |
+| `md0183` | 183 | rule | “The diagnostic names the members in the order they refer to” | The cycle's diagnostic names its members (`FIRST`, `SECOND`) on its first line, not "circular import". | `sh:0` |
+| `md0185` | 185 | rule | “The same module graph must produce” | The same module graph compiles to the same program whichever import the loader enters first: swapping the root's two import lines leaves the emitted IR identical. | `sh:0` |
+| `md0199` | 199 | rule | “strict binary visibility model” | Visibility has two levels only, public and private. | untestable [vague] no third level's spelling is named whose refusal a program could check |
+| `md0201` | 201 | rule | “Symbols are accessible only within the same module/file” | A private symbol of another file is not importable: `use "./lib.npk".private_here;` is refused. | `refuse` |
+| `md0201b` | 201 | rule | “Intra-module access to private symbols is always permitted” | A module's own `pub` function may call its private one: the importer sees the result. | `run:0` |
+| `md0203` | 203 | rule | “qualified path from outside its module (`nested.internal()`” | `nested.internal()`, a private member called qualified from outside, is refused, NITPICK-RESOLVE-003. | `refuse:NITPICK-RESOLVE-003` |
+| `md0204` | 204 | rule | “`nested.SECRET`” | `nested.SECRET`, a private binding read qualified from outside, is refused, NITPICK-RESOLVE-003. | `refuse:NITPICK-RESOLVE-003` |
+| `md0204b` | 204 | rule | “a hop through a private nested module” | `nested.deep.g()`, a `pub` member reached through a private nested module, is refused, NITPICK-RESOLVE-003. | `refuse:NITPICK-RESOLVE-003` |
+| `md0205` | 205 | rule | “`use nested.internal;`), is `NITPICK-RESOLVE-003`” | `use nested.internal;`, naming a private member by a `use`, is refused, NITPICK-RESOLVE-003. | `refuse:NITPICK-RESOLVE-003` |
+| `md0206` | 206 | rule | “"`internal` is private to `nested`"” | The refusal says "`internal` is private to `nested`". | `sh:0` |
+| `md0209` | 209 | example | “```nitpick” | The four `pub` declarations (a function, a struct, a `pub const`, a `pub mod`) compile in a file, and an importer uses each. | `run:0` |
+| `md0212` | 212 | rule | “pub const int32:MAX = 100i32;” | `pub const int32:MAX = 100i32;` declares a public module constant: `MAX` is 100. | `run:0` |
+| `md0219` | 219 | rule | “Legacy C-style/Rust-style `func name() -> type` is banned” | The legacy `func add(...) -> int32 { … }` syntax is refused. | `refuse` |
+| `md0221` | 221 | example | “```nitpick” | `func:add = int32(int32:a, int32:b) { pass (a + b); };` compiles, and `add(2, 3)` is 5. | `run:0` |
+| `md0226` | 226 | rule | “The compiler automatically wraps this in a `Result<int32>`” | The declared type is the success type, wrapped in `Result<int32>`: the call binds as a `Result<int32>` whose value is 5. | `run:0` |
+| `md0226b` | 226 | rule | “is the *success* type” | The call is a `Result<int32>`, not an `int32`: binding it to a plain `int32` is refused. | `refuse` |
+| `md0230` | 230 | rule | “**In-process FFI does not exist in Nitpick (D-149).**” | There is no in-process FFI; an `extern` block declares a driver process's interface. | untestable [vague] a statement of the design; its observable parts are md0241-md0274's |
+| `md0235` | 235 | rule | “line — past it, a segfault, a hang, or a scribbled heap in the foreign code” | A fault in the driver arrives in the Nitpick process as a value, never as an uninterceptable fault. | untestable [tool] needs a running driver process to fault |
+| `md0241` | 241 | example | “```nitpick” | The `cuda_driver` block (an opaque struct and two methods) is valid syntax: the program compiles. | `compile` |
+| `md0249` | 249 | rule | “The string names the driver; the functions are its methods.” | The block's string names the driver and its functions are the driver's methods. | untestable [vague] a statement of what the parts mean; md0250 checks the stub the methods become |
+| `md0250` | 250 | rule | “lowers each method to a **Bridge stub**” | Each method of an `extern` block lowers to a stub: the emitted IR defines a function for the method `probe`. | `sh:0` |
+| `md0252` | 252 | rule | “An `opaque struct` declared here is a” | An opaque struct declared in a block is a typed wire handle, minted by the driver, dead after a restart. | untestable [tool] needs a running driver to mint a handle and restart |
+| `md0259` | 259 | rule | “All driver methods return `Result<T>` like every other function” | A driver method's call is a `Result<T>`: binding `await probe(…)` to `Result<int64>` compiles. | `sh:0` |
+| `md0260` | 260 | rule | “**no per-method error contracts**” | Timeouts, driver death and protocol violations arrive as uniform negative codes in the D-141 space. | untestable [tool] needs a running driver to time out, die or violate the protocol |
+| `md0265` | 265 | rule | “written anymore. The grammar remains parsed and is refused by the checker” | A failure contract (`never fails`) on a driver method is parsed and refused by the checker, which names D-149. | `sh:0` |
+| `md0270` | 270 | rule | “Fixed-width scalars, POD structs of them, sized byte payloads, and typed” | A POD struct of fixed-width scalars is in the wire vocabulary: a method taking one compiles. | `sh:0` |
+| `md0270b` | 270 | rule | “Fixed-width scalars” | Every fixed-width scalar is in the wire vocabulary: a method taking an `int16` compiles. | `sh:0` |
+| `md0270c` | 270 | rule | “sized byte payloads” | A sized byte payload is in the wire vocabulary: a method taking an `int8[]` compiles. | `sh:0` |
+| `md0270d` | 270 | rule | “and typed” | A typed handle is in the wire vocabulary: a method taking the block's `opaque struct` compiles. | `sh:0` |
+| `md0271` | 271 | rule | “Payloads are **copied out of shared memory before validation**” | Payloads are copied out of shared memory before validation. | untestable [tool] the copy happens on a live ring; needs a running driver |
+| `md0273` | 273 | rule | “Nothing address-shaped crosses in either direction: no pointers” | No pointer crosses the wire: a method taking an `int32->` (besides its `Bridge->`) is refused. | `sh:0` |
+| `md0274` | 274 | rule | “(which is now valid nowhere in the language)” | `void*` is valid nowhere: a parameter of type `void->` is refused. | `refuse` |
+| `md0279` | 279 | rule | “an **interface hash derived from the `extern` block's signatures**” | The handshake carries an interface hash from the block's signatures; a stale driver is refused before any call. | untestable [tool] needs a driver built against another interface |
+| `md0281` | 281 | rule | “the generated stub implements the `Driver` trait with D-055's” | The stub implements the Driver trait with D-055's obligations (deadline, no partial results, supervised child, failsafe-reachable registry). | untestable [tool] the obligations are kept at run time against a running driver |
+| `md0284` | 284 | rule | “**C SDK header**” | The driver side is built against the C SDK header. | untestable [tree] the SDK is a file of the compiler's tree, not something a program does |
+| `md0289` | 289 | example | “```nitpick” | A driver method's call is read with `raw` or with `_!`; both forms compile and give the value. | `run:0` |
+| `md0296` | 296 | rule | “a `string` is `{ptr, len, cap}` and is **not** NUL-terminated” | A `string` is `{ptr, len, cap}` and is not NUL-terminated. | untestable [internal] a string's machine layout is not observable from a program without `wild` |
+| `md0296b` | 296 | rule | “a string literal converts at compile time” | A string literal converts to a `cstring` at compile time: `cstring:c = "abc";` compiles. | `compile` |
+| `md0296c` | 296 | rule | “`to_cstring(s)` converts a runtime `string`” | `to_cstring(s)` converts a runtime string without an interior NUL: the result is not an error. | `run:0` |
+| `md0298` | 298 | rule | “`int32->`: Scalar pointer” | `int32->` is a pointer to an int32: a write through it reaches the int32. | `run:0` |
+| `md0299` | 299 | rule | “`MyStruct->`: Struct pointer” | `MyStruct->` is a pointer to a struct: a read through it sees the struct's field. | `run:0` |
+| `md0300` | 300 | rule | “`any->`: Erased/Opaque pointer” | `any->` is the erased pointer type: a parameter of type `any->` compiles. | `compile` |
 
 ## OP (`meta/specs/OP_REFERENCE.md`)
 

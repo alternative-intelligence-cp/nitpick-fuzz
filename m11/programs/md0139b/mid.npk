@@ -1,0 +1,3 @@
+mod:mid;
+pub use "./lib.npk".f;
+pub func:anchor = int32() never fails { pass 0i32; };

@@ -1,0 +1,4 @@
+mod:hlib;
+pub mod:helpers = {
+    pub func:f = int32() never fails { pass 6i32; };
+};
