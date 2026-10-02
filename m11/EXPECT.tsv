@@ -2311,3 +2311,19 @@ vf1230	VERIFICATION	1230	rule	m11/programs/vf1230.npk	run:108	-
 vf1232	VERIFICATION	1232	rule	m10/programs/o22_simd_lane_overflow.npk	run:93	-
 vf1244	VERIFICATION	1244	rule	m11/programs/vf1244.sh	sh:0	-
 vf1245	VERIFICATION	1245	rule	m11/programs/vf1245.sh	sh:0	-
+vf1264	VERIFICATION	1264	rule	m11/programs/vf1264.sh	sh:0	-
+vf1281	VERIFICATION	1281	rule	m11/programs/vf1281.sh	sh:0	-
+vf1297	VERIFICATION	1297	rule	m11/programs/vf1297.sh	sh:0	-
+vf1308	VERIFICATION	1308	rule	m11/programs/vf1308.sh	sh:0	-
+vf1319	VERIFICATION	1319	rule	m11/programs/vf1319.sh	sh:0	-
+vf1330	VERIFICATION	1330	rule	m11/programs/vf1330.npk	refuse:NITPICK-BORROW-013	-
+vf1334	VERIFICATION	1334	rule	m11/programs/vf1334.npk	ir:call [^\n]*@npk_raise\(i32	-
+vf1363	VERIFICATION	1363	rule	m11/programs/vf1363.sh	sh:0	-
+vf1374	VERIFICATION	1374	rule	m11/programs/vf1374.sh	sh:0	-
+vf1405	VERIFICATION	1405	rule	m11/programs/vf1405.npk	ir:@npk_trap\(i32 -4110\)	-
+vf1406	VERIFICATION	1406	rule	m11/programs/vf1406.npk	ir:@npk_trap\(i32 -4099\)	-
+vf1410	VERIFICATION	1410	rule	m11/programs/vf1410.npk	ir:@npk_trap\(i32 -4119\)	-
+vf1452	VERIFICATION	1452	rule	m11/programs/vf1452.sh	sh:0	-
+vf2141	VERIFICATION	2141	rule	m11/programs/vf2141.npk	ir:^define [^\n]*@"npk\.vf2141\.helper"\([^\n]*"split-stack"	-
+vf2145	VERIFICATION	2145	rule	m11/programs/vf2145.npk	run:106	-
+vf2149	VERIFICATION	2149	rule	m11/programs/vf2149.sh	sh:0	-

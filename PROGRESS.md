@@ -1430,6 +1430,19 @@ the brief says.
   agreed for a reason of their own and were re-spelled; each now agrees or disagrees for
   the claim's reason.
 
+**VERIFICATION 1248–2351, `gen/m11_claims/verif3.py`.** The week read 90% before it.
+- **The extraction.** 131 claims (2 examples, 49 rows, 80 rules); 16 testable, 115
+  untestable: 87 `tool`, 13 `z3`, 12 `tree`, 2 `vague`, 1 `internal`. The range is §8
+  (the SMT elimination manifest), §9 (the floor's obligations: the spec grammar, the
+  kernel boundary and its 30-row effect table, the rows and verdicts, the protocol
+  models, the floor's stack) and §10 (the schedule explorer). Nearly all of it is the
+  verified build's runners, the floor's translator, the models and the explorer, which
+  need z3 or `npkg`'s full ladder (verif2's reasons, copied). Committed before any of its
+  programs ran.
+  - The tested claims are what the compiler emits: `npkc --obligations` scripts
+    (verif2's scaffolding, copied) and `ir:` tests of the trap spellings (`@npk_trap(i32
+    -4110)`, `-4099`, `-4119`; a program's raise `@npk_raise`).
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
