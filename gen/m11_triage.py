@@ -182,6 +182,23 @@ put("extract", "the sentence gives the refusal's sense, \"is not a module\"; the
 put("extract", "the two IRs hold the same lines: only `fb`'s definition moves with the import order. The script "
     "demanded a byte-identical file, which is more than \"the same program\"", "md0185")
 
+# ---- session 9: LEXICAL_REFERENCE (documentation rows are F-035, compiler rows F-036)
+put("comp", "F-036 a: four keywords (`acquire`, `any`, `trit`, `nit`) are accepted as a module-level function's "
+    "name, and the function can never be called (PARSE-002 at the call): DEF-103's fix exempts them at every "
+    "function site, for the method names it meant", "lx0054", "lx0114", "lx0121")
+put("comp", "F-036 b: a decimal literal ending in an underscore (`10_i32`) is accepted, against "
+    "`DecimalLiteral ::= [0-9] ([0-9_]* [0-9])?`", "lx0296b")
+put("doc", "F-035: `++` and `--` are listed as operator tokens; they are removed (D-174), PARSE-010", "lx0174")
+put("doc", "F-035: the full-tier syscall is not spelled `sys_full`: no such builtin (RESOLVE-002); the syscall "
+    "builtin is `sys`", "lx0256")
+put("doc", "F-035: `f128` is listed as a literal suffix, and `flt128` is a storage format with no literals "
+    "(TYPE-030, D-143)", "lx0315")
+put("doc", "F-035: \"`0u64 - 1u64` is the maximum\" (LEXICAL:324) is TYPE-076, as the note at LEXICAL:328-331 "
+    "says", "lx0324")
+put("doc", "F-035: the LBIM note (LEXICAL:353-354) is dead (TYPE:449): `5i2048` is a literal, and there is no "
+    "`parse_uint2048`", "lx0353", "lx0354")
+put("known", "DEF-131 (F-015): `<=>` refused by the emitter (EMIT-002); it compiles and runs at 93bcb66", "lx0178")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

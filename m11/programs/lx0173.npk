@@ -14,7 +14,7 @@ func:main = int32(cstring[]:_~argv) {
     x += 1i32; x -= 2i32; x *= 3i32; x /= 11i32; x %= 2i32;
     int32:y = raw v32(6i32);
     y &= 3i32; y |= 8i32; y ^= 1i32; y <<= 2i32; y >>= 1i32;
-    if (!(a + b == 17i32 && a - b == 7i32 && a * b == 60i32 && a / b == 2i32 && a %% b == 2i32)) { exit 10i32; }
+    if (!(a + b == 17i32 && a - b == 7i32 && a * b == 60i32 && a / b == 2i32 && a % b == 2i32)) { exit 10i32; }
     if (!(x == 1i32)) { exit 11i32; }
     if (!(y == 22i32)) { exit 12i32; }
     if (!((a == 12i32) && (a != b) && (b < a) && (b <= 5i32) && (a > b) && (a >= 12i32))) { exit 13i32; }

@@ -1119,3 +1119,17 @@ trait:Show = {
 };
 impl:Box:Show = {};"""),
       wrong="refused")
+
+# ================================================================== after run 1 (S45, S53)
+# The programs' own mistakes; every expectation above is unchanged.
+refix("lx0167", "a `decreases` measure is a contract position, which calls only `pure` functions (TYPE-060): "
+      "the measure is now a local read from the identity helper, not the helper's call",
+      [("    while (i < 3i64) decreases raw v64(5i64) { i = i + 1i64; }",
+        "    int64:m = raw v64(5i64);\n    while (i < 3i64) decreases m { i = i + 1i64; }")])
+refix("lx0173", "a check passed into the %-formatted body kept `%%` as written (PARSE-002); it is `%`",
+      [("a %% b == 2i32", "a % b == 2i32")])
+WHY_IDT = ("a generic identity cannot pass out its lent parameter (TYPE-047, D-065); `idt` now ignores it and "
+           "passes 5")
+for cid in ("lx0239", "lx0240"):
+    refix(cid, WHY_IDT + (" (lx0239 agreed in run 1 for its own parse error, which still stands)" if cid == "lx0239" else ""),
+          [("func:idt<T> = T(T:x) never fails { pass x; };", "func:idt<T> = int32(T:_~x) never fails { pass 5i32; };")])

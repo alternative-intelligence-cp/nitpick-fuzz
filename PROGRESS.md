@@ -49,13 +49,14 @@ committed. A session that starts here resumes at the first unticked box.
     extracted MEMORY, OP and CONTROL in turn, each to a clean point: F-029 … F-032. Its
     scope is done.
   - Session 9 (2026-10-02, the workbench's next brief, S60) extracts the ranges not
-    started, smallest first. MODULE is done, to a clean point: F-033, F-034.
-  - Extracted so far: 5 351 of 10 419 lines; 2 077 claims, 1 797 tested, 1 610 agree,
-    187 disagree.
+    started, smallest first. MODULE and LEXICAL are done, each to a clean point: F-033 …
+    F-036.
+  - Extracted so far: 5 761 of 10 419 lines; 2 261 claims, 1 978 tested, 1 780 agree,
+    198 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST and LEXICAL not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 610 agree, 187 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL whole, TYPE 1–660, VERIFICATION 1–1247 done; TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD and AST not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 1 780 agree, 198 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -960,30 +961,32 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's MODULE (S60): extracted, run, triaged, committed,
-pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's LEXICAL (S60), after its MODULE: extracted, run,
+triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
-- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL and MODULE whole,
-  TYPE 1–660 and VERIFICATION 1–1247. That is 5 351 of the references' 10 419 lines (S58
-  corrected the count).
-- **2 077 claims, 1 797 testable, 280 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 610 agree, 187 disagree**.
+- Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE and LEXICAL
+  whole, TYPE 1–660 and VERIFICATION 1–1247. That is 5 761 of the references' 10 419
+  lines (S58 corrected the count).
+- **2 261 claims, 1 978 testable, 283 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **1 780 agree, 198 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-034:
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-036:
 - MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
   documentation rows);
 - OP's is F-031 (five documentation rows);
 - CONTROL's is F-032 (six documentation rows);
 - MODULE's are F-033 (seven documentation rows) and F-034 (three lower-priority compiler
+  rows);
+- LEXICAL's are F-035 (six documentation rows) and F-036 (two lower-priority compiler
   rows).
 
-**Not started:** TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD, AST and LEXICAL.
-About 5 070 lines, roughly 2 500 claims. Session 9's brief (S60) takes them smallest
-first: LEXICAL, AST, BUILD, TRAITS, VERIFICATION 1248–2351, TYPE 661–2122.
+**Not started:** TYPE 661–2122, VERIFICATION 1248–2351, TRAITS, BUILD and AST. About
+4 660 lines, roughly 2 300 claims. Session 9's brief (S60) takes them smallest first: AST,
+BUILD, TRAITS, VERIFICATION 1248–2351, TYPE 661–2122.
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -997,7 +1000,7 @@ first: LEXICAL, AST, BUILD, TRAITS, VERIFICATION 1248–2351, TYPE 661–2122.
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-035.
+   and extend `REPORT.md` §12. Findings number on from F-037.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1277,6 +1280,27 @@ the brief says.
     accepted (S63).
   - The base-suffixed literals are written as the reference writes them, with no type
     suffix, in a typed declaration (`int32:b = 0Tt;`, D-148's contextual type).
+- **Run 1:** 167 agree, 14 disagree (14 s).
+- **The fixes.** Four programs were fixed for mistakes of their own:
+  - a `decreases` measure called the identity helper, in a contract position (TYPE-060);
+  - a check kept a `%%`;
+  - a generic identity passed out its lent parameter (TYPE-047): `lx0240`, and `lx0239`,
+    which had agreed through its own parse error.
+- **Run 2:** 170 agree, 11 disagree. The final full run of all 1 978 claims: 1 780 agree,
+  198 disagree. The 1 797 earlier claims re-ran identical.
+- **Triage of the 11**, each run at the baseline and `93bcb66`:
+  - 6 documentation rows (F-035): `++`/`--`, `sys_full`, the `f128` suffix, `0u64 -
+    1u64`, the dead LBIM note twice;
+  - 2 lower-priority compiler rows over 4 claims (F-036). Four keywords (`acquire`,
+    `any`, `trit`, `nit`) are accepted as a function's name, which no call can reach:
+    DEF-103's residue, measured by hand at HUNT2 and `93bcb66`. And a literal's trailing
+    underscore is accepted;
+  - 1 known: DEF-131's `<=>` (`lx0178`), which compiles and runs at `93bcb66`.
+
+  All stand at the baseline and at `93bcb66`, but `lx0178`. At the baseline, which
+  predates DEF-103's fix, more keywords are accepted as a function's name.
+- **The screen.** LEXICAL's agreeing refusals were screened (S55): each is the claim's
+  own reason. `lx0239`'s parse error is its claim's.
 
 ## Environment
 
@@ -1972,3 +1996,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     disagree. 24 programs fixed over two runs. Final: 109 agree, 15 disagree. Triaged:
     F-033 (7 documentation rows), F-034 (3 lower-priority compiler rows), 1 known
     (DEF-153), 2 not findings.
+  - **LEXICAL.** 184 claims, committed before any run (`a967fbc`). Run 1: 167 agree, 14
+    disagree. Four programs fixed. Final: 170 agree, 11 disagree. Triaged: F-035 (6
+    documentation rows), F-036 (2 lower-priority compiler rows), 1 known (DEF-131).

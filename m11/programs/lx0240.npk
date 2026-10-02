@@ -7,7 +7,7 @@ mod:lx0240;
 
 func:v32 = int32(int32:x) never fails { pass x; };
 
-func:idt<T> = T(T:x) never fails { pass x; };
+func:idt<T> = int32(T:_~x) never fails { pass 5i32; };
 
 func:main = int32(cstring[]:_~argv) {
     int32:v = raw idt::<int32>(raw v32(5i32));

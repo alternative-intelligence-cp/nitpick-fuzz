@@ -13,31 +13,32 @@ before the first run.
 | CONCURRENCY | 152 | 11 | 21 | 120 | 30 | 122 | 122 | 101 | 21 |
 | CONTROL | 110 | 14 | 7 | 89 | 2 | 108 | 108 | 98 | 10 |
 | IO | 78 | 5 | 9 | 64 | 11 | 67 | 67 | 60 | 7 |
+| LEXICAL | 184 | 9 | 34 | 141 | 3 | 181 | 181 | 170 | 11 |
 | MACRO | 124 | 13 | 34 | 77 | 5 | 119 | 119 | 98 | 21 |
 | MEMORY | 181 | 10 | 11 | 160 | 35 | 146 | 146 | 137 | 9 |
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
 | VERIFICATION | 585 | 9 | 97 | 479 | 128 | 457 | 457 | 435 | 22 |
-| **total** | 2077 | 90 | 452 | 1535 | 280 | 1797 | 1797 | 1610 | 187 |
+| **total** | 2261 | 99 | 486 | 1676 | 283 | 1978 | 1978 | 1780 | 198 |
 
-**These denominators cover 5351 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL none of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
+**These denominators cover 5761 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST none of 644; BUILD none of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS none of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
 - `z3` 92 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `vague` 49 — the sentence states no checkable outcome
-- `internal` 46 — a compiler internal no program observes (an AST field, a table's layout)
-- `tree` 43 — a claim about the compiler's own source tree, generators, harness or documents
+- `vague` 50 — the sentence states no checkable outcome
+- `internal` 47 — a compiler internal no program observes (an AST field, a table's layout)
+- `tree` 44 — a claim about the compiler's own source tree, generators, harness or documents
 - `unobservable` 24 — no program can tell the claim's truth from its falsehood
 - `tool` 16 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 2 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (187)
+## 2. The disagreements (198)
 
-By kind: `refused` 97, `wrong_exit` 34, `accepted` 27, `ir` 13, `other_code` 7, `emit_defect` 6, `crash` 3.
+By kind: `refused` 102, `wrong_exit` 37, `accepted` 29, `ir` 13, `emit_defect` 7, `other_code` 7, `crash` 3.
 
 | class | claims |
 |---|---|
@@ -47,9 +48,9 @@ By kind: `refused` 97, `wrong_exit` 34, `accepted` 27, `ir` 13, `other_code` 7, 
 | compiler: npkc traps, exit 3 (F-024) | 4 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 21 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 120 |
-| known: deduplicated against KNOWN_DEFECTS.md | 15 |
+| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 25 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 126 |
+| known: deduplicated against KNOWN_DEFECTS.md | 16 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or no valid program can test it | 14 |
 
@@ -109,6 +110,17 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `io0212` | IO:212 | `close(release_fd(move o))` closes an owned descriptor and reports the verdict: the reader then sees end of input. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-028: `close(release_fd(move o))` is PARSE-001; the spelling is `move(o)` | same / same @1b4f0c6 |
 | `io0232` | IO:232 | Seeking a buffered stream discards its read buffer: after a text reader has read `ab` (buffering `cd`), seeking to the start and reading gives `ab` again. | `run:0` | npkc 1 TYPE-019,TYPE-043, -/- (`refused`) | F-028: no buffered stream has seek | same / same @1b4f0c6 |
 | `io0242b` | IO:242 | The standard streams belong to main's scope and are passed down: constructing one in a helper function is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-028: the standard streams are not confined to main's scope | same / same @1b4f0c6 |
+| `lx0054` | LEXICAL:54 | `relaxed`, `acquire`, `release`, `acq_rel`, `seq_cst`: each is reserved, so a local and a function of that name are each refused. | `sh:0` | sh 1 (`wrong_exit`) | F-036 a: four keywords (`acquire`, `any`, `trit`, `nit`) are accepted as a module-level function's name, and the function can never be called (PARSE-002 at the call): DEF-103's fix exempts them at every function site, for the method names it meant | same / same @93bcb66 |
+| `lx0114` | LEXICAL:114 | `dyn`, `any`, `Result`, `Optional`: each is reserved, so a local and a function of that name are each refused. | `sh:0` | sh 1 (`wrong_exit`) | F-036 a: four keywords (`acquire`, `any`, `trit`, `nit`) are accepted as a module-level function's name, and the function can never be called (PARSE-002 at the call): DEF-103's fix exempts them at every function site, for the method names it meant | same / same @93bcb66 |
+| `lx0121` | LEXICAL:121 | `trit`, `tryte`, `nit`, `nyte`: each is reserved, so a local and a function of that name are each refused. | `sh:0` | sh 1 (`wrong_exit`) | F-036 a: four keywords (`acquire`, `any`, `trit`, `nit`) are accepted as a module-level function's name, and the function can never be called (PARSE-002 at the call): DEF-103's fix exempts them at every function site, for the method names it meant | same / same @93bcb66 |
+| `lx0174` | LEXICAL:174 | `++` and `--` are operator tokens: `x++; x--;` compiles. | `compile` | npkc 1 PARSE-010, -/- (`refused`) | F-035: `++` and `--` are listed as operator tokens; they are removed (D-174), PARSE-010 | same / same @93bcb66 |
+| `lx0178` | LEXICAL:178 | `<=>` is an operator: `a <=> b` compiles and orders (-1 when a < b). | `run:0` | npkc 1 EMIT-002, -/- (`emit_defect`) | DEF-131 (F-015): `<=>` refused by the emitter (EMIT-002); it compiles and runs at 93bcb66 | same / npkc 0 , 0/0 @93bcb66 |
+| `lx0256` | LEXICAL:256 | The full-tier syscall is spelled `sys_full`: `sys_full(39i64)` compiles. | `compile` | npkc 1 RESOLVE-002, -/- (`refused`) | F-035: the full-tier syscall is not spelled `sys_full`: no such builtin (RESOLVE-002); the syscall builtin is `sys` | same / same @93bcb66 |
+| `lx0296b` | LEXICAL:296 | A decimal literal ends with a digit: `10_i32` (a trailing underscore) is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-036 b: a decimal literal ending in an underscore (`10_i32`) is accepted, against `DecimalLiteral ::= [0-9] ([0-9_]* [0-9])?` | same / same @93bcb66 |
+| `lx0315` | LEXICAL:315 | The suffixes `f32`, `f64` and `f128` are float literals' types. | `compile` | npkc 1 TYPE-030, -/- (`refused`) | F-035: `f128` is listed as a literal suffix, and `flt128` is a storage format with no literals (TYPE-030, D-143) | same / same @93bcb66 |
+| `lx0324` | LEXICAL:324 | `0u64 - 1u64` is uint64's maximum. | `run:0` | npkc 1 TYPE-076, -/- (`refused`) | F-035: "`0u64 - 1u64` is the maximum" (LEXICAL:324) is TYPE-076, as the note at LEXICAL:328-331 says | same / same @93bcb66 |
+| `lx0353` | LEXICAL:353 | `int2048` has no direct source literal: `5i2048` is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-035: the LBIM note (LEXICAL:353-354) is dead (TYPE:449): `5i2048` is a literal, and there is no `parse_uint2048` | same / same @93bcb66 |
+| `lx0354` | LEXICAL:354 | Such a value is instantiated by parsing: `parse_uint2048("1.5e308")` compiles. | `compile` | npkc 1 RESOLVE-002, -/- (`refused`) | F-035: the LBIM note (LEXICAL:353-354) is dead (TYPE:449): `5i2048` is a literal, and there is no `parse_uint2048` | same / same @93bcb66 |
 | `mc0046b` | MACRO:46 | "is whatever `b` is": an alias whose target is a declaration macro, invoked at module level, emits the target's declarations. | `run:0` | npkc 1 MACRO-005, -/- (`refused`) | F-027 c: an alias of a declaration macro is refused at module level (MACRO-005), against D-125 | same / same @1b4f0c6 |
 | `mc0085b` | MACRO:85 | A variable declaration carrying a qualifier (`fixed`) spliced into a struct body is refused rather than stripped: "a field has neither". | `refuse` | npkc 0 , 0/0 (`accepted`) | F-027 a: a `fixed` qualifier spliced into a struct body is stripped, not refused | same / same @1b4f0c6 |
 | `mc0112` | MACRO:112 | The emit_helpers example: three emitted declarations referencing each other; helper_sum is 42. | `run:0` | npkc 1 MACRO-009,TYPE-042, -/- (`refused`) | F-028: the example uses `raw` on a callee that is not never fails (D-163) | same / same @1b4f0c6 |
@@ -247,7 +259,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (105; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (109; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -287,6 +299,10 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `ct0055` | a unit variant's pattern is qualified by its enum (`(Opt.Non)`; RESOLVE-002 for the bare `(Non)`), as a payload variant's `(Som(x))` is not |
 | `ct0199` | `$` is the counter, an int64 whatever the bounds' type (TYPE-007 for an int32 `x += $`); the example leaves x untyped, so the program's x is an int64 |
 | `ct0207` | `$` is the counter, an int64 whatever the bounds' type (TYPE-007 for an int32 `x += $`); the example leaves x untyped, so the program's x is an int64 |
+| `lx0167` | a `decreases` measure is a contract position, which calls only `pure` functions (TYPE-060): the measure is now a local read from the identity helper, not the helper's call |
+| `lx0173` | a check passed into the %-formatted body kept `%%` as written (PARSE-002); it is `%` |
+| `lx0239` | a generic identity cannot pass out its lent parameter (TYPE-047, D-065); `idt` now ignores it and passes 5 (lx0239 agreed in run 1 for its own parse error, which still stands) |
+| `lx0240` | a generic identity cannot pass out its lent parameter (TYPE-047, D-065); `idt` now ignores it and passes 5 |
 | `mc0312b` | it agreed for another reason: `assert_static comptime(...)` is refused for its spelling (PARSE-001; mc0312's row), so the program now writes `assert_static(comptime(...))` and the refusal it expects is the false proposition's |
 | `me0120` | `buffer` is a reserved word in expression position (LEXICAL:122): a binding declared `buffer` compiles but cannot be referenced (PARSE-002); the program's binding is `buf` (the example's own line, which never references it, is the documentation row this observation adds) |
 | `me0179` | `buffer` is a reserved word in expression position (LEXICAL:122): a binding declared `buffer` compiles but cannot be referenced (PARSE-002); the program's binding is `buf`; run 1 AGREED for that reason, not for the use after move |
@@ -357,6 +373,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 1797 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 1978 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

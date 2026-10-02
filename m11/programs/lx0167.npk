@@ -9,7 +9,8 @@ func:v64 = int64(int64:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
     int64:i = raw v64(0i64);
-    while (i < 3i64) decreases raw v64(5i64) { i = i + 1i64; }
+    int64:m = raw v64(5i64);
+    while (i < 3i64) decreases m { i = i + 1i64; }
     exit 10i32;
 };
 
