@@ -199,6 +199,54 @@ put("doc", "F-035: the LBIM note (LEXICAL:353-354) is dead (TYPE:449): `5i2048` 
     "`parse_uint2048`", "lx0353", "lx0354")
 put("known", "DEF-131 (F-015): `<=>` refused by the emitter (EMIT-002); it compiles and runs at 93bcb66", "lx0178")
 
+# ---- session 9: AST_REFERENCE (F-037 memory, F-038 crash, F-039 lower-priority compiler rows,
+#      F-040 documentation rows)
+put("mem", "F-037: a trait object built by `x => dyn Trait` reads freed memory: its method returns the "
+    "0xAA poison (170), where the implicit `dyn Trait:d = move(x);` returns the field", "as0453")
+put("crash", "F-038: npkc traps (exit 3, no diagnostic) on `give` or `fall` outside a pick arm",
+    "as0202", "as0203", "as0267")
+put("comp", "F-039 a: a function with a `comptime` value parameter passes the checker and is EMIT-002 (a hole "
+    "the compiler names)", "as0062")
+put("comp", "F-039 b: the backward pipe takes its function on the RIGHT, as `|>` does: `dbl <| x` is "
+    "TYPE-007, and `x <| dbl` computes dbl(x) (OP:378 says it passes to the LEFT function)", "as0301")
+put("comp", "F-039 c: a `joins` deadline that is no constant expression is accepted (a call; a parameter's "
+    "call, measured by hand)", "as0555")
+put("comp", "F-039 d: an attribute the language does not have is accepted and ignored: the removed "
+    "`#[lexical_drop]`, and `#[nosuch_attribute]` (measured by hand)", "as0583")
+DOC40 = (
+    ("F-040: an `opaque struct` is accepted at module level, and refused inside an `extern` block (EXTERN-001, "
+     "D-190): the row's \"`extern`-block item only\" is reversed", ("as0043",)),
+    ("F-040: `pub const int32:MAX = 100i32;` and a `const` local qualifier do not parse (PARSE-001): `const` "
+     "is retired (AST:505 says so)", ("as0044", "as0499")),
+    ("F-040: `unit:Hertz = 1 / Seconds;` is RESOLVE-001: the prelude declares `Hertz` (another name compiles)",
+     ("as0045",)),
+    ("F-040: `failsafe` takes one `Error` (TYPE-044, D-179), not `tbb32:err`", ("as0093",)),
+    ("F-040: an extern method's failure contract is not required (it compiles without one) and `never fails` "
+     "on one is EXTERN-002: D-149 removed the contracts (MODULE:263-266)", ("as0128", "as0137")),
+    ("F-040: a Result literal's `err` is an `Error` (D-179): `err: 0i32` is TYPE-007, and a success literal "
+     "omits `err` (TYPE:1330)", ("as0195", "as0307")),
+    ("F-040: `FFhex` is an identifier (D-147, LEXICAL:337), not a literal (RESOLVE-002)", ("as0281",)),
+    ("F-040: `++` and `--` are removed (D-174, PARSE-010)", ("as0297",)),
+    ("F-040: generic arguments in an expression take the turbofish (LEXICAL:239, D-064): `f<int32>(x)` is "
+     "PARSE-002", ("as0364",)),
+    ("F-040: UFCS reaches a free function named `magnitude(p)` (TRAITS:494), not `Point_magnitude(p)`, which "
+     "`p.magnitude()` does not find (TYPE-019)", ("as0365",)),
+    ("F-040: `ok` is no bare-name builtin: it is removed (AST:329, D-097), RESOLVE-002", ("as0385b",)),
+    ("F-040: a bare-name builtin need not return `Result<T>`: `string_byte_length` returns `int64` (TYPE-007 "
+     "binding it to `Result<int64>`)", ("as0403",)),
+    ("F-040: the bare `?` fallback is struck (D-175, PARSE-011), and `?|` is the fallback, not struck",
+     ("as0413", "as0416")),
+    ("F-040: `?!`'s argument is an `Error` constant (D-179), not a `tbb32` (TYPE-007)", ("as0415",)),
+    ("F-040: a cast to a `wild` target is `=>!` (D-019's one door): `p => wild int8->` is BORROW-011, even "
+     "from a pointer that is no borrow (measured by hand)", ("as0437",)),
+    ("F-040: there is no `vec3(…)` constructor: `vec3` is a library type (D-135), RESOLVE-002", ("as0450",)),
+)
+for _t, _ids in DOC40:
+    put("doc", _t, *_ids)
+put("known", "DEF-131 (F-015): `<=>` refused by the emitter (EMIT-002); it compiles and runs at 93bcb66", "as0295b")
+put("known", "DEF-153 (F-027 c): a string literal in `cstring` position is TYPE-007; it compiles at 93bcb66",
+    "as0492")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

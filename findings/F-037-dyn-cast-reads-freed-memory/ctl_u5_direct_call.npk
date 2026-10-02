@@ -1,20 +1,15 @@
-// M11 as0300 -- meta/specs/AST_REFERENCE.md:300 (row)
-// quote: `$$i` / `$$m`
-// claim: `$$m` takes a mutable borrow: a write through `$$m arr[2]` changes the element.
-// expect: run:0
-// wrong: refused, or 10
-mod:as0300;
+mod:ctl_u5_direct_call;
 
-func:vb = bool(bool:x) never fails { pass x; };
+trait:Speaks = { func:say = int32(Self:self); };
+struct:Pod = { int32:v; int32:w; };
+impl:Pod:Speaks = { func:say = int32(Pod:self) { pass self.v; }; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32[4]:arr = [1i32, 2i32, 3i32, 4i32];
-    if (raw vb(true)) {
-        int32->:p = $$m arr[2i64];
-        <-p = 9i32;
-    }
-    if (!(arr[2i64] == 9i32)) { exit 10i32; }
-    exit 0i32;
+    // The control: the method called on the struct itself.
+    Pod:l = Pod{ v: 7i32, w: 8i32 };
+    int32:v = l.say() ?| 0i32;
+    if (v == 7i32) { exit 0i32; }
+    exit 11i32;
 };
 
 func:failsafe = int32(Error:e) {

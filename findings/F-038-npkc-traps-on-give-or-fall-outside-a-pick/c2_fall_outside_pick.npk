@@ -1,19 +1,11 @@
-// M11 as0300 -- meta/specs/AST_REFERENCE.md:300 (row)
-// quote: `$$i` / `$$m`
-// claim: `$$m` takes a mutable borrow: a write through `$$m arr[2]` changes the element.
-// expect: run:0
-// wrong: refused, or 10
-mod:as0300;
+mod:c2_fall_outside_pick;
 
-func:vb = bool(bool:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32[4]:arr = [1i32, 2i32, 3i32, 4i32];
-    if (raw vb(true)) {
-        int32->:p = $$m arr[2i64];
-        <-p = 9i32;
-    }
-    if (!(arr[2i64] == 9i32)) { exit 10i32; }
+    // AST_REFERENCE:202: `fall label;` is legal only in a pick arm. The reference's answer
+    // is npkc exit 1. Measured: npkc traps, exit 3, with no diagnostic.
+    fall nowhere;
     exit 0i32;
 };
 

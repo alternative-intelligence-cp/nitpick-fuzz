@@ -1,0 +1,14 @@
+# F-037-dyn-cast-reads-freed-memory — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-02 17:18 UTC; HUNT 93bcb66 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_u4_dyn_implicit                          93bcb66  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_u5_direct_call                           93bcb66  run 1  npkc=0  codes=-  O0=0  O2=0
+u1_dyn_cast_moved_pod                        93bcb66  run 1  npkc=0  codes=-  O0=10  O2=10
+u2_dyn_cast_pod_no_move                      93bcb66  run 1  npkc=0  codes=-  O0=10  O2=10
+u3_dyn_cast_owning_struct                    93bcb66  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_u4_dyn_implicit                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_u5_direct_call                           c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+u1_dyn_cast_moved_pod                        c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+u2_dyn_cast_pod_no_move                      c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+u3_dyn_cast_owning_struct                    c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

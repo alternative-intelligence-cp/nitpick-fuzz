@@ -8,7 +8,7 @@ mod:as0352;
 func:mk = string() never fails { pass string_concat("a", "b"); };
 
 func:main = int32(cstring[]:_~argv) {
-    string:t = move(mk());
+    string:t = move(raw mk());
     exit 0i32;
 };
 

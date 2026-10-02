@@ -1518,3 +1518,13 @@ claim("as0643", D, 643, "`FunctionDecl.modifiers` already", "rule",
 %s
     exit 0i32;""" % chk("v == 25i32", 10), "comptime func:sq = int32(int32:n) { pass (n * n); };"),
       wrong="refused, or 10")
+
+# ================================================================== after run 1 (S45, S53)
+# The programs' own mistakes; every expectation above is unchanged.
+refix("as0300", "the `$$m` claim stays live to the end of its scope, so the read of `arr[2]` conflicted with it "
+      "(BORROW-013); the claim and its write now sit in an inner block",
+      [("    int32->:p = $$m arr[2i64];\n    <-p = 9i32;\n",
+        "    if (raw vb(true)) {\n        int32->:p = $$m arr[2i64];\n        <-p = 9i32;\n    }\n")])
+refix("as0352", "`move(mk())` was refused for the call's `Result` (TYPE-007, S55), not for its operand being a value; "
+      "the operand is now `raw mk()`, a value and no place",
+      [("    string:t = move(mk());", "    string:t = move(raw mk());")])

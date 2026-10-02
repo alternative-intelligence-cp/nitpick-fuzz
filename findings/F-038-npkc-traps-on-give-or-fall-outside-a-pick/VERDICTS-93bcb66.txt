@@ -1,0 +1,10 @@
+# F-038-npkc-traps-on-give-or-fall-outside-a-pick — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-02 17:18 UTC; HUNT 93bcb66 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+c1_give_outside_pick                         93bcb66  run 1  npkc=3  codes=-  O0=-  O2=-
+c2_fall_outside_pick                         93bcb66  run 1  npkc=3  codes=-  O0=-  O2=-
+ctl_c3_give_in_pick                          93bcb66  run 1  npkc=0  codes=-  O0=0  O2=0
+c1_give_outside_pick                         c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+c2_fall_outside_pick                         c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+ctl_c3_give_in_pick                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0

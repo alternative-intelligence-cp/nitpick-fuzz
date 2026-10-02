@@ -1,19 +1,12 @@
-// M11 as0300 -- meta/specs/AST_REFERENCE.md:300 (row)
-// quote: `$$i` / `$$m`
-// claim: `$$m` takes a mutable borrow: a write through `$$m arr[2]` changes the element.
-// expect: run:0
-// wrong: refused, or 10
-mod:as0300;
+mod:ctl_c3_give_in_pick;
 
-func:vb = bool(bool:x) never fails { pass x; };
+func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32[4]:arr = [1i32, 2i32, 3i32, 4i32];
-    if (raw vb(true)) {
-        int32->:p = $$m arr[2i64];
-        <-p = 9i32;
-    }
-    if (!(arr[2i64] == 9i32)) { exit 10i32; }
+    // The control: `give` in an expression pick's arms compiles and runs.
+    int32:y = raw v32(2i32);
+    int32:v = pick (y) { (1i32) { give 10i32; }, (*) { give 20i32; } };
+    if (v != 20i32) { exit 10i32; }
     exit 0i32;
 };
 

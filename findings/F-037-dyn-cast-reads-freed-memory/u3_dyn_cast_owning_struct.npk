@@ -1,20 +1,19 @@
-// M11 as0300 -- meta/specs/AST_REFERENCE.md:300 (row)
-// quote: `$$i` / `$$m`
-// claim: `$$m` takes a mutable borrow: a write through `$$m arr[2]` changes the element.
-// expect: run:0
-// wrong: refused, or 10
-mod:as0300;
+mod:u3_dyn_cast_owning_struct;
 
-func:vb = bool(bool:x) never fails { pass x; };
+trait:Speaks = { func:say = int32(Self:self); };
+struct:Loud = { string:name; int32:v; };
+impl:Loud:Speaks = { func:say = int32(Loud:self) { pass self.v; }; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32[4]:arr = [1i32, 2i32, 3i32, 4i32];
-    if (raw vb(true)) {
-        int32->:p = $$m arr[2i64];
-        <-p = 9i32;
-    }
-    if (!(arr[2i64] == 9i32)) { exit 10i32; }
-    exit 0i32;
+    // AST_REFERENCE:453: a `=>` whose target is a `dyn` type builds the trait object (a fat
+    // pointer). The reference's answer is 7, the field the method reads: exit 0. Measured:
+    // the method reads 0xAA, the allocator's poison for freed bytes: exit 10.
+    Loud:l = Loud{ name: string_concat("a", "b"), v: 7i32 };
+    dyn Speaks:d = move(l) => dyn Speaks;
+    int32:v = d.say() ?| 0i32;
+    if (v == 7i32) { exit 0i32; }
+    if ((v & 255i32) == 170i32) { exit 10i32; }
+    exit 11i32;
 };
 
 func:failsafe = int32(Error:e) {
