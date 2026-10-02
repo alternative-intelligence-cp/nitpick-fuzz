@@ -10,10 +10,11 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**2261 claims: 1978 testable, 283 untestable** (each with its reason).
+**2463 claims: 2159 testable, 304 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
+| AST | 202 | 8 | 116 | 78 | 181 | 21 |
 | BUILTIN | 227 | 2 | 109 | 116 | 194 | 33 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
 | CONTROL | 110 | 14 | 7 | 89 | 108 | 2 |
@@ -32,7 +33,7 @@ extracted:
 
 | reference | lines | extracted | lines extracted | not extracted |
 |---|---|---|---|---|
-| AST | 644 | — | 0 | 1–644 |
+| AST | 644 | 1–644 | 644 | — |
 | BUILD | 682 | — | 0 | 1–682 |
 | BUILTIN | 447 | 1–447 | 447 | — |
 | CONCURRENCY | 647 | 1–647 | 647 | — |
@@ -46,6 +47,213 @@ extracted:
 | TRAITS | 766 | — | 0 | 1–766 |
 | TYPE | 2122 | 1–660 | 660 | 661–2122 |
 | VERIFICATION | 2351 | 1–845, 846–1247 | 1247 | 1248–2351 |
+
+## AST (`meta/specs/AST_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `as0032` | 32 | row | “**`mod:name = { … };`**, or **`mod:name;`** for a file (D-088)” | A module is `mod:name = { … };` inline or `mod:name;` for a file: both compile and are reached. | `run:0` |
+| `as0033` | 33 | row | “`kind` ∈ wildcard / single / selective / namespace” | An import is one of four kinds, wildcard, single, selective and namespace: all four compile. | `run:0` |
+| `as0034` | 34 | row | “the contracts window holds `requires`/`ensures`/`acquires`, the `never fails`” | A function's contracts window holds `requires`, `ensures`, `never fails` and `pure` together. | `run:0` |
+| `as0035` | 35 | row | “\| `StructDecl` \| `name`, `visibility`, `generics`, `fields: FieldDecl[]`, `attributes` \| \|” | The StructDecl node holds name, visibility, generics, fields and attributes. | untestable [internal] the node's fields |
+| `as0036` | 36 | row | “variants may carry payloads” | Enum variants may carry payloads: `Opt.Som(5i32)` matched by `(Som(x))` binds 5. | `run:0` |
+| `as0037` | 37 | row | “supertraits combine with **`&`** (D-029)” | Supertraits combine with `&`: `trait:C = A & B & { … };` compiles, and a type implementing all three calls each. | `run:0` |
+| `as0038` | 38 | row | “**`impl:Type`** or **`impl:Type:Trait`**” | `impl:Type` and `impl:Type:Trait` both compile: an inherent method and a trait method are called. | `run:0` |
+| `as0038b` | 38 | rule | “type always first, no connector (D-031)” | There is no connector: `impl Speaks for Loud` is refused. | `refuse` |
+| `as0039` | 39 | row | “`Rules<int32>:r = { $ > 0i32 }`” | `Rules<int32>:r_pos = { $ > 0i32 };` declares a rule: a `limit<r_pos>` binding assigned -1 traps LimitViolated. | `trap:LimitViolated` |
+| `as0040` | 40 | row | “invoked as **`#name(args)`** (D-046)” | A macro is invoked as `#name(args)`: an expression macro `#twice(4i32)` is 8. | `run:0` |
+| `as0041` | 41 | row | “an invocation standing **where a declaration is expected**” | A declaration macro invoked at module level splices its declaration: the emitted function is called. | `run:0` |
+| `as0042` | 42 | row | “**`extern:"libc" = { … };`** (D-088)” | An extern block is named by a string: `extern:"mockif" = { … };` compiles (in HUNT2's method form). | `sh:0` |
+| `as0043` | 43 | row | “**`extern`-block item only**” | An `opaque struct` is an extern-block item only: one at module level is refused. | `refuse` |
+| `as0044` | 44 | row | “`pub const int32:MAX = 100i32;`” | A global is declared `pub const int32:MAX = 100i32;`: MAX is 100. | `run:0` |
+| `as0045` | 45 | row | “**`unit:Hertz = 1 / Seconds;`** (D-196, 1.3.3)” | `unit:Hertz = 1 / Seconds;` declares a named unit for `dim256<U>`: a `dim256<Hertz>` value compiles. | `compile` |
+| `as0045b` | 45 | rule | “The RHS is unit algebra only” | A unit's right side is unit algebra only (names, `1`, `*`, `/`, parentheses): `Seconds + Seconds` is refused. | `refuse` |
+| `as0049` | 49 | example | “```” | A FunctionDecl takes generics after the name, parameters, the success type, contracts and a body: `f::<int64>(1i64, 3i32)` is 3. | `run:0` |
+| `as0062` | 62 | example | “```” | A generic parameter is a type or a compile-time value: `scale<comptime int32:K>` called `scale::<3i32>(2i32)` is 6. | `run:0` |
+| `as0075` | 75 | rule | “**Not to be confused with `type:T`**, which is an ordinary `ParamDecl` in a” | `type:T` is legal only in a `comptime` function: as a parameter of an ordinary function it is refused. | `refuse` |
+| `as0079` | 79 | rule | “**`ParamDecl` and `FieldDecl` carry memory qualifiers**” | A parameter carries a memory qualifier: `wild int8->:buf` as a parameter compiles. | `compile` |
+| `as0080` | 80 | rule | “`wild int8->:buf` is a” | A field carries a memory qualifier: a struct field `wild int8->:buf;` compiles. | `compile` |
+| `as0090` | 90 | rule | “**Reading a discarded parameter is an error**” | Reading a parameter declared discarded (`int32:_~x`) is an error. | `refuse` |
+| `as0092` | 92 | rule | “checked as `NITPICK-TYPE-083` since 1.6.0 step 3c” | `main`'s arity is fixed: a `main` with no parameter is refused, NITPICK-TYPE-083. | `refuse:NITPICK-TYPE-083` |
+| `as0092b` | 92 | rule | “the arity, the parameter's type and the `int32` return” | `main` returns `int32`: a `main` returning `int64` is refused, NITPICK-TYPE-083. | `refuse:NITPICK-TYPE-083` |
+| `as0092c` | 92 | rule | “`failsafe`'s shape is `NITPICK-TYPE-044`” | `failsafe`'s shape is fixed: a `failsafe` with two parameters is refused, NITPICK-TYPE-044. | `refuse:NITPICK-TYPE-044` |
+| `as0093` | 93 | rule | “`failsafe` sets the same precedent with `tbb32:err`” | `failsafe`'s one parameter is `tbb32:err`: a failsafe so declared compiles. | `compile` |
+| `as0095` | 95 | rule | “`argc`: a slice carries its length (D-070)” | There is no `argc`: `main(int32:argc, cstring[]:argv)` is refused, NITPICK-TYPE-083. | `refuse:NITPICK-TYPE-083` |
+| `as0098` | 98 | rule | “implicitly, except `main` and `failsafe`” | Every function but `main` and `failsafe` returns `Result<T>`: a call binds as `Result<int32>`. | `run:0` |
+| `as0100` | 100 | rule | “**`extern` is not a modifier here**” | `extern` is not a function modifier: `extern func:f = …` is refused. | `refuse` |
+| `as0105` | 105 | example | “```” | A variadic parameter is `..*T[]`, a slice: `total(1, 2, 3)` is 6. | `run:0` |
+| `as0110` | 110 | rule | “**One form: homogeneous.**” | A variadic tail is homogeneous: an `int32` among `int64` trailing arguments is refused. | `refuse` |
+| `as0120` | 120 | rule | “**removed by D-053** along with the `fmt` type itself” | The format-directed form (a bare `..*` after a `fmt` parameter) is removed: refused. | `refuse` |
+| `as0124` | 124 | rule | “The surviving consumer is the `sys` builtin” | `sys(CONST, ..*int64[])` is the surviving variadic: `sys(39i64)` (getpid) returns a positive pid. | `run:0` |
+| `as0128` | 128 | example | “```” | An extern function's failure contract is REQUIRED: a method with none is a compile error. | `sh:0` |
+| `as0137` | 137 | example | “```” | A failure contract is `fails on …` or `never fails`: an extern method declared `never fails` compiles. | `sh:0` |
+| `as0145` | 145 | rule | “**`FailsOn` and `NeverFails` are separate node kinds**” | FailsOn and NeverFails are separate node kinds. | untestable [internal] the node kinds are the parser's |
+| `as0157` | 157 | row | “**`assoc:Item;`** (D-028)” | `assoc:Item;` declares an associated type in a trait, which an impl binds: `first(c)` reads it. | `run:0` |
+| `as0158` | 158 | row | “**`error:Name;`** (D-179): one declared error constant” | `error:Name;` declares an error constant: a function fails with it and the caller's arm sees it. | `run:0` |
+| `as0158b` | 158 | rule | “The explicit-code form (`error:Name = 4102i32;`) is the prelude's alone” | The explicit-code form `error:Name = 4102i32;` is the prelude's alone: a program's is refused. | `refuse` |
+| `as0160` | 160 | rule | “**`TraitMethod` is removed. A method in a trait body is an ordinary” | A trait method is an ordinary function: one with a body is a default, one without is a declaration the impl must give. | `run:0` |
+| `as0180` | 180 | row | “\| `BlockStmt` \| `stmts: Stmt[]` — introduces a scope \|” | A block introduces a scope: a local declared inside an `if` block is not visible after it. | `refuse` |
+| `as0181` | 181 | row | “\| `VarDeclStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0182` | 182 | row | “\| `AssignStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0183` | 183 | row | “a bare call discards a `Result` (`TYPE-039`)” | A bare call statement that discards a `Result` is refused, NITPICK-TYPE-039. | `refuse:NITPICK-TYPE-039` |
+| `as0183b` | 183 | rule | “`drop f();` / `relay f();` / `f() ?! c;` / `f() ?\\| NIL;`” | The value-less statement forms compile: `drop g();`, `relay f();`, `f() ?! c;` and `f() ?\| NIL;`. | `run:0` |
+| `as0184` | 184 | row | “\| `IfStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0185` | 185 | row | “\| `PickStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0186` | 186 | row | “\| `WhileStmt` \| `label: Ident?`” | A `while` may carry a label: `break outer;` from an inner loop leaves the labelled one. | `run:0` |
+| `as0187` | 187 | row | “\| `ForStmt` \|” | A `for` takes no `decreases` clause: one is always refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `as0188` | 188 | row | “\| `LoopStmt` \|” | A `loop` takes no `decreases` clause: one is always refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `as0189` | 189 | row | “\| `TillStmt` \|” | A `till` takes no `decreases` clause: one is always refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `as0190` | 190 | row | “\| `WhenStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0191` | 191 | row | “\| `BreakStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0192` | 192 | row | “\| `ContinueStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0193` | 193 | row | “\| `PassStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0194` | 194 | row | “\| `FailStmt` \|” | The node's fields. | untestable [internal] the node's fields; the construct itself is CONTROL's and TYPE's claims |
+| `as0195` | 195 | row | “\| `ReturnStmt` \| `result: Expr` — the literal `Result{…}` form only \|” | `return` takes the literal `Result{…}` form: `return Result{ value: 5i32, err: 0i32 };` returns 5. | `run:0` |
+| `as0195b` | 195 | rule | “the literal `Result{…}` form only” | `return` takes only the `Result{…}` literal: `return 5i32;` is refused. | `refuse` |
+| `as0196` | 196 | row | “\| `ExitStmt` \| `code: Expr` — legal only in `main` / `failsafe` \|” | `exit` is legal only in `main` and `failsafe`: one in another function is refused. | `refuse` |
+| `as0197` | 197 | row | “\| `TrapStmt` \| `error: Expr` — `!!! errCode;` \|” | `!!! errCode;` traps to failsafe with that code: `!!! E1;` reaches failsafe's `E1` arm (81). | `run:81` |
+| `as0198` | 198 | row | “\| `DeferStmt` \| `body: BlockStmt` \|” | A `defer` body runs at its scope's exit: the deferred write through a pointer is seen after the call. | `run:0` |
+| `as0199` | 199 | row | “`discard(e)` / `_~ e`” | A value is discarded by `discard(e)` or `_~ e`: both compile. | `compile` |
+| `as0200` | 200 | row | “\| `ProveStmt` \| `condition: Expr` — **compile-time** obligation \|” | `prove` is a compile-time obligation. | untestable [z3] a `prove` obligation is discharged by `npkg verify` with the pinned z3 |
+| `as0201` | 201 | row | “\| `AssertStaticStmt` \| `condition: Expr` \|” | `assert_static(cond);` is a statement: a true condition compiles and runs. | `run:0` |
+| `as0201b` | 201 | rule | “`AssertStaticStmt`” | `assert_static` of a false condition is refused at compile time. | `refuse` |
+| `as0202` | 202 | row | “legal only in a `PickArm` body (§2.2)” | `fall label;` is legal only in a pick arm: one in a plain block is refused. | `refuse` |
+| `as0203` | 203 | row | “\| `GiveStmt` \| `value: Expr` — `give e;`, legal only in a `PickArm` body (§2.2) \|” | `give e;` is legal only in a pick arm: one in a plain block is refused. | `refuse` |
+| `as0207` | 207 | rule | “**`ForStmt.binding` is a full `ParamDecl` with a required type.**” | A `for` binding needs its type: `for (i in 0i64...3i64)` is refused. | `refuse` |
+| `as0210` | 210 | rule | “are **counted**, exposing the counter as `$`” | `loop` is counted and exposes its counter as `$`: the body sees `$` equal to 1 on some trip. | `run:0` |
+| `as0211` | 211 | rule | “so `step` must be positive — a negative or zero step is a compile error” | A `loop` with a zero step is a compile error. | `refuse` |
+| `as0211b` | 211 | rule | “a negative or zero step” | A `loop` with a negative step is a compile error. | `refuse` |
+| `as0212` | 212 | rule | “Neither has an `end` block” | A `loop` has no `end` block: one is refused. | `refuse` |
+| `as0213` | 213 | rule | “**`WhenStmt.then_block` runs when the body executed at least once, *including*” | `when`'s `then` runs when the body ran at least once, including after a `break`; `end` does not. | `run:0` |
+| `as0214` | 214 | rule | “`end_block` runs only when the condition was false initially” | `when`'s `end` runs only when the condition was false at the start, and then `then` does not. | `run:0` |
+| `as0223` | 223 | rule | “**`DeferStmt` does not run on a trap** (D-014)” | A `defer` does not run on a trap: a division by zero traps DivByZero, though the pending defer would itself have trapped IntOverflow. | `trap:DivByZero` |
+| `as0228` | 228 | example | “```” | A pick arm may carry a `where` guard: a false guard passes to the next arm. | `run:0` |
+| `as0236` | 236 | example | “```” | A pick pattern is a value, a range or a wildcard: 550 takes the `(500..599)` arm. | `run:0` |
+| `as0239` | 239 | rule | “StructDestructure(type, binds) // (MouseClick { x, y })” | A struct destructure pattern `(MouseClick { x, y })` binds the fields. | `run:0` |
+| `as0240` | 240 | rule | “EnumDestructure(path, binds)   // (Net.Disconnect(reason))” | An enum destructure pattern is written with its path: `(Net.Disconnect(reason))` binds the payload. | `run:0` |
+| `as0241` | 241 | rule | “ErrPattern                     // ERR:” | `ERR:` matches the tbb error sentinel. | `run:0` |
+| `as0246` | 246 | rule | “**requires** an explicit `ERR:` arm” | A `pick` on a `tbb` selector requires an explicit `ERR:` arm; `(*)` may not absorb it. | `refuse` (M10 `p12_tbb_pick_needs_err_arm`) |
+| `as0248` | 248 | rule | “**There is no `Unreachable` pattern.**” | There is no `(!)` pattern: an arm written `(!)` is refused. | `refuse` |
+| `as0251` | 251 | rule | “`#unreachable()`” | An arm believed unreachable has `#unreachable()` as its body, which traps when reached. | `trap:Unreachable` |
+| `as0256` | 256 | rule | “`pick` must be exhaustive” | A `pick` must be exhaustive. | `refuse` (M10 `p10_int_pick_not_exhaustive`) |
+| `as0256b` | 256 | rule | “A `pick` whose arms `give` is an **expression**” | A `pick` whose arms `give` is an expression: `int32:v = pick (y) { … };` initialises v. | `run:0` |
+| `as0257` | 257 | rule | “must additionally agree on one type across all arms” | An expression `pick`'s arms agree on one type: an `int32` arm and an `int64` arm are refused. | `refuse` |
+| `as0267` | 267 | rule | “a **semantic** restriction, not a syntactic one” | `give` outside a pick arm is refused by the checker, not the parser: the refusal is no PARSE code. | `sh:0` |
+| `as0281` | 281 | row | “**suffix-form bases** (`FFhex`, `1T0t`, `2An`)” | `FFhex` is a hex literal: an `int32` bound to it is 255. | `run:0` |
+| `as0281b` | 281 | rule | “`1T0t`, `2An`” | `1T0t` (balanced ternary) is 6 and `2An` (balanced nonary) is 17. | `run:0` |
+| `as0281c` | 281 | rule | “A `dim256`-suffixed literal may carry a **`<UnitName>` tail**” | An integer `dim256` literal may carry a unit tail: `5dim256<Meters>` compiles. | `compile` |
+| `as0282` | 282 | row | “the `dim256` unit tail as on `IntLiteral`” | A float `dim256` literal may carry a unit tail: `2.5dim256<Meters>` compiles. | `compile` |
+| `as0283` | 283 | row | “**not an integer** (D-005)” | A character literal is not an integer: `int32:x = 'A';` is refused. | `refuse` |
+| `as0284` | 284 | row | “\| `StringLiteral` \| escape-processed \|” | A string literal is escape-processed: `"a\tb"` is three bytes, the second a tab. | `run:0` |
+| `as0285` | 285 | row | “`r"…"` — no escape processing (D-024)” | A raw string has no escape processing: `r"a\tb"` is four bytes. | `run:0` |
+| `as0286` | 286 | row | “`"""…"""` — newlines preserved (D-024)” | A block string preserves its newline. | `run:0` |
+| `as0287` | 287 | row | “\| `BoolLiteral` \| \|” | The BoolLiteral node. | untestable [internal] the node; LEXICAL's lx0269 tests the literals |
+| `as0288` | 288 | row | “`NULL`, `NIL`, `ERR` — **not `unknown`**” | `NULL`, `NIL` and `ERR` are sentinel literals, each binding where its type is expected. | `run:0` |
+| `as0289` | 289 | row | “\| `TemplateLiteral` \|” | The TemplateLiteral node's parts. | untestable [internal] the node's parts; LEXICAL's lx0383 and lx0387 test the literal |
+| `as0295` | 295 | row | “\| `BinaryExpr` \| `op`, `lhs`, `rhs` \|” | The binary operators compute (all of the row's but `<=>`, which is as0295b). | `run:0` |
+| `as0295b` | 295 | rule | “<=>” | `<=>` is a binary operator: `1 <=> 2` is negative. | `run:0` |
+| `as0296` | 296 | row | “\| `UnaryExpr` \| `op`, `operand` \| `!` `~` `-` \|” | The unary operators `!`, `~` and `-` compute. | `run:0` |
+| `as0297` | 297 | row | “\| `PostfixExpr` \| `op`, `operand` \| `++` `--` \|” | `++` and `--` are postfix operators: `x++; x--;` compiles. | `compile` |
+| `as0298` | 298 | row | “yields a **second-class borrow**, not a pointer (D-004)” | `@x` is a second-class borrow: it cannot be returned out of its function. | `refuse` |
+| `as0299` | 299 | row | “\| `DerefExpr` \| `operand` \| `<-ptr` \|” | `<-ptr` dereferences: a write through it reaches the local. | `run:0` |
+| `as0300` | 300 | row | “`$$i` / `$$m`” | `$$m` takes a mutable borrow: a write through `$$m arr[2]` changes the element. | `run:0` |
+| `as0300b` | 300 | rule | “\| `BorrowExpr` \|” | `$$i` takes an immutable borrow: reading through `$$i x` gives x. | `run:0` |
+| `as0301` | 301 | row | “\| `PipeExpr` \| `direction`, `value`, `callee` \| `\\|>` / `<\\|` \|” | `\|>` and `<\|` pipe a value into a function: `4 \|> dbl` is 8 and `dbl <\| 5` is 10. | `run:0` |
+| `as0302` | 302 | row | “\| `RangeExpr` \| `lo`, `hi`, `inclusive` \| `..` / `...` \|” | `..` is inclusive and `...` exclusive: the sums over 1 to 3 are 6 and 3. | `run:0` |
+| `as0303` | 303 | row | “**`..^`** — expands a collection at a call site (D-026)” | `..^` expands a slice at a call site: `total(1, ..^xs)` with xs = [2, 3] is 6. | `run:0` |
+| `as0304` | 304 | row | “\| `TernaryExpr` \| `cond`, `then_expr`, `else_expr` \| `is (c) : a : b` \|” | The ternary is `is (c) : a : b`. | `run:0` |
+| `as0305` | 305 | row | “**`move(place)`** — transfers ownership and invalidates the source (D-065)” | `move(place)` transfers ownership: the destination holds the string. | `run:0` |
+| `as0306` | 306 | row | “**`is_err(tbbValue)`** — tests a `tbb` for ERR **without trapping**” | `is_err(t)` tests a tbb for ERR without trapping: true for ERR, false for 5. | `run:0` |
+| `as0307` | 307 | row | “**`Result{value: v, err: e}`** — the only way to construct a `Result`” | `Result{value: v, err: e}` constructs a Result: one with err 0 is not an error and holds v. | `run:0` |
+| `as0310` | 310 | rule | “built by writing the value and emptied by writing `NIL`” | An Optional is built by writing the value and emptied by writing `NIL`. | `run:0` |
+| `as0326` | 326 | rule | “Its operand is a **`tbb`**, not a `Result`” | `is_err`'s operand is a tbb, not a Result: `is_err(r)` on a Result is refused. | `refuse` |
+| `as0329` | 329 | rule | “**`ok(val)`** was removed instead (D-097)” | `ok(val)` is removed: a call to it is refused. | `refuse` |
+| `as0352` | 352 | rule | “Its operand is a **place**, not a value” | `move`'s operand is a place: `move(f())` is refused. | `refuse` |
+| `as0360` | 360 | row | “\| `IdentifierExpr` \| `name` \|” | The IdentifierExpr node. | untestable [internal] the node |
+| `as0361` | 361 | row | “**`.` only** — auto-dereferences pointers” | `.` auto-dereferences a pointer: `q.y` on a `Pt->` reads the field. | `run:0` |
+| `as0361b` | 361 | rule | “`->` is type-position only (D-006)” | `->` is type-position only: `q->y` is refused. | `refuse` |
+| `as0362` | 362 | row | “\| `SafeNavExpr` \| `base`, `field` \| `?.` \|” | `?.` reads a field through an Optional: a present one gives the field, an empty one NIL. | `run:0` |
+| `as0363` | 363 | row | “\| `IndexExpr` \| `base`, `index` \| bounds-checked \|” | Indexing is bounds-checked: index 4 of a 4-element array traps OutOfBounds. | `trap:OutOfBounds` |
+| `as0364` | 364 | row | “`generic_args` may arrive implicitly (`f<int32>(x)`)” | Generic arguments may arrive implicitly: `idt<int32>(5i32)` is a call, as `idt::<int32>(5i32)` is. | `run:0` |
+| `as0365` | 365 | row | “UFCS — `p.magnitude()` resolves to `Point_magnitude(p)` (D-006)” | UFCS: with a free function `Point_magnitude(Point:p)`, `p.magnitude()` calls it. | `run:0` |
+| `as0366` | 366 | row | “**`#name<T>(…)`** (D-020)” | A compiler builtin is `#name<T>(…)`: `#size_of<int32>()` is 4. | `run:0` |
+| `as0367` | 367 | row | “**`comptime(expr)`** — forces compile-time resolution” | `comptime(expr)` resolves at compile time: `comptime(6i32 * 7i32)` is 42. | `run:0` |
+| `as0367b` | 367 | rule | “a compile error if it cannot be resolved” | `comptime(expr)` that cannot be resolved at compile time is a compile error. | `refuse` |
+| `as0384` | 384 | row | “\| **`#`-prefixed** \| `BuiltinExpr` \|” | `#`-prefixed calls are compiler builtins and macros: `#size_of<int64>()` and a user macro compile. | `run:0` |
+| `as0385` | 385 | row | “\| **bare name** \| ordinary `CallExpr` \|” | The bare-name builtins are ordinary calls: `sys(39i64)` and `string_concat` are called bare. | `run:0` |
+| `as0385b` | 385 | rule | “`asm`, `ok`, `is_err`” | `ok` is one of the bare-name builtins: `ok(t)` is an ordinary call. | `compile` |
+| `as0403` | 403 | rule | “return `Result<T>`, and are subject to” | A bare-name builtin returns `Result<T>` like any function: `string_byte_length`'s call binds as a `Result<int64>`. | `compile` |
+| `as0413` | 413 | row | “\| `SafeUnwrapExpr` \| `expr`, `default` \| `e ? d` \|” | `e ? d` unwraps with a default: `k(3i32) ? 0i32` is 3. | `run:0` |
+| `as0414` | 414 | row | “\| `NullCoalesceExpr` \| `expr`, `default` \| `e ?? d` \|” | `e ?? d` gives the default for an empty Optional. | `run:0` |
+| `as0415` | 415 | row | “**`e ?! code`** — exactly one `tbb32` argument (D-009)” | `e ?! code` takes exactly one `tbb32` argument: `k(3i32) ?! 5tbb32` compiles. | `compile` |
+| `as0416` | 416 | row | “`?\\|` / `defaults` — **struck (D-167)**” | `?\|` is struck (D-167) and refused by name: `k(3i32) ?\| 0i32` is refused. | `refuse` |
+| `as0416b` | 416 | rule | “the node is still built so the parser never restricts, and refused by name” | `defaults` is struck and refused by name: `k(3i32) defaults 0i32` is refused. | `refuse` |
+| `as0417` | 417 | row | “\| `RawUnwrapExpr` \| `expr` \| `raw e` / `_! e` \|” | `raw e` and `_! e` unwrap a never-fails call. | `run:0` |
+| `as0418` | 418 | row | “\| `DropExpr` \| `expr` \| `drop e` / `_? e` \|” | `drop e` and `_? e` discard a never-fails NIL call. | `compile` |
+| `as0419` | 419 | row | “**`relay e` / `_^ e`** (D-080) — on error, returns the same code” | `relay e` returns the same error code from the enclosing function, and its `defer` runs. | `run:0` |
+| `as0421` | 421 | rule | “**`RelayExpr` is a normal exit path**, so `defer` runs on the error branch” | `_^`'s error branch is a normal exit: the `defer` runs. | `run:0` |
+| `as0422` | 422 | rule | “unlike `EmphaticUnwrapExpr`, which traps and runs nothing” | `?!` traps and runs nothing: a pending `defer` that would trap IntOverflow does not run, and failsafe sees `E1` (81). | `run:81` |
+| `as0423` | 423 | rule | “It is **illegal in `main` and `failsafe`**” | `relay` is illegal in `main`: refused. | `refuse` |
+| `as0432` | 432 | row | “`=>`, **compile error if loss is possible**” | `=>` is a compile error where loss is possible: `int64 => int32` is refused. | `refuse` |
+| `as0433` | 433 | row | “`=>!`, the sole opt-out” | `=>!` is the opt-out: `int64 =>! int32` of 5 is 5. | `run:0` |
+| `as0435` | 435 | rule | “`cast<T>` / `#cast<T>` / `@cast<T>` do not exist (D-021)” | `cast<T>(x)` does not exist: refused. | `refuse` |
+| `as0435b` | 435 | rule | “`#cast<T>`” | `#cast<T>(x)` does not exist: refused. | `refuse` |
+| `as0437` | 437 | rule | “**A cast target carries a memory qualifier** — `p => wild int8->`” | A cast target carries a memory qualifier: `p => wild int8->` compiles. | `compile` |
+| `as0448` | 448 | row | “\| `StructLiteralExpr` \| `type`, `fields` \|” | The node's fields. | untestable [internal] the node's fields |
+| `as0449` | 449 | row | “\| `ArrayLiteralExpr` \| `elements` \|” | The node's fields. | untestable [internal] the node's fields |
+| `as0450` | 450 | row | “`vec3(1.0, 2.0, 3.0)`” | `vec3(1.0, 2.0, 3.0)` constructs a vector. | `compile` |
+| `as0451` | 451 | row | “legal only inside `async func` (`NITPICK-040`)” | `await` is legal only inside an `async func`: one in a plain function is refused. | `refuse` |
+| `as0452` | 452 | row | “`$`, legal only inside `loop` / `till`” | `$` is legal only inside `loop` and `till`: one in a `while` is refused. | `refuse` |
+| `as0453` | 453 | row | “**A `=>` whose target is a `dyn` type is this node” | A `=>` whose target is a `dyn` type builds a trait object: `move(l) => dyn Speaks` compiles and dispatches. | `run:0` |
+| `as0454` | 454 | row | “a `pick` whose arms `give` (D-059)” | A `pick` whose arms `give` is a PickExpr: it initialises a binding. | `run:0` |
+| `as0455` | 455 | row | “legal in `ensures` and `invariant`, never nested” | `old(expr)` is legal in `ensures`: `ensures result == old(x) + 1i32` holds. | `run:0` |
+| `as0455b` | 455 | rule | “never nested” | `old` is never nested: `old(old(x))` is refused. | `refuse` |
+| `as0455c` | 455 | rule | “**`old(expr)`**, the operand's value at the function's ENTRY” | `old` is legal in `ensures` and `invariant` only: one in a function body is refused. | `refuse` |
+| `as0456` | 456 | row | “legal in `ensures` alone” | `result` is legal in `ensures` alone: one in `requires` is refused. | `refuse` |
+| `as0461` | 461 | rule | “variables are a compile error” | An uninitialised variable is a compile error: `int32:x;` then a read of x is refused. | `refuse` |
+| `as0476` | 476 | rule | “**No lambda or closure nodes.** Closures are removed (D-018)” | Closures are removed: an anonymous function expression is refused. | `refuse` |
+| `as0485` | 485 | row | “\| `NamedType` \| `name`, `generic_args` \| \|” | The NamedType node. | untestable [internal] the node's fields |
+| `as0486` | 486 | row | “`T->` — **thin**, one word, no bounds metadata (D-038)” | A pointer is thin, one word: `#size_of<int32->>()` is 8. | `run:0` |
+| `as0487` | 487 | row | “\| `OptionalType` \| `inner` \| `T?` \|” | `T?` is the Optional type: `int32?` holds 5 or NIL. | `run:0` |
+| `as0488` | 488 | row | “value type; does not decay” | An array is a value type: a copy is independent of its source. | `run:0` |
+| `as0488b` | 488 | rule | “does not decay” | An array does not decay to a pointer: an `int32[2]` passed for an `int32->` is refused. | `refuse` |
+| `as0489` | 489 | row | “\| `FuncType` \| `params`, `return_type`, `never_fails: bool` \| D-163 \|” | The FuncType node (listed twice in the table; the second row gives the spelling). | untestable [internal] the node's fields; as0491 tests the type's spelling |
+| `as0490` | 490 | row | “\| `DynType` \| `traits: TypeNode[]` \| `dyn A & B` \|” | `dyn A & B` is a trait-object type over two traits: a binding of that type compiles. | `compile` |
+| `as0491` | 491 | row | “**`func RetType(ParamTypes) [never fails]`** (D-087; D-163)” | A function type is `func RetType(ParamTypes) never fails`: `f` of that type holding `twice` gives 6. | `run:0` |
+| `as0491b` | 491 | rule | “a may-fail function cannot fill a `never fails` slot” | A may-fail function cannot fill a `never fails` slot: refused. | `refuse` |
+| `as0492` | 492 | row | “Inhabited by string literals (checked at compile time) and by `to_cstring`” | A `cstring` is inhabited by a string literal: `cstring:c = "abc";` compiles. | `compile` |
+| `as0493` | 493 | row | “**Only legal under `->`**; bare `any` is a type error” | Bare `any` is a type error: a parameter of type `any` is refused. | `refuse` |
+| `as0494` | 494 | row | “`Self`, valid only in `trait` / `impl` bodies (D-030)” | `Self` is valid only in trait and impl bodies: a free function returning `Self` is refused. | `refuse` |
+| `as0495` | 495 | row | “**`Mutex<Config, 2>`** — a compile-time **value** in a type-argument list” | A type-argument list holds a compile-time value: `Mutex<int64, 2i32>` is a type. | `compile` |
+| `as0496` | 496 | row | “**`T.Item`** — an associated type projected from a type (D-164)” | `T.Item` projects an associated type: `first<T: Seq>` returning `T.Item` gives the counter's value. | `run:0` |
+| `as0498` | 498 | rule | “Qualifiers on `VarDeclStmt`, not on the type node: `stack`, `wild`, `wildx`,” | `stack` qualifies a local: `stack int32:x = 3i32;` compiles and holds 3. | `run:0` |
+| `as0499` | 499 | rule | “`const`, `fixed`” | `const` qualifies a local: `const int32:x = 3i32;` compiles. | `compile` |
+| `as0499b` | 499 | rule | “**`gc` does not exist** (D-003)” | `gc` does not exist: `gc int32:x` is refused. | `refuse` |
+| `as0501` | 501 | rule | “`borrow_imm` / `borrow_mut` are STRUCK” | `borrow_imm` is struck: a binding so qualified is refused. | `refuse` |
+| `as0518` | 518 | rule | “**`ArrayType.size` consumed one token and called it an integer literal**” | An array's size may be a named constant: `int32[COUNT]` with COUNT = 3 holds three elements. | `run:0` |
+| `as0538` | 538 | rule | “Beyond the scalar families:” | The builtin type names are the compiler's: a user struct named `Result` is refused. | `refuse` |
+| `as0551` | 551 | row | “compared at every call inside the function's recursive group” | A function's `decreases` is compared at every call inside its recursive group: f and g calling each other with an unchanged measure trap DecreasesViolated. | `trap:DecreasesViolated` |
+| `as0552` | 552 | row | “\| `InvariantNode` \| `conditions: Expr[]` — attached to loop statements \|” | An invariant is attached to a loop: one that fails traps InvariantViolated. | `trap:InvariantViolated` |
+| `as0553` | 553 | row | “`limit<r_pos>` on a declaration, a parameter” | `limit<r_pos>` on a parameter: passing -1 traps LimitViolated. | `trap:LimitViolated` |
+| `as0554` | 554 | row | “the `never fails` contract on an ordinary function, trait method, impl method” | `never fails` rides an ordinary function and a function type alike. | `run:0` |
+| `as0555` | 555 | row | “Constant-expression only” | `joins` takes a constant expression only: a call as the deadline is refused. | `refuse` |
+| `as0556` | 556 | row | “A channel-returning function without it is a getter” | A channel-returning function without `gives` is a getter: creating a channel inside one is refused. | `refuse` |
+| `as0557` | 557 | row | “Orthogonal to `never fails`: a pure function may `fail`” | A `pure` function may `fail`: `pure` without `never fails` compiles, and its failure reaches the caller. | `run:0` |
+| `as0558` | 558 | row | “a clause found after `invariant`, the wrong order, TYPE-072” | The termination clause comes before `invariant`: `invariant P decreases E` is refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `as0563` | 563 | rule | “A `decreases` measure admits neither” | A `decreases` measure admits neither `result` nor `old`: `decreases old(i)` is refused. | `refuse` |
+| `as0571` | 571 | example | “```” | An attribute attaches to a declaration: `#[derive(Clone)]` on a struct compiles. | `compile` |
+| `as0572` | 572 | rule | “#[align(16)]” | `#[align(16)]` is an attribute: a struct carrying it compiles. | `compile` |
+| `as0575` | 575 | rule | “not `@derive` (D-020)” | Derive is not `@derive`: `@derive(Clone)` is refused. | `refuse` |
+| `as0583` | 583 | rule | “`#[lexical_drop]` and `#[nll_drop]` are **removed**” | `#[lexical_drop]` is removed: a struct carrying it is refused. | `refuse` |
+| `as0593` | 593 | row | “\| `PinExpr` (`#obj`) \|” | Pinning is removed: `#obj` on a value is refused. | `refuse` |
+| `as0594` | 594 | row | “\| `LAMBDA` / closure capture \| closures removed (D-018) \|” | Closures are removed: a nested function capturing a local is refused. | `refuse` |
+| `as0595` | 595 | row | “\| `gc` in `memory_modifier` \| no collector (D-003) \|” | There is no `gc` memory modifier: a `gc` local is refused. | `refuse` |
+| `as0596` | 596 | row | “positional `.a` / `.b` / `.c` \| replaced by named fields \|” | The nodes' positional slots are replaced by named fields. | untestable [internal] the parser's node layout |
+| `as0597` | 597 | row | “\| `end` block on `LOOP_STMT` / `TILL_STMT` \| only `when` has one (D-027) \|” | A `till` has no `end` block: one is refused. | `refuse` |
+| `as0598` | 598 | row | “\| `a*` collection builtins \|” | The `a*` collection builtins are not the language's: `astack()` is refused. | `refuse` |
+| `as0621` | 621 | rule | “**settled by D-058: internal” | `Future<T>` is an internal lowering artifact: no construct produces one. | untestable [vague] the sentence names no construct whose refusal a program could check |
+| `as0635` | 635 | rule | “**Resolved as: modifier + `comptime(expr)`, no block.**” | There is no `comptime { … }` block: one is refused. | `refuse` |
+| `as0643` | 643 | rule | “`FunctionDecl.modifiers` already” | `comptime` is a function modifier: `comptime func:sq` forced by `comptime(sq(5i32))` is 25. | `run:0` |
 
 ## BUILTIN (`meta/specs/BUILTIN_REFERENCE.md`)
 

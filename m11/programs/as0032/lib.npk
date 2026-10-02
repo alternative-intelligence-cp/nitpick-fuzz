@@ -1,0 +1,2 @@
+mod:lib;
+pub func:f = int32() never fails { pass 5i32; };

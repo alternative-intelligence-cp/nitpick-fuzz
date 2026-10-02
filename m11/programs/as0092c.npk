@@ -1,0 +1,15 @@
+// M11 as0092c -- meta/specs/AST_REFERENCE.md:92 (rule)
+// quote: `failsafe`'s shape is `NITPICK-TYPE-044`
+// claim: `failsafe`'s shape is fixed: a `failsafe` with two parameters is refused, NITPICK-TYPE-044.
+// expect: refuse:NITPICK-TYPE-044
+// wrong: accepted, or refused with another code
+mod:as0092c;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e, int32:extra) {
+    pick (e) { (*) { exit 99i32; } }
+    exit 9i32;
+};

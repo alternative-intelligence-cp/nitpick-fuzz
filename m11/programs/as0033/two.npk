@@ -1,0 +1,3 @@
+mod:two;
+pub func:h = int32() never fails { pass 6i32; };
+pub fixed int32:K2 = 7i32;

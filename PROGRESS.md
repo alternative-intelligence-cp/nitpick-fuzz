@@ -1302,6 +1302,19 @@ the brief says.
 - **The screen.** LEXICAL's agreeing refusals were screened (S55): each is the claim's
   own reason. `lx0239`'s parse error is its claim's.
 
+**AST (all 644 lines), `gen/m11_claims/ast.py`.** The week read 89% before it.
+- **The extraction.** 202 claims (8 examples, 116 rows, 78 rules); 181 testable (2
+  linked to the M10 item that tests exactly their sentence), 21 untestable (19
+  `internal`: a row that lists only a node's fields; 1 `z3`; 1 `vague`). Committed
+  before any of its programs ran.
+  - A row or a note that states a spelling, a placement or a run-time rule is tested in
+    that spelling, even where another reference's claim already tests the construct.
+  - Where AST's sentence and another reference disagree, the claim takes AST's
+    sentence. Examples: implicit generic arguments `f<int32>(x)` (LEXICAL:239 says the
+    turbofish is always written), `ok(val)` among the bare-name builtins (AST:329 says
+    it is removed), `?|` struck (every program uses it). The run says which side the
+    compiler is on.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*

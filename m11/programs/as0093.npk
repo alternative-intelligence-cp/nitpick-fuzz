@@ -1,0 +1,15 @@
+// M11 as0093 -- meta/specs/AST_REFERENCE.md:93 (rule)
+// quote: `failsafe` sets the same precedent with `tbb32:err`
+// claim: `failsafe`'s one parameter is `tbb32:err`: a failsafe so declared compiles.
+// expect: compile
+// wrong: refused: failsafe takes another parameter
+mod:as0093;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(tbb32:err) {
+    pick (err) { ERR: { exit 2i32; }, (*) { exit 3i32; } }
+    exit 9i32;
+};
