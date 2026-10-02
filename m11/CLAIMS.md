@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**2077 claims: 1797 testable, 280 untestable** (each with its reason).
+**2261 claims: 1978 testable, 283 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -18,6 +18,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
 | CONTROL | 110 | 14 | 7 | 89 | 108 | 2 |
 | IO | 78 | 5 | 9 | 64 | 67 | 11 |
+| LEXICAL | 184 | 9 | 34 | 141 | 181 | 3 |
 | MACRO | 124 | 13 | 34 | 77 | 119 | 5 |
 | MEMORY | 181 | 10 | 11 | 160 | 146 | 35 |
 | MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
@@ -37,7 +38,7 @@ extracted:
 | CONCURRENCY | 647 | 1–647 | 647 | — |
 | CONTROL | 415 | 1–415 | 415 | — |
 | IO | 287 | 1–287 | 287 | — |
-| LEXICAL | 410 | — | 0 | 1–410 |
+| LEXICAL | 410 | 1–410 | 410 | — |
 | MACRO | 412 | 1–412 | 412 | — |
 | MEMORY | 533 | 1–533 | 533 | — |
 | MODULE | 300 | 1–300 | 300 | — |
@@ -640,6 +641,195 @@ Tables whose rows are not claims:
 | `io0268` | 268 | rule | “spliced by `&{ }` interpolation” | Formatting is ordinary functions returning string, spliced by `&{ }` interpolation. | `run:0` |
 | `io0269` | 269 | rule | “There is no format-specifier language” | There is no format-specifier language: a text writer writes `%d` verbatim. | `run:0` |
 | `io0280` | 280 | rule | “and only epoll” | The readiness mechanism is epoll only, with no timerfd; io_uring is refused. | untestable [internal] the executor's syscalls are the runtime's, not visible to a program |
+
+## LEXICAL (`meta/specs/LEXICAL_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `lx0014` | 14 | rule | “Nitpick source is a sequence of Unicode code points encoded in UTF-8” | Source is UTF-8: a string literal holding `é` compiles, and the string is its two UTF-8 bytes. | `run:0` |
+| `lx0015` | 15 | rule | “not forming part of a valid token are a lexical error” | A character that forms no token (`§` between two operands) is a lexical error: refused. | `refuse` |
+| `lx0017` | 17 | example | “```ebnf” | Every code point up to U+10FFFF is a source character: a string literal holding U+1F600 compiles and is its four UTF-8 bytes. | `run:0` |
+| `lx0024` | 24 | rule | “Block comments do **not** nest” | Block comments do not nest: `/* a /* b */ c */` ends at the first `*/`, leaving `c */` as code, which is refused. | `refuse` |
+| `lx0024b` | 24 | rule | “stream. Block comments” | Since block comments do not nest, an inner `/*` is comment text: `/* a /* b */` is one whole comment and the program compiles. | `run:0` |
+| `lx0026` | 26 | example | “```ebnf” | Whitespace (space, tab, CR, LF) and both comment forms are discarded: `1i32 /* c */ + 2i32 // d` with a tab and a CRLF is 3. | `run:0` |
+| `lx0035` | 35 | rule | “ASCII-bounded, beginning with a letter or underscore” | Identifiers are ASCII-bounded: `café` is not an identifier, and a local of that name is refused. | `refuse` |
+| `lx0035b` | 35 | rule | “beginning with a letter or underscore” | An identifier may begin with an underscore: `_n2` is a local's name. | `run:0` |
+| `lx0037` | 37 | example | “```ebnf” | `Identifier ::= [a-zA-Z_] [a-zA-Z0-9_]*`: `a_1B` and `Z9` are names. | `run:0` |
+| `lx0043` | 43 | rule | “The lexer resolves `_?`, `_!`, and `_~` as distinct operators” | `_!` is lexed as the operator before any identifier: `_! g(3i32)` on a `never fails` callee is 3. | `run:0` |
+| `lx0043b` | 43 | rule | “`_?`” | `_?` is lexed as the operator: `_? note();` discards a `never fails` NIL call. | `compile` |
+| `lx0048` | 48 | example | “```ebnf” | The keyword families are reserved: one word of each (`wild`, `relaxed`, `if`, `prove`, `async`, `use`, `struct`, `int8`, `is`) is refused as a local's and a function's name. | `sh:0` |
+| `lx0052` | 52 | rule | “MemoryQualifier     ::= "wild"” | `wild`, `wildx`, `stack`, `defer`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0054` | 54 | rule | “MemoryOrdering      ::= "relaxed"” | `relaxed`, `acquire`, `release`, `acq_rel`, `seq_cst`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0056` | 56 | rule | “ControlFlow         ::= "if"” | `if`, `else`, `while`, `for`, `loop`, `till`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0057` | 57 | rule | “"when" \| "then" \| "end" \| "pick"” | `when`, `then`, `end`, `pick`, `fall`, `where`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0058` | 58 | rule | “"give" \| "break" \| "continue"” | `give`, `break`, `continue`, `return`, `pass`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0059` | 59 | rule | “"fail" \| "exit" \| "raw"” | `fail`, `exit`, `raw`, `drop`, `nodrop`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0060` | 60 | rule | “"defaults" \| "discard" \| "move" \| "relay"” | `defaults`, `discard`, `move`, `relay`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0062` | 62 | rule | “VerificationKeyword ::= "prove"” | `prove`, `assert_static`, `requires`, `ensures`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0063` | 63 | rule | “"acquires" \| "gives"” | `acquires`, `gives`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0064` | 64 | rule | “"invariant" \| "fails" \| "on" \| "with" \| "never"” | `invariant`, `fails`, `on`, `with`, `never`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0065` | 65 | rule | “"old" \| "result" \| "pure"” | `old`, `result`, `pure`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0066` | 66 | rule | “"decreases" \| "unbounded"” | `decreases`, `unbounded`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0072` | 72 | rule | “`decreases Expr` on a FUNCTION (D-304 (5), 1.5.8c) is the measure a recursive” | A function's `decreases n` is checked at every recursive call: a call with a measure that does not shrink traps DecreasesViolated. | `trap:DecreasesViolated` |
+| `lx0076` | 76 | rule | “`while (c) unbounded` -- exactly one of the two, TYPE-072” | A `while` stating both `decreases` and `unbounded` is refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `lx0076b` | 76 | rule | “exactly one of the two” | A `while` stating neither `decreases` nor `unbounded` is refused, NITPICK-TYPE-072. | `refuse:NITPICK-TYPE-072` |
+| `lx0078` | 78 | rule | “arguments and nothing else -- no allocation, no I/O, no suspension, no” | A `pure` function's body is checked: one that allocates (`string_concat`) is refused. | `refuse` |
+| `lx0080` | 80 | rule | “call site inside a contract, which admits only `never fails` `pure` callees” | A contract admits only `never fails` `pure` callees: `requires raw pos(n)` with `pos` not `pure` is refused. | `refuse` |
+| `lx0080b` | 80 | rule | “admits only `never fails` `pure` callees” | The permitted twin: `requires raw pos(n)` with `pos` declared `pure never fails` compiles and `half(8)` is 4. | `run:0` |
+| `lx0083` | 83 | rule | “`never fails` is also legal after a function TYPE's parameter list” | `never fails` after a function type's parameter list: `func int64() never fails:f = seven;` and `raw f()` is 7. | `run:0` |
+| `lx0085` | 85 | rule | “AsyncKeyword        ::= "async"” | `async`, `await`, `thread`, `joins`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0087` | 87 | rule | “ModuleKeyword       ::= "use"” | `use`, `mod`, `pub`, `extern`, `cfg`, `as`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0088` | 88 | rule | “"comptime" \| "inline" \| "noinline"” | `comptime`, `inline`, `noinline`, `macro`, `derive`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0089` | 89 | rule | “"sealed" \| "hidden"” | `sealed`, `hidden`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0091` | 91 | rule | “`sealed` and `hidden` are FIELD qualifiers (D-313, D-314): a sealed field is” | A `sealed` field is read anywhere: outside its struct's module, `a.bal` reads 5. | `run:0` |
+| `lx0092` | 92 | rule | “read anywhere and written only by code in the module that declares its” | A `sealed` field is written only inside its struct's module: `a.bal = 6i64;` outside is refused. | `refuse` |
+| `lx0093` | 93 | rule | “a hidden field is neither read nor written outside that module” | A `hidden` field is not read outside its struct's module: `a.key` outside is refused. | `refuse` |
+| `lx0095` | 95 | rule | “TypeKeyword         ::= "struct"” | `struct`, `enum`, `assoc`, `opaque`, `error`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0096` | 96 | rule | “\| "unit"” | `unit`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0097` | 97 | rule | “"trait" \| "impl" \| "Self"” | `trait`, `impl`, `Self`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0098` | 98 | rule | “"Rules" \| "limit" \| "fixed"” | `Rules`, `limit`, `fixed`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0100` | 100 | rule | “BuiltinType         ::= "int8"” | `int8`, `int16`, `int32`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0101` | 101 | rule | “"int64" \| "int128" \| "int256"” | `int64`, `int128`, `int256`, `int512`, `int1024`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0102` | 102 | rule | “"int2048" \| "int4096"” | `int2048`, `int4096`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0103` | 103 | rule | “"uint8" \| "uint16"” | `uint8`, `uint16`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0104` | 104 | rule | “"uint32" \| "uint64" \| "uint128"” | `uint32`, `uint64`, `uint128`, `uint256`, `uint512`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0105` | 105 | rule | “"uint1024" \| "uint2048" \| "uint4096"” | `uint1024`, `uint2048`, `uint4096`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0106` | 106 | rule | “"tbb8" \| "tbb16" \| "tbb32"” | `tbb8`, `tbb16`, `tbb32`, `tbb64`, `tbb128`, `tbb256`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0107` | 107 | rule | “"frac8" \| "frac16" \| "frac32" \| "frac64"” | `frac8`, `frac16`, `frac32`, `frac64`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0108` | 108 | rule | “"tfp32" \| "tfp64" \| "tfp128"” | `tfp32`, `tfp64`, `tfp128`, `tfp256`, `dim256`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0109` | 109 | rule | “"flt32" \| "flt64" \| "flt128"” | `flt32`, `flt64`, `flt128`, `flt256`, `flt512`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0110` | 110 | rule | “"bool" \| "char8" \| "char16"” | `bool`, `char8`, `char16`, `char32`, `string`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0111` | 111 | rule | “\| "cstring"” | `cstring`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0112` | 112 | rule | “"fd" \| "pid" \| "tid" \| "uid" \| "gid"” | `fd`, `pid`, `tid`, `uid`, `gid`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0113` | 113 | rule | “"oflags" \| "prot" \| "mflags" \| "fmode"” | `oflags`, `prot`, `mflags`, `fmode`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0114` | 114 | rule | “"dyn" \| "any" \| "Result" \| "Optional"” | `dyn`, `any`, `Result`, `Optional`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0115` | 115 | rule | “"Handle" \| "arena" \| "shared_arena"” | `Handle`, `arena`, `shared_arena`, `atomic`, `Future`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0116` | 116 | rule | “\| "Channel"” | `Channel`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0117` | 117 | rule | “"Mutex" \| "Guard" \| "RwLock" \| "RGuard"” | `Mutex`, `Guard`, `RwLock`, `RGuard`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0118` | 118 | rule | “"CondVar" \| "Barrier" \| "OwnedFd"” | `CondVar`, `Barrier`, `OwnedFd`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0119` | 119 | rule | “"simd" \| "complex" \| "array" \| "func"” | `simd`, `complex`, `array`, `func`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0120` | 120 | rule | “\| "range"” | `range`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0121` | 121 | rule | “"trit" \| "tryte" \| "nit" \| "nyte"” | `trit`, `tryte`, `nit`, `nyte`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0122` | 122 | rule | “"buffer" \| "NIL"” | `buffer`, `NIL`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0124` | 124 | rule | “BuiltinHelper       ::= "is" \| "in" \| "is_err"” | `is`, `in`, `is_err`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0127` | 127 | rule | “`vec2`, `vec3`, `vec9`, `matrix`, `tmatrix`, `tensor` and `ttensor` were” | `vec2`, `vec3`, `vec9`, `matrix`, `tmatrix`, `tensor` and `ttensor` are not keywords (D-135): a local of each name compiles. | `sh:0` |
+| `lx0142` | 142 | row | “\| `gc` removed from `MemoryQualifier` \|” | `gc`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0143` | 143 | row | “\| `fails`, `on`, `with`, `never` added \|” | `fails`, `on`, `with`, `never`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0144` | 144 | row | “\| `is_err` added \|” | `is_err`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0145` | 145 | row | “\| **`ok` removed** \|” | `ok`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0146` | 146 | row | “\| `discard` added to `ControlFlow` \|” | `discard`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0147` | 147 | row | “\| `tbb128`, `tbb256` added \|” | `tbb128` and `tbb256` are types: `5tbb128 + 5tbb128` is `10tbb128`, and `7tbb256` binds. | `run:0` |
+| `lx0148` | 148 | row | “\| `fix256` → `dim256` \|” | `fix256` is no longer a name the language holds, so a local of that name compiles; `dim256` is reserved. | `sh:0` |
+| `lx0149` | 149 | row | “\| `tfp128`, `tfp256` added \|” | `tfp128` and `tfp256` are types: `1.5tfp128 + 1.5tfp128` is `3.0tfp128`, and `2.5tfp256` binds. | `run:0` |
+| `lx0150` | 150 | row | “\| `char8/16/32` added \|” | `char8` is semantically distinct from `uint8`: binding a `char8` to a `uint8` is refused. | `refuse` |
+| `lx0151` | 151 | row | “`Handle`, `arena`, `shared_arena`, `atomic`, `Future`, `Optional`, `simd`, `complex` added” | `Handle`, `arena`, `shared_arena`, `atomic`, `Future`, `Optional`, `simd`, `complex`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0152` | 152 | row | “\| **35 `a*` collection keywords removed** \|” | `astack`, `alist`, `ahash`, `astringlist`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0153` | 153 | row | “\| `fd`, `pid`, `tid`, `uid`, `gid` added \|” | Kernel identifiers permit no arithmetic: `a + b` on two `fd`s is refused. | `refuse` |
+| `lx0153b` | 153 | rule | “permitting comparison but not arithmetic” | Kernel identifiers permit comparison: `a == b` on two `fd`s compiles. | `compile` |
+| `lx0153c` | 153 | rule | “POSIX's `-1` goes to `Result.err` and is not representable” | An `fd` of -1 is not representable: `(-1i32) => fd` is refused. | `refuse` |
+| `lx0154` | 154 | row | “\| `range` added \|” | `range<T>` can be written: `range<int64>:r = 0i64...3i64;` compiles. | `compile` |
+| `lx0155` | 155 | row | “\| `oflags`, `prot`, `mflags`, `fmode` added \|” | A flag family takes `\|` within the family and `=> int32` outbound: `(O_WRONLY \| O_CREAT) => int32` is the two flags' ints or-ed. | `run:0` |
+| `lx0155b` | 155 | rule | “no arithmetic and no order” | A flag family has no arithmetic: `O_WRONLY + O_CREAT` is refused. | `refuse` |
+| `lx0155c` | 155 | rule | “no order” | A flag family has no order: `O_WRONLY < O_CREAT` is refused. | `refuse` |
+| `lx0155d` | 155 | rule | “families never convert to each other” | Flag families never convert to each other: `O_WRONLY => prot` is refused. | `refuse` |
+| `lx0155e` | 155 | rule | “`int32 =>! ` inbound” | Inbound to a flag family is `=>!`, not `=>`: `(1i32) => oflags` is refused. | `refuse` |
+| `lx0155f` | 155 | rule | “`=> int32` outbound and `int32 =>! ` inbound” | Inbound with `=>!` compiles: `(1i32) =>! oflags`. | `compile` |
+| `lx0156` | 156 | row | “\| `assoc` added \|” | `assoc`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0157` | 157 | row | “\| **`Type` removed** \|” | `Type`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0158` | 158 | row | “\| **`stream`, `process`, `pipe`, `debug`, `log` removed** \|” | `stream`, `process`, `pipe`, `debug`, `log`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0159` | 159 | row | “\| **`const` removed** \|” | `const` is removed and not reserved (D-088's rule): a local named `const` compiles. | `sh:0` |
+| `lx0160` | 160 | row | “\| **`binary` removed** \|” | `binary`: none is a keyword, so a local of that name compiles. | `sh:0` |
+| `lx0160b` | 160 | rule | “`buffer` is retained” | `buffer`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0161` | 161 | row | “\| **`move` moved** from `MemoryQualifier` to `ControlFlow` \|” | `move(place)` is a keyword operator: `string:t = move(s);` takes the string. | `run:0` |
+| `lx0161b` | 161 | rule | “marking a CONSUMING parameter” | `move` on a parameter marks it consuming: `take(move(s))` passes the string in. | `run:0` |
+| `lx0161c` | 161 | rule | “is refused (`NITPICK-MOVE-004`) anywhere but a parameter” | `move` in a declaration anywhere but a parameter is refused, NITPICK-MOVE-004. | `refuse:NITPICK-MOVE-004` |
+| `lx0162` | 162 | row | “\| **`relay` and `_^` added** \|” | `relay` forwards the error's code verbatim and runs `defer`: the caller's arm `(E1)` matches, and the deferred write happened. | `run:0` |
+| `lx0162b` | 162 | rule | “`relay` forwards the code verbatim and runs `defer`” | `_^` is `relay`'s operator: `_^ inner(v)` forwards the code and runs `defer` the same way. | `run:0` |
+| `lx0163` | 163 | row | “\| `Self` added \|” | `Self`: each is reserved, so a local and a function of that name are each refused. | `sh:0` |
+| `lx0164` | 164 | row | “\| `NIL` added to `BuiltinType` \|” | `NIL` is a type: `func:reset = NIL(int32->:a)` compiles, and its call writes through the pointer. | `run:0` |
+| `lx0165` | 165 | row | “\| `cstring` added to `BuiltinType` \|” | `cstring` is a builtin type's keyword: a user type named `cstring` is refused, never a shadow. | `refuse` |
+| `lx0166` | 166 | row | “`result` is the SUCCESS value in `ensures`” | `result` names the success value in `ensures`: `ensures result == x + 1i32` holds for `inc`. | `run:0` |
+| `lx0167` | 167 | row | “checked in every build, `DecreasesViolated`” | A `while`'s `decreases` is checked in every build: a measure that does not shrink traps DecreasesViolated. | `trap:DecreasesViolated` |
+| `lx0168` | 168 | row | “\| `pure` added to `VerificationKeyword` \|” | Purity is checked in the body: a `pure` function calling one that is not `pure` is refused. | `refuse` |
+| `lx0168b` | 168 | rule | “`pure` never rides a function TYPE” | `pure` never rides a function type: `func int64() pure never fails:f` is refused. | `refuse` |
+| `lx0169` | 169 | row | “`for` is **not** duplicated” | `for` is one reserved token. | untestable [vague] the row states the grammar's bookkeeping; that `for` is reserved is lx0056's claim |
+| `lx0173` | 173 | example | “```ebnf” | The arithmetic, compound, comparison, logical and bitwise operators of the block lex and compute: a program using each gets the expected values. | `run:0` |
+| `lx0174` | 174 | rule | “"++" \| "--"” | `++` and `--` are operator tokens: `x++; x--;` compiles. | `compile` |
+| `lx0178` | 178 | rule | “"<=>"” | `<=>` is an operator: `a <=> b` compiles and orders (-1 when a < b). | `run:0` |
+| `lx0186` | 186 | rule | “CompilerSigil ::= "#"” | `#` addresses the compiler: `#size_of<int64>()` is 8. | `run:0` |
+| `lx0191` | 191 | rule | “`=>` and `=>!` are the *only*” | `=>` and `=>!` are the only cast forms: a C-style cast `(int64)x` is refused. | `refuse` |
+| `lx0191b` | 191 | rule | “**`=>!` added**” | `x as int64` is no cast either: refused. | `refuse` |
+| `lx0195` | 195 | rule | “It was formerly” | `#` is not a value operator (the old pin): `#x` on a value is refused. | `refuse` |
+| `lx0203` | 203 | rule | “**The wrapping family `+% -% *%`**” | `+%` computes modulo 2^N and never traps: `127i8 +% 1i8` is -128. | `run:0` |
+| `lx0204` | 204 | rule | “forms `+%= -%= *%=`” | The compound forms wrap: `u +%= 1u8` from 255 is 0, `-%=` back is 255, `*%= 2u8` is 254. | `run:0` |
+| `lx0204b` | 204 | rule | “Plain `+ - *` TRAP on overflow (D-210)” | Plain `+` traps on overflow: `127i8 + 1i8` traps IntOverflow. | `trap:IntOverflow` |
+| `lx0208` | 208 | rule | “They are the longest match, so `a +% b` is one token” | `a + %b` was never a program (`%` starts no expression): refused. | `refuse` |
+| `lx0218` | 218 | row | “\| `..` \| inclusive range `[a, b]` \| expression \|” | `..` is inclusive: summing `1i64..3i64` is 6. | `run:0` |
+| `lx0219` | 219 | row | “\| `...` \| exclusive range `[a, b)` \| expression \|” | `...` is exclusive: summing `1i64...3i64` is 3. | `run:0` |
+| `lx0220` | 220 | row | “\| `..*` \| variadic rest marker — **collects** arguments \| declaration site \|” | `..*` collects the trailing arguments: `total(1, 2, 3)` is 6. | `run:0` |
+| `lx0221` | 221 | row | “\| `..^` \| spread — **expands** a collection into arguments \| call site \|” | `..^` spreads a slice into the arguments: `total(1, ..^xs)` with `xs` = [2, 3] is 6. | `run:0` |
+| `lx0223` | 223 | rule | “`..*` and `..^` are inverses. Confirmed against the prototype:” | `..*` and `..^` are inverses, confirmed against the prototype's parser. | untestable [tree] the confirmation cites the prototype's and the compiler's own sources; lx0221 spreads what lx0220 collects |
+| `lx0231` | 231 | rule | “`>>` is the right-shift operator **and** the closing bracket pair of a nested” | `>>` closes a nested generic: `Result<List<int64>>:r = mk();` compiles and the list is usable. | `run:0` |
+| `lx0239` | 239 | rule | “Explicit type arguments in expression position are always written” | Explicit type arguments in an expression need the turbofish: `idt<int32>(5i32)` is refused. | `refuse` |
+| `lx0240` | 240 | rule | “with the turbofish” | With the turbofish, `idt::<int32>(5i32)` is 5. | `run:0` |
+| `lx0241` | 241 | rule | “splits inside a type-argument list and is a right-shift everywhere outside one” | Outside a type-argument list `>>` is a right shift: `64 >> 2` is 16. | `run:0` |
+| `lx0251` | 251 | row | “\| **leading** \| negation \| `!x`, `!=` \|” | A leading `!` negates: `!t` is false, and `a != b` compares. | `run:0` |
+| `lx0252` | 252 | row | “\| **trailing or repeated** \| unchecked / emphatic \| `?!`, `=>!`, `_!`, `!!!` \|” | The trailing forms lex as their operators: `?!`, `=>!` and `_!` compile and compute; `!!! E1;` goes to failsafe's `E1` arm (81). | `run:81` |
+| `lx0254` | 254 | rule | “**`!!` no longer exists.**” | `!!` no longer exists: `asm!!` is refused. | `refuse` |
+| `lx0256` | 256 | rule | “full-tier syscall is spelled **`sys_full`**” | The full-tier syscall is spelled `sys_full`: `sys_full(39i64)` compiles. | `compile` |
+| `lx0259` | 259 | rule | “**Macro invocation is `#name(args)`**, not `name!(args)` (D-046)” | A macro is not invoked as `name!(args)`: `seven!()` is refused. | `refuse` |
+| `lx0259b` | 259 | rule | “**Macro invocation is `#name(args)`**” | A macro is invoked as `#name(args)`: `#seven()` is 7. | `run:0` |
+| `lx0269` | 269 | example | “```ebnf” | `true`, `false`, `NIL` and `ERR` are literals: each binds where its type is expected. | `run:0` |
+| `lx0271` | 271 | rule | “SentinelLiteral ::= "NULL" \| "NIL" \| "ERR"” | `NULL` is a literal: `int8->:p = NULL;` compiles. | `compile` |
+| `lx0274` | 274 | rule | “**`unknown` is not a literal.**” | `unknown` is not a literal: `int32:x = unknown;` is refused. | `refuse` |
+| `lx0279` | 279 | rule | “`ERR` **is** writable” | `ERR` is writable and is a `pick` label: a `tbb8` holding `ERR` takes the `ERR:` arm. | `run:0` |
+| `lx0284` | 284 | rule | “Underscores are permitted for readability and ignored” | Underscores in a literal are ignored: `1_000i32` is 1000. | `run:0` |
+| `lx0287` | 287 | rule | “leading significant digit is a letter takes a value-neutral leading zero” | A value whose leading digit is a letter takes a leading zero: `0FFhex` is 255, `0Tt` is -1, `0an` is -1. | `run:0` |
+| `lx0290` | 290 | example | “```ebnf” | Every base is a suffix: `10`, `0Ahex`, `1010bin`, `12oct`, `101t` and `11n` are each 10. | `run:0` |
+| `lx0296` | 296 | rule | “DecimalLiteral ::= [0-9] ([0-9_]* [0-9])?” | Underscores may stand anywhere inside the digits: `1__0i32` is 10. | `run:0` |
+| `lx0296b` | 296 | rule | “([0-9_]* [0-9])?” | A decimal literal ends with a digit: `10_i32` (a trailing underscore) is refused. | `refuse` |
+| `lx0297` | 297 | rule | “HexLiteral     ::= [0-9] ([0-9a-fA-F_]* [0-9a-fA-F])? "hex"” | Hex digits take either case: `0ffhex` equals `0FFhex`. | `run:0` |
+| `lx0302` | 302 | rule | “TernaryLiteral ::= [01] ([01Tt_]* [01Tt])? ("t" \| "ter" \| "tri")” | Balanced ternary takes the suffixes `t`, `ter` and `tri`, and `T` or `t` is -1: `1Tt`, `1Tter`, `1Ttri` and `1tt` are each 2. | `run:0` |
+| `lx0305` | 305 | rule | “NonaryLiteral  ::= [0-4] ([0-4a-dA-D_]* [0-4a-dA-D])? ("non" \| "n")” | Balanced nonary takes `non` and `n`, and a..d / A..D are -1..-4: `1an` is 8, `1dn` and `1Dnon` are 5. | `run:0` |
+| `lx0307` | 307 | rule | “FloatLiteral   ::= DecimalLiteral "." DecimalLiteral Exponent? TypeSuffix?” | A float literal with an exponent: `1.5e2f64` is 150.0. | `run:0` |
+| `lx0307b` | 307 | rule | “DecimalLiteral "." DecimalLiteral” | A float needs digits on both sides of the point: `.5f64` is refused. | `refuse` |
+| `lx0308` | 308 | rule | “Exponent       ::= [eE] [+-]? DecimalLiteral” | An exponent takes a sign and either case: `15.0E-1f64` is 1.5. | `run:0` |
+| `lx0310` | 310 | rule | “TypeSuffix     ::= "u8" \| "u16" \| "u32" \| "u64" \| "u128"” | The suffixes `u8` … `u128` are literals' types. | `compile` |
+| `lx0311` | 311 | rule | “"u256" \| "u512" \| "u1024" \| "u2048" \| "u4096"” | The suffixes `u256` … `u4096` are literals' types. | `compile` |
+| `lx0312` | 312 | rule | “"i8" \| "i16" \| "i32" \| "i64" \| "i128"” | The suffixes `i8` … `i128` are literals' types. | `compile` |
+| `lx0313` | 313 | rule | “"i256" \| "i512" \| "i1024" \| "i2048" \| "i4096"” | The suffixes `i256` … `i4096` are literals' types. | `compile` |
+| `lx0314` | 314 | rule | “"tbb8" \| "tbb16" \| "tbb32" \| "tbb64" \| "tbb128" \| "tbb256"” | The `tbb` suffixes are literals' types. | `compile` |
+| `lx0315` | 315 | rule | “"f32" \| "f64" \| "f128"” | The suffixes `f32`, `f64` and `f128` are float literals' types. | `compile` |
+| `lx0316` | 316 | rule | “"tfp32" \| "tfp64" \| "tfp128" \| "tfp256" \| "dim256"” | The `tfp` suffixes and `dim256` are literals' types. | `compile` |
+| `lx0317` | 317 | rule | “"char8" \| "char16" \| "char32"” | The `char` suffixes are literals' types. | `compile` |
+| `lx0321` | 321 | rule | “verified EXACTLY at scan time (`NITPICK-LEX-004`)” | A literal outside the signed 64-bit envelope is refused at scan time, NITPICK-LEX-004. | `refuse:NITPICK-LEX-004` |
+| `lx0323` | 323 | rule | “(`NITPICK-TYPE-031`)” | A literal must fit its type, checked at the literal: `300i8` is refused, NITPICK-TYPE-031. | `refuse:NITPICK-TYPE-031` |
+| `lx0324` | 324 | rule | “(`0u64 - 1u64` is the maximum)” | `0u64 - 1u64` is uint64's maximum. | `run:0` |
+| `lx0326` | 326 | rule | “`0b4bni8` is −128” | `0b4bni8` is -128. | `run:0` |
+| `lx0330` | 330 | rule | “from 1.5.8b step 2 the spelling is refused” | From 1.5.8b step 2, `0u64 - 1u64` is refused, NITPICK-TYPE-076. | `refuse:NITPICK-TYPE-076` |
+| `lx0332` | 332 | rule | “`~0u64` is the maximum” | `~0u64` is uint64's maximum: every bit set. | `run:0` |
+| `lx0332b` | 332 | rule | “`(1u64 << 63u64) \| k` gives” | `(1u64 << 63u64) \| k` builds a value above 2^63-1: with `k` = `04BF29CE484222325hexu64` it is above 9223372036854775807. | `run:0` |
+| `lx0334` | 334 | rule | “`0u64 -% 1u64` also works” | `0u64 -% 1u64` wraps to the maximum. | `run:0` |
+| `lx0337` | 337 | rule | “`FFhex`,” | By D-147 `FFhex`, `an`, `ban` and `tt` are ordinary identifiers: a local of each name compiles. | `sh:0` |
+| `lx0338` | 338 | rule | “`an`, `ban`, `tt` are ordinary identifiers; the values they used to spell are” | The values those words used to spell are `0FFhex` (255), `0an` (-1), `0ban` (-19) and `0tt` (-1). | `run:0` |
+| `lx0343` | 343 | rule | “The **legacy C-style prefixes** (`0x`, `0b`, `0o`, `0n`)” | The C-style `0o` prefix is removed: `0o17` is refused. | `refuse` |
+| `lx0346` | 346 | rule | “`0xFF` is a bad-digit error at the `x`” | `0xFF` is a bad-digit error at the `x`, NITPICK-LEX-003. | `refuse:NITPICK-LEX-003` |
+| `lx0349` | 349 | rule | “**Ternary/nonary use the suffix form**” | The prefix form of a ternary literal (`0t1T`) is not the language's: refused. | `refuse` |
+| `lx0353` | 353 | rule | “`int2048` and `int4096` have no direct source literal” | `int2048` has no direct source literal: `5i2048` is refused. | `refuse` |
+| `lx0354` | 354 | rule | “are instantiated by parsing” | Such a value is instantiated by parsing: `parse_uint2048("1.5e308")` compiles. | `compile` |
+| `lx0358` | 358 | example | “```ebnf” | Each escape is its byte: `\n \r \t \\ \" \' \0 \x41 \u{42}` is nine bytes 10 13 9 92 34 39 0 65 66. | `run:0` |
+| `lx0365` | 365 | rule | “RawStringLiteral   ::= "r" '"' (SourceCharacter - '"')* '"'” | A raw string performs no escape processing: `r"a\nb"` is four bytes, the second a backslash. | `run:0` |
+| `lx0366` | 366 | rule | “BlockStringLiteral ::= '"""' (SourceCharacter - '"""')* '"""'” | A block string holds a lone `"`: `"""a"b"""` is the three bytes `a"b`. | `run:0` |
+| `lx0368` | 368 | rule | “CharacterLiteral   ::= "'"” | A character literal takes an escape: `'\n'` is 10char8, and `'A'` is 65char8. | `run:0` |
+| `lx0377` | 377 | rule | “preserves newlines and indentation verbatim” | A block string preserves newlines and indentation verbatim: a newline and two spaces stay. | `run:0` |
+| `lx0377b` | 377 | rule | “ends at the FIRST `"""`: a `"`” | A `""` inside a block string is body text: `"""a""b"""` is the four bytes `a""b`. | `run:0` |
+| `lx0383` | 383 | rule | “Backtick-delimited, with `&{ … }` interpolation” | A template literal interpolates `&{ … }`: `` `x&{ n }y` `` with n = 5 is "x5y". | `run:0` |
+| `lx0383b` | 383 | rule | “The lexer decomposes a template” | The lexer decomposes a template into TEMPLATE_START, TEMPLATE_PART, INTERP_START, INTERP_END, TEMPLATE_END. | untestable [internal] the token kinds are the lexer's; lx0383 and lx0387 test the literal |
+| `lx0387` | 387 | example | “```ebnf” | A template holds several interpolations of expressions: `` `&{ a }+&{ b }=&{ a + b }` `` is "2+3=5". | `run:0` |
+| `lx0405` | 405 | rule | “Ownership transfers only where `move` is written” | Ownership never transfers implicitly: `string:t = s;` is refused. | `refuse` |
+| `lx0406` | 406 | rule | “implicitly — and the moved-from binding is invalid until reinitialized” | A moved-from binding is invalid: reading `s` after `move(s)` is refused. | `refuse` |
+| `lx0406b` | 406 | rule | “until reinitialized” | Reinitialised after the move, the binding is valid again: `s` assigned anew reads its new value. | `run:0` |
+| `lx0408` | 408 | rule | “`impl` now takes” | `impl` takes no connector: `impl:Box:Show = {};` implements the trait, and `b.show()` is 7. | `run:0` |
 
 ## MACRO (`meta/specs/MACRO_REFERENCE.md`)
 

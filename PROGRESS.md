@@ -1266,6 +1266,18 @@ the brief says.
 - **The screen.** MODULE's agreeing refusals were screened (S55). Two had agreed for a
   reason of their own (`md0099b`, `md0273`), and both were re-spelled.
 
+**LEXICAL (all 410 lines), `gen/m11_claims/lexical.py`.** The week read 88% before it.
+- **The extraction.** 184 claims (9 examples, 34 rows, 141 rules); 181 testable, 3
+  untestable (`vague`, `tree`, `internal`, one each). No M10 item tests a LEXICAL
+  sentence. Committed before any of its programs ran.
+  - The keyword productions are checked one source line at a time (44 claims). A
+    script compiles a local binding and a function named after each word, and every
+    compile must be refused. A word the text says is no keyword (D-135's seven, and
+    the corrections table's removals) is compiled as a local's name, which must be
+    accepted (S63).
+  - The base-suffixed literals are written as the reference writes them, with no type
+    suffix, in a typed declaration (`int32:b = 0Tt;`, D-148's contextual type).
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
@@ -1814,6 +1826,13 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   showed that a support file can be where the program's own mistake sits (`hidden`).
   A second `refix()` of one claim passes the first one's reason on, so the claim's
   `fixed` names both.
+- **S63 — a keyword list is checked word by word, in two positions.** A word of a keyword
+  production is reserved when a local binding of that name and a function of that name
+  are both refused (one `sh:0` script per source line, `lexical.py`'s `kw`). F-029 found
+  a reserved word accepted in one position and refused in another, so one position is
+  not enough. A word the text says is NOT a keyword is checked as a local's name only.
+  A module-level function's name can be refused for reasons of its own, a prelude or
+  builtin name (D-239, D-294).
 
 ## Log
 
