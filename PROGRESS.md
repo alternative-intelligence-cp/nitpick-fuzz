@@ -1347,6 +1347,22 @@ the brief says.
 - **The screen.** AST's agreeing refusals were screened (S55). One had agreed for a
   reason of its own (`as0352`), and was re-spelled.
 
+**BUILD (all 682 lines), `gen/m11_claims/build.py`.** The week read 89% before it.
+- **The extraction.** 97 claims (4 examples, 26 rows, 67 rules); 38 testable, 59
+  untestable: 28 `tool`, 17 `tree`, 6 `vague`, 6 `z3`, 1 `platform`, 1 `internal`. The
+  reference describes the compiler's own build: the ladder, the two test runners, the
+  verified build. Committed before any of its programs ran.
+  - `npkg build` cannot build a project outside the compiler's repository: it reads the
+    floor's `runtime/npkrt.ll` from the manifest's root. This was measured in a scratch
+    project, as a probe of `npkg`'s spelling. `npkg test` builds the compiler's ladder
+    before its entries, which is longer than a script's 60 s.
+  - What a script can check is tested (S64):
+    - each refusal `npkg` makes before it builds: the manifest, the lock, the toolchain
+      pin, `edition`, `update`;
+    - the `[[test]]` schema refusals and the stage names, which `npkg test` refuses by
+      name before anything runs;
+    - every rule about what `npkc` emits.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
@@ -1902,6 +1918,12 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   not enough. A word the text says is NOT a keyword is checked as a local's name only.
   A module-level function's name can be refused for reasons of its own, a prelude or
   builtin name (D-239, D-294).
+- **S64 — BUILD's `npkg` claims run in a scratch project, and stop before the build.**
+  Each script writes a `nitpick.toml`, a one-function `src/main.npk` and (unless the claim
+  is about its absence) a `nitpick.lock`, and runs `$NPKG`. A stage name is checked by an
+  entry with that stage and a bogus `kind`: the runner refuses the entry by name before
+  anything runs. A known stage is refused for its kind, an unknown one for the stage. So
+  no claim waits on the compiler's ladder.
 
 ## Log
 

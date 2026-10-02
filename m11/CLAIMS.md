@@ -10,11 +10,12 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**2463 claims: 2159 testable, 304 untestable** (each with its reason).
+**2560 claims: 2197 testable, 363 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
 | AST | 202 | 8 | 116 | 78 | 181 | 21 |
+| BUILD | 97 | 4 | 26 | 67 | 38 | 59 |
 | BUILTIN | 227 | 2 | 109 | 116 | 194 | 33 |
 | CONCURRENCY | 152 | 11 | 21 | 120 | 122 | 30 |
 | CONTROL | 110 | 14 | 7 | 89 | 108 | 2 |
@@ -34,7 +35,7 @@ extracted:
 | reference | lines | extracted | lines extracted | not extracted |
 |---|---|---|---|---|
 | AST | 644 | 1–644 | 644 | — |
-| BUILD | 682 | — | 0 | 1–682 |
+| BUILD | 682 | 1–682 | 682 | — |
 | BUILTIN | 447 | 1–447 | 447 | — |
 | CONCURRENCY | 647 | 1–647 | 647 | — |
 | CONTROL | 415 | 1–415 | 415 | — |
@@ -254,6 +255,108 @@ extracted:
 | `as0621` | 621 | rule | “**settled by D-058: internal” | `Future<T>` is an internal lowering artifact: no construct produces one. | untestable [vague] the sentence names no construct whose refusal a program could check |
 | `as0635` | 635 | rule | “**Resolved as: modifier + `comptime(expr)`, no block.**” | There is no `comptime { … }` block: one is refused. | `refuse` |
 | `as0643` | 643 | rule | “`FunctionDecl.modifiers` already” | `comptime` is a function modifier: `comptime func:sq` forced by `comptime(sq(5i32))` is 25. | `run:0` |
+
+## BUILD (`meta/specs/BUILD_REFERENCE.md`)
+
+| id | line | kind | quote | claim | expected |
+|---|---|---|---|---|---|
+| `bd0015` | 15 | row | “\| **`npkc`** \| the compiler — one module set to one object, or to one artifact \|” | npkc compiles one module set to one object or artifact. | untestable [vague] the row names a role; what npkc emits (text, D-067) is bd0175's claim |
+| `bd0016` | 16 | row | “\| **`npkg`** \| the driver — reads the manifest” | npkg reads the manifest: in a directory with none, `npkg build` refuses and names `nitpick.toml`. | `sh:0` |
+| `bd0018` | 18 | rule | “**Naming discrepancy to settle.**” | The package manager is `npkg`, not `npkpkg`. | untestable [tree] a note about the compiler repository's CLAUDE.md |
+| `bd0027` | 27 | rule | “One schema (D-077). Six tables” | The manifest has six tables and the `[[test]]` array. | untestable [vague] the sentence lists the schema; bd0462-bd0464 test the `[[test]]` keys it refuses |
+| `bd0030` | 30 | example | “```toml” | The example manifest (nlibc, with `[dependencies]`, `[verify]` and `[limits]`) is one `npkg` builds. | untestable [tool] `npkg build` reads the floor's `runtime/npkrt.ll` from the manifest's root, so a project outside the compiler's repository does not build (measured in a scratch project before the extraction) |
+| `bd0036` | 36 | rule | “PLANNED, read by nothing today” | `target` is planned and read by nothing. | untestable [tool] what a build makes of `target` needs a build that completes (bd0030) |
+| `bd0066` | 66 | rule | “`target` is READ BY” | Every build is one executable from `[build] entry`; `target` is read by nothing. | untestable [tool] needs a completed build (bd0030) |
+| `bd0072` | 72 | rule | “**`[project]` is identity, `[build]` is settings.**” | `entry` lives in `[build]`, not `[project]`. | untestable [vague] the sentence states the schema's split; it names no refusal |
+| `bd0074` | 74 | rule | “**`[toolchain]` is an INPUT, not a setting** (D-204)” | The toolchain is a build input: a manifest with no `[toolchain]` pin is refused, naming the toolchain. | `sh:0` |
+| `bd0075` | 75 | rule | “version is an EXACT PATCH RELEASE: a minor-version pin is insufficient” | The pin is an exact patch release: `llvm = "20.1"` (a minor-version pin) is refused. | `sh:0` |
+| `bd0079` | 79 | rule | “the thing that runs them rather than restated there” | The flag lists are read by the tool that runs them. | untestable [tool] which flags llc and opt were run with is visible only in a completed build (bd0030) |
+| `bd0088` | 88 | rule | “**`[verify]` belongs in the manifest**” | The verification flags are the manifest's `[verify]`, not the command line's. | untestable [z3] `npkg verify` needs the pinned z3 |
+| `bd0095` | 95 | rule | “**The solver is an INPUT like the toolchain**” | Both runners refuse a mismatched z3 version or hash, no `rlimit=`, or a wall-clock knob. | untestable [z3] needs the pinned z3 and `npkg verify` |
+| `bd0112` | 112 | rule | “**There is no `edition` key** (D-077)” | There is no `edition` key: a manifest with `edition = "2024"` is refused. | `sh:0` |
+| `bd0118` | 118 | rule | “`nitpick.lock` records, for every dependency in the transitive graph” | The lock records every dependency's exact version and content hash, and is committed. | untestable [tool] dependencies bind nothing today (bd0161); the lock's rows are never written |
+| `bd0121` | 121 | rule | “`npkg build` **reads the lock and never writes it.**” | `npkg build` never writes the lock: a build refused for a missing lock leaves no `nitpick.lock` behind. | `sh:0` |
+| `bd0122` | 122 | rule | “error, not an invitation to resolve” | A missing lock is an error, not an invitation to resolve: `npkg build` refuses, naming `nitpick.lock`. | `sh:0` |
+| `bd0126` | 126 | rule | “## 2. A build never touches the network” | A build never touches the network; resolution is `npkg update`'s alone. | untestable [platform] a build's network use is not observable here; bd0453 tests `npkg update` |
+| `bd0154` | 154 | row | “\| `use "./util.npk"` , `use "../x/y.npk"` \| the **importing file's** directory \|” | A `../` path resolves against the importing file's directory. | `sh:0` |
+| `bd0155` | 155 | row | “\| `use "nfs/path.npk"` \| the **dependency roots** \|” | A path not starting with `.` resolves against the dependency roots only: with no dependency, `use "nfs/path.npk"` is refused even with the file beside the importer. | `sh:0` |
+| `bd0156` | 156 | row | “\| `use std.math.*` \| the standard library \|” | `use std.math.*;` is the standard library's path: the program compiles. | `compile` |
+| `bd0158` | 158 | rule | “A dependency named `nfs` declared at `../nfs` roots at **`../nfs/src/`**” | A dependency at `../nfs` roots at `../nfs/src/`. | untestable [tool] dependencies bind nothing today (bd0161); the root is never formed |
+| `bd0161` | 161 | rule | “the dependency-root form is PLANNED, not” | Today `use "dep/thing.npk"` is NITPICK-RESOLVE-005. | `refuse:NITPICK-RESOLVE-005` |
+| `bd0167` | 167 | rule | “**An ambiguous path is an error, not a first match.**” | Two dependencies supplying one path fail the build, naming both. | untestable [tool] dependencies bind nothing today (bd0161) |
+| `bd0175` | 175 | rule | “Per D-067 the compiler **emits text and invokes tools**; it links nothing.” | npkc emits LLVM IR text and links nothing: its output is a text `.ll`, and no object or executable appears. | `sh:0` |
+| `bd0177` | 177 | example | “```” | The build pipeline: module graph, npkc to .ll, opt, llc at opt-level, the undefined-symbol scan, ld.lld. | untestable [tool] `npkg build`'s pipeline needs a project in the compiler's tree (bd0030) |
+| `bd0187` | 187 | rule | “**The undefined-symbol scan is a permanent pipeline step” | Every object is scanned and the build fails on an undefined symbol outside the runtime's allowlist. | untestable [tool] the scan is `npkg build`'s (bd0030); a Nitpick program cannot name an outside symbol |
+| `bd0195` | 195 | rule | “**An unreferenced prelude item is not emitted (D-262 §1, 1.5.2d).**” | An unreferenced prelude item is not emitted: a program that calls nothing has a few defines, and no `string_concat`. | `sh:0` |
+| `bd0215` | 215 | rule | “**The scan's reader is `npkg`'s own**” | The scan reads the object's ELF symbol table itself, against the runtime's exports. | untestable [tree] the scan's implementation and its counts |
+| `bd0235` | 235 | rule | “Verification, where `[verify]` requests it, runs against the IR and the source” | Verification runs over SMT-LIB2 text to z3. | untestable [z3] needs the pinned z3 |
+| `bd0238` | 238 | rule | “A failure in any subprocess is a nonzero exit status the driver reports” | A subprocess's failure is a nonzero exit the driver reports. | untestable [tool] needs a build that reaches its subprocesses (bd0030) |
+| `bd0242` | 242 | rule | “**`llc` must be invoked at the manifest's `opt-level`” | llc is invoked at the manifest's opt-level. | untestable [tool] needs a completed build (bd0030) |
+| `bd0249` | 249 | rule | “**Every emitted function checks its stack (D-305, 1.5.8 step 2).**” | Every define the compiler writes carries "split-stack": a program's own function does. | `ir:^define [^\n]*@"npk\.bd0249\.helper"\([^\n]*"split-stack"` |
+| `bd0252` | 252 | rule | “The floor's object carries two linker” | The floor's object carries the notes `.note.GNU-split-stack` and `.note.GNU-no-split-stack`. | `sh:0` |
+| `bd0260` | 260 | rule | “floor's own functions carry no prologue” | The floor's own functions carry no split-stack prologue. | untestable [internal] the floor's machine code |
+| `bd0268` | 268 | rule | “A unit that does not define `failsafe` DECLARES `@npk_failsafe`” | A unit that does not define `failsafe` declares `@npk_failsafe`, so a non-root module compiled alone assembles: llc accepts it. | `sh:0` |
+| `bd0269` | 269 | rule | “a generic's body is exported with its module, instantiation happens in the” | A generic's body is exported with its module and instantiated in the user; identical specialisations fold at link time. | untestable [tool] needs a multi-object link that `npkg` performs (bd0030) |
+| `bd0272` | 272 | rule | “Whole-program compilation is available as an opt-in” | Whole-program compilation is an opt-in for release and verification builds. | untestable [vague] the sentence names no switch |
+| `bd0277` | 277 | rule | “**A verification build and a release build are always clean builds.**” | Verification and release builds are always clean. | untestable [tool] needs `npkg verify` and a release build (bd0030) |
+| `bd0290` | 290 | rule | “**The same inputs produce a byte-identical output** (D-078).” | The same input produces a byte-identical emission, wherever it is compiled: one program compiled in two directories gives two identical `.ll` files. | `sh:0` |
+| `bd0292` | 292 | rule | “No timestamps, build paths, hostnames, or environment values in the artifact.” | The emission carries no build path: the `.ll` names no part of the directory it was compiled in. | `sh:0` |
+| `bd0295` | 295 | rule | “D-064's mangled names are readable and reversible with **no hash**” | A generic instance's name is readable, with no hash: `idt` instantiated at `int32` is named by both. | `sh:0` |
+| `bd0299` | 299 | rule | “driver refuses a mismatching toolchain loudly” | The driver refuses a mismatching toolchain: a pin of 20.1.1 with 20.1.2 installed is refused. | `sh:0` |
+| `bd0300` | 300 | rule | “A `repro` check builds twice from different working directories” | A repro check builds twice from different directories and byte-compares the emissions. | untestable [tree] the harness's check; bd0290 does the same over a program |
+| `bd0303` | 303 | rule | “**The pin is a version, and a version is not a binary**” | The pin is a version; the cross-machine claim is the compiler's own emission; every ladder run prints its sha256 report. | untestable [tool] the ladder's report is `npkg build`'s in the compiler's tree (bd0030) |
+| `bd0335` | 335 | row | “\| **Seed** \|” | A stage of the bootstrap ladder. | untestable [tree] the compiler's own bootstrap |
+| `bd0336` | 336 | row | “\| **1** \|” | A stage of the bootstrap ladder. | untestable [tree] the compiler's own bootstrap |
+| `bd0337` | 337 | row | “\| **2** \|” | A stage of the bootstrap ladder. | untestable [tree] the compiler's own bootstrap |
+| `bd0339` | 339 | rule | “**Self-hosting is the fixpoint of the compiler's emission of itself**” | Self-hosting: stage N and stage N+1 emit the compiler byte-identically. | untestable [tool] needs the compiler's own build ladder |
+| `bd0351` | 351 | rule | “**Declared at 1.4.9 (2026-09-02).**” | The fixpoint held at 1.4.9. | untestable [tree] a record of the compiler's history |
+| `bd0362` | 362 | rule | “**The prototype `npkc` is not the seed** (D-085, superseding D-079).” | The prototype is not the seed. | untestable [tree] the compiler's bootstrap |
+| `bd0368` | 368 | rule | “**The parser never restricts; the backend does.**” | The parser accepts the whole grammar; a construct the backend cannot lower is a backend diagnostic. | untestable [vague] since D-271 no construct is refused by rung; no program can tell the parser's acceptance from the checker's here |
+| `bd0374` | 374 | rule | “The seed is **invoked once, ever**” | The seed is invoked once. | untestable [tree] the compiler's bootstrap |
+| `bd0379` | 379 | rule | “**What the fixpoint does not prove.**” | The fixpoint does not exclude a seed backdoor. | untestable [tree] a statement about the bootstrap |
+| `bd0397` | 397 | rule | “They interact in one place.” | The capability ladder meets the bootstrap at self-hosting. | untestable [tree] the compiler's plan |
+| `bd0402` | 402 | rule | “**Subset 1 is what the two ladders share.**” | Subset 1's contents. | untestable [tree] the compiler's own sources' subset |
+| `bd0416` | 416 | rule | “**Once stage 2 exists, primitives are implemented in Nitpick.**” | Primitives are implemented in Nitpick after self-hosting. | untestable [tree] the compiler's sources |
+| `bd0432` | 432 | row | “\| build with the current compiler \|” | A pass of an ABI change's rebuild. | untestable [tool] the compiler's own rebuild |
+| `bd0433` | 433 | row | “\| build again with that one \|” | A pass of an ABI change's rebuild. | untestable [tool] the compiler's own rebuild |
+| `bd0434` | 434 | row | “\| build a third time \|” | A pass of an ABI change's rebuild. | untestable [tool] the compiler's own rebuild |
+| `bd0451` | 451 | row | “\| `npkg build` \| reads lock + vendored source” | `npkg build` reads the lock: with none, it refuses with D-078's sentence, "a missing lock is an error". | `sh:0` |
+| `bd0452` | 452 | row | “\| `npkg test` \| builds the compiler” | `npkg test` builds the compiler, runs the self-check and every `[[test]]` in order. | untestable [tool] `npkg test` builds the compiler's ladder first, longer than a script's 60 s; bd0462-bd0464 test its refusals before anything runs |
+| `bd0453` | 453 | row | “\| `npkg update` \| PLANNED — refused today by name” | `npkg update` is refused today by name: "there is nothing to resolve in a single-repository world". | `sh:0` |
+| `bd0454` | 454 | row | “\| `npkg verify` \| the ladder, then the VERIFIED build” | `npkg verify` runs the verified build. | untestable [z3] needs the pinned z3 |
+| `bd0462` | 462 | rule | “entry a runner cannot honour is refused BY NAME before anything runs” | An entry with a stage the runner does not know is refused by name before anything runs, exit 2. | `sh:0` |
+| `bd0463b` | 463 | rule | “never skipped: a stage it does not know, a `kind` on a stage that has none” | A `kind` on a stage that has none is refused by name, exit 2. | `sh:0` |
+| `bd0464` | 464 | rule | “compile entry with no kind, no `paths`/`path` (or both), a key the schema lacks” | A compile entry with no `kind` is refused by name, exit 2. | `sh:0` |
+| `bd0464b` | 464 | rule | “no `paths`/`path` (or both)” | An entry with both `path` and `paths` is refused by name, exit 2. | `sh:0` |
+| `bd0464c` | 464 | rule | “a key the schema lacks” | An entry with a key the schema lacks is refused by name, exit 2. | `sh:0` |
+| `bd0466` | 466 | example | “```toml” | Three `[[test]]` entries: conformance (compile, positive), types (check, recursive), programs. | untestable [tool] running the entries needs the compiler's ladder first (bd0452) |
+| `bd0487` | 487 | row | “\| `compile` (the default) \|” | `compile` is a stage the runner knows (an entry with it is refused for its bad kind, not its stage). | `sh:0` |
+| `bd0488` | 488 | row | “\| `parse` \| `tools/parse_check` \|” | `parse` is a stage the runner knows. | `sh:0` |
+| `bd0489` | 489 | row | “\| `resolve` \| `tools/resolve_check` \|” | `resolve` is a stage the runner knows. | `sh:0` |
+| `bd0490` | 490 | row | “\| `check` \| `tools/check` \|” | `check` is a stage the runner knows. | `sh:0` |
+| `bd0491` | 491 | row | “\| `accept` \| `tools/check` \| accepted in silence \|” | `accept` is a stage the runner knows. | `sh:0` |
+| `bd0492` | 492 | row | “\| `fixture` \| the compiler under test \|” | `fixture` is a stage the runner knows. | `sh:0` |
+| `bd0493` | 493 | row | “\| `program` \| the compiler under test \|” | `program` is a stage the runner knows. | `sh:0` |
+| `bd0494` | 494 | row | “\| `runtime` \| `llc` + `ld.lld` \|” | `runtime` is a stage the runner knows. | `sh:0` |
+| `bd0495` | 495 | row | “\| `verify` \| the compiler under test, z3 \|” | `verify` is a stage the runner knows. | `sh:0` |
+| `bd0496` | 496 | row | “\| `cost` \| the compiler under test, the runtime's `NPK_HEAP_STATS` \|” | `cost` is a stage the runner knows. | `sh:0` |
+| `bd0497` | 497 | row | “\| `explore` \| the compiler under test, the explored floor, the shim \|” | `explore` is a stage the runner knows. | `sh:0` |
+| `bd0499` | 499 | rule | “Membership stays with the stage” | A file another file imports is skipped as a fixture. | untestable [tool] needs a run of `npkg test` (bd0452) |
+| `bd0506` | 506 | rule | “**Expectations live in the test file**” | Expectations live in the test file. | untestable [tree] a convention of the compiler's tests |
+| `bd0509` | 509 | example | “```nitpick” | The expectation markers: expect-error, -at, expect-note, expect-exit, stress, argv, expect-no-parse-error, expect-obligation. | untestable [tool] the markers are read by `npkg test` and the harness (bd0452) |
+| `bd0529` | 529 | rule | “`CODE path:line:col: message` (1.0.8), with `note ` or `warning ` in front” | A diagnostic renders as `CODE path:line:col: message`, with `note ` in front of a note. | `sh:0` |
+| `bd0531` | 531 | rule | “place of the position for a spanless diagnostic (D-162)” | A spanless diagnostic renders `<no span>` in place of the position. | untestable [vague] the text names no diagnostic that has no span |
+| `bd0536` | 536 | rule | “**A finding at a `<derived-N>` line fails the unit**” | A finding at a `<derived-N>` line fails the unit. | untestable [tool] a rule of `npkg test` (bd0452) |
+| `bd0544` | 544 | rule | “**A negative test with no `expect-error` is a failing test.**” | A negative test with no expect-error fails. | untestable [tool] a rule of `npkg test` (bd0452) |
+| `bd0547` | 547 | rule | “**Unexpected diagnostics fail a test as surely as missing ones.**” | An unexpected diagnostic fails a test. | untestable [tool] a rule of `npkg test` (bd0452) |
+| `bd0576` | 576 | rule | “**A `verify` test names its rows exactly**” | A verify test names its rows exactly. | untestable [z3] a verify test's rows |
+| `bd0585` | 585 | rule | “**The elided IR is an inventory**” | The elided IR's traps and assumes are counted by group. | untestable [z3] needs the verified build |
+| `bd0618` | 618 | rule | “**`expect-no-parse-error` is the load-bearing one.**” | expect-no-parse-error asserts the file reached the backend. | untestable [tool] a marker `npkg test` reads |
+| `bd0623` | 623 | rule | “**The suite it was written for retired at 1.5.4 step 4” | tests/rejection/ retired at 1.5.4. | untestable [tree] the compiler's test tree |
+| `bd0634` | 634 | rule | “**The harness is itself tested.**” | The harness's self-check feeds it wrong expectations and requires each to fail. | untestable [tool] `npkg test --selfcheck` builds the compiler first (bd0452) |
+| `bd0646` | 646 | rule | “**Parity between the runners is measured, not assumed**” | The parity stage diffs the two runners' verdicts. | untestable [tree] the harness's stage |
+| `bd0653` | 653 | rule | “**The descriptor ceiling (1.5.1b step 5).**” | A runner lowers its soft RLIMIT_NOFILE to `[limits] nofile` before it spawns anything. | untestable [tool] observable only in programs a run of `npkg test` spawns (bd0452) |
+| `bd0669` | 669 | rule | “**Test-target declaration.**” | Settled: see §7.1. | untestable [tree] a settled open item |
 
 ## BUILTIN (`meta/specs/BUILTIN_REFERENCE.md`)
 
