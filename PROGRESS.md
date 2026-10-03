@@ -1494,6 +1494,20 @@ land at a clean point by 95 % of the week. The week read 90 % before it.
 - **The final full run**, all 2 577 programs: 2 324 agree, 253 disagree. The 2 328 earlier
   programs re-ran identical.
 
+**TYPE 1177–1592, `gen/m11_claims/type3.py`** (part B, S65). The week read 90 % before it.
+- **The extraction.** 129 claims (9 examples, 37 rows, 83 rules); 123 testable, 10 of
+  them M10's programs; 6 untestable: 3 `internal`, 2 `vague`, 1 `unobservable`.
+  - The range is §10 (pointers, pointer indexing and TYPE-082), §11 (Optional and
+    Result: the rows of both tables, the unwrap operators and their shorthands, the
+    struck spellings), §12 (Handle and arena layouts), §13 (the six atomic operations'
+    IR, scoped to `main`), §14 (SIMD: rows, limits, any-lane traps, reductions, the
+    obligation rows), §15 (the library vector types, by a script that loads the
+    compiler's own `lib/nvec.npk` and `lib/ntensor.npk`), §16 (function types), §17
+    (Future) and §18 (`dyn` sizes and bound order).
+  - Its scaffolding is shared with part C through `gen/m11_tyhelp.py`, which is not a
+    claims module. `type2.py` keeps its own copy, as committed.
+  - Committed before any of its programs ran.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*

@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**3078 claims: 2577 testable, 501 untestable** (each with its reason).
+**3207 claims: 2700 testable, 507 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -26,7 +26,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
 | OP | 159 | 0 | 87 | 72 | 157 | 2 |
 | TRAITS | 119 | 19 | 16 | 84 | 115 | 4 |
-| TYPE | 590 | 29 | 142 | 419 | 552 | 38 |
+| TYPE | 719 | 38 | 179 | 502 | 675 | 44 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 473 | 243 |
 
 The line ranges extracted (each module declares its own with `covers()`; coverage
@@ -47,7 +47,7 @@ extracted:
 | MODULE | 300 | 1–300 | 300 | — |
 | OP | 403 | 1–403 | 403 | — |
 | TRAITS | 766 | 1–766 | 766 | — |
-| TYPE | 2122 | 1–660, 661–1176 | 1176 | 1177–2122 |
+| TYPE | 2122 | 1–660, 661–1176, 1177–1592 | 1592 | 1593–2122 |
 | VERIFICATION | 2351 | 1–845, 846–1247, 1248–2351 | 2351 | — |
 
 ## AST (`meta/specs/AST_REFERENCE.md`)
@@ -2484,6 +2484,135 @@ Tables whose rows are not claims:
 | `ty1169` | 1169 | rule | “`Opt<Point>` under `enum:Opt<T: Pr>` is” | An inferred instance is judged as an annotated one: `Opt.Some(Point{…})` under `enum:Opt<T: Pr>` where Point lacks Pr is TYPE-017. | `refuse:NITPICK-TYPE-017` |
 | `ty1170` | 1170 | rule | “In pattern position a bare variant is read” | In pattern position a bare variant is read against the selector: `(Opt.None)` matches an `Opt<string>` with no annotation. | `run:0` |
 | `ty1171` | 1171 | rule | “A non-generic enum binds an” | A non-generic enum binds an empty window, unchanged. | untestable [internal] a type's operand window |
+| `ty1181` | 1181 | row | “\| `T->` \| `ptr` \| Pointer to T \|” | `T->` is an opaque `ptr`: an `int32->` parameter is `ptr`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11p"?\(ptr(?=[\s,)]))` |
+| `ty1182` | 1182 | row | “\| `any->` \| `ptr` \| Type-erased pointer \|” | `any->` is an opaque `ptr`: an `any->` parameter is `ptr`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11a"?\(ptr(?=[\s,)]))` |
+| `ty1184` | 1184 | rule | “The C-style `*` pointer syntax (e.g. `void*`, `char*`) is **forbidden everywhere**” | The C-style `*` pointer syntax is refused: `int32*:p = @x;`. | `refuse` |
+| `ty1185` | 1185 | rule | “`@var` = address of” | `@var` takes an address, `<-ptr` dereferences (read and write), and `ptr.field` reaches a field through a pointer. | `run:0` |
+| `ty1189` | 1189 | rule | “All pointers are **thin** — a single machine word” | A pointer is one machine word: `int32->` is 8 bytes with alignment 8. | `run:0` |
+| `ty1190` | 1190 | rule | “The distinction between wild and” | Wild and borrow pointers lower alike: a `wild int64->` parameter and an `int64->` one are both `ptr`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11w"?\(ptr(?=[\s,)]))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\(ptr(?=[\s,)]))` |
+| `ty1194` | 1194 | rule | “claims `int8->` is a *fat* pointer carrying bounds” | `int8->` is not fat (the draft's claim is struck): an `int8->` parameter is one `ptr`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\(ptr(?=[\s,)]))` |
+| `ty1200` | 1200 | rule | “`--guard-pages` remains available” | `--guard-pages` is available: npkc accepts it on an ordinary program. | `sh:0` |
+| `ty1203` | 1203 | rule | “**Indexing a pointer** (`p[i]`) is the i-th `T` in memory from `p`” | Indexing a pointer to a scalar is the i-th element from it: `p[2]` from `@arr[0]` is arr[2]. | `run:0` |
+| `ty1205` | 1205 | rule | “where the pointee is itself indexed** (1.5.8b step 1b, `NITPICK-TYPE-082`)” | Indexing a pointer to an array is TYPE-082. | `refuse:NITPICK-TYPE-082` |
+| `ty1206` | 1206 | rule | “That covers an array (`int64[8]->`), a slice (`T[]->`) and a `List<T>->`” | Indexing a pointer to a slice is TYPE-082. | `refuse:NITPICK-TYPE-082` |
+| `ty1206b` | 1206 | rule | “That covers an array (`int64[8]->`), a slice (`T[]->`) and a `List<T>->`” | Indexing a pointer to a List is TYPE-082. | `refuse:NITPICK-TYPE-082` |
+| `ty1210` | 1210 | rule | “Here the element is spelled `(<-p)[i]`” | The pointee's element is spelled `(<-p)[i]`. | `run:0` |
+| `ty1211` | 1211 | rule | “pointer to a scalar or a struct keeps its indexing” | A pointer to a struct keeps its indexing: `q[1].f` from `@sa[0]` is sa[1].f. | `run:0` |
+| `ty1219` | 1219 | example | “```llvm” | `int32?` is 8 bytes with alignment 4 (an i8 tag padded before an i32). | `run:0` |
+| `ty1222` | 1222 | rule | “%Optional_i32 = type { i8, i32 }” | `int32?` is `{ i8, i32 }`: an `int32?` parameter has that type. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11o"?\(\{ ?i8, i32 ?\}(?=[\s,)]))` |
+| `ty1228` | 1228 | rule | “the value half is ZEROED, never undef” | An empty Optional is `zeroinitializer`, never `undef`: a function passing `NIL` as an `int32?` emits `zeroinitializer` and no `undef`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?zeroinitializer)(?!(?:(?!\n\}).)*?\bundef\b)` |
+| `ty1229` | 1229 | rule | “; int32?:b = 42i32;  = { i8 1, i32 42 }” | `int32?:b = 42i32;` holds 42. | `run:0` |
+| `ty1237` | 1237 | rule | “`== NIL`/`!= NIL` is a tag” | `== NIL` and `!= NIL` test the tag in either operand order. | `run:0` |
+| `ty1238` | 1238 | rule | “`??` evaluates its default only on the empty” | `??` evaluates its default only when the Optional is empty. | `run:0` (M10 `x06_optional_default_lazy`) |
+| `ty1239` | 1239 | rule | “`?.` yields `zeroinitializer` of the result type when empty” | `?.` on an empty Optional yields an empty result. | `run:0` (M10 `d15_safe_navigation_on_empty`) |
+| `ty1240` | 1240 | rule | “the field when present” | `?.` wraps the field when present: `s?.f` over a holding `S?` is the field, wrapped. | `run:0` |
+| `ty1245` | 1245 | rule | “**There is no constructor, and none is needed (D-099).**” | An Optional is built by writing the value and emptied by writing NIL. | `run:0` |
+| `ty1252` | 1252 | row | “\| `int32?:a = NIL;` \| empty \|” | `NIL` is the empty Optional and a value the holding one. | `run:0` (M10 `d09_optional_nil_and_value`) |
+| `ty1253` | 1253 | row | “\| `int32?:b = 42i32;` \| holding `42i32` \|” | `int32?:b = 42i32;` holds 42i32. | `run:0` |
+| `ty1254` | 1254 | row | “\| `a == NIL`, `a != NIL` \| the test \|” | `a == NIL` and `a != NIL` test an Optional. | `run:0` |
+| `ty1255` | 1255 | row | “\| `a ?? d` \| the value, or `d` \|” | `a ?? d` is the value, or d when empty. | `run:0` |
+| `ty1256` | 1256 | row | “\| `a?.f` \| the field, still wrapped \|” | `a?.f` is the field, still wrapped: it binds to an `int32?`. | `run:0` |
+| `ty1256b` | 1256 | row | “\| `a?.f` \| the field, still wrapped \|” | `a?.f` is still wrapped: binding it to a plain `int32` is refused. | `refuse` |
+| `ty1257` | 1257 | row | “\| `pick (a ?? d) { … }` \|” | `pick (a ?? d)` selects over the value or the default. | `run:0` |
+| `ty1259` | 1259 | rule | “**No `pick` selects on an `Optional` (D-260, 1.5.2c; `NITPICK-TYPE-065`).**” | A pick on an Optional is TYPE-065 (statement form). | `refuse:NITPICK-TYPE-065` |
+| `ty1262` | 1262 | rule | “refused by name at the selector, in the statement form and in the expression” | A pick on an Optional is TYPE-065 in the expression form too. | `refuse:NITPICK-TYPE-065` |
+| `ty1268` | 1268 | rule | “`T?` and `Optional<T>` are **one type with two spellings**” | `T?` and `Optional<T>` are one type: an `Optional<int32>` binds to an `int32?`. | `run:0` |
+| `ty1272` | 1272 | rule | “The wrap from `T` to `Optional<T>` is the **one implicit conversion in the” | The wrap from T applies at a declaration's initialiser, a call argument and `pass`. | `run:0` |
+| `ty1275` | 1275 | rule | “no implicit widening (D-092)” | Nothing else is coerced: an int32 into an int64 binding is refused. | `refuse` |
+| `ty1276` | 1276 | rule | “A `NIL`-**typed value**, which is what `drop f()` yields, is” | A NIL-typed value is not wrapped: `int32?:x = drop f();` is refused. | `refuse` |
+| `ty1280` | 1280 | rule | “**`Some(42)` was struck (D-099).**” | `Some(42)` does not exist: `int32?:a = Some(42i32);` is refused. | `refuse` |
+| `ty1282` | 1282 | rule | “A replacement literal form `Optional{…}` was then drafted and” | `Optional{…}` was struck too: `int32?:a = Optional{ value: 5i32 };` is refused. | `refuse` |
+| `ty1287` | 1287 | rule | “**An `Optional` has no readable members.**” | `.has_value` is not a member: reading it is refused. | `refuse` |
+| `ty1288` | 1288 | rule | “names, not source-level members” | `.value` is not a member: reading it is refused. | `refuse` |
+| `ty1294` | 1294 | rule | “**`NIL?`** — `NIL?:x = NIL;` is ambiguous” | `NIL?` is refused. | `refuse` |
+| `ty1296` | 1296 | rule | “**`Optional<Optional<T>>`**” | `Optional<Optional<T>>` is refused. | `refuse` |
+| `ty1298` | 1298 | rule | “`int32??` reads as `int32` followed by the null-coalesce operator” | `int32??` is not a type: it lexes as `int32` and `??`, and is refused. | `refuse` |
+| `ty1299` | 1299 | rule | “flattens** rather than manufacturing the type behind the rule's back” | `?.` flattens: over an Optional field it yields that field as it is (`int32?`), empty or holding. | `run:0` |
+| `ty1303` | 1303 | rule | “**EVERY function in Nitpick returns `Result<T>`** except `pub func:main` and” | Every function returns a Result, a `never fails` one included: binding its bare call to an int32 is refused. | `refuse` |
+| `ty1309` | 1309 | example | “```nitpick” | A Result's canonical fields are `value` and `err`: an error reads `r.err == E2`, a success `r.value`. | `run:0` |
+| `ty1317` | 1317 | example | “```llvm” | `Result<int32>` is 8 bytes with alignment 4. | `run:0` |
+| `ty1320` | 1320 | rule | “%Result_i32 = type { i32, i32 }” | `Result<int32>` is `{ i32, i32 }`: an int32 function returns that type. | `ir:(?m)^define \{ i32, i32 \} @"?(?:[\w$]+\.)*m11r"?\(` |
+| `ty1330` | 1330 | row | “\| `pass(retVal);` \| `return Result{value: retVal};`” | `pass(retVal);` returns a success holding retVal. | `run:0` |
+| `ty1331` | 1331 | row | “\| `fail(errCode);` \| `return Result{err: errCode, value: zero};`” | `fail(errCode);` returns an error holding errCode. | `run:0` |
+| `ty1332` | 1332 | row | “\| `return Result{err: errCode, value: retVal};` \| (literal, no desugar) \|” | `return Result{err: e, value: v};` returns both. | `run:0` (M10 `r10_result_literal_both`) |
+| `ty1337` | 1337 | rule | “`0i32` is not assignable to a `tbb32`, there being no implicit conversion” | There is no implicit conversion from int32 to tbb32: `tbb32:t = 0i32;` is refused. | `refuse` |
+| `ty1340` | 1340 | rule | “**Either field may be omitted**” | A Result literal's omitted `err` is success. | `run:0` (M10 `d07_result_literal_omits_err`) |
+| `ty1340b` | 1340 | rule | “**Either field may be omitted**” | A Result literal with only `err` is that error. | `run:0` (M10 `d08_result_literal_omits_value`) |
+| `ty1343` | 1343 | rule | “order is free**” | Field order is free: `Result{value: v, err: e}` and `Result{err: e, value: v}` are the same. | `run:0` |
+| `ty1346` | 1346 | rule | “**There is no `is_error` field to write** (D-069)” | There is no `is_error` field to write: a literal naming it is refused. | `refuse` |
+| `ty1356` | 1356 | rule | “existing `pick(r.is_error)` code is unaffected” | `r.is_error` is a derived accessor: `pick (r.is_error)` selects on it. | `run:0` |
+| `ty1360` | 1360 | rule | “The error field's value space is total” | 0 is success, positive codes user errors, negative codes system errors, and INT32_MIN unconstructible. | untestable [internal] the codes are an encoding (D-179: the domain is typed, and the sign an encoding detail) |
+| `ty1362` | 1362 | rule | “Building a `Result` whose code is ERR, or” | Building a Result whose code is ERR, or 0 on a failure path, traps where it is built. | untestable [unobservable] since D-179 typed the error domain, no program can spell a zero or ERR code |
+| `ty1369` | 1369 | rule | “The compiler WILL NOT allow accessing `.value` without first checking `.is_error`” | Reading `.value` without checking is refused. | `refuse` (M10 `r07_value_without_check_refused`) |
+| `ty1374` | 1374 | row | “\| Safe unwrap \| `expr ? defaultVal` \|” | Safe unwrap `expr ? defaultVal` gives the default on an error. | `run:0` |
+| `ty1375` | 1375 | row | “**On an `Optional`, not a `Result`**” | `??` is on an Optional, not a Result: `m11k(…) ?? 7` is refused. | `refuse` |
+| `ty1376` | 1376 | row | “\| Emphatic unwrap \| `expr ?! errCode` \|” | Emphatic unwrap `expr ?! errCode` triggers failsafe with errCode on an error (E1 exits 81, where the callee's own E2 would exit 82). | `run:81` |
+| `ty1377` | 1377 | row | “\| Raw unwrap \| `raw(expr)` or `raw expr` \|” | `raw(expr)` and `raw expr` extract a never-fails call's value. | `run:0` |
+| `ty1377b` | 1377 | row | “\| `_!` \|” | `_!` is raw unwrap's shorthand. | `run:0` |
+| `ty1378` | 1378 | row | “\| Drop \| `drop(expr)` or `drop expr` \|” | `drop(expr)` and `drop expr` run a NIL never-fails call. | `run:0` |
+| `ty1378b` | 1378 | row | “\| `_?` \|” | `_?` is drop's shorthand. | `run:0` |
+| `ty1379` | 1379 | row | “\| Discard \| `discard(param)` \| `_~` \|” | `discard(x)` marks a value unused, and a `_~` name marks a parameter unused. | `run:0` |
+| `ty1382` | 1382 | rule | “licensed only” | `raw` on a may-fail call is refused, TYPE-042. | `refuse:NITPICK-TYPE-042` (M10 `r08_raw_on_fallible_refused`) |
+| `ty1385` | 1385 | rule | “`drop` = the "void call": run a `never fails` function whose success type is” | `drop` of a may-fail call is refused. | `refuse:NITPICK-TYPE-042` (M10 `r05_drop_of_fallible_refused`) |
+| `ty1387` | 1387 | rule | “`?!`-trapped, or `? NIL`-swallowed” | A may-fail NIL call is swallowed with `? NIL`. | `run:0` |
+| `ty1387b` | 1387 | rule | “a never-failing VALUE is `discard(raw f())`” | A never-failing value is discarded with `discard(raw f())`. | `run:0` |
+| `ty1388` | 1388 | rule | “takes a VALUE” | `discard` of a Result is refused. | `refuse` (M10 `r09_discard_of_result_refused`) |
+| `ty1392` | 1392 | rule | “(`TYPE-039`), the `defer` rule (`TYPE-040`)” | The statement closed list: a bare call statement that discards a Result is TYPE-039. | `refuse:NITPICK-TYPE-039` |
+| `ty1396` | 1396 | example | “```nitpick” | The storage_driver extern example compiles. | `compile` |
+| `ty1419` | 1419 | rule | “The contract grammar remains parsed and is” | An `extern` method's contract (`fails on result < 0i32 with errno`) is parsed and refused, naming D-149. | `sh:0` |
+| `ty1428` | 1428 | example | “```llvm” | `Handle<T>` is { i64, i32 }: 16 bytes, alignment 8. | `run:0` |
+| `ty1439` | 1439 | example | “```llvm” | An arena is allocated with `alloc(N)` and a cast: `alloc(N) => arena<T>->` compiles. | `compile` |
+| `ty1453` | 1453 | row | “\| `a.load()` \|” | `a.load()` on an `atomic<int32>` is native, sequentially consistent IR: `load atomic i32, ptr … seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?load atomic i32, ptr [^,\n]+ seq_cst)` |
+| `ty1454` | 1454 | row | “\| `a.store(v)` \|” | `a.store(v)` on an `atomic<int32>` is native, sequentially consistent IR: `store atomic i32 …, ptr … seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?store atomic i32 [^,\n]+, ptr [^,\n]+ seq_cst)` |
+| `ty1455` | 1455 | row | “\| `a.swap(v)` \|” | `a.swap(v)` on an `atomic<int32>` is native, sequentially consistent IR: `atomicrmw xchg ptr …, i32 … seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw xchg ptr [^,\n]+, i32 [^,\n]+ seq_cst)` |
+| `ty1456` | 1456 | row | “\| `a.fetch_add(v)` \|” | `a.fetch_add(v)` on an `atomic<int32>` is native, sequentially consistent IR: `atomicrmw add ptr …, i32 … seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw add ptr [^,\n]+, i32 [^,\n]+ seq_cst)` |
+| `ty1457` | 1457 | row | “\| `a.fetch_sub(v)` \|” | `a.fetch_sub(v)` on an `atomic<int32>` is native, sequentially consistent IR: `atomicrmw sub ptr …, i32 … seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw sub ptr [^,\n]+, i32 [^,\n]+ seq_cst)` |
+| `ty1458` | 1458 | row | “\| `a.compare_exchange(exp, des)` \|” | `a.compare_exchange(exp, des)` on an `atomic<int32>` is native, sequentially consistent IR: `cmpxchg ptr …, i32 …, i32 … seq_cst seq_cst`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?cmpxchg ptr [^,\n]+, i32 [^,\n]+, i32 [^,\n]+ seq_cst seq_cst)` |
+| `ty1466` | 1466 | row | “\| `simd<flt32, 4>` \|” | `simd<flt32, 4>` is 16 bytes with alignment 16. | `run:0` |
+| `ty1466b` | 1466 | row | “\| `simd<flt32, 4>` \| `<4 x float>` \|” | A `simd<flt32, 4>` parameter is `<4 x float>`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<4\ x\ float>(?=[\s,)]))` |
+| `ty1467` | 1467 | row | “\| `simd<flt64, 2>` \|” | `simd<flt64, 2>` is 16 bytes with alignment 16. | `run:0` |
+| `ty1467b` | 1467 | row | “\| `simd<flt64, 2>` \| `<2 x double>` \|” | A `simd<flt64, 2>` parameter is `<2 x double>`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<2\ x\ double>(?=[\s,)]))` |
+| `ty1468` | 1468 | row | “\| `simd<int32, 8>` \|” | `simd<int32, 8>` is 32 bytes with alignment 32. | `run:0` |
+| `ty1468b` | 1468 | row | “\| `simd<int32, 8>` \| `<8 x i32>` \|” | A `simd<int32, 8>` parameter is `<8 x i32>`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<8\ x\ i32>(?=[\s,)]))` |
+| `ty1472` | 1472 | rule | “2..64, total ≤ 64 bytes” | A simd of one lane is refused. | `refuse` |
+| `ty1472b` | 1472 | rule | “2..64, total ≤ 64 bytes” | A simd over 64 bytes is refused: `simd<int64, 16>` is 128. | `refuse` |
+| `ty1472c` | 1472 | rule | “alignment = next power of two ≥ size, capped 64” | A simd's alignment is the next power of two at or above its size: `simd<int16, 3>` (6 bytes) aligns to 8, so `{int8, it}` is 16 bytes. | `run:0` |
+| `ty1473` | 1473 | rule | “`simd(…)` constructs annotation-directed” | `simd(…)` takes N components, or one that splats. | `run:0` |
+| `ty1474` | 1474 | rule | “Operations are elementwise on identical types” | Operations are elementwise: `+ - * / %` on lanes, and `& \| ^ << >>` on integer lanes. | `run:0` |
+| `ty1475` | 1475 | rule | “comparisons yield `simd<bool, N>`” | A lane comparison yields `simd<bool, N>`. | `run:0` |
+| `ty1476` | 1476 | rule | “`v[i]` is a bounds-checked lane place” | A lane index past the lanes traps OutOfBounds. | `trap:OutOfBounds` |
+| `ty1476b` | 1476 | rule | “`.len` is the lane count” | `.len` is the lane count. | `run:0` |
+| `ty1477` | 1477 | rule | “vector division carries D-007 as ANY-LANE checks” | Integer vector division by a vector with one zero lane traps DivByZero. | `trap:DivByZero` |
+| `ty1478` | 1478 | rule | “INT_MIN/−1 → DivOverflow” | Integer vector division with one lane INT_MIN / -1 traps DivOverflow. | `trap:DivOverflow` |
+| `ty1478b` | 1478 | rule | “Reductions are methods” | Reductions are methods: `.sum()/.min()/.max()` on numeric lanes, `.all()/.any()` on bool lanes. | `run:0` |
+| `ty1480` | 1480 | rule | “float `.sum()` is deterministic BY CONSTRUCTION” | A float `.sum()` is an ordered fold: [1e16, 1, -1e16, 1] sums to 1 (a tree reduction gives 0). | `run:0` |
+| `ty1481` | 1481 | rule | “Casts are elementwise under the scalar” | A simd cast is elementwise: `simd<int32, 4> => simd<int64, 4>` widens each lane. | `run:0` |
+| `ty1482` | 1482 | rule | “rules and never change N” | A simd cast never changes N: `simd<int32, 4> => simd<int64, 2>` is refused. | `refuse` |
+| `ty1482b` | 1482 | rule | “Shuffles are OUT by decision (D-194)” | There are no shuffles. | untestable [vague] no shuffle spelling is named, so no program can try one |
+| `ty1487` | 1487 | rule | “division's any-lane guard is ONE `div-zero` row” | A simd division's any-lane guard is one div-zero row and one div-min row (a signed element). | `sh:0` |
+| `ty1488` | 1488 | rule | “a shift's one `shift-range`” | A simd shift has one shift-range row. | `sh:0` |
+| `ty1490` | 1490 | rule | “its ELEMENT's kind (DEF-37, 1.5.4b step 4b): integer lanes do, float lanes” | Float lanes do not arm DivByZero: a float simd divided by zero lanes gives infinities. | `run:0` |
+| `ty1491` | 1491 | rule | “integer lane's `+ - *` and an” | An integer lane's `+` traps IntOverflow as its scalar does. | `trap:IntOverflow` |
+| `ty1492` | 1492 | rule | “integer `.sum()` trap `IntOverflow` as their scalars do” | An integer `.sum()` traps IntOverflow. | `trap:IntOverflow` |
+| `ty1495` | 1495 | rule | “spelling `v op= w` lowers through the same vector path with its guards” | `v += w` keeps the guards: a lane overflow traps IntOverflow. | `trap:IntOverflow` |
+| `ty1504` | 1504 | row | “\| `vec2` \|” | `vec2` (the library's `nvec.npk`) is 16 bytes. | `sh:0` |
+| `ty1505` | 1505 | row | “\| `vec3` \|” | `vec3` (the library's `nvec.npk`) is 24 bytes. | `sh:0` |
+| `ty1506` | 1506 | row | “\| `vec4` \|” | `vec4` (the library's `nvec.npk`) is 32 bytes. | `sh:0` |
+| `ty1507` | 1507 | row | “\| `matrix<T>` \|” | `matrix<int64>` (the library's `ntensor.npk`) is 24 bytes. | `sh:0` |
+| `ty1508` | 1508 | row | “\| `tensor<T>` \|” | `tensor<int64>` (the library's `ntensor.npk`) is 24 bytes. | `sh:0` |
+| `ty1510` | 1510 | rule | “**These are LIBRARY types and are not keywords** (D-135)” | `vec2` is not a keyword: a local of that name compiles. | `run:0` |
+| `ty1515` | 1515 | rule | “A library cannot declare a type whose name is a keyword” | A type named by a keyword is refused: `struct:tbb8 = { … };`. | `refuse` |
+| `ty1518` | 1518 | rule | “`matrix<T>` and `tensor<T>` are heap-backed containers” | matrix and tensor are heap-backed containers with nothing SIMD about them. | untestable [vague] a description of the library; the rows above test the sizes |
+| `ty1526` | 1526 | example | “```llvm” | A function `int32(int32, int32)` is `define { i32, i32 } @f(i32, i32)`. | `ir:(?m)^define \{ i32, i32 \} @"?(?:[\w$]+\.)*m11add"?\(i32 [^,\n]+, i32 ` |
+| `ty1535` | 1535 | rule | “When Result elision proves function is infallible” | A function proved infallible returns a raw `i32`: a `never fails` int32 function is `define i32`. | `ir:(?m)^define i32 @"?(?:[\w$]+\.)*m11e"?\(` |
+| `ty1545` | 1545 | rule | “**Not surface syntax.** Nothing in the language produces a `Future<T>`” | `Future<T>` cannot be named in a signature. | `refuse` |
+| `ty1558` | 1558 | example | “```llvm” | A future is `{ ptr, ptr }`, a coroutine handle and a result slot. | untestable [internal] a lowering artifact no program can name (the text's own words) |
+| `ty1567` | 1567 | rule | “**One data word and ONE VTABLE WORD PER TRAIT**” | A `dyn` is (N+1) x 8 bytes: 16 for one trait, 24 for two. | `run:0` |
+| `ty1572` | 1572 | example | “```llvm” | `dyn A` is `{ ptr, ptr }`: a `dyn A` parameter has that type. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11d"?\(\{ ?ptr, ptr ?\}(?=[\s,)]))` |
+| `ty1576` | 1576 | rule | “; `dyn A & B & C` — one vtable word per bound, 32 bytes” | `dyn A & B & C` is 32 bytes. | `run:0` |
+| `ty1579` | 1579 | rule | “; Vtable: function pointers in TRAIT DECLARATION ORDER (D-158)” | A vtable holds one adapter thunk per method, in declaration order. | untestable [internal] a vtable's slot order is not observable from a program |
+| `ty1584` | 1584 | rule | “The bounds are **canonically ordered by trait name at type interning**” | `dyn A & B` and `dyn B & A` are one type: one binds to the other. | `run:0` |
+| `ty1586` | 1586 | rule | “Widening (`dyn A & B` → `dyn A`) is a” | Widening `dyn A & B` to `dyn A` compiles and keeps the value. | `run:0` |
 
 ## VERIFICATION (`meta/specs/VERIFICATION_REFERENCE.md`)
 

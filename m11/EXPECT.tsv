@@ -2103,6 +2103,129 @@ ty1165	TYPE	1165	rule	m11/programs/ty1165.npk	refuse:NITPICK-TYPE-022	-
 ty1167	TYPE	1167	rule	m11/programs/ty1167.npk	run:0	-
 ty1169	TYPE	1169	rule	m11/programs/ty1169.npk	refuse:NITPICK-TYPE-017	-
 ty1170	TYPE	1170	rule	m11/programs/ty1170.npk	run:0	-
+ty1181	TYPE	1181	row	m11/programs/ty1181.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11p"?\(ptr(?=[\s,)]))	-
+ty1182	TYPE	1182	row	m11/programs/ty1182.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11a"?\(ptr(?=[\s,)]))	-
+ty1184	TYPE	1184	rule	m11/programs/ty1184.npk	refuse	-
+ty1185	TYPE	1185	rule	m11/programs/ty1185.npk	run:0	-
+ty1189	TYPE	1189	rule	m11/programs/ty1189.npk	run:0	-
+ty1190	TYPE	1190	rule	m11/programs/ty1190.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11w"?\(ptr(?=[\s,)]))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\(ptr(?=[\s,)]))	-
+ty1194	TYPE	1194	rule	m11/programs/ty1194.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\(ptr(?=[\s,)]))	-
+ty1200	TYPE	1200	rule	m11/programs/ty1200.sh	sh:0	-
+ty1203	TYPE	1203	rule	m11/programs/ty1203.npk	run:0	-
+ty1205	TYPE	1205	rule	m11/programs/ty1205.npk	refuse:NITPICK-TYPE-082	-
+ty1206	TYPE	1206	rule	m11/programs/ty1206.npk	refuse:NITPICK-TYPE-082	-
+ty1206b	TYPE	1206	rule	m11/programs/ty1206b.npk	refuse:NITPICK-TYPE-082	-
+ty1210	TYPE	1210	rule	m11/programs/ty1210.npk	run:0	-
+ty1211	TYPE	1211	rule	m11/programs/ty1211.npk	run:0	-
+ty1219	TYPE	1219	example	m11/programs/ty1219.npk	run:0	-
+ty1222	TYPE	1222	rule	m11/programs/ty1222.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11o"?\(\{ ?i8, i32 ?\}(?=[\s,)]))	-
+ty1228	TYPE	1228	rule	m11/programs/ty1228.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?zeroinitializer)(?!(?:(?!\n\}).)*?\bundef\b)	-
+ty1229	TYPE	1229	rule	m11/programs/ty1229.npk	run:0	-
+ty1237	TYPE	1237	rule	m11/programs/ty1237.npk	run:0	-
+ty1238	TYPE	1238	rule	m10/programs/x06_optional_default_lazy.npk	run:0	-
+ty1239	TYPE	1239	rule	m10/programs/d15_safe_navigation_on_empty.npk	run:0	-
+ty1240	TYPE	1240	rule	m11/programs/ty1240.npk	run:0	-
+ty1245	TYPE	1245	rule	m11/programs/ty1245.npk	run:0	-
+ty1252	TYPE	1252	row	m10/programs/d09_optional_nil_and_value.npk	run:0	-
+ty1253	TYPE	1253	row	m11/programs/ty1253.npk	run:0	-
+ty1254	TYPE	1254	row	m11/programs/ty1254.npk	run:0	-
+ty1255	TYPE	1255	row	m11/programs/ty1255.npk	run:0	-
+ty1256	TYPE	1256	row	m11/programs/ty1256.npk	run:0	-
+ty1256b	TYPE	1256	row	m11/programs/ty1256b.npk	refuse	-
+ty1257	TYPE	1257	row	m11/programs/ty1257.npk	run:0	-
+ty1259	TYPE	1259	rule	m11/programs/ty1259.npk	refuse:NITPICK-TYPE-065	-
+ty1262	TYPE	1262	rule	m11/programs/ty1262.npk	refuse:NITPICK-TYPE-065	-
+ty1268	TYPE	1268	rule	m11/programs/ty1268.npk	run:0	-
+ty1272	TYPE	1272	rule	m11/programs/ty1272.npk	run:0	-
+ty1275	TYPE	1275	rule	m11/programs/ty1275.npk	refuse	-
+ty1276	TYPE	1276	rule	m11/programs/ty1276.npk	refuse	-
+ty1280	TYPE	1280	rule	m11/programs/ty1280.npk	refuse	-
+ty1282	TYPE	1282	rule	m11/programs/ty1282.npk	refuse	-
+ty1287	TYPE	1287	rule	m11/programs/ty1287.npk	refuse	-
+ty1288	TYPE	1288	rule	m11/programs/ty1288.npk	refuse	-
+ty1294	TYPE	1294	rule	m11/programs/ty1294.npk	refuse	-
+ty1296	TYPE	1296	rule	m11/programs/ty1296.npk	refuse	-
+ty1298	TYPE	1298	rule	m11/programs/ty1298.npk	refuse	-
+ty1299	TYPE	1299	rule	m11/programs/ty1299.npk	run:0	-
+ty1303	TYPE	1303	rule	m11/programs/ty1303.npk	refuse	-
+ty1309	TYPE	1309	example	m11/programs/ty1309.npk	run:0	-
+ty1317	TYPE	1317	example	m11/programs/ty1317.npk	run:0	-
+ty1320	TYPE	1320	rule	m11/programs/ty1320.npk	ir:(?m)^define \{ i32, i32 \} @"?(?:[\w$]+\.)*m11r"?\(	-
+ty1330	TYPE	1330	row	m11/programs/ty1330.npk	run:0	-
+ty1331	TYPE	1331	row	m11/programs/ty1331.npk	run:0	-
+ty1332	TYPE	1332	row	m10/programs/r10_result_literal_both.npk	run:0	-
+ty1337	TYPE	1337	rule	m11/programs/ty1337.npk	refuse	-
+ty1340	TYPE	1340	rule	m10/programs/d07_result_literal_omits_err.npk	run:0	-
+ty1340b	TYPE	1340	rule	m10/programs/d08_result_literal_omits_value.npk	run:0	-
+ty1343	TYPE	1343	rule	m11/programs/ty1343.npk	run:0	-
+ty1346	TYPE	1346	rule	m11/programs/ty1346.npk	refuse	-
+ty1356	TYPE	1356	rule	m11/programs/ty1356.npk	run:0	-
+ty1369	TYPE	1369	rule	m10/programs/r07_value_without_check_refused.npk	refuse	-
+ty1374	TYPE	1374	row	m11/programs/ty1374.npk	run:0	-
+ty1375	TYPE	1375	row	m11/programs/ty1375.npk	refuse	-
+ty1376	TYPE	1376	row	m11/programs/ty1376.npk	run:81	-
+ty1377	TYPE	1377	row	m11/programs/ty1377.npk	run:0	-
+ty1377b	TYPE	1377	row	m11/programs/ty1377b.npk	run:0	-
+ty1378	TYPE	1378	row	m11/programs/ty1378.npk	run:0	-
+ty1378b	TYPE	1378	row	m11/programs/ty1378b.npk	run:0	-
+ty1379	TYPE	1379	row	m11/programs/ty1379.npk	run:0	-
+ty1382	TYPE	1382	rule	m10/programs/r08_raw_on_fallible_refused.npk	refuse:NITPICK-TYPE-042	-
+ty1385	TYPE	1385	rule	m10/programs/r05_drop_of_fallible_refused.npk	refuse:NITPICK-TYPE-042	-
+ty1387	TYPE	1387	rule	m11/programs/ty1387.npk	run:0	-
+ty1387b	TYPE	1387	rule	m11/programs/ty1387b.npk	run:0	-
+ty1388	TYPE	1388	rule	m10/programs/r09_discard_of_result_refused.npk	refuse	-
+ty1392	TYPE	1392	rule	m11/programs/ty1392.npk	refuse:NITPICK-TYPE-039	-
+ty1396	TYPE	1396	example	m11/programs/ty1396.npk	compile	-
+ty1419	TYPE	1419	rule	m11/programs/ty1419.sh	sh:0	-
+ty1428	TYPE	1428	example	m11/programs/ty1428.npk	run:0	-
+ty1439	TYPE	1439	example	m11/programs/ty1439.npk	compile	-
+ty1453	TYPE	1453	row	m11/programs/ty1453.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?load atomic i32, ptr [^,\n]+ seq_cst)	-
+ty1454	TYPE	1454	row	m11/programs/ty1454.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?store atomic i32 [^,\n]+, ptr [^,\n]+ seq_cst)	-
+ty1455	TYPE	1455	row	m11/programs/ty1455.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw xchg ptr [^,\n]+, i32 [^,\n]+ seq_cst)	-
+ty1456	TYPE	1456	row	m11/programs/ty1456.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw add ptr [^,\n]+, i32 [^,\n]+ seq_cst)	-
+ty1457	TYPE	1457	row	m11/programs/ty1457.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?atomicrmw sub ptr [^,\n]+, i32 [^,\n]+ seq_cst)	-
+ty1458	TYPE	1458	row	m11/programs/ty1458.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*main"?\((?=(?:(?!\n\}).)*?cmpxchg ptr [^,\n]+, i32 [^,\n]+, i32 [^,\n]+ seq_cst seq_cst)	-
+ty1466	TYPE	1466	row	m11/programs/ty1466.npk	run:0	-
+ty1466b	TYPE	1466	row	m11/programs/ty1466b.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<4\ x\ float>(?=[\s,)]))	-
+ty1467	TYPE	1467	row	m11/programs/ty1467.npk	run:0	-
+ty1467b	TYPE	1467	row	m11/programs/ty1467b.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<2\ x\ double>(?=[\s,)]))	-
+ty1468	TYPE	1468	row	m11/programs/ty1468.npk	run:0	-
+ty1468b	TYPE	1468	row	m11/programs/ty1468b.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\(<8\ x\ i32>(?=[\s,)]))	-
+ty1472	TYPE	1472	rule	m11/programs/ty1472.npk	refuse	-
+ty1472b	TYPE	1472	rule	m11/programs/ty1472b.npk	refuse	-
+ty1472c	TYPE	1472	rule	m11/programs/ty1472c.npk	run:0	-
+ty1473	TYPE	1473	rule	m11/programs/ty1473.npk	run:0	-
+ty1474	TYPE	1474	rule	m11/programs/ty1474.npk	run:0	-
+ty1475	TYPE	1475	rule	m11/programs/ty1475.npk	run:0	-
+ty1476	TYPE	1476	rule	m11/programs/ty1476.npk	run:94	-
+ty1476b	TYPE	1476	rule	m11/programs/ty1476b.npk	run:0	-
+ty1477	TYPE	1477	rule	m11/programs/ty1477.npk	run:97	-
+ty1478	TYPE	1478	rule	m11/programs/ty1478.npk	run:98	-
+ty1478b	TYPE	1478	rule	m11/programs/ty1478b.npk	run:0	-
+ty1480	TYPE	1480	rule	m11/programs/ty1480.npk	run:0	-
+ty1481	TYPE	1481	rule	m11/programs/ty1481.npk	run:0	-
+ty1482	TYPE	1482	rule	m11/programs/ty1482.npk	refuse	-
+ty1487	TYPE	1487	rule	m11/programs/ty1487.sh	sh:0	-
+ty1488	TYPE	1488	rule	m11/programs/ty1488.sh	sh:0	-
+ty1490	TYPE	1490	rule	m11/programs/ty1490.npk	run:0	-
+ty1491	TYPE	1491	rule	m11/programs/ty1491.npk	run:93	-
+ty1492	TYPE	1492	rule	m11/programs/ty1492.npk	run:93	-
+ty1495	TYPE	1495	rule	m11/programs/ty1495.npk	run:93	-
+ty1504	TYPE	1504	row	m11/programs/ty1504.sh	sh:0	-
+ty1505	TYPE	1505	row	m11/programs/ty1505.sh	sh:0	-
+ty1506	TYPE	1506	row	m11/programs/ty1506.sh	sh:0	-
+ty1507	TYPE	1507	row	m11/programs/ty1507.sh	sh:0	-
+ty1508	TYPE	1508	row	m11/programs/ty1508.sh	sh:0	-
+ty1510	TYPE	1510	rule	m11/programs/ty1510.npk	run:0	-
+ty1515	TYPE	1515	rule	m11/programs/ty1515.npk	refuse	-
+ty1526	TYPE	1526	example	m11/programs/ty1526.npk	ir:(?m)^define \{ i32, i32 \} @"?(?:[\w$]+\.)*m11add"?\(i32 [^,\n]+, i32 	-
+ty1535	TYPE	1535	rule	m11/programs/ty1535.npk	ir:(?m)^define i32 @"?(?:[\w$]+\.)*m11e"?\(	-
+ty1545	TYPE	1545	rule	m11/programs/ty1545.npk	refuse	-
+ty1567	TYPE	1567	rule	m11/programs/ty1567.npk	run:0	-
+ty1572	TYPE	1572	example	m11/programs/ty1572.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11d"?\(\{ ?ptr, ptr ?\}(?=[\s,)]))	-
+ty1576	TYPE	1576	rule	m11/programs/ty1576.npk	run:0	-
+ty1584	TYPE	1584	rule	m11/programs/ty1584.npk	run:0	-
+ty1586	TYPE	1586	rule	m11/programs/ty1586.npk	run:0	-
 vf0007	VERIFICATION	7	rule	m11/programs/vf0007.sh	sh:0	-
 vf0026	VERIFICATION	26	rule	m11/programs/vf0026.npk	refuse	-
 vf0028	VERIFICATION	28	example	m11/programs/vf0028.npk	run:0	-
