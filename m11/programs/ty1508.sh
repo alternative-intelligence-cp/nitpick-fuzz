@@ -40,6 +40,8 @@ func:main = int32(cstring[]:_~argv) {
 
 func:failsafe = int32(Error:e) {
     pick (e) {
+        (ntensor.BadShape) { exit 80i32; },
+        (ntensor.BadIndex) { exit 81i32; },
         (HeapBadRequest) { exit 91i32; },
         (HeapOom) { exit 92i32; },
         (IntOverflow) { exit 93i32; },

@@ -52,14 +52,15 @@ committed. A session that starts here resumes at the first unticked box.
     started, smallest first. MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION
     1248–2351 are done, each to a clean point: F-033 … F-043, among them F-037, a use
     after free, and F-041, an npkc hang. BUILD's 38 and VERIFICATION 1248–2351's 16
-    tested claims all agree. TYPE 661–2122 is under way in three parts (S65); part A,
-    661–1176, is done: F-044, eight documentation rows.
-  - Extracted so far: 9 473 of 10 419 lines; 3 078 claims, 2 577 tested, 2 324 agree,
-    253 disagree.
+    tested claims all agree. TYPE 661–2122 is under way in three parts (S65); parts A and
+    B, 661–1592, are done: F-044 (seventeen documentation rows) and F-045 (a compiler
+    message that advises the retired `?`).
+  - Extracted so far: 9 889 of 10 419 lines; 3 207 claims, 2 700 tested, 2 438 agree,
+    262 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION whole, TYPE 1–1176 done; TYPE 1177–2122 not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 324 agree, 253 disagree, all triaged)
+  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION whole, TYPE 1–1592 done; TYPE 1593–2122 not started
+  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 438 agree, 262 disagree, all triaged)
   - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
 
 ## Compilers
@@ -964,21 +965,21 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's TYPE 661–1176, part A of TYPE 661–2122 (S65), after
-its MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION 1248–2351: extracted, run,
-triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's TYPE 1177–1592, part B of TYPE 661–2122 (S65), after
+its MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION 1248–2351 and TYPE 661–1176:
+extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
 - Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST,
-  BUILD, TRAITS and VERIFICATION whole, and TYPE 1–1176. That is 9 473 of the references'
+  BUILD, TRAITS and VERIFICATION whole, and TYPE 1–1592. That is 9 889 of the references'
   10 419 lines (S58 corrected the count).
-- **3 078 claims, 2 577 testable, 501 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 324 agree, 253 disagree**.
+- **3 207 claims, 2 700 testable, 507 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 438 agree, 262 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-044:
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-045:
 - MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
   documentation rows);
 - OP's is F-031 (five documentation rows);
@@ -996,11 +997,12 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-044:
   - F-041: **npkc does not terminate** on an unbounded generic instantiation;
   - F-042: one lower-priority compiler row;
   - F-043: thirteen documentation rows.
-- TYPE 661–1176's (part A of TYPE 661–2122, S65) is F-044, eight documentation rows. F-044
-  grows with parts B and C.
+- TYPE 661–1592's (parts A and B of TYPE 661–2122, S65):
+  - F-044: seventeen documentation rows (it grows with part C);
+  - F-045: a compiler message that advises the retired `?`.
 
-**Not started:** TYPE 1177–2122, parts B (1177–1592, §10–18) and C (1593–2122, §19–28)
-of S65, 946 lines, roughly 490 claims: the rest of session 9's brief (S60).
+**Not started:** TYPE 1593–2122, part C of S65 (§19–28), 530 lines, roughly 225 claims:
+the rest of session 9's brief (S60).
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -1014,7 +1016,7 @@ of S65, 946 lines, roughly 490 claims: the rest of session 9's brief (S60).
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-045 (F-044, TYPE 661–2122's
+   and extend `REPORT.md` §12. Findings number on from F-046 (F-044, TYPE 661–2122's
    documentation rows, grows with each part).
 
 ### M11 — the state at session 6's stop (history)
@@ -1506,7 +1508,26 @@ land at a clean point by 95 % of the week. The week read 90 % before it.
     (Future) and §18 (`dyn` sizes and bound order).
   - Its scaffolding is shared with part C through `gen/m11_tyhelp.py`, which is not a
     claims module. `type2.py` keeps its own copy, as committed.
-  - Committed before any of its programs ran.
+  - Committed before any of its programs ran (`2e9f871`, with the files `gen/m11.py`
+    writes).
+- **Run 1:** 114 agree, 9 disagree. Every agreeing refusal's first diagnostic was read,
+  and each is the claim's own reason.
+  - One reads `ty1375`'s refusal (TYPE-007, `??` on a Result) as advising "`?` is the one
+    that unwraps a `Result`". The compiler itself refuses that spelling (PARSE-011, D-175).
+    This is F-045, measured with a control at three compilers.
+- **Runs 2 and 3:** `ty1507` and `ty1508`'s scripts did not name the two errors
+  `lib/ntensor.npk` declares (REACH-002). Fixed in two steps. Then they build, run, and
+  report sizes other than the table's.
+- **Triage.** Nine disagree, and each gives the same result at the baseline and `93bcb66`.
+  All nine are F-044 rows:
+  - `--guard-pages`, which no tool has;
+  - the bare `?`, twice;
+  - the extern example (EXTERN-001);
+  - the arena's `alloc(N) => arena<T>->` (TYPE-009);
+  - §15's `vec3`, `matrix` and `tensor` layouts (32, 40 and 104 bytes, measured);
+  - the elided-Result IR.
+- **The final full run**, all 2 700 programs: 2 438 agree, 262 disagree. The 2 577 earlier
+  programs re-ran identical.
 
 ## Environment
 
@@ -2238,3 +2259,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     the module; the files `gen/m11.py` writes from it come with the run's commit).
     Run 1: 237 agree, 12 disagree. Four programs fixed. Final: 240 agree, 9 disagree.
     Triaged: F-044 (8 documentation rows), 1 not a finding.
+  - **TYPE 1177–1592**, part B (S65). 129 claims, 123 testable, committed before any run
+    (`2e9f871`). Run 1: 114 agree, 9 disagree. Two scripts fixed. Final: 114 agree, 9
+    disagree. Triaged: F-044 grows to seventeen rows, plus F-045 (a diagnostic that
+    advises the retired `?`, found while screening the agreements).

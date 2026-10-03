@@ -311,6 +311,29 @@ for _t, _ids in DOC44:
 put("extract", "the regex demanded a word boundary after `}`, which cannot match there; the slice parameter is "
     "`{ ptr, i64 }`, as claimed (measured by hand)", "ty1084")
 
+# ---- session 9: TYPE_REFERENCE 1177-1592, part B (F-044 documentation rows)
+DOC44B = (
+    ("F-044: `--guard-pages` \"remains available\": no tool has it; npkc refuses the argument, and only "
+     "DECISIONS:2300 and a grammar note name it", ("ty1200",)),
+    ("F-044: the safe unwrap `expr ? defaultVal`: a bare `?` is PARSE-011 since D-175; the fallback is `expr ?| d`",
+     ("ty1374",)),
+    ("F-044: a may-fail call \"`? NIL`-swallowed\": the same retired `?` (PARSE-011, D-175)", ("ty1387",)),
+    ("F-044: the storage_driver extern example is EXTERN-001: the `opaque` tier is reserved (D-190), as at "
+     "TRAITS:373 (F-043)", ("ty1396",)),
+    ("F-044: an arena \"allocated via alloc() and cast: alloc(N) => arena<T>->\": the cast is TYPE-009 (a "
+     "pointer reinterpretation takes `=>!`), and an arena is made with `arena_make(n)`", ("ty1439",)),
+    ("F-044: §15's `vec3` is 24 bytes: its `simd<flt64, 3>` aligns to 32 by §14's own rule, so `vec3` is 32",
+     ("ty1505",)),
+    ("F-044: §15's `matrix<T>` is `{ptr, i32, i32}`, 24 bytes: the library's is `{ {ptr, i64, i64}, i64, i64 }`, "
+     "40 bytes for `matrix<int64>`", ("ty1507",)),
+    ("F-044: §15's `tensor<T>` is `{ptr, ptr, i32}`, 24 bytes: the library's is `{ {ptr, i64, i64}, i64, "
+     "[9 x i64] }`, 104 bytes for `tensor<int64>`", ("ty1508",)),
+    ("F-044: the elided-Result IR (`define i32 @add_elided`): a `never fails` function returns `{ i32, i32 }`; "
+     "no Result elision is emitted", ("ty1535",)),
+)
+for _t, _ids in DOC44B:
+    put("doc", _t, *_ids)
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

@@ -7,6 +7,7 @@ part.
 | part | lines | claims | tested | agree | disagree | here |
 |---|---|---|---|---|---|---|
 | A | 661–1176 (§6–9) | 268 | 249 | 240 | 9 | 8 rows |
+| B | 1177–1592 (§10–18) | 129 | 123 | 114 | 9 | 9 rows |
 
 Part A's nine disagreements are:
 - eight documentation rows (below);
@@ -14,7 +15,7 @@ Part A's nine disagreements are:
   cannot match there. Compiled by hand, the slice parameter is `{ ptr, i64 }`, as claimed.
 
 The rows, with each claim's program and its verdicts at HUNT2, the baseline `c3bdae2` and
-`93bcb66`, are in [`ROWS.md`](ROWS.md). All eight give the same result at all three.
+`93bcb66`, are in [`ROWS.md`](ROWS.md). All seventeen give the same result at all three.
 
 ## Part A (§6–9)
 
@@ -79,7 +80,73 @@ The rows, with each claim's program and its verdicts at HUNT2, the baseline `c3b
   - tag casts (TYPE-009, -032);
   - generic enum instances and their inference (TYPE-022, TYPE-017).
 
-**Found in run 1, not findings.** These were the programs' own mistakes:
+## Part B (§10–18)
+
+All nine of part B's disagreements are documentation rows:
+- **`--guard-pages` "remains available"** (:1200). No tool has it. npkc refuses it ("unknown
+  argument"), and only DECISIONS:2300 and a grammar note name it. This is BUILTIN's
+  `--seccomp` shape (F-028).
+- **The bare `?`** (:1374, :1387). The safe unwrap `expr ? defaultVal` and "`? NIL`-swallowed"
+  are PARSE-011 since D-175; the fallback is `expr ?| d`. The compiler's own advice for
+  `??` on a `Result` names the bare `?`: that is [F-045](../F-045-diagnostic-advises-the-retired-question-mark/).
+- **The storage_driver extern example** (:1396) is EXTERN-001. The `opaque` tier is
+  reserved (D-190); it is the same example as TRAITS:373 (F-043).
+- **"Allocated via alloc() and cast: `alloc(N) => arena<T>->`"** (:1439–1441).
+  - The cast is TYPE-009: reinterpreting a pointer takes `=>!`.
+  - An arena is made with `arena_make(n)` as an `arena<T>` (MEMORY's agreeing
+    programs).
+- **§15's library layouts** (:1505, :1507, :1508), measured by hand at HUNT2:
+  - `vec2` is 16 bytes and `vec4` 32, as the table says.
+  - `vec3` is 32, not 24: its `simd<flt64, 3>` aligns to 32 by §14's own rule (:1472).
+  - `matrix<int64>` is `{ {ptr, i64, i64}, i64, i64 }`, 40 bytes; the table says
+    `{ptr, i32, i32}` and 24.
+  - `tensor<int64>` is `{ {ptr, i64, i64}, i64, [9 x i64] }`, 104 bytes; the table says
+    `{ptr, ptr, i32}` and 24.
+  - The library (`lib/ntensor.npk`) is the measure; TYPE §25 (part C) describes it as
+    landed.
+- **The elided-Result IR** (:1535). `define i32 @add_elided` is not emitted: a `never fails`
+  function returns `{ i32, i32 }` like any other (`ty1320` and `ty1526` agree).
+
+**Agreements worth naming (part B).**
+- Pointers:
+  - thin;
+  - one `ptr` for wild and borrow alike;
+  - TYPE-082 on an array, a slice and a `List` pointer;
+  - `(<-p)[i]`.
+- Optional:
+  - every row of both tables;
+  - `zeroinitializer` and no `undef`;
+  - the flattening `?.`;
+  - TYPE-065 in both forms;
+  - the struck `Some`, `Optional{…}`, `.has_value` and `.value`;
+  - `NIL?` and `Optional<Optional<T>>`.
+- Result:
+  - `{ i32, i32 }`;
+  - `pass(…)`/`fail(…)`;
+  - free field order;
+  - no `is_error` to write;
+  - `?!` routing its own code to `failsafe` (exit 81 for `E1`, not the callee's `E2`);
+  - the `_!`, `_?` and `_~` shorthands;
+  - TYPE-039 and TYPE-042.
+- All six atomic operations, each as native `seq_cst` IR.
+- SIMD:
+  - the three rows;
+  - the lane and byte limits;
+  - alignment as the next power of two;
+  - any-lane DivByZero and DivOverflow;
+  - lane IntOverflow for `+`, `.sum()` and `+=`;
+  - the ordered float `.sum()` ([1e16, 1, −1e16, 1] is 1);
+  - one `div-zero`, one `div-min` and one `shift-range` row.
+- `dyn`:
+  - (N+1) × 8 bytes;
+  - `{ ptr, ptr }`;
+  - `dyn A & B` is `dyn B & A`.
+
+**Found in run 1, not findings (part B).** Two scripts' own failsafes did not name the
+errors `lib/ntensor.npk` declares (`BadShape`, `BadIndex`; REACH-002). They were fixed in
+two steps, and the rows above are the measured sizes.
+
+**Found in run 1, not findings (part A).** These were the programs' own mistakes:
 - a nyte product past the bound (`ty0786`);
 - `raw f(x).m()` parsing as `raw (f(x).m())` (`ty0803b`);
 - the prelude's `Whence` variants, which are `Start`, `Current` and `End`. `ty0855` had
@@ -91,14 +158,16 @@ The rows, with each claim's program and its verdicts at HUNT2, the baseline `c3b
 - None of these sentences is among F-028's rows (DEF-154), which cover TYPE 1–660 only.
 - The `#wild_slice` row is the TYPE sentence that D-315's retirement missed. BUILTIN's rows
   `bi0417b` and `bi0419b` (F-028) are the same phrase for `#wild_ptr` and `#ptr_add`.
-- The registry at `93bcb66` has no open entry for any of the eight. Its S-95 and S-107
-  are settled.
+- The registry at `93bcb66` has no open entry for any of the seventeen. Its S-95 and
+  S-107 are settled.
+- The bare `?` rows repeat, in TYPE's words, rows F-030, F-031 and F-040 found in MEMORY,
+  OP and AST. The extern example repeats TRAITS' (F-043).
 
 ## Measured, and inferred
 
 - **Measured:**
   - each row's result at three compilers;
-  - by hand at HUNT2: the four alignments, the two BORROW refusals, and ty1084's
-    parameter.
+  - by hand at HUNT2: the four alignments, the two BORROW refusals, ty1084's parameter,
+    and the five library sizes.
 - **Reasoned, not measured:** that the compiler is the right side in each, and the
   balanced-ternary arithmetic of `1T1T0`.

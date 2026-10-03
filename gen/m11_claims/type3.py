@@ -855,3 +855,14 @@ claim("ty1586", D, 1586, "Widening (`dyn A & B` → `dyn A`) is a", "rule",
     discard(y);
     exit 0i32;""", TR),
       wrong="refused")
+
+# ------------------------------------------------------------------ after run 1 (S45: text only)
+for _id in ("ty1507", "ty1508"):
+    refix(_id, "run 1: the program's own failsafe did not name `ntensor.BadShape`, an error the library "
+          "declares (REACH-002); the arm is added",
+          [("    pick (e) {\n", "    pick (e) {\n        (ntensor.BadShape) { exit 80i32; },\n")], field="sh")
+for _id in ("ty1507", "ty1508"):
+    refix(_id, "run 2: and `ntensor.BadIndex`, the library's other error (lib/ntensor.npk:21-22)",
+          [("        (ntensor.BadShape) { exit 80i32; },\n",
+            "        (ntensor.BadShape) { exit 80i32; },\n        (ntensor.BadIndex) { exit 81i32; },\n")],
+          field="sh")

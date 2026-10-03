@@ -1029,13 +1029,13 @@ python3 gen/run_known.py .work/hunt2     # the recall suite, DEF-108's known cas
 
 Written 2026-09-26 by session 7 and extended by sessions 8 and 9 (2026-10-02), all on
 the author's machine (48 cores), from the committed scripts. **M11 is not finished.**
-These denominators cover the ranges extracted so far, 9 473 of the fourteen references'
+These denominators cover the ranges extracted so far, 9 889 of the fourteen references'
 10 419 lines. Session 8 corrected the count, which had included the empty element after
 each file's final newline (10 433 before):
 - extracted whole: BUILTIN, CONCURRENCY, IO, MACRO; by session 8, MEMORY, OP and
   CONTROL; by session 9, MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION's rest;
-- extracted in part: TYPE 1–1176 (session 9 took 661–1176 as the first of three parts, S65);
-- not yet extracted: TYPE 1177–2122.
+- extracted in part: TYPE 1–1592 (session 9 took 661–1592 as the first two of three parts, S65);
+- not yet extracted: TYPE 1593–2122.
 
 The records are:
 - `m11/CLAIMS.md` (every claim with its line, quote and expectation) and
@@ -1045,7 +1045,7 @@ The records are:
   and `results/93bcb66/m11-disagree.jsonl` (sessions 8 and 9): the disagreeing claims at
   the baseline and at the compiler's newest `main` of each session;
 - `gen/m11_triage.py` (the class of each disagreement);
-- `findings/F-018` … `F-044`.
+- `findings/F-018` … `F-045`.
 
 ### 12.1 The denominators
 
@@ -1063,19 +1063,19 @@ The records are:
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 148 | 9 |
 | TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 99 | 16 |
-| TYPE (1–1176) | 590 | 29 | 142 | 419 | 38 | 552 | 482 | 70 |
+| TYPE (1–1592) | 719 | 38 | 179 | 502 | 44 | 675 | 596 | 79 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 243 | 473 | 451 | 22 |
-| **total** | **3 078** | 142 | 761 | 2 175 | **501** | **2 577** | **2 324** | **253** |
+| **total** | **3 207** | 151 | 798 | 2 258 | **507** | **2 700** | **2 438** | **262** |
 
 Untestable, each with its reason in `m11/CLAIMS.md`:
 - `z3` 117: needs `npkg verify` with the pinned z3;
-- `vague` 66: no checkable outcome;
-- `internal` 73 (AST's 19 are rows that list only a node's fields);
+- `vague` 68: no checkable outcome;
+- `internal` 76 (AST's 19 are rows that list only a node's fields);
 - `tree` 75: the compiler's own tree;
 - `tool` 132: a running driver process, a package in the compiler's tree, `npkg test`, which
   builds the compiler first (BUILD's 28), or the verified build's runners, floor
   translator, protocol models and schedule explorer (VERIFICATION 1248–2351's 87);
-- `unobservable` 27;
+- `unobservable` 28;
 - `timing` 8;
 - `platform` 3.
 
@@ -1110,11 +1110,11 @@ mistakes:
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
 | compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039; TRAITS' F-042) | 16 + 5 + 4 + 5 + 1 |
-| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040; TRAITS' F-043; TYPE 661–1176's F-044) | 94 + 8 + 5 + 6 + 7 + 6 + 18 + 13 + 8 |
+| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040; TRAITS' F-043; TYPE 661–1592's F-044) | 94 + 8 + 5 + 6 + 7 + 6 + 18 + 13 + 17 |
 | known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135; MODULE's DEF-153; LEXICAL's DEF-131; AST's DEF-131 and DEF-153) | 7 + 1 + 2 + 4 + 1 + 1 + 2 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) + 1 (AST) + 1 (TRAITS) + 1 (TYPE 661–1176) |
-| **total** | **253** |
+| **total** | **262** |
 
 **Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
 codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
@@ -1166,12 +1166,13 @@ three compilers), where the reference caps the depth at 64. TRAITS' rows all sta
 | F-042 | TRAITS' safe departure: an `opaque struct` accepted outside an extern block (as F-039 e) | compiler, lower priority | per row | the same | the same (at `93bcb66`) |
 | F-043 | TRAITS' thirteen stale claims (eleven examples, the field visibility sentence, the lambdas sentence) | documentation | per row | the same, two compiled | the same (at `93bcb66`) |
 | F-040 | AST's eighteen stale claims (retired spellings, the error model before D-179, the extern rows before D-149, and four more) | documentation | per row | the same | the same (at `93bcb66`) |
-| F-044 | TYPE 661–1176's eight stale claims (§6's tbb alignments, the failsafe signature, the `42` = `1T1T0t` example, the struct example's spelling, the field-access IR, "never up" for a slice, `#wild_slice`'s retired wild-context rule) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-044 | TYPE 661–1592's seventeen stale claims (§6's tbb alignments, the failsafe signature, the `42` = `1T1T0t` example, the struct example, the field-access IR, "never up" for a slice, `#wild_slice`'s wild context, `--guard-pages`, the bare `?` twice, the extern example, the arena cast, §15's three library layouts, the elided-Result IR) | documentation | per row | the same | the same (at `93bcb66`) |
+| F-045 | the compiler's message for `??` on a `Result` advises the bare `?`, which it refuses (PARSE-011, D-175) | compiler, lower priority: a diagnostic | TYPE-007, then PARSE-011 | the same | the same (at `93bcb66`) |
 
 ### 12.4 What these claims do not cover
 
-- **The range not yet extracted** (above), TYPE 1177–2122, 946 lines: at part A's density
-  (268 claims in 516 lines), roughly 490 more claims.
+- **The range not yet extracted** (above), TYPE 1593–2122, 530 lines: at parts A and B's
+  density (397 claims in 932 lines), roughly 225 more claims.
 - **VERIFICATION 1248–2351 is mostly the verified build's own machinery.** 115 of its 131
   claims need z3 or the runners. Its 16 tested claims (what `npkc --obligations` writes,
   the trap spellings, the stack's prologue and notes) all agree.
