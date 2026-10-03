@@ -286,6 +286,31 @@ for _t, _ids in DOC43:
 put("extract", "the sentence says a blanket impl does not APPLY to itself (its bound is not met by itself), not "
     "that the declaration is refused; the program expected a refusal", "tr0350")
 
+# ---- session 9: TYPE_REFERENCE 661-1176, part A of 661-2122 (F-044 documentation rows)
+DOC44 = (
+    ("F-044: §6's table gives `tbb128` and `tbb256` alignment 8; both align to 16 (`{i8, i128}` is 32 bytes, "
+     "`{i8, i256}` 48), as TYPE §5's rows 460-461 and its line 469 say (ty0460, ty0461, ty0469 agree)",
+     ("ty0673", "ty0674")),
+    ("F-044: tbb is \"used for ... the `failsafe` signature\": `failsafe` takes exactly one `Error` "
+     "(D-179, TYPE-044)", ("ty0715",)),
+    ("F-044: `tryte:t = 42;` and `tryte:t = 1T1T0t;` are not one value: balanced 1T1T0 is 60 "
+     "(81 - 27 + 9 - 3), as the compiler computes, and 42 is 1TTT0", ("ty0805",)),
+    ("F-044: the struct example is spelled `struct MyStruct = ...` (PARSE-001); a struct is `struct:Name`",
+     ("ty0921",)),
+    ("F-044: the field-access IR (a `getelementptr` to field 1, then an `i64` load) is not what is emitted: "
+     "the struct is loaded whole and the field taken with `extractvalue`", ("ty0936",)),
+    ("F-044: a slice \"passes down the call stack and never up\": a slice PARAMETER passed back up is "
+     "accepted, and safe: a view of the frame's own local is BORROW-001, and a returned view stored past its "
+     "storage is BORROW-002 (measured); the registry's S-107 controls describe the same reading of D-004",
+     ("ty1107",)),
+    ("F-044: `#wild_slice` \"in `wild` context only\": D-315 retired the phrase (no such rule exists or "
+     "can be checked), and TYPE §9.2.1 still states it", ("ty1112",)),
+)
+for _t, _ids in DOC44:
+    put("doc", _t, *_ids)
+put("extract", "the regex demanded a word boundary after `}`, which cannot match there; the slice parameter is "
+    "`{ ptr, i64 }`, as claimed (measured by hand)", "ty1084")
+
 # ---- known, strict, extraction
 put("known", "DEF-133 (F-017 d1, d2): TYPE §3.2's `s.length` and `s[i]`", "ty0366", "ty0366b", "ty0367")
 put("known", "DEF-133 (F-017 d5): TYPE §4's D-037 wrapping sentence", "ty0475")

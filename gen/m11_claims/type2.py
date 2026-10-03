@@ -1810,3 +1810,18 @@ claim("ty1170", D, 1170, "In pattern position a bare variant is read", "rule",
 claim("ty1171", D, 1171, "A non-generic enum binds an", "rule",
       "A non-generic enum binds an empty window, unchanged.",
       untestable="[internal] a type's operand window")
+
+# ------------------------------------------------------------------ after run 1 (S45: text only)
+refix("ty0786", "run 1: the program's own nyte product 1000 * 30 is past the balanced bound, so its "
+      "cast out trapped TbbErr; the operands are now 100 and 30 (2900)",
+      [("    nyte:x = 1000;", "    nyte:x = 100;"),
+       ("    if ((z => int32) != 29000i32) { exit 14i32; }", "    if ((z => int32) != 2900i32) { exit 14i32; }")])
+refix("ty0803b", "run 1: `raw vtr(e).trit(0i64)` parses as `raw (vtr(e).trit(0i64))`, a method on a "
+      "Result (TYPE-019); the receiver is bound first",
+      [("    trit:d = raw vtr(e).trit(0i64);", "    tryte:f = raw vtr(e);\n    trit:d = f.trit(0i64);")])
+refix("ty0854", "run 1: the prelude's `Whence` is `{ Start; Current; End; }` (src/prelude/prelude.npk); "
+      "the text's SEEK_* names only illustrate a flags type",
+      [("Whence.SEEK_END", "Whence.End")])
+refix("ty0855", "run 1 agreed for the wrong reason (TYPE-019, no variant `SEEK_SET`): the prelude's "
+      "`Whence` is `{ Start; Current; End; }`",
+      [("Whence.SEEK_SET | Whence.SEEK_END", "Whence.Start | Whence.End")])

@@ -1,0 +1,52 @@
+// M11 ty0811 -- meta/specs/TYPE_REFERENCE.md:811 (rule)
+// quote: a smaller-bound target trap-or-saturates (`=>` / `=>!`)
+// claim: A cast to a smaller-bound ternary target traps under `=>` when the value does not fit (tryte 60 => trit).
+// expect: run:42
+// wrong: no trap: ERR (11) or a number (10)
+mod:ty0811;
+
+func:vtr = tryte(tryte:x) never fails { pass x; };
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 42i32; },
+        (HeapOom) { exit 42i32; },
+        (IntOverflow) { exit 42i32; },
+        (OutOfBounds) { exit 42i32; },
+        (Unreachable) { exit 42i32; },
+        (WildLeak) { exit 42i32; },
+        (DivByZero) { exit 42i32; },
+        (DivOverflow) { exit 42i32; },
+        (StaleHandle) { exit 42i32; },
+        (DeadlineExceeded) { exit 42i32; },
+        (ChannelClosed) { exit 42i32; },
+        (DriverLeak) { exit 42i32; },
+        (IoEof) { exit 42i32; },
+        (WouldBlock) { exit 42i32; },
+        (StackExhausted) { exit 42i32; },
+        (MachineFault) { exit 42i32; },
+        (LimitViolated) { exit 42i32; },
+        (DecreasesViolated) { exit 42i32; },
+        (TbbErr) { exit 42i32; },
+        (ShiftRange) { exit 42i32; },
+        (CastRange) { exit 42i32; },
+        (BadStep) { exit 42i32; },
+        (BorrowOverlap) { exit 42i32; },
+        (RequiresViolated) { exit 42i32; },
+        (EnsuresViolated) { exit 42i32; },
+        (InvariantViolated) { exit 42i32; },
+        (Interrupted) { exit 42i32; },
+        (NotFound) { exit 42i32; },
+        (Exists) { exit 42i32; },
+        (CrossDevice) { exit 42i32; },
+        (BadPath) { exit 42i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    tryte:b = 60;
+    trit:t = raw vtr(b) => trit;
+    if (is_err(t)) { exit 11i32; }
+    exit 10i32;
+};

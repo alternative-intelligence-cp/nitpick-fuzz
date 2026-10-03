@@ -1,0 +1,53 @@
+// M11 ty0708 -- meta/specs/TYPE_REFERENCE.md:708 (rule)
+// quote: `=>` traps on a value with no image (the sentinel bit pattern, or out of
+// claim: Entering tbb8 with `=>` traps on the sentinel's bit pattern: int8 -128 has no tbb8 image.
+// expect: run:42
+// wrong: no trap: ERR (11) or a number (10)
+mod:ty0708;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 42i32; },
+        (HeapOom) { exit 42i32; },
+        (IntOverflow) { exit 42i32; },
+        (OutOfBounds) { exit 42i32; },
+        (Unreachable) { exit 42i32; },
+        (WildLeak) { exit 42i32; },
+        (DivByZero) { exit 42i32; },
+        (DivOverflow) { exit 42i32; },
+        (StaleHandle) { exit 42i32; },
+        (DeadlineExceeded) { exit 42i32; },
+        (ChannelClosed) { exit 42i32; },
+        (DriverLeak) { exit 42i32; },
+        (IoEof) { exit 42i32; },
+        (WouldBlock) { exit 42i32; },
+        (StackExhausted) { exit 42i32; },
+        (MachineFault) { exit 42i32; },
+        (LimitViolated) { exit 42i32; },
+        (DecreasesViolated) { exit 42i32; },
+        (TbbErr) { exit 42i32; },
+        (ShiftRange) { exit 42i32; },
+        (CastRange) { exit 42i32; },
+        (BadStep) { exit 42i32; },
+        (BorrowOverlap) { exit 42i32; },
+        (RequiresViolated) { exit 42i32; },
+        (EnsuresViolated) { exit 42i32; },
+        (InvariantViolated) { exit 42i32; },
+        (Interrupted) { exit 42i32; },
+        (NotFound) { exit 42i32; },
+        (Exists) { exit 42i32; },
+        (CrossDevice) { exit 42i32; },
+        (BadPath) { exit 42i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int8:m = raw v8(-127i8) - 1i8;
+    tbb8:t = m => tbb8;
+    if (is_err(t)) { exit 11i32; }
+    exit 10i32;
+};

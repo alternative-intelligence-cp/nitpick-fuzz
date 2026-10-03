@@ -21,27 +21,27 @@ before the first run.
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 115 | 99 | 16 |
-| TYPE | 322 | 19 | 74 | 229 | 19 | 303 | 303 | 242 | 61 |
+| TYPE | 590 | 29 | 142 | 419 | 38 | 552 | 552 | 482 | 70 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 243 | 473 | 473 | 451 | 22 |
-| **total** | 2810 | 132 | 693 | 1985 | 482 | 2328 | 2328 | 2084 | 244 |
+| **total** | 3078 | 142 | 761 | 2175 | 501 | 2577 | 2577 | 2324 | 253 |
 
-**These denominators cover 8957 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660 of 2122; VERIFICATION 1–845, 846–1247, 1248–2351 of 2351.
+**These denominators cover 9473 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660, 661–1176 of 2122; VERIFICATION 1–845, 846–1247, 1248–2351 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
-- `tool` 131 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
-- `z3` 112 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `tree` 73 — a claim about the compiler's own source tree, generators, harness or documents
-- `internal` 69 — a compiler internal no program observes (an AST field, a table's layout)
-- `vague` 62 — the sentence states no checkable outcome
-- `unobservable` 24 — no program can tell the claim's truth from its falsehood
+- `tool` 132 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
+- `z3` 117 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
+- `tree` 75 — a claim about the compiler's own source tree, generators, harness or documents
+- `internal` 73 — a compiler internal no program observes (an AST field, a table's layout)
+- `vague` 66 — the sentence states no checkable outcome
+- `unobservable` 27 — no program can tell the claim's truth from its falsehood
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 3 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (244)
+## 2. The disagreements (253)
 
-By kind: `refused` 131, `wrong_exit` 42, `accepted` 36, `ir` 13, `emit_defect` 9, `other_code` 7, `crash` 6.
+By kind: `refused` 133, `wrong_exit` 45, `accepted` 38, `ir` 15, `emit_defect` 9, `other_code` 7, `crash` 6.
 
 | class | claims |
 |---|---|
@@ -53,10 +53,10 @@ By kind: `refused` 131, `wrong_exit` 42, `accepted` 36, `ir` 13, `emit_defect` 9
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026) | 1 |
 | compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 31 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 157 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 165 |
 | known: deduplicated against KNOWN_DEFECTS.md | 18 |
 | not a finding: refused at compile time where the text says it traps | 2 |
-| not a finding: the program tests more than its sentence, or no valid program can test it | 16 |
+| not a finding: the program tests more than its sentence, or no valid program can test it | 17 |
 
 Every disagreement below was also run at the baseline `c3bdae2` and at the compiler's newest
 `main` of its session (`1b4f0c6` for session 7's claims, `93bcb66` for session 8's); the last
@@ -286,6 +286,15 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `ty0616b` | TYPE:616 | Values of the same vector have the full ordering. | `run:0` | npkc 1 EMIT-002, -/- (`emit_defect`) | DEF-131 (F-015): `<=>` refused by the emitter | same / same @1b4f0c6 |
 | `ty0634b` | TYPE:634 | Declared to return bare tfp256, the same body `pass(d / t)` compiles. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-028: a bare tfp256 return needs the explicit `=> tfp256` (line 618) | same / same @1b4f0c6 |
 | `ty0648` | TYPE:648 | At the IR, dim256<Joules> is tfp256, whose type is `{ i64, i64, i64, i64 }`. | `ir:^%\"?tfp256\"? = type \{ ?i64, i64, i64, i64 ?\}|^define [^@\n]* @"?(?:[\w$]+\.)*m11dj"?\(\{ ?i64, i64, i64, i64 ?\} ` | npkc 0 , 0/0 (`ir`) | F-028: tfp256 is i256 at the IR, not { i64, i64, i64, i64 } | same / same @1b4f0c6 |
+| `ty0673` | TYPE:673 | `tbb128` is 16 bytes with alignment 8; its valid range is symmetric, -(2^127-1) .. 2^127-1, and one step past either end is ERR. | `run:0` | npkc 0 , 11/11 (`wrong_exit`) | F-044: §6's table gives `tbb128` and `tbb256` alignment 8; both align to 16 (`{i8, i128}` is 32 bytes, `{i8, i256}` 48), as TYPE §5's rows 460-461 and its line 469 say (ty0460, ty0461, ty0469 agree) | same / same @93bcb66 |
+| `ty0674` | TYPE:674 | `tbb256` is 32 bytes with alignment 8; its valid range is symmetric, -(2^255-1) .. 2^255-1, and one step past either end is ERR. | `run:0` | npkc 0 , 11/11 (`wrong_exit`) | F-044: §6's table gives `tbb128` and `tbb256` alignment 8; both align to 16 (`{i8, i128}` is 32 bytes, `{i8, i256}` 48), as TYPE §5's rows 460-461 and its line 469 say (ty0460, ty0461, ty0469 agree) | same / same @93bcb66 |
+| `ty0715` | TYPE:715 | tbb is used for the failsafe signature: a failsafe whose parameter is a tbb32 is accepted. | `run:0` | npkc 1 TYPE-044, -/- (`refused`) | F-044: tbb is "used for ... the `failsafe` signature": `failsafe` takes exactly one `Error` (D-179, TYPE-044) | same / same @93bcb66 |
+| `ty0805` | TYPE:805 | A ternary-typed slot takes an unsuffixed integer literal and a balanced-digit literal: `tryte:t = 42;` and `tryte:t = 1T1T0t;` are one value spelled two ways. | `run:0` | npkc 0 , 10/10 (`wrong_exit`) | F-044: `tryte:t = 42;` and `tryte:t = 1T1T0t;` are not one value: balanced 1T1T0 is 60 (81 - 27 + 9 - 3), as the compiler computes, and 42 is 1TTT0 | same / same @93bcb66 |
+| `ty0921` | TYPE:921 | The struct example compiles as written. | `compile` | npkc 1 PARSE-001, -/- (`refused`) | F-044: the struct example is spelled `struct MyStruct = ...` (PARSE-001); a struct is `struct:Name` | same / same @93bcb66 |
+| `ty0936` | TYPE:936 | Reading `obj.y` is a `getelementptr` to field index 1 and an `i64` load. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11gy"?\((?=(?:(?!\n\}).)*?getelementptr[^\n]*, i32 0, i32 1\b)(?=(?:(?!\n\}).)*?load i64)` | npkc 0 , 0/0 (`ir`) | F-044: the field-access IR (a `getelementptr` to field 1, then an `i64` load) is not what is emitted: the struct is loaded whole and the field taken with `extractvalue` | same / same @93bcb66 |
+| `ty1084` | TYPE:1084 | A slice is `{ ptr, i64 }`: an `int32[]` parameter has that type. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11sl"?\(\{ ?ptr, i64 ?\}\b` | npkc 0 , 0/0 (`ir`) | the regex demanded a word boundary after `}`, which cannot match there; the slice parameter is `{ ptr, i64 }`, as claimed (measured by hand) | same / same @93bcb66 |
+| `ty1107` | TYPE:1107 | A slice never passes up the call stack: a function returning a slice is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-044: a slice "passes down the call stack and never up": a slice PARAMETER passed back up is accepted, and safe: a view of the frame's own local is BORROW-001, and a returned view stored past its storage is BORROW-002 (measured); the registry's S-107 controls describe the same reading of D-004 | same / same @93bcb66 |
+| `ty1112` | TYPE:1112 | `#wild_slice` is for wild context only: outside one it is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-044: `#wild_slice` "in `wild` context only": D-315 retired the phrase (no such rule exists or can be checked), and TYPE §9.2.1 still states it | same / same @93bcb66 |
 | `vf0145b` | VERIFICATION:145 | A limit on main's parameter is refused: the sentence lists it among the TYPE-064 sites. | `refuse:TYPE-064` | npkc 1 TYPE-060, -/- (`other_code`) | F-028: a limit on main's parameter is TYPE-060, not TYPE-064 | same / same @1b4f0c6 |
 | `vf0151` | VERIFICATION:151 | A struct subject is outside the encoder's fragment: its limit row is unencoded (0 in rows.txt). | `sh:0` | sh 1 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf0215b` | VERIFICATION:215 | A write through a shared ($$i) claim's holder is NITPICK-BORROW-013. | `refuse:BORROW-013` | npkc 0 , 0/0 (`accepted`) | DEF-123 (F-008): a write through a $$i claim's holder is not refused | same / same @1b4f0c6 |
@@ -309,7 +318,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (124; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (128; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -408,6 +417,10 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `ty0376` | the Python string made `\t` and `\n` a real tab and newline inside the literal (LEX-005); the escapes are now written as escapes |
 | `ty0399b` | run 1: a cstring's `.ptr` is `uint8->`, not `char8->` (TYPE-007); run 2: a borrow cannot initialise a `wild` binding (BORROW-011, D-223): the bytes are now read through a view, `string_from_bytes(c.ptr, c.len + 1)`, as the compiler's own len_ceiling.npk reads a cstring |
 | `ty0476b` | run 1 and run 2: a literal of 2^64 - 1 is outside the 64-bit literal envelope (LEX-004, D-148), even with a u64 suffix: the u64 maximum is computed (`0 -% 1`), and zero-extension is checked through its half, 2^63 - 1 |
+| `ty0786` | run 1: the program's own nyte product 1000 * 30 is past the balanced bound, so its cast out trapped TbbErr; the operands are now 100 and 30 (2900) |
+| `ty0803b` | run 1: `raw vtr(e).trit(0i64)` parses as `raw (vtr(e).trit(0i64))`, a method on a Result (TYPE-019); the receiver is bound first |
+| `ty0854` | run 1: the prelude's `Whence` is `{ Start; Current; End; }` (src/prelude/prelude.npk); the text's SEEK_* names only illustrate a flags type |
+| `ty0855` | run 1 agreed for the wrong reason (TYPE-019, no variant `SEEK_SET`): the prelude's `Whence` is `{ Start; Current; End; }` |
 | `vf0007` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
 | `vf0039` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
 | `vf0075` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
@@ -438,6 +451,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 2328 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 2577 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

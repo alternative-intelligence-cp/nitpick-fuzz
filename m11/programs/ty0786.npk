@@ -1,0 +1,71 @@
+// M11 ty0786 -- meta/specs/TYPE_REFERENCE.md:786 (rule)
+// quote: `+ - *` at all four types
+// claim: `+ - *` compute at trit, tryte, nit and nyte.
+// expect: run:0
+// wrong: refused at one type, or 10-14: a wrong result
+mod:ty0786;
+
+func:vtt = trit(trit:x) never fails { pass x; };
+func:vtr = tryte(tryte:x) never fails { pass x; };
+func:vnt = nit(nit:x) never fails { pass x; };
+func:vny = nyte(nyte:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    trit:t1 = 1;
+    trit:tm = 0Tt;
+    trit:ts = raw vtt(t1) + raw vtt(tm);
+    if ((ts => int32) != 0i32) { exit 10i32; }
+    trit:tp = raw vtt(tm) * raw vtt(tm);
+    if ((tp => int32) != 1i32) { exit 11i32; }
+    tryte:a = 100;
+    tryte:b = 7;
+    tryte:c = (raw vtr(a) - raw vtr(b)) * raw vtr(b);
+    if ((c => int32) != 651i32) { exit 12i32; }
+    nit:n = 3;
+    nit:m = 0 - 2;
+    nit:s = raw vnt(n) + raw vnt(m);
+    if ((s => int32) != 1i32) { exit 13i32; }
+    nyte:x = 100;
+    nyte:y = 30;
+    nyte:z = raw vny(x) * raw vny(y) - raw vny(x);
+    if ((z => int32) != 2900i32) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

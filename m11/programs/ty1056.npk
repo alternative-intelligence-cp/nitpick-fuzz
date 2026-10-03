@@ -1,0 +1,56 @@
+// M11 ty1056 -- meta/specs/TYPE_REFERENCE.md:1056 (example)
+// quote: ```llvm
+// claim: A local `int32[4]` is an `alloca [4 x i32]`, and an index is checked `icmp ult i64 %idx, 4` before a `getelementptr [4 x i32]`.
+// expect: ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11ix"?\((?=(?:(?!\n\}).)*?alloca \[4 x i32\])(?=(?:(?!\n\}).)*?icmp ult i64 %[^,\n]+, 4\b)(?=(?:(?!\n\}).)*?getelementptr[^\n]*\[4 x i32\])
+// wrong: another check (a signed compare, or none) or another access
+mod:ty1056;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:m11ix = int32(int64:i) never fails {
+    int32[4]:arr = [1i32, 2i32, 3i32, 4i32];
+    pass arr[i];
+};
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw m11ix(raw v64(2i64)) != 3i32) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

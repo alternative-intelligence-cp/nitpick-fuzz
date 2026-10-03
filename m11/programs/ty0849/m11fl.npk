@@ -1,0 +1,3 @@
+mod:m11fl;
+
+pub func:word = int32() never fails { pass (O_EXCL => int32); };

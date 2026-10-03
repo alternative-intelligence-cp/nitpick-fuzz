@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**2810 claims: 2328 testable, 482 untestable** (each with its reason).
+**3078 claims: 2577 testable, 501 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -26,7 +26,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
 | OP | 159 | 0 | 87 | 72 | 157 | 2 |
 | TRAITS | 119 | 19 | 16 | 84 | 115 | 4 |
-| TYPE | 322 | 19 | 74 | 229 | 303 | 19 |
+| TYPE | 590 | 29 | 142 | 419 | 552 | 38 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 473 | 243 |
 
 The line ranges extracted (each module declares its own with `covers()`; coverage
@@ -47,7 +47,7 @@ extracted:
 | MODULE | 300 | 1–300 | 300 | — |
 | OP | 403 | 1–403 | 403 | — |
 | TRAITS | 766 | 1–766 | 766 | — |
-| TYPE | 2122 | 1–660 | 660 | 661–2122 |
+| TYPE | 2122 | 1–660, 661–1176 | 1176 | 1177–2122 |
 | VERIFICATION | 2351 | 1–845, 846–1247, 1248–2351 | 2351 | — |
 
 ## AST (`meta/specs/AST_REFERENCE.md`)
@@ -2216,6 +2216,274 @@ Tables whose rows are not claims:
 | `ty0639` | 639 | example | “```nitpick” | A struct may hold dim256 fields of different units; they read and compose. | `run:0` |
 | `ty0648` | 648 | example | “```llvm” | At the IR, dim256<Joules> is tfp256, whose type is `{ i64, i64, i64, i64 }`. | `ir:^%\"?tfp256\"? = type \{ ?i64, i64, i64, i64 ?\}|^define [^@\n]* @"?(?:[\w$]+\.)*m11dj"?\(\{ ?i64, i64, i64, i64 ?\} ` |
 | `ty0654` | 654 | rule | “The dimensional annotation is attached to the AST type node” | The annotation lives on the AST type node; the type checker verifies the algebra and codegen ignores it. | untestable [internal] the AST's type node is not observable; codegen's ignoring the unit is ty0593's IR test |
+| `ty0663` | 663 | rule | “**reserved as the ERR sentinel**” | The most negative bit pattern is ERR, not a number: -127 is a tbb8 value, and -127 - 1 is ERR. | `run:0` |
+| `ty0669` | 669 | row | “\| `tbb8` \|” | `tbb8` is 1 byte with alignment 1; its valid range is symmetric, -(2^7-1) .. 2^7-1, and one step past either end is ERR. | `run:0` |
+| `ty0669b` | 669 | row | “\| `tbb8` \| `i8` \|” | A `tbb8` parameter is an `i8` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i8\b` |
+| `ty0670` | 670 | row | “\| `tbb16` \|” | `tbb16` is 2 bytes with alignment 2; its valid range is symmetric, -(2^15-1) .. 2^15-1, and one step past either end is ERR. | `run:0` |
+| `ty0670b` | 670 | row | “\| `tbb16` \| `i16` \|” | A `tbb16` parameter is an `i16` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i16\b` |
+| `ty0671` | 671 | row | “\| `tbb32` \|” | `tbb32` is 4 bytes with alignment 4; its valid range is symmetric, -(2^31-1) .. 2^31-1, and one step past either end is ERR. | `run:0` |
+| `ty0671b` | 671 | row | “\| `tbb32` \| `i32` \|” | A `tbb32` parameter is an `i32` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i32\b` |
+| `ty0672` | 672 | row | “\| `tbb64` \|” | `tbb64` is 8 bytes with alignment 8; its valid range is symmetric, -(2^63-1) .. 2^63-1, and one step past either end is ERR. | `run:0` |
+| `ty0672b` | 672 | row | “\| `tbb64` \| `i64` \|” | A `tbb64` parameter is an `i64` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i64\b` |
+| `ty0673` | 673 | row | “\| `tbb128` \|” | `tbb128` is 16 bytes with alignment 8; its valid range is symmetric, -(2^127-1) .. 2^127-1, and one step past either end is ERR. | `run:0` |
+| `ty0673b` | 673 | row | “\| `tbb128` \| `i128` \|” | A `tbb128` parameter is an `i128` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i128\b` |
+| `ty0674` | 674 | row | “\| `tbb256` \|” | `tbb256` is 32 bytes with alignment 8; its valid range is symmetric, -(2^255-1) .. 2^255-1, and one step past either end is ERR. | `run:0` |
+| `ty0674b` | 674 | row | “\| `tbb256` \| `i256` \|” | A `tbb256` parameter is an `i256` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i256\b` |
+| `ty0680` | 680 | rule | “makes negation and absolute” | Negation is total on tbb: for the valid -127, `x * -1` and `-x` are 127, not ERR. | `run:0` |
+| `ty0682` | 682 | rule | “`INT_MIN / -1` — which faults in hardware on x86 — cannot arise” | The hardware's INT_MIN / -1 cannot arise: ERR / -1 at tbb32 is ERR, with no trap and no fault. | `run:0` |
+| `ty0687` | 687 | rule | “**Any operation on an ERR value yields ERR.**” | Any operation on ERR yields ERR, overriding identities: `ERR * 0` and `ERR - ERR` are ERR. | `run:0` (M10 `m13_tbb_err_sticky`) |
+| `ty0690` | 690 | rule | “Overflow **saturates to ERR** rather than wrapping” | tbb overflow saturates to ERR rather than wrapping: 100 + 100 at tbb8 is ERR, not -56. | `run:0` |
+| `ty0692` | 692 | rule | “Division or modulo by zero yields ERR (D-007).” | tbb division or modulo by zero yields ERR, with no trap. | `run:0` (M10 `v18_tbb_div_by_zero_is_err`) |
+| `ty0693` | 693 | rule | “**Comparison or branching on ERR traps to `failsafe`**” | Comparing or branching on ERR traps to failsafe. | `run:110` (M10 `m12_tbb_compare_on_err_traps`) |
+| `ty0695` | 695 | rule | “Use `is_err(x)` to test without” | `is_err(x)` tests a tbb for ERR without trapping, true for ERR and false for a value. | `run:0` |
+| `ty0696` | 696 | rule | “trapping, or a `pick` with an explicit `ERR:` arm.” | A pick with an explicit `ERR:` arm takes ERR without trapping. | `run:0` (M10 `p13_tbb_err_arm_taken`) |
+| `ty0697` | 697 | rule | “**Bitwise operators are rejected** on `tbb`” | `~` on a tbb is refused. | `refuse` |
+| `ty0698` | 698 | rule | “or destroy it (`ERR & 0` is `0`)” | `&` on a tbb is refused. | `refuse` |
+| `ty0699` | 699 | rule | “**Casts are never straight bit operations.**” | A tbb8 ERR cast to tbb32 is ERR: the sentinel maps across widths rather than sign-extending into a valid -128. | `run:0` |
+| `ty0702` | 702 | rule | “**A cast OUT of the family traps on an ERR operand under BOTH spellings**” | `=>` out of tbb traps TbbErr on an ERR operand. | `trap:TbbErr` |
+| `ty0702b` | 702 | rule | “**A cast OUT of the family traps on an ERR operand under BOTH spellings**” | `=>!` out of tbb traps TbbErr on an ERR operand: the bang acknowledges a value's loss, and ERR is not a value. | `trap:TbbErr` |
+| `ty0705` | 705 | rule | “so `tbb64 =>” | `tbb64 => int8` is a compile error: the value is range-classified like any numeric pair. | `refuse` |
+| `ty0706` | 706 | rule | “`tbb32 => uint32` are compile errors” | `tbb32 => uint32` is a compile error. | `refuse` |
+| `ty0706b` | 706 | rule | “and take the bang” | With the bang, `tbb32 =>! uint32` and `tbb64 =>! int8` compile and convert an in-range value. | `run:0` |
+| `ty0708` | 708 | rule | “`=>` traps on a value with no image (the sentinel bit pattern, or out of” | Entering tbb8 with `=>` traps on the sentinel's bit pattern: int8 -128 has no tbb8 image. | `run:42` |
+| `ty0708b` | 708 | rule | “`=>` traps on a value with no image (the sentinel bit pattern, or out of” | Entering tbb8 with `=>` traps on an out-of-range value: int32 200 has no tbb8 image. | `run:42` |
+| `ty0709` | 709 | rule | “and `=>!` saturates it to ERR” | Entering tbb8 with `=>!`, an out-of-range int32 (200) and the sentinel's int8 bit pattern (-128) are ERR, with no trap. | `run:0` |
+| `ty0711` | 711 | rule | “Definite-assignment analysis rejects” | There is no implicit default: a read before any write is refused. | `refuse` (M10 `d02_read_unassigned`) |
+| `ty0713` | 713 | rule | “so an ERR taint is cleared by `x = 5i32`” | Assignment replaces a value: an ERR binding assigned 5 holds 5, not ERR. | `run:0` |
+| `ty0713b` | 713 | rule | “Assignment *replaces* a value” | A binding declared without a value may be written later, and arithmetic after it is ordinary. | `run:0` (M10 `d04_tbb_assign_replaces`) |
+| `ty0715` | 715 | rule | “the `failsafe` signature” | tbb is used for the failsafe signature: a failsafe whose parameter is a tbb32 is accepted. | `run:0` |
+| `ty0718` | 718 | rule | “**To the verifier (D-278” | The verifier models a twisted value as an unbounded Int in the carrier's range, ERR being its most negative value; `is_err(x)` is `(= x MIN)`; each operation is the emitter's saturate-to-ERR `ite`. | untestable [z3] the SMT model is what `npkg verify` gives z3; only the rows are written without it (below) |
+| `ty0723` | 723 | rule | “trap the family has (`TbbErr` at a comparison or a cast out) is the” | A tbb comparison's TbbErr guard is an `err-exit` obligation: `npkc --obligations` writes an err-exit row for a function that compares a tbb32 parameter. | `sh:0` |
+| `ty0725` | 725 | rule | “division has no row: a zero divisor is ERR” | A twisted division has no row: a function dividing two tbb32s has no div-zero or div-min row. | `sh:0` |
+| `ty0736` | 736 | row | “\| `trit` \| base-3 \| −1, 0, 1 \|” | A trit holds -1, 0 and 1, and 1 + 1 is past its bound (ERR). | `run:0` |
+| `ty0737` | 737 | row | “\| `tryte` \| base-3 \| 10 trits \|” | A tryte is 10 trits: `.len` is 10, its largest value is 29524 ((3^10-1)/2), and 29524 + 1 is ERR. | `run:0` |
+| `ty0738` | 738 | row | “\| `nit` \| base-9 \| −4 … 4 \|” | A nit holds -4 .. 4: 4 and -4 are values, and 4 + 1 is ERR. | `run:0` |
+| `ty0739` | 739 | row | “\| `nyte` \| base-9 \| 5 nits \|” | A nyte is 5 nits: `.len` is 5, its largest value is 29524 ((9^5-1)/2), and 29524 + 1 is ERR. | `run:0` |
+| `ty0741` | 741 | rule | “`tryte` and `nyte` hold the SAME 59049 states” | tryte and nyte hold the same states: -29524 and 29524 are values of both. | `run:0` |
+| `ty0751` | 751 | row | “\| `trit` \| `i8` \| 1 byte” | On the binary rung a `trit` is 1 byte with alignment 1. | `run:0` |
+| `ty0751b` | 751 | row | “\| `trit` \| `i8` \|” | A `trit` parameter is an `i8` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i8\b` |
+| `ty0752` | 752 | row | “\| `tryte` \| `i16` \| 2 byte” | On the binary rung a `tryte` is 2 bytes with alignment 2. | `run:0` |
+| `ty0752b` | 752 | row | “\| `tryte` \| `i16` \|” | A `tryte` parameter is an `i16` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i16\b` |
+| `ty0753` | 753 | row | “\| `nit` \| `i8` \| 1 byte” | On the binary rung a `nit` is 1 byte with alignment 1. | `run:0` |
+| `ty0753b` | 753 | row | “\| `nit` \| `i8` \|” | A `nit` parameter is an `i8` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i8\b` |
+| `ty0754` | 754 | row | “\| `nyte` \| `i16` \| 2 byte” | On the binary rung a `nyte` is 2 bytes with alignment 2. | `run:0` |
+| `ty0754b` | 754 | row | “\| `nyte` \| `i16` \|” | A `nyte` parameter is an `i16` in the IR. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\(i16\b` |
+| `ty0768` | 768 | rule | “ternary arithmetic is checked as **ternary** in the frontend” | Ternary arithmetic is checked as ternary in the frontend; nothing above the backend assumes `i8`. | untestable [internal] where a check runs inside the compiler is not observable; its results are (below) |
+| `ty0777` | 777 | rule | “**The binary rung stores the VALUE**” | The binary rung stores a tryte's balanced value: the tryte 60 is the constant `i16 60` in the IR. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11v"?\((?=(?:(?!\n\}).)*?\bi16 60\b)` |
+| `ty0779` | 779 | rule | “ERR sentinel is the carrier's most-negative (−128 / −32768)” | A tryte's ERR is the carrier's most negative value: a function passing ERR as a tryte emits `-32768`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11e"?\((?=(?:(?!\n\}).)*?-32768\b)` |
+| `ty0780` | 780 | rule | “The prototype's packed-trit LUT emulation is deliberately NOT carried” | The packed-trit lookup-table emulation is not carried. | untestable [internal] an emulation's absence; ty0777 tests the stored value |
+| `ty0786` | 786 | rule | “`+ - *` at all four types” | `+ - *` compute at trit, tryte, nit and nyte. | `run:0` |
+| `ty0786b` | 786 | rule | “**`/ %` at `tryte`/`nyte` only**” | `/` and `%` compute at tryte and nyte: 100 / 7 is 14 and 100 % 7 is 2 (truncating). | `run:0` |
+| `ty0787` | 787 | rule | “refused by name (TYPE-051)” | `/` at trit is refused, TYPE-051. | `refuse:NITPICK-TYPE-051` |
+| `ty0787b` | 787 | rule | “refused by name (TYPE-051)” | `%` at nit is refused, TYPE-051. | `refuse:NITPICK-TYPE-051` |
+| `ty0788` | 788 | rule | “**Overflow past the BALANCED bound → ERR**” | Overflow past the balanced bound is ERR at every width: nit 4 + 1, tryte 29524 * 2 and nyte -29524 - 1 are ERR. | `run:0` |
+| `ty0789` | 789 | rule | “`trit` is ERR exactly as `MAX + 1` is at `tbb`” | 1 + 1 at trit is ERR (the prototype's clamp to 1 is overruled). | `run:0` |
+| `ty0792` | 792 | rule | “Division by zero yields ERR (D-007's twisted row)” | Ternary division and modulo by zero yield ERR, with no trap. | `run:0` |
+| `ty0792b` | 792 | rule | “comparisons at all four” | Comparisons work at all four ternary types in balanced (numeric) order. | `run:0` |
+| `ty0794` | 794 | rule | “comparison traps; `is_err` looks” | An ERR operand at a bare ternary comparison traps TbbErr (the family's one trap, line 723). | `trap:TbbErr` |
+| `ty0794b` | 794 | rule | “the `pick` `ERR:` arm handles” | A ternary pick's `ERR:` arm takes ERR. | `run:0` |
+| `ty0795` | 795 | rule | “ternary `pick` selector demands that arm exactly as a `tbb`'s does” | A ternary pick selector without an `ERR:` arm is refused. | `refuse` |
+| `ty0796` | 796 | rule | “on `trit`/`nit`, `&` is three-valued” | On trit, `&` is min and `\|` is max (Kleene), and NOT is `0 - x`. | `run:0` |
+| `ty0796b` | 796 | rule | “on `trit`/`nit`, `&` is three-valued” | On nit, `&` is min and `\|` is max. | `run:0` |
+| `ty0797` | 797 | rule | “ERR sticky” | The Kleene operators keep ERR: `1 & ERR` and `-1 \| ERR` at trit are ERR. | `run:0` |
+| `ty0799` | 799 | rule | “the operators stay refused” | `&` on tryte is refused. | `refuse` |
+| `ty0799b` | 799 | rule | “multi-digit types the operators stay refused” | `\|` on nyte is refused. | `refuse` |
+| `ty0801` | 801 | rule | “**Digit access**: `t.trit(i)` / `n.nit(i)`” | `t.trit(i)` reads a tryte's balanced digits from the least significant (60 = 1T1T0: 0, -1, 1), and `n.nit(i)` a nyte's (100 = 121 nonary: 1, 2, 1). | `run:0` |
+| `ty0802` | 802 | rule | “`tryte` has trits, not nits” | A tryte has trits, not nits: `t.nit(0)` on a tryte is refused. | `refuse` |
+| `ty0803` | 803 | rule | “array's (OUT_OF_BOUNDS)” | A digit index past the digit count traps OutOfBounds: `t.trit(10)` on a tryte. | `trap:OutOfBounds` |
+| `ty0803b` | 803 | rule | “an ERR receiver yields an ERR digit” | An ERR receiver yields an ERR digit. | `run:0` |
+| `ty0803c` | 803 | rule | “`.len` is” | `.len` is the digit count as an int64: 10 for a tryte, 5 for a nyte, 1 for a trit or a nit. | `run:0` |
+| `ty0805` | 805 | rule | “**Literals are contextual, any base**” | A ternary-typed slot takes an unsuffixed integer literal and a balanced-digit literal: `tryte:t = 42;` and `tryte:t = 1T1T0t;` are one value spelled two ways. | `run:0` |
+| `ty0808` | 808 | rule | “range-checked EXACTLY against the balanced bound” | A literal past the balanced bound is refused: `tryte:t = 29525;`. | `refuse` |
+| `ty0808b` | 808 | rule | “range-checked EXACTLY against the balanced bound” | A literal past the balanced bound is refused: `trit:t = 2;`. | `refuse` |
+| `ty0808c` | 808 | rule | “range-checked EXACTLY against the balanced bound” | A literal at the bound is accepted exactly: `tryte:t = 29524;` and `nit:n = -4` (as `0 - 4`) are values. | `run:0` |
+| `ty0808d` | 808 | rule | “`ERR` takes the slot's” | `ERR` takes the slot's type: `nit:e = ERR;` is the nit ERR. | `run:0` |
+| `ty0810` | 810 | rule | “one family within itself — value-preserving, the sentinel maps” | Within the ternary family a cast preserves the value and maps the sentinel: trit -1 => tryte is -1, and trit ERR => tryte is ERR. | `run:0` |
+| `ty0811` | 811 | rule | “a smaller-bound target trap-or-saturates (`=>` / `=>!`)” | A cast to a smaller-bound ternary target traps under `=>` when the value does not fit (tryte 60 => trit). | `run:42` |
+| `ty0811b` | 811 | rule | “a smaller-bound target trap-or-saturates (`=>` / `=>!`)” | A cast to a smaller-bound ternary target saturates to ERR under `=>!` (tryte 60 =>! trit), and a value that fits converts (tryte 1 =>! trit is 1). | `run:0` |
+| `ty0812` | 812 | rule | “`tryte ⇄ nyte` (the same 59049 values) is a pure relabel” | tryte => nyte => tryte keeps every value: 29524 and -29524 survive. | `run:0` |
+| `ty0813` | 813 | rule | “ERR traps under BOTH spellings” | Leaving the ternary family, ERR traps TbbErr under `=>`. | `trap:TbbErr` |
+| `ty0813b` | 813 | rule | “ERR traps under BOTH spellings” | Leaving the ternary family, ERR traps TbbErr under `=>!`. | `trap:TbbErr` |
+| `ty0814` | 814 | rule | “range-classified” | Leaving, the value is range-classified: `tryte => int8` is a compile error (29524 does not fit). | `refuse` |
+| `ty0814b` | 814 | rule | “Entering: out-of-range traps under `=>`” | Entering the ternary family with `=>`, an out-of-range value traps: int32 30000 => tryte. | `run:42` |
+| `ty0815` | 815 | rule | “under `=>!`.” | Entering the ternary family with `=>!`, an out-of-range value is ERR: int32 30000 =>! tryte. | `run:0` |
+| `ty0815b` | 815 | rule | “Another twisted family (`tbb`, `tfp`, `dim256`) is reached” | Another twisted family is reached through the plain integer: (tryte => int32) => tbb32 converts. | `run:0` |
+| `ty0816` | 816 | rule | “cross-family casts do not exist” | A direct cross-family cast is refused: tryte => tbb32. | `refuse` |
+| `ty0816b` | 816 | rule | “cross-family casts do not exist” | A direct cross-family cast is refused under the bang too: tbb32 =>! nyte. | `refuse` |
+| `ty0817` | 817 | rule | “**`ToString`** renders the VALUE” | ToString renders a ternary value as its number, and ERR as "ERR". | `run:0` |
+| `ty0825` | 825 | rule | “`PROT_READ` where an `oflags` belongs” | Each flag family is a distinct type: `PROT_READ` where an `oflags` belongs is refused. | `refuse` |
+| `ty0830` | 830 | rule | “Every family lowers to `i32`.” | Every flag family lowers to `i32`: a parameter of each of the four families is an `i32`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11o"?\(i32\b)(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11p"?\(i32\b)(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11m"?\(i32\b)(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\(i32\b)` |
+| `ty0832` | 832 | rule | “`\|` combines, `&` tests, `~` complements” | Within one family `\|` combines, `&` tests and `~` complements, each giving that family; `==`/`!=` compare. | `run:0` |
+| `ty0833` | 833 | rule | “There is no arithmetic” | There is no arithmetic on flags: `O_WRONLY + O_APPEND` is refused. | `refuse` |
+| `ty0834` | 834 | rule | “ordering, no `^` and no shifts” | There is no ordering on flags: `O_WRONLY < O_APPEND` is refused. | `refuse` |
+| `ty0834b` | 834 | rule | “ordering, no `^` and no shifts” | There is no `^` on flags. | `refuse` |
+| `ty0834c` | 834 | rule | “ordering, no `^` and no shifts” | There are no shifts on flags: `O_WRONLY << 1` is refused. | `refuse` |
+| `ty0835` | 835 | rule | “`oflags \| prot` refuses” | Two families never meet: `oflags \| prot` is refused, TYPE-058. | `refuse:NITPICK-TYPE-058` |
+| `ty0836` | 836 | rule | “as does `O_RDONLY \| 1i32`” | An integer is not a member: `O_RDONLY \| 1i32` is refused, TYPE-058. | `refuse:NITPICK-TYPE-058` |
+| `ty0838` | 838 | rule | “`flags => int32` is the one outbound conversion” | `flags => int32` converts losslessly: the word is the members' sum. | `run:0` |
+| `ty0838b` | 838 | rule | “is the one outbound conversion” | `=> int32` is the only outbound conversion: `flags => int64` is refused. | `refuse` |
+| `ty0840` | 840 | rule | “`int32 =>! flags` is the read-back direction” | `int32 =>! flags` reads a word back into the family. | `run:0` |
+| `ty0841` | 841 | rule | “Nothing else enters or leaves” | Nothing else enters: `int64 =>! oflags` is refused. | `refuse` |
+| `ty0841b` | 841 | rule | “so it takes the bang” | The read-back takes the bang: `int32 => flags` is refused. | `refuse` |
+| `ty0842` | 842 | rule | “family never converts to another” | A family never converts to another: `oflags =>! prot` is refused. | `refuse` |
+| `ty0844` | 844 | rule | “**Members.** The named bits are **prelude constants**, `pub fixed” | The members are `fixed` prelude constants: assigning to `O_APPEND` is refused. | `refuse` |
+| `ty0846` | 846 | rule | “`src/prelude/prelude.npk`'s marked region from the table below by” | The members are generated into the prelude by `gen_tables.py`, with the family indices and the builtin-type table. | untestable [tree] how the compiler's tree generates its prelude |
+| `ty0849` | 849 | rule | “authority; a member added here exists everywhere the prelude is bound” | A member exists in every module, since the prelude is bound in every module. | `run:0` |
+| `ty0850` | 850 | rule | “A derived set is an ordinary module binding” | A derived set is an ordinary module binding that folds: `fixed oflags:CREATE_RW = (O_RDWR \| O_CREAT) \| O_CLOEXEC;` is the word 524354. | `run:0` |
+| `ty0853` | 853 | rule | “The four that are bitmasks by nature” | There are four flag families: oflags, prot, mflags and fmode. | untestable [unobservable] that no fifth family exists; each of the four is tested (ty0830) |
+| `ty0854` | 854 | rule | “`whence` is the prelude enum `Whence`” | `whence` is the prelude enum `Whence`: `Whence.SEEK_END` is a value a pick can match. | `run:0` |
+| `ty0855` | 855 | rule | “OR-ed — a flags type would admit `SEEK_SET \| SEEK_END`” | A `Whence` is exactly one value: `Whence.SEEK_SET \| Whence.SEEK_END` is refused. | `refuse` |
+| `ty0855b` | 855 | rule | “`fcmd`/`advice`” | `fcmd` and `advice` are enumerations, not flag types. | untestable [vague] the text names no member of either, so no program can spell one |
+| `ty0857` | 857 | rule | “The family INDEX is the type's `a` operand” | The family index is the type's `a` operand, in the table's order of first appearance. | untestable [internal] a type's operand window |
+| `ty0864` | 864 | row | “\| `oflags` \| `O_RDONLY` \| 0 \|” | `O_RDONLY` is a `oflags` member whose word is 0. | `run:0` |
+| `ty0864b` | 864 | row | “so `f & O_RDONLY == O_RDONLY` always” | `O_RDONLY` is the empty set: `f & O_RDONLY == O_RDONLY` for any f. | `run:0` |
+| `ty0865` | 865 | row | “\| `oflags` \| `O_WRONLY` \| 1 \|” | `O_WRONLY` is a `oflags` member whose word is 1. | `run:0` |
+| `ty0866` | 866 | row | “\| `oflags` \| `O_RDWR` \| 2 \|” | `O_RDWR` is a `oflags` member whose word is 2. | `run:0` |
+| `ty0867` | 867 | row | “\| `oflags` \| `O_CREAT` \| 64 \|” | `O_CREAT` is a `oflags` member whose word is 64. | `run:0` |
+| `ty0868` | 868 | row | “\| `oflags` \| `O_EXCL` \| 128 \|” | `O_EXCL` is a `oflags` member whose word is 128. | `run:0` |
+| `ty0869` | 869 | row | “\| `oflags` \| `O_NOCTTY` \| 256 \|” | `O_NOCTTY` is a `oflags` member whose word is 256. | `run:0` |
+| `ty0870` | 870 | row | “\| `oflags` \| `O_TRUNC` \| 512 \|” | `O_TRUNC` is a `oflags` member whose word is 512. | `run:0` |
+| `ty0871` | 871 | row | “\| `oflags` \| `O_APPEND` \| 1024 \|” | `O_APPEND` is a `oflags` member whose word is 1024. | `run:0` |
+| `ty0872` | 872 | row | “\| `oflags` \| `O_NONBLOCK` \| 2048 \|” | `O_NONBLOCK` is a `oflags` member whose word is 2048. | `run:0` |
+| `ty0873` | 873 | row | “\| `oflags` \| `O_DSYNC` \| 4096 \|” | `O_DSYNC` is a `oflags` member whose word is 4096. | `run:0` |
+| `ty0874` | 874 | row | “\| `oflags` \| `O_DIRECTORY` \| 65536 \|” | `O_DIRECTORY` is a `oflags` member whose word is 65536. | `run:0` |
+| `ty0875` | 875 | row | “\| `oflags` \| `O_NOFOLLOW` \| 131072 \|” | `O_NOFOLLOW` is a `oflags` member whose word is 131072. | `run:0` |
+| `ty0876` | 876 | row | “\| `oflags` \| `O_CLOEXEC` \| 524288 \|” | `O_CLOEXEC` is a `oflags` member whose word is 524288. | `run:0` |
+| `ty0877` | 877 | row | “\| `oflags` \| `O_SYNC` \| 1052672 \|” | `O_SYNC` is a `oflags` member whose word is 1052672. | `run:0` |
+| `ty0878` | 878 | row | “\| `oflags` \| `O_PATH` \| 2097152 \|” | `O_PATH` is a `oflags` member whose word is 2097152. | `run:0` |
+| `ty0879` | 879 | row | “\| `prot` \| `PROT_NONE` \| 0 \|” | `PROT_NONE` is a `prot` member whose word is 0. | `run:0` |
+| `ty0880` | 880 | row | “\| `prot` \| `PROT_READ` \| 1 \|” | `PROT_READ` is a `prot` member whose word is 1. | `run:0` |
+| `ty0881` | 881 | row | “\| `prot` \| `PROT_WRITE` \| 2 \|” | `PROT_WRITE` is a `prot` member whose word is 2. | `run:0` |
+| `ty0882` | 882 | row | “\| `prot` \| `PROT_EXEC` \| 4 \|” | `PROT_EXEC` is a `prot` member whose word is 4. | `run:0` |
+| `ty0883` | 883 | row | “\| `mflags` \| `MAP_SHARED` \| 1 \|” | `MAP_SHARED` is a `mflags` member whose word is 1. | `run:0` |
+| `ty0884` | 884 | row | “\| `mflags` \| `MAP_PRIVATE` \| 2 \|” | `MAP_PRIVATE` is a `mflags` member whose word is 2. | `run:0` |
+| `ty0885` | 885 | row | “\| `mflags` \| `MAP_FIXED` \| 16 \|” | `MAP_FIXED` is a `mflags` member whose word is 16. | `run:0` |
+| `ty0886` | 886 | row | “\| `mflags` \| `MAP_ANONYMOUS` \| 32 \|” | `MAP_ANONYMOUS` is a `mflags` member whose word is 32. | `run:0` |
+| `ty0887` | 887 | row | “\| `mflags` \| `MAP_NORESERVE` \| 16384 \|” | `MAP_NORESERVE` is a `mflags` member whose word is 16384. | `run:0` |
+| `ty0888` | 888 | row | “\| `mflags` \| `MAP_POPULATE` \| 32768 \|” | `MAP_POPULATE` is a `mflags` member whose word is 32768. | `run:0` |
+| `ty0889` | 889 | row | “\| `mflags` \| `MAP_FIXED_NOREPLACE` \| 1048576 \|” | `MAP_FIXED_NOREPLACE` is a `mflags` member whose word is 1048576. | `run:0` |
+| `ty0890` | 890 | row | “\| `fmode` \| `S_NONE` \| 0 \|” | `S_NONE` is a `fmode` member whose word is 0. | `run:0` |
+| `ty0891` | 891 | row | “\| `fmode` \| `S_IXOTH` \| 1 \|” | `S_IXOTH` is a `fmode` member whose word is 1. | `run:0` |
+| `ty0892` | 892 | row | “\| `fmode` \| `S_IWOTH` \| 2 \|” | `S_IWOTH` is a `fmode` member whose word is 2. | `run:0` |
+| `ty0893` | 893 | row | “\| `fmode` \| `S_IROTH` \| 4 \|” | `S_IROTH` is a `fmode` member whose word is 4. | `run:0` |
+| `ty0894` | 894 | row | “\| `fmode` \| `S_IRWXO` \| 7 \|” | `S_IRWXO` is a `fmode` member whose word is 7. | `run:0` |
+| `ty0894b` | 894 | row | “\| `fmode` \| `S_IRWXO` \| 7 \| others: all three \|” | S_IRWXO is S_IROTH \| S_IWOTH \| S_IXOTH; S_IRWXU likewise for the owner. | `run:0` |
+| `ty0895` | 895 | row | “\| `fmode` \| `S_IXGRP` \| 8 \|” | `S_IXGRP` is a `fmode` member whose word is 8. | `run:0` |
+| `ty0896` | 896 | row | “\| `fmode` \| `S_IWGRP` \| 16 \|” | `S_IWGRP` is a `fmode` member whose word is 16. | `run:0` |
+| `ty0897` | 897 | row | “\| `fmode` \| `S_IRGRP` \| 32 \|” | `S_IRGRP` is a `fmode` member whose word is 32. | `run:0` |
+| `ty0898` | 898 | row | “\| `fmode` \| `S_IRWXG` \| 56 \|” | `S_IRWXG` is a `fmode` member whose word is 56. | `run:0` |
+| `ty0899` | 899 | row | “\| `fmode` \| `S_IXUSR` \| 64 \|” | `S_IXUSR` is a `fmode` member whose word is 64. | `run:0` |
+| `ty0900` | 900 | row | “\| `fmode` \| `S_IWUSR` \| 128 \|” | `S_IWUSR` is a `fmode` member whose word is 128. | `run:0` |
+| `ty0901` | 901 | row | “\| `fmode` \| `S_IRUSR` \| 256 \|” | `S_IRUSR` is a `fmode` member whose word is 256. | `run:0` |
+| `ty0902` | 902 | row | “\| `fmode` \| `S_IRWXU` \| 448 \|” | `S_IRWXU` is a `fmode` member whose word is 448. | `run:0` |
+| `ty0903` | 903 | row | “\| `fmode` \| `S_ISVTX` \| 512 \|” | `S_ISVTX` is a `fmode` member whose word is 512. | `run:0` |
+| `ty0904` | 904 | row | “\| `fmode` \| `S_ISGID` \| 1024 \|” | `S_ISGID` is a `fmode` member whose word is 1024. | `run:0` |
+| `ty0905` | 905 | row | “\| `fmode` \| `S_ISUID` \| 2048 \|” | `S_ISUID` is a `fmode` member whose word is 2048. | `run:0` |
+| `ty0909` | 909 | rule | “The lowering is pinned in `tests/backend/ir_types.npk`” | The lowering, the rules and the executed semantics are pinned by three named tests of the compiler's tree. | untestable [tree] the compiler's own tests |
+| `ty0921` | 921 | example | “```nitpick” | The struct example compiles as written. | `compile` |
+| `ty0925` | 925 | example | “```llvm” | MyStruct is laid out with C padding: 24 bytes, alignment 8. | `run:0` |
+| `ty0926` | 926 | rule | “%MyStruct = type { i32, i64, i8 }” | MyStruct's LLVM type is `{ i32, i64, i8 }`. | `ir:(?m)^%"?[^"\n]*MyStruct"? = type \{ i32, i64, i8 \}` |
+| `ty0936` | 936 | example | “```llvm” | Reading `obj.y` is a `getelementptr` to field index 1 and an `i64` load. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11gy"?\((?=(?:(?!\n\}).)*?getelementptr[^\n]*, i32 0, i32 1\b)(?=(?:(?!\n\}).)*?load i64)` |
+| `ty0946` | 946 | rule | “A generic struct's qualifiers, and its module, are its” | A generic struct's qualifiers are its template's: a sealed `T` field of `Box<int64>` is refused a write from outside, TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0949` | 949 | example | “```nitpick” | The `bank` example compiles. | `compile` |
+| `ty0952` | 952 | rule | “read anywhere; written only inside `bank`” | A sealed field is read outside its module and written inside it: `a.bal` reads 5, and after `bank.deposit(@a, 3)` reads 8. | `run:0` |
+| `ty0953` | 953 | rule | “neither read nor written outside `bank`” | A hidden field is not read outside its module: TYPE-080. | `refuse:NITPICK-TYPE-080` |
+| `ty0954` | 954 | rule | “int64:note;           // anyone” | An unqualified field is written and read by anyone. | `run:0` |
+| `ty0960` | 960 | rule | “refuses every WRITE from outside, `NITPICK-TYPE-079`” | A sealed field's assignment from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0962` | 962 | rule | “including a part of a sealed value” | Writing a part of a sealed value (`h.inner.x`) from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0963` | 963 | rule | “a sealed field reached through a pointer” | Writing a sealed field through a pointer from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0964` | 964 | rule | “a compound assignment;” | A compound assignment to a sealed field from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0965` | 965 | rule | “a struct literal naming the field;” | A struct literal naming a sealed field outside its module is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0966` | 966 | rule | “a `move` or `pass` out of an OWNING sealed field” | A move out of an owning sealed field from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0968` | 968 | rule | “`@` and `$$m`;” | Taking `@` of a sealed field from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0968b` | 968 | rule | “`@` and `$$m`;” | Claiming a sealed field `$$m` from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0969` | 969 | rule | “a call through a `Self->` receiver;” | A call through a `Self->` receiver on a sealed field from outside is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0970` | 970 | rule | “any operation on a stateful value, which writes through its address” | Any operation on a stateful sealed value is a write. | untestable [vague] which values are stateful, and which operations, is not named here |
+| `ty0973` | 973 | rule | “A read, a copy out, a `$$i` claim (D-286 holds it read-only)” | A read, a copy out and a `$$i` claim of a sealed field pass outside its module. | `run:0` |
+| `ty0974` | 974 | rule | “THROUGH a sealed pointer field all pass” | A write through a sealed pointer field passes outside its module: it writes the pointee. | `run:0` |
+| `ty0976` | 976 | rule | “refuses every touch from outside, read or write” | Writing a hidden field from outside is TYPE-080. | `refuse:NITPICK-TYPE-080` |
+| `ty0977` | 977 | rule | “a struct literal naming” | A struct literal naming a hidden field outside its module is TYPE-080. | `refuse:NITPICK-TYPE-080` |
+| `ty0978` | 978 | rule | “it, a struct pattern binding it” | A struct pattern binding a hidden field outside its module is TYPE-080. | `refuse:NITPICK-TYPE-080` |
+| `ty0978b` | 978 | rule | “it, a struct pattern binding it” | A struct pattern binding an unqualified field outside its module is accepted (the twin of ty0978). | `run:0` |
+| `ty0980` | 980 | rule | “On a local, a parameter, a module binding or” | `sealed` on a local is TYPE-081. | `refuse:NITPICK-TYPE-081` |
+| `ty0980b` | 980 | rule | “On a local, a parameter, a module binding or” | `hidden` on a parameter is TYPE-081. | `refuse:NITPICK-TYPE-081` |
+| `ty0981` | 981 | rule | “a cast target, or both on one field, the qualifier is `NITPICK-TYPE-081`” | `sealed` and `hidden` both on one field is TYPE-081. | `refuse:NITPICK-TYPE-081` |
+| `ty0982` | 982 | rule | “`for` binding takes no qualifier at all” | A `for` binding takes no qualifier: `for (sealed int64:i in …)` is refused. | `refuse` |
+| `ty0984` | 984 | rule | “`ptr`, `len` and `cap` of a `string`, a `cstring`, a slice and a `buffer`” | A string's `len` is sealed in every module: `s.len = s.len` is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0984b` | 984 | rule | “`ptr`, `len` and `cap` of a `string`, a `cstring`, a slice and a `buffer`” | A slice's `len` is sealed in every module: writing it is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0987` | 987 | rule | “An `OwnedFd`'s `.value`, the descriptor its drop closes.” | An OwnedFd's `.value` is sealed in every module: writing it is TYPE-079. | `refuse:NITPICK-TYPE-079` |
+| `ty0993` | 993 | rule | “**An `RGuard`'s `.value` is read-only at every write form**” | An RGuard's `.value` is read-only: assigning it is TYPE-007. | `refuse:NITPICK-TYPE-007` |
+| `ty1002` | 1002 | example | “```” | The limited-field example compiles. | `compile` |
+| `ty1012` | 1012 | rule | “Struct-wide relational rules (`$.count <= $.cap`) are decided” | Struct-wide relational field rules are decided out. | untestable [vague] a decision against a feature; the subject rule (ty1017) is what refuses one |
+| `ty1017` | 1017 | rule | “**The subject is the field's type by identity**” | A field rule's subject is the field's type by identity: a `Rules<int32>` on an int64 field is TYPE-059. | `refuse:NITPICK-TYPE-059` |
+| `ty1019` | 1019 | rule | “limited field of a generic struct's `T` refuses” | A limited field of a generic struct's `T` is refused (TYPE-059). | `refuse:NITPICK-TYPE-059` |
+| `ty1020` | 1020 | rule | “**The rule must hold of the field's VACANT value** (`NITPICK-TYPE-077`)” | A field rule that its vacant value (0) breaks is TYPE-077. | `refuse:NITPICK-TYPE-077` |
+| `ty1024` | 1024 | rule | “the rule at the declaration with `$` bound to it — 0 for a plain integer,” | A bool field's vacant value is false: a rule `$ == true` on it is TYPE-077. | `refuse:NITPICK-TYPE-077` |
+| `ty1025` | 1025 | rule | “a rule it cannot decide there is refused too” | A field rule the folder cannot decide at the declaration is refused. | untestable [vague] what the folder cannot decide is not stated |
+| `ty1026` | 1026 | rule | “Only a plain integer, a `bool` or a `char`” | A field rule on another subject (flt64) is refused with the vacant-value reason, TYPE-077. | `refuse:NITPICK-TYPE-077` |
+| `ty1029` | 1029 | rule | “**The write points**, each checked after the write in EVERY build” | In-range writes at every write point pass: a literal of 5, an assignment of 50, a write of 60 through a pointer and `+= 40`. | `run:0` |
+| `ty1031` | 1031 | rule | “a struct literal's value for the field;” | A struct literal's out-of-rule value for a limited field traps LimitViolated. | `trap:LimitViolated` |
+| `ty1032` | 1032 | rule | “an assignment to the field through ANY path” | An assignment of an out-of-rule value to a limited field traps LimitViolated. | `trap:LimitViolated` |
+| `ty1033` | 1033 | rule | “pointer `p.f = v`, since the rule is the field's wherever its struct lives” | An out-of-rule write through a pointer to the struct traps LimitViolated. | `trap:LimitViolated` |
+| `ty1034` | 1034 | rule | “a compound assignment, `s.f += v`.” | A compound assignment that leaves the rule traps LimitViolated. | `trap:LimitViolated` |
+| `ty1035` | 1035 | rule | “**A limited field has no address** (`NITPICK-TYPE-063`” | `@s.f` of a limited field is TYPE-063. | `refuse:NITPICK-TYPE-063` |
+| `ty1036` | 1036 | rule | “`@s.f`, `$$i`/`$$m` of it” | `$$m` of a limited field is TYPE-063. | `refuse:NITPICK-TYPE-063` |
+| `ty1036b` | 1036 | rule | “`@s.f`, `$$i`/`$$m` of it” | `$$i` of a limited field is TYPE-063. | `refuse:NITPICK-TYPE-063` |
+| `ty1037` | 1037 | rule | “through a pointer to the struct as well” | `@p.f` of a limited field through a pointer to its struct is TYPE-063. | `refuse:NITPICK-TYPE-063` |
+| `ty1038` | 1038 | rule | “A write through `wild` storage is the author's” | A write through wild storage is unchecked. | untestable [unobservable] an opt-out promises nothing a program could check |
+| `ty1040` | 1040 | rule | “**Every read is a fact**” | Every read of a limited field is a hypothesis for the rows after it. | untestable [z3] a hypothesis matters only to the solver's verdicts |
+| `ty1045` | 1045 | rule | “The verified build elides a write point's check where its `limit` row” | The verified build elides a write point's check where its limit row discharges. | untestable [z3] needs `npkg verify` with the pinned z3 |
+| `ty1050` | 1050 | rule | “Passing `int32[4]` to a function copies all 16 bytes” | Passing a fixed array copies it. | `run:0` (M10 `a02_array_argument_copies`) |
+| `ty1050b` | 1050 | rule | “Fixed arrays are **Value Types**, not references” | Assigning a fixed array copies it. | `run:0` (M10 `a01_array_assignment_copies`) |
+| `ty1050c` | 1050 | rule | “explicitly pass a pointer to it (`int32[4]->`)” | A write through an `int32[4]->` reaches the caller's array. | `run:0` (M10 `a06_write_through_array_pointer`) |
+| `ty1050d` | 1050 | rule | “They do NOT implicitly decay to pointers like in C” | A fixed array does not decay to a pointer: passing `int32[4]` where `int32->` is expected is refused. | `refuse` |
+| `ty1052` | 1052 | example | “```nitpick” | `int32[4]:arr = [1i32, 2i32, 3i32, 4i32];` holds 1, 2, 3, 4. | `run:0` |
+| `ty1056` | 1056 | example | “```llvm” | A local `int32[4]` is an `alloca [4 x i32]`, and an index is checked `icmp ult i64 %idx, 4` before a `getelementptr [4 x i32]`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11ix"?\((?=(?:(?!\n\}).)*?alloca \[4 x i32\])(?=(?:(?!\n\}).)*?icmp ult i64 %[^,\n]+, 4\b)(?=(?:(?!\n\}).)*?getelementptr[^\n]*\[4 x i32\])` |
+| `ty1058` | 1058 | rule | “; Element access (bounds-checked):” | An index past the end traps OutOfBounds. | `run:94` (M10 `a03_index_past_end`) |
+| `ty1061` | 1061 | rule | “%in_bounds = icmp ult i64 %idx, 4” | A negative index traps OutOfBounds (the unsigned compare). | `run:94` (M10 `a04_index_negative`) |
+| `ty1068` | 1068 | rule | “**A zero-length fixed array `T[0]` is a supported type**” | `T[0]` is accepted and zero bytes wide: a struct holding only an `int64[0]` is 0 bytes. | `run:0` |
+| `ty1070` | 1070 | rule | “OWNING when `T` owns” | A struct with a `hidden string[0]` field is move-only: copying it is TYPE-046. | `refuse:NITPICK-TYPE-046` |
+| `ty1072` | 1072 | rule | “while `int64[0]` copies freely” | A struct with an `int64[0]` field copies freely. | `run:0` |
+| `ty1075` | 1075 | rule | “`arr.len` is the count the type carries” | `arr.len` is the array's count. | `run:0` (M10 `a05_array_len`) |
+| `ty1077` | 1077 | rule | “a local `uint8[20]` asking its length” | A local `uint8[20]` asking its length compiles, and the length is 20. | `run:0` |
+| `ty1084` | 1084 | example | “```llvm” | A slice is `{ ptr, i64 }`: an `int32[]` parameter has that type. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11sl"?\(\{ ?ptr, i64 ?\}\b` |
+| `ty1088` | 1088 | rule | “**Indexing is bounds-checked against the runtime `len`**” | A slice index past its own len traps OutOfBounds. | `run:94` (M10 `a09_view_index_past_its_len`) |
+| `ty1088b` | 1088 | rule | “**Indexing is bounds-checked against the runtime `len`**” | A byte view's index past its len traps OutOfBounds. | `run:94` (M10 `t07_bytes_view_bounds`) |
+| `ty1092` | 1092 | rule | “**`.len`** is available on every slice.” | `.len` is available on every slice: a range of an array and a range of a slice. | `run:0` |
+| `ty1093` | 1093 | rule | “**Every built-in length lies in `[0, 2^47]`, and the verifier knows it**” | Every built-in length lies in [0, 2^47], and the verifier pushes the fact at every read. | untestable [z3] the fact matters to the solver's verdicts; the guard below is tested |
+| `ty1099` | 1099 | rule | “2^47`, one unsigned compare, trapping `OutOfBounds` outside it” | `#wild_slice` guards the caller's count: a negative count traps OutOfBounds. | `trap:OutOfBounds` |
+| `ty1102` | 1102 | rule | “`s.len + 1` cannot overflow an `int64` and its row discharges” | `s.len + 1`'s overflow row discharges. | untestable [z3] a discharge is z3's verdict |
+| `ty1103` | 1103 | rule | “The prelude's `List` carries the same bound as a” | A program that pushes to a List reaches the prelude's `limit<ListLen>` writes, so its failsafe must name LimitViolated: one that does not is refused. | `refuse` |
+| `ty1103b` | 1103 | rule | “The prelude's `List` carries the same bound as a” | A program that pushes to a List, with a failsafe naming LimitViolated, compiles and runs. | `run:0` |
+| `ty1107` | 1107 | rule | “**A slice is a second-class borrow** (D-004)” | A slice never passes up the call stack: a function returning a slice is refused. | `refuse` |
+| `ty1111` | 1111 | rule | “Constructed by ranging a fixed array or another slice” | Ranging a fixed array makes a slice of it. | `run:0` (M10 `a08_range_view`) |
+| `ty1112` | 1112 | rule | “`wild` context only, from a raw pointer and a length with” | `#wild_slice` is for wild context only: outside one it is refused. | `refuse` |
+| `ty1117` | 1117 | rule | “`T[]` **never owns**” | A slice never owns its elements. | untestable [unobservable] a view's not-owning shows only as the absence of a free |
+| `ty1119` | 1119 | rule | “A slice does not cross an `extern` boundary as a view” | A byte-slice parameter of an extern block is a sized payload the Bridge copies. | untestable [tool] needs a driver behind an extern block |
+| `ty1126` | 1126 | example | “```nitpick” | `Color`'s variants are the i32 tags 0, 1, 2. | `run:0` |
+| `ty1130` | 1130 | example | “```llvm” | Enum values are plain i32 constants: a `Color` parameter is an `i32`. | `ir:(?m)^define [^@\n]*@"?(?:[\w$]+\.)*m11c"?\(i32\b` |
+| `ty1136` | 1136 | rule | “%Shape = type { i32, [2 x i64] }” | Shape is a tag and a two-i64 payload slot: 24 bytes, alignment 8. | `run:0` |
+| `ty1136b` | 1136 | rule | “%Shape = type { i32, [2 x i64] }” | Shape's LLVM type is `{ i32, [2 x i64] }`. | `ir:(?m)^%"?[^"\n]*Shape"? = type \{ i32, \[2 x i64\] \}` |
+| `ty1137` | 1137 | rule | “payload's alignment in bits, N covering the widest size” | The payload slot is [N x iK], K the widest payload's alignment in bits: for payloads int8 and (int32, int32) it is `[2 x i32]`. | `ir:(?m)^%"?[^"\n]*Ev"? = type \{ i32, \[2 x i32\] \}` |
+| `ty1140` | 1140 | rule | “`enum =>! intN` reads the TAG (slot 0) at every shape” | `enum =>! intN` reads the tag. | `run:0` (M10 `c17_enum_to_int_reads_tag`) |
+| `ty1140b` | 1140 | rule | “`enum =>! intN` reads the TAG (slot 0) at every shape” | `enum =>! intN` reads the tag of a payload-carrying enum: Shape.Rect is 1, Shape.Circle 0. | `run:0` |
+| `ty1142` | 1142 | rule | “`intN =>! enum`, which manufactures a tag” | A tag-only enum takes `intN =>! enum`: 2 =>! Color is Blue. | `run:0` |
+| `ty1142b` | 1142 | rule | “hence the bang; `=>`” | `intN => enum` without the bang is TYPE-009. | `refuse:NITPICK-TYPE-009` |
+| `ty1143` | 1143 | rule | “a PAYLOAD-CARRYING enum like this `Shape` admits neither” | A payload-carrying enum admits no `intN =>! enum`: TYPE-032. | `refuse:NITPICK-TYPE-032` |
+| `ty1144` | 1144 | rule | “spelling (TYPE-032)” | A payload-carrying enum admits no `intN => enum` either: TYPE-032. | `refuse:NITPICK-TYPE-032` |
+| `ty1150` | 1150 | rule | “`enum:Opt<T> = { Some(T); None; };` is a template” | A generic enum is a template: `Opt<int32>` and `Opt<string>` are instances, constructed and matched. | `run:0` |
+| `ty1152` | 1152 | rule | “header (`%"…Opt<int32>" = type { i32, [1 x i32] }`)” | `Opt<int32>` has its own header `{ i32, [1 x i32] }`. | `ir:(?m)^%"[^"\n]*Opt<int32>" = type \{ i32, \[1 x i32\] \}` |
+| `ty1153` | 1153 | rule | “`Opt<int32>` is a tag” | `Opt<int32>` is a tag and four bytes: 8 bytes, alignment 4. | `run:0` |
+| `ty1153b` | 1153 | rule | “`Opt<string>` owns and drops its payload” | `Opt<string>` owns its payload: copying one is refused. | `refuse` |
+| `ty1153c` | 1153 | rule | “`Opt<int32>` is a tag” | `Opt<int32>` copies freely (the twin of ty1153b). | `run:0` |
+| `ty1159` | 1159 | rule | “**The instance of a constructor or a bare variant reference**” | A constructor's instance is the expected type: `Opt.None` and `Opt.Some(5i64)` passed to an `Opt<int64>` parameter compile and match. | `run:0` |
+| `ty1162` | 1162 | rule | “else INFERRED from the payload arguments” | With no expected type, the instance is inferred from the payload: `Opt.Some(5i64)` is an `Opt<int64>`. | `run:0` |
+| `ty1164` | 1164 | rule | “type from context, an unsuffixed literal say, teaches nothing” | An unsuffixed literal teaches nothing: `Opt.Some(5)` with no expected type is TYPE-022. | `refuse:NITPICK-TYPE-022` |
+| `ty1165` | 1165 | rule | “else refused: `NITPICK-TYPE-022` naming the parameter” | A payload-less variant with no expected type is TYPE-022. | `refuse:NITPICK-TYPE-022` |
+| `ty1167` | 1167 | rule | “`Opt<int32>:o = Opt.None;`” | A payload-less variant takes its instance from the annotation: `Opt<int32>:o = Opt.None;`. | `run:0` |
+| `ty1169` | 1169 | rule | “`Opt<Point>` under `enum:Opt<T: Pr>` is” | An inferred instance is judged as an annotated one: `Opt.Some(Point{…})` under `enum:Opt<T: Pr>` where Point lacks Pr is TYPE-017. | `refuse:NITPICK-TYPE-017` |
+| `ty1170` | 1170 | rule | “In pattern position a bare variant is read” | In pattern position a bare variant is read against the selector: `(Opt.None)` matches an `Opt<string>` with no annotation. | `run:0` |
+| `ty1171` | 1171 | rule | “A non-generic enum binds an” | A non-generic enum binds an empty window, unchanged. | untestable [internal] a type's operand window |
 
 ## VERIFICATION (`meta/specs/VERIFICATION_REFERENCE.md`)
 

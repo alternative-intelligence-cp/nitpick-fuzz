@@ -1,0 +1,53 @@
+// M11 ty0814b -- meta/specs/TYPE_REFERENCE.md:814 (rule)
+// quote: Entering: out-of-range traps under `=>`
+// claim: Entering the ternary family with `=>`, an out-of-range value traps: int32 30000 => tryte.
+// expect: run:42
+// wrong: no trap: ERR (11) or a number (10)
+mod:ty0814b;
+
+func:v32 = int32(int32:x) never fails { pass x; };
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 42i32; },
+        (HeapOom) { exit 42i32; },
+        (IntOverflow) { exit 42i32; },
+        (OutOfBounds) { exit 42i32; },
+        (Unreachable) { exit 42i32; },
+        (WildLeak) { exit 42i32; },
+        (DivByZero) { exit 42i32; },
+        (DivOverflow) { exit 42i32; },
+        (StaleHandle) { exit 42i32; },
+        (DeadlineExceeded) { exit 42i32; },
+        (ChannelClosed) { exit 42i32; },
+        (DriverLeak) { exit 42i32; },
+        (IoEof) { exit 42i32; },
+        (WouldBlock) { exit 42i32; },
+        (StackExhausted) { exit 42i32; },
+        (MachineFault) { exit 42i32; },
+        (LimitViolated) { exit 42i32; },
+        (DecreasesViolated) { exit 42i32; },
+        (TbbErr) { exit 42i32; },
+        (ShiftRange) { exit 42i32; },
+        (CastRange) { exit 42i32; },
+        (BadStep) { exit 42i32; },
+        (BorrowOverlap) { exit 42i32; },
+        (RequiresViolated) { exit 42i32; },
+        (EnsuresViolated) { exit 42i32; },
+        (InvariantViolated) { exit 42i32; },
+        (Interrupted) { exit 42i32; },
+        (NotFound) { exit 42i32; },
+        (Exists) { exit 42i32; },
+        (CrossDevice) { exit 42i32; },
+        (BadPath) { exit 42i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    int32:v = raw v32(30000i32);
+    tryte:t = v => tryte;
+    if (is_err(t)) { exit 11i32; }
+    exit 10i32;
+};

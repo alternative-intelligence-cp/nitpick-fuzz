@@ -1,0 +1,14 @@
+// M11 ty0715 -- meta/specs/TYPE_REFERENCE.md:715 (rule)
+// quote: the `failsafe` signature
+// claim: tbb is used for the failsafe signature: a failsafe whose parameter is a tbb32 is accepted.
+// expect: run:0
+// wrong: refused: the failsafe signature takes something else
+mod:ty0715;
+
+func:failsafe = int32(tbb32:code) {
+    exit 9i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
