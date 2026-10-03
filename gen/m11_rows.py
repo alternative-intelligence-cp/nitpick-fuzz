@@ -29,7 +29,8 @@ FINDINGS = {"F-027": "F-027-lower-priority-compiler-rows",
             "F-040": "F-040-ast-reference-sentences-the-compiler-contradicts",
             "F-042": "F-042-traits-lower-priority-compiler-rows",
             "F-043": "F-043-traits-reference-sentences-the-compiler-contradicts",
-            "F-044": "F-044-type-reference-661-2122-sentences-the-compiler-contradicts"}
+            "F-044": "F-044-type-reference-661-2122-sentences-the-compiler-contradicts",
+            "F-046": "F-046-type-reference-661-2122-lower-priority-compiler-rows"}
 NEWEST = ("93bcb66", "1b4f0c6")   # the compiler's newest main, newest first (S37, S49)
 
 

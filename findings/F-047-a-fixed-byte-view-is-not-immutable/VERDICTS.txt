@@ -1,0 +1,16 @@
+# F-047-a-fixed-byte-view-is-not-immutable — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-03 00:44 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_s3_plain_param_written                   9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_s4_fixed_scalar_written                  9126350  run 1  npkc=1  codes=NITPICK-ASSIGN-002  O0=-  O2=-
+s1_fixed_view_written                        9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+s2_fixed_param_written                       9126350  run 1  npkc=0  codes=-  O0=10  O2=10
+ctl_s3_plain_param_written                   9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_s4_fixed_scalar_written                  9126350  run 2  npkc=1  codes=NITPICK-ASSIGN-002  O0=-  O2=-
+s1_fixed_view_written                        9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+s2_fixed_param_written                       9126350  run 2  npkc=0  codes=-  O0=10  O2=10
+ctl_s3_plain_param_written                   c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_s4_fixed_scalar_written                  c3bdae2  run 1  npkc=1  codes=NITPICK-ASSIGN-002  O0=-  O2=-
+s1_fixed_view_written                        c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10
+s2_fixed_param_written                       c3bdae2  run 1  npkc=0  codes=-  O0=10  O2=10

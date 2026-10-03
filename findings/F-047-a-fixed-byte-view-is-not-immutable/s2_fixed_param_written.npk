@@ -1,16 +1,12 @@
-// M11 ty1989 -- meta/specs/TYPE_REFERENCE.md:1989 (rule)
-// quote: This read `p => T`
-// claim: Giving an `any->` a type with `=>` is refused (D-095).
-// expect: refuse
-// wrong: accepted
-mod:ty1989;
+// F-047 s2_fixed_param_written -- a callee writes through its `fixed uint8[]` parameter; exit 10 if the caller's bytes change
+mod:s2_fixed_param_written;
 
-func:v32 = int32(int32:x) never fails { pass x; };
+func:m11w = NIL(fixed uint8[]:v) never fails { v[0i64] = 9u8; pass NIL; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32:x = raw v32(5i32);
-    any->:p = (@x) =>! any->;
-    int32->:q = p => int32->;
+    uint8[4]:arr = [1u8, 2u8, 3u8, 4u8];
+    drop m11w(arr[0i64...4i64]);
+    if (arr[0i64] == 9u8) { exit 10i32; }
     exit 0i32;
 };
 

@@ -8,7 +8,7 @@ mod:ty1607;
 func:main = int32(cstring[]:_~argv) {
     dim256<Meters>:m = 10.0dim256<Meters>;
     dim256<Seconds>:s = 4.0dim256<Seconds>;
-    dim256<Meters/Seconds>:v = m / s;
+    dim256<MetersPerSecond>:v = m / s;
     if ((v => tfp256) != 2.5tfp256) { exit 10i32; }
     exit 0i32;
 };

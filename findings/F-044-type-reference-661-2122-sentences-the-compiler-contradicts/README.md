@@ -8,6 +8,7 @@ part.
 |---|---|---|---|---|---|---|
 | A | 661–1176 (§6–9) | 268 | 249 | 240 | 9 | 8 rows |
 | B | 1177–1592 (§10–18) | 129 | 123 | 114 | 9 | 9 rows |
+| C | 1593–2122 (§19–28) | 178 | 172 | 149 | 23 | 16 rows |
 
 Part A's nine disagreements are:
 - eight documentation rows (below);
@@ -15,7 +16,7 @@ Part A's nine disagreements are:
   cannot match there. Compiled by hand, the slice parameter is `{ ptr, i64 }`, as claimed.
 
 The rows, with each claim's program and its verdicts at HUNT2, the baseline `c3bdae2` and
-`93bcb66`, are in [`ROWS.md`](ROWS.md). All seventeen give the same result at all three.
+`93bcb66`, are in [`ROWS.md`](ROWS.md). All thirty-three give the same result at all three.
 
 ## Part A (§6–9)
 
@@ -107,6 +108,95 @@ All nine of part B's disagreements are documentation rows:
 - **The elided-Result IR** (:1535). `define i32 @add_elided` is not emitted: a `never fails`
   function returns `{ i32, i32 }` like any other (`ty1320` and `ty1526` agree).
 
+## Part C (§19–28)
+
+Part C's 23 disagreements are:
+- sixteen documentation rows (below);
+- a silent wrong answer, [F-047](../F-047-a-fixed-byte-view-is-not-immutable/): a
+  `fixed uint8[]` view is not immutable;
+- invalid IR, [F-048](../F-048-a-nil-field-emits-invalid-ir/): a `NIL` struct field;
+- three lower-priority compiler rows,
+  [F-046](../F-046-type-reference-661-2122-lower-priority-compiler-rows/);
+- F-026's shape (`int32<Meters>` accepted, refused at `93bcb66`);
+- DEF-131 (`<=>`, which compiles at `93bcb66`).
+
+The documentation rows:
+- **frac `ToString`** (:1657): "whole num/denom" — "-2 5/8". Measured by hand at three
+  compilers:
+  - −(1 3/8) is {−2, 5, 8} and renders "-2 5/8";
+  - −(2 5/8) is {−3, 3, 8} and renders "-3 3/8".
+  - So the compiler renders the stated format literally. The example does not say which
+    value it shows, and a reader of mixed numbers takes "-2 5/8" for −2.625, not −1.375.
+  - *Reasoned:* whether that rendering is a wrong answer is the author's call. Under the
+    reference's letter it is not.
+- **complex `ToString`** (:1700) is "3.0+4.0i", not "3+4i": each element renders as flt64
+  does ("3.0").
+- **`pass(NIL)` "desugars to `return Result{ value: NIL, err: 0i32 }`"** (:1942): an `err`
+  is an `Error` (D-179, TYPE-007).
+- **"`drop(myFunc());`"** (:1943) is TYPE-042: `drop` is licensed by `never fails` only
+  (D-163).
+- **`void`.**
+  - "Only inside `extern { }` blocks" (:1975): a driver method returns NIL, int32 or int64
+    (EXTERN-001, D-190).
+  - Elsewhere (:1976), the diagnostic is not the one quoted: there is no type named `void`
+    (TYPE-001).
+- **§28's operator tables**, measured by hand:
+  - `+ - *` on integers lower through `llvm.s{add,sub,mul}.with.overflow` (as TYPE:56 says),
+    not `add`/`sub`/`mul`;
+  - there is no `**` (PARSE-002);
+  - `!=` on floats is `fcmp une`, the IEEE predicate (the table's `one` would make
+    NaN != NaN false);
+  - the string comparison is `string_equals`, not `string_eq`;
+  - `ptr->field` does not parse;
+  - `val.field` is `extractvalue`, not a `getelementptr` and `load`;
+  - the bare `?` is retired (D-175);
+  - the ternary branches (`br i1`) rather than `select`, and evaluates one arm (M10's `x05`
+    agrees).
+
+**Agreements worth naming (part C).**
+- dim256 erased at run time (the same IR type as `tfp256`), and the five named units.
+- frac:
+  - every row's members and size;
+  - automatic normalization and the five invariants;
+  - ERR `{min, min, 0}`, sticky, at a zero divisor;
+  - TbbErr at a comparison and on any exit;
+  - `=>!` truncating toward zero (−2, not −3);
+  - no `%`, no bitwise, no literals, no pick;
+  - the prelude core.
+- complex:
+  - Smith's division;
+  - ERR in both components;
+  - IEEE `==` with NaN;
+  - TbbErr on tfp `==`;
+  - the element gate and the methods.
+- buffer:
+  - the example run as written;
+  - `{ ptr, i64, i64 }`;
+  - the empty buffer for n <= 0;
+  - move-only;
+  - the four verbs that were not landed.
+- The library tier through the compiler's own `lib/`:
+  - vec3's methods and `.cross` on vec3 alone;
+  - vec9's row-major `.mul`;
+  - `matrix`'s 40 and `tensor`'s 104 bytes, as §25 says;
+  - rank 9;
+  - ternary cells.
+- `fixed`:
+  - module constants and D-211;
+  - ASSIGN-002 for a local, a late local and a field through a pointer;
+  - `comptime` (TYPE-004);
+  - the constant global.
+- NIL, NULL, `any` (its quoted diagnostic) and the one-level `.`.
+- `unknown` (TAINT-001), and `ok` gone.
+- `<<`'s TYPE-070 and ShiftRange, signed and unsigned `>>`, `@` of a `fixed` (TYPE-071),
+  and both ranges in a `for` and a `pick`.
+
+**Found in run 1, not findings (part C).** These were the programs' own mistakes:
+- an inline unit expression (`dim256<Meters/Seconds>` does not parse; the unit is
+  `MetersPerSecond`);
+- `@x =>! any->`, which parses as `@(x =>! any->)`. `ty1989` and `ty2007` had agreed for
+  that reason; re-spelled, each agrees for its own.
+
 **Agreements worth naming (part B).**
 - Pointers:
   - thin;
@@ -158,7 +248,7 @@ two steps, and the rows above are the measured sizes.
 - None of these sentences is among F-028's rows (DEF-154), which cover TYPE 1–660 only.
 - The `#wild_slice` row is the TYPE sentence that D-315's retirement missed. BUILTIN's rows
   `bi0417b` and `bi0419b` (F-028) are the same phrase for `#wild_ptr` and `#ptr_add`.
-- The registry at `93bcb66` has no open entry for any of the seventeen. Its S-95 and
+- The registry at `93bcb66` has no open entry for any of the thirty-three. Its S-95 and
   S-107 are settled.
 - The bare `?` rows repeat, in TYPE's words, rows F-030, F-031 and F-040 found in MEMORY,
   OP and AST. The extern example repeats TRAITS' (F-043).
@@ -168,6 +258,8 @@ two steps, and the rows above are the measured sizes.
 - **Measured:**
   - each row's result at three compilers;
   - by hand at HUNT2: the four alignments, the two BORROW refusals, ty1084's parameter,
-    and the five library sizes.
+    and the five library sizes;
+  - by hand at three compilers: the two frac renderings, the complex rendering, and the
+    operators' IR.
 - **Reasoned, not measured:** that the compiler is the right side in each, and the
   balanced-ternary arithmetic of `1T1T0`.

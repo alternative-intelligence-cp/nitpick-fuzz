@@ -1,16 +1,11 @@
-// M11 ty1989 -- meta/specs/TYPE_REFERENCE.md:1989 (rule)
-// quote: This read `p => T`
-// claim: Giving an `any->` a type with `=>` is refused (D-095).
-// expect: refuse
-// wrong: accepted
-mod:ty1989;
+// F-047 ctl_s4_fixed_scalar_written -- the control: `fixed` on a scalar local is enforced, ASSIGN-002
+mod:ctl_s4_fixed_scalar_written;
 
 func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32:x = raw v32(5i32);
-    any->:p = (@x) =>! any->;
-    int32->:q = p => int32->;
+    fixed int32:k = raw v32(1i32);
+    k = 2i32;
     exit 0i32;
 };
 

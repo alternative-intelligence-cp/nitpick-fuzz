@@ -1,16 +1,13 @@
-// M11 ty1989 -- meta/specs/TYPE_REFERENCE.md:1989 (rule)
-// quote: This read `p => T`
-// claim: Giving an `any->` a type with `=>` is refused (D-095).
-// expect: refuse
-// wrong: accepted
-mod:ty1989;
+// F-048 n2_nil_field_built -- the same struct built and read
+mod:n2_nil_field_built;
 
 func:v32 = int32(int32:x) never fails { pass x; };
 
+struct:S = { int32:a; NIL:n; };
+
 func:main = int32(cstring[]:_~argv) {
-    int32:x = raw v32(5i32);
-    any->:p = (@x) =>! any->;
-    int32->:q = p => int32->;
+    S:s = S{ a: raw v32(7i32), n: NIL };
+    if (s.a != 7i32) { exit 10i32; }
     exit 0i32;
 };
 

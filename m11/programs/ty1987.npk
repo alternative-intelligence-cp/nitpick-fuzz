@@ -9,7 +9,7 @@ func:v32 = int32(int32:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
     int32:x = raw v32(5i32);
-    any->:p = @x =>! any->;
+    any->:p = (@x) =>! any->;
     int32->:q = p =>! int32->;
     if (<-q != 5i32) { exit 10i32; }
     exit 0i32;

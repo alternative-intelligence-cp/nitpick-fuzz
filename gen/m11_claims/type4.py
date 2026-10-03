@@ -1280,3 +1280,15 @@ claim("ty2108", D, 2108, "| `\"\"\"triple\"\"\"` | triple-quoted string | Multil
       wrong="refused, or 10: the newline or the indentation lost")
 
 excluded(D, 2114, "the type implementation priority table: a plan by cycle, history, not behaviour")
+
+# ------------------------------------------------------------------ after run 1 (S45: text only)
+refix("ty1607", "run 1: a unit expression does not parse inside a type's angle brackets (PARSE-001 at "
+      "`Meters/Seconds`); the velocity unit is the prelude's named `MetersPerSecond` (the compiler's "
+      "dim_basic.npk)",
+      [("    dim256<Meters/Seconds>:v = m / s;", "    dim256<MetersPerSecond>:v = m / s;")])
+for _id, _pairs in (("ty1987", [(" = @x =>! any->;", " = (@x) =>! any->;")]),
+                    ("ty1989", [(" = @x =>! any->;", " = (@x) =>! any->;")]),
+                    ("ty2007", [(" = @s =>! any->;", " = (@s) =>! any->;")])):
+    refix(_id, "run 1: `@x =>! any->` parses as `@(x =>! any->)`, an `any->->` (TYPE-007); the address "
+          "is taken first, `(@x) =>! any->`" + ("" if _id == "ty1987" else
+                                               " (this refusal had agreed for that reason)"), _pairs)

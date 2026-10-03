@@ -21,40 +21,40 @@ before the first run.
 | MODULE | 139 | 7 | 3 | 129 | 15 | 124 | 124 | 109 | 15 |
 | OP | 159 | 0 | 87 | 72 | 2 | 157 | 157 | 148 | 9 |
 | TRAITS | 119 | 19 | 16 | 84 | 4 | 115 | 115 | 99 | 16 |
-| TYPE | 719 | 38 | 179 | 502 | 44 | 675 | 675 | 596 | 79 |
+| TYPE | 897 | 47 | 237 | 613 | 50 | 847 | 847 | 745 | 102 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 243 | 473 | 473 | 451 | 22 |
-| **total** | 3207 | 151 | 798 | 2258 | 507 | 2700 | 2700 | 2438 | 262 |
+| **total** | 3385 | 160 | 856 | 2369 | 513 | 2872 | 2872 | 2587 | 285 |
 
-**These denominators cover 9889 of the references' 10419 lines** (the ranges extracted; the
-rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660, 661–1176, 1177–1592 of 2122; VERIFICATION 1–845, 846–1247, 1248–2351 of 2351.
+**These denominators cover 10419 of the references' 10419 lines** (the ranges extracted; the
+rest is not yet extracted): AST 1–644 of 644; BUILD 1–682 of 682; BUILTIN 1–447 of 447; CONCURRENCY 1–647 of 647; CONTROL 1–415 of 415; IO 1–287 of 287; LEXICAL 1–410 of 410; MACRO 1–412 of 412; MEMORY 1–533 of 533; MODULE 1–300 of 300; OP 1–403 of 403; TRAITS 1–766 of 766; TYPE 1–660, 661–1176, 1177–1592, 1593–2122 of 2122; VERIFICATION 1–845, 846–1247, 1248–2351 of 2351.
 
 Untestable, by reason (each claim's own sentence is in `m11/CLAIMS.md`):
 
-- `tool` 132 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
+- `tool` 135 — needs a tool or workflow beyond a program: a package tree, the harness, the explorer, a driver
 - `z3` 117 — needs the verified build (`npkg verify` and the pinned z3), not in this environment
-- `internal` 76 — a compiler internal no program observes (an AST field, a table's layout)
+- `internal` 77 — a compiler internal no program observes (an AST field, a table's layout)
 - `tree` 75 — a claim about the compiler's own source tree, generators, harness or documents
-- `vague` 68 — the sentence states no checkable outcome
-- `unobservable` 28 — no program can tell the claim's truth from its falsehood
+- `vague` 69 — the sentence states no checkable outcome
+- `unobservable` 29 — no program can tell the claim's truth from its falsehood
 - `timing` 8 — a schedule, a race or a duration
 - `platform` 3 — another architecture or OS, root, the network, or more memory than the VM
 
-## 2. The disagreements (262)
+## 2. The disagreements (285)
 
-By kind: `refused` 137, `wrong_exit` 49, `accepted` 38, `ir` 16, `emit_defect` 9, `other_code` 7, `crash` 6.
+By kind: `refused` 144, `wrong_exit` 53, `accepted` 41, `ir` 22, `emit_defect` 11, `other_code` 7, `crash` 6, `build_fail` 1.
 
 | class | claims |
 |---|---|
-| compiler: a silent wrong answer (F-018 to F-021) | 6 |
+| compiler: a silent wrong answer (F-018 to F-021; TYPE's F-047) | 7 |
 | compiler: a lifetime rule not enforced, a use after destroy (F-022) | 2 |
-| compiler: accepted, then invalid IR (F-023) | 1 |
+| compiler: accepted, then invalid IR (F-023; TYPE's F-048) | 2 |
 | compiler: npkc traps, exit 3 (F-024) | 7 |
 | compiler: npkc does not terminate (F-041) | 1 |
 | compiler: a flag that refuses every program (F-025) | 2 |
-| compiler: a unit annotation accepted and ignored (F-026) | 1 |
-| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 31 |
-| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 174 |
-| known: deduplicated against KNOWN_DEFECTS.md | 18 |
+| compiler: a unit annotation accepted and ignored (F-026) | 2 |
+| compiler, lower priority: accepted though refused, a self-declared hole, refused though permitted, a diagnostic (F-027) | 34 |
+| documentation: the compiler right or safe, the reference wrong or stale (F-028) | 190 |
+| known: deduplicated against KNOWN_DEFECTS.md | 19 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or no valid program can test it | 17 |
 
@@ -304,6 +304,29 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `ty1507` | TYPE:1507 | `matrix<int64>` (the library's `ntensor.npk`) is 24 bytes. | `sh:0` | sh 1 (`wrong_exit`) | F-044: §15's `matrix<T>` is `{ptr, i32, i32}`, 24 bytes: the library's is `{ {ptr, i64, i64}, i64, i64 }`, 40 bytes for `matrix<int64>` | same / same @93bcb66 |
 | `ty1508` | TYPE:1508 | `tensor<int64>` (the library's `ntensor.npk`) is 24 bytes. | `sh:0` | sh 1 (`wrong_exit`) | F-044: §15's `tensor<T>` is `{ptr, ptr, i32}`, 24 bytes: the library's is `{ {ptr, i64, i64}, i64, [9 x i64] }`, 104 bytes for `tensor<int64>` | same / same @93bcb66 |
 | `ty1535` | TYPE:1535 | A function proved infallible returns a raw `i32`: a `never fails` int32 function is `define i32`. | `ir:(?m)^define i32 @"?(?:[\w$]+\.)*m11e"?\(` | npkc 0 , 0/0 (`ir`) | F-044: the elided-Result IR (`define i32 @add_elided`): a `never fails` function returns `{ i32, i32 }`; no Result elision is emitted | same / same @93bcb66 |
+| `ty1598` | TYPE:1598 | D-036 rejected value-generic units on plain integers: `int32<Meters>` is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-026: `int32<Meters>` is accepted and its unit ignored, where TYPE:1599-1601 says D-036 rejected units on plain integers (as `tfp64<Meters>`) | same / npkc 1 TYPE-016, -/- @93bcb66 |
+| `ty1649` | TYPE:1649 | The members are not places: assigning `.num` is refused. | `refuse` | npkc 1 EMIT-002, -/- (`emit_defect`) | F-046 a: an assignment to a frac's `.num` passes the checker and is EMIT-002, where TYPE:1649 makes the members read-only views | same / same @93bcb66 |
+| `ty1657` | TYPE:1657 | ToString renders "3 1/3", "-2 5/8", "0" and "ERR". | `run:0` | npkc 0 , 11/11 (`wrong_exit`) | F-044: frac `ToString` "whole num/denom", "-2 5/8": the example does not say its value. The compiler renders -(1 3/8) = {-2, 5, 8} as "-2 5/8" and -(2 5/8) = {-3, 3, 8} as "-3 3/8"; a reader of mixed numbers takes "-2 5/8" for -2.625 | same / same @93bcb66 |
+| `ty1700` | TYPE:1700 | ToString renders "3+4i" and "3-4i", and a tfp ERR pair "ERR". | `run:0` | npkc 0 , 10/10 (`wrong_exit`) | F-044: complex `ToString` "3+4i": via the element's own rendering it is "3.0+4.0i" | same / same @93bcb66 |
+| `ty1719b` | TYPE:1719 | A `fixed uint8[]` is immutable: writing an element through it is refused. | `refuse` | npkc 0 , 0/0 (`accepted`) | F-047: a `fixed uint8[]` view is not immutable: a write through it is accepted and lands, a callee's through a `fixed` parameter included, against TYPE:1719 (D-074's immutable byte view) | same / same @93bcb66 |
+| `ty1873` | TYPE:1873 | A fixed parameter may not be reassigned: ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` | npkc 0 , 0/0 (`accepted`) | F-046 b: a `fixed` parameter is reassigned, against TYPE:1873 and :1876 (ASSIGN-002 in every position) | same / same @93bcb66 |
+| `ty1942` | TYPE:1942 | The desugared form `return Result{ value: NIL, err: 0i32 };` is a success. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-044: `pass(NIL)` "desugars to `return Result{ value: NIL, err: 0i32 }`": an `err` is an `Error` (D-179, TYPE-007) | same / same @93bcb66 |
+| `ty1943` | TYPE:1943 | A NIL-returning function is called without checking by `drop(myFunc());`. | `run:0` | npkc 1 TYPE-042, -/- (`refused`) | F-044: "call a NIL-returning function without checking: `drop(myFunc());`": `drop` is licensed by `never fails` only (D-163, TYPE-042) | same / same @93bcb66 |
+| `ty1944` | TYPE:1944 | NIL is zero-sized: a struct of an int32 and a NIL field is 4 bytes. | `run:0` | npkc 0 , llc!1/opt!1 (`build_fail`) | F-048: a struct with a `NIL` field is accepted, and its IR (`type { i32, void }`) is refused by llc and opt | same / same @93bcb66 |
+| `ty1975` | TYPE:1975 | `void` is valid inside an extern block, as a method's return type. | `sh:0` | sh 1 (`wrong_exit`) | F-044: `void` "ONLY valid inside `extern { }` blocks": a driver method returns NIL, int32 or int64 (EXTERN-001, D-190) | same / same @93bcb66 |
+| `ty1976` | TYPE:1976 | `void` outside an extern block is refused with "'void' is reserved for extern blocks; use 'NIL' for Nitpick functions returning nothing". | `sh:0` | sh 1 (`wrong_exit`) | F-044: `void` elsewhere is not the quoted diagnostic: there is no type named `void` (TYPE-001) | same / same @93bcb66 |
+| `ty2032` | TYPE:2032 | `+` lowers to `add` on int32 and `fadd` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\badd\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfadd\b))` | npkc 0 , 0/0 (`ir`) | F-044: §28's IR column gives `add`/`sub`/`mul` for `+ - *`: integers lower through `llvm.s{add,sub,mul}.with.overflow` (TYPE:56 says so), floats through `fadd`/`fsub`/`fmul` | same / same @93bcb66 |
+| `ty2033` | TYPE:2033 | `-` lowers to `sub` on int32 and `fsub` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsub\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfsub\b))` | npkc 0 , 0/0 (`ir`) | F-044: §28's IR column gives `add`/`sub`/`mul` for `+ - *`: integers lower through `llvm.s{add,sub,mul}.with.overflow` (TYPE:56 says so), floats through `fadd`/`fsub`/`fmul` | same / same @93bcb66 |
+| `ty2034` | TYPE:2034 | `*` lowers to `mul` on int32 and `fmul` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bmul\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfmul\b))` | npkc 0 , 0/0 (`ir`) | F-044: §28's IR column gives `add`/`sub`/`mul` for `+ - *`: integers lower through `llvm.s{add,sub,mul}.with.overflow` (TYPE:56 says so), floats through `fadd`/`fsub`/`fmul` | same / same @93bcb66 |
+| `ty2037` | TYPE:2037 | `**` is power: 2 ** 10 is 1024. | `run:0` | npkc 1 PARSE-002, -/- (`refused`) | F-044: `**` "power, library call": there is no `**` (PARSE-002) | same / same @93bcb66 |
+| `ty2038` | TYPE:2038 | `<=>` returns -1, 0 or 1. | `run:0` | npkc 1 EMIT-002, -/- (`emit_defect`) | DEF-131 (F-015): `<=>` refused by the emitter, TYPE:2038 | same / npkc 0 , 0/0 @93bcb66 |
+| `ty2053e` | TYPE:2053 | Strings compare with `string_eq`. | `run:0` | npkc 1 RESOLVE-002, -/- (`refused`) | F-044: "`string_eq` for strings": the function is `string_equals` (RESOLVE-002) | same / same @93bcb66 |
+| `ty2054` | TYPE:2054 | `!=` lowers to `icmp ne` on int32 and `fcmp one` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp ne i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp one double\b))` | npkc 0 , 0/0 (`ir`) | F-044: `!=` is `fcmp one` on floats: it is `fcmp une`, the IEEE predicate (NaN != NaN is true; `one` would make it false) | same / same @93bcb66 |
+| `ty2073` | TYPE:2073 | `ptr->field` reads a member through a pointer. | `run:0` | npkc 1 PARSE-001, -/- (`refused`) | F-044: `ptr->field` "member via ptr": it does not parse; a member is `.` (D-098) | same / same @93bcb66 |
+| `ty2074` | TYPE:2074 | `val.field` lowers to a `getelementptr` and a `load`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11g"?\((?=(?:(?!\n\}).)*?\bgetelementptr\b)(?=(?:(?!\n\}).)*?\bload i32\b)` | npkc 0 , 0/0 (`ir`) | F-044: `val.field` is "`getelementptr` + `load`": it is `extractvalue` (as TYPE:936) | same / same @93bcb66 |
+| `ty2079` | TYPE:2079 | `res ? default` is the safe unwrap. | `run:0` | npkc 1 PARSE-011, -/- (`refused`) | F-044: §28's `?` safe unwrap: PARSE-011 since D-175 | same / same @93bcb66 |
+| `ty2084` | TYPE:2084 | `f <\| v` is `f(v)`. | `run:0` | npkc 1 TYPE-007, -/- (`refused`) | F-046 c: the backward pipe takes its function on the right, against TYPE:2084 (as AST's F-039 b) | same / same @93bcb66 |
+| `ty2101b` | TYPE:2101 | The ternary lowers to `select i1`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\((?=(?:(?!\n\}).)*?\bselect i1\b)` | npkc 0 , 0/0 (`ir`) | F-044: the ternary is "`select i1`": it branches (`br i1`), evaluating one arm (x05 agrees) | same / same @93bcb66 |
 | `vf0145b` | VERIFICATION:145 | A limit on main's parameter is refused: the sentence lists it among the TYPE-064 sites. | `refuse:TYPE-064` | npkc 1 TYPE-060, -/- (`other_code`) | F-028: a limit on main's parameter is TYPE-060, not TYPE-064 | same / same @1b4f0c6 |
 | `vf0151` | VERIFICATION:151 | A struct subject is outside the encoder's fragment: its limit row is unencoded (0 in rows.txt). | `sh:0` | sh 1 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf0215b` | VERIFICATION:215 | A write through a shared ($$i) claim's holder is NITPICK-BORROW-013. | `refuse:BORROW-013` | npkc 0 , 0/0 (`accepted`) | DEF-123 (F-008): a write through a $$i claim's holder is not refused | same / same @1b4f0c6 |
@@ -327,7 +350,7 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf1228b` | VERIFICATION:1228 | A `limit` over a struct subject is `unencoded`. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 | `vf1244` | VERIFICATION:1244 | Still at 1.5.8b: a `limit` over a struct is `unencoded` with its guard kept. | `sh:0` | sh 11 (`wrong_exit`) | F-028: a struct subject's limit row, and a List-count loop bound, are encoded | same / same @1b4f0c6 |
 
-## 3. Programs whose text changed after a run (130; no expectation changed but where stated)
+## 3. Programs whose text changed after a run (134; no expectation changed but where stated)
 
 | id | why |
 |---|---|
@@ -432,6 +455,10 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `ty0855` | run 1 agreed for the wrong reason (TYPE-019, no variant `SEEK_SET`): the prelude's `Whence` is `{ Start; Current; End; }` |
 | `ty1507` | run 2: and `ntensor.BadIndex`, the library's other error (lib/ntensor.npk:21-22) |
 | `ty1508` | run 2: and `ntensor.BadIndex`, the library's other error (lib/ntensor.npk:21-22) |
+| `ty1607` | run 1: a unit expression does not parse inside a type's angle brackets (PARSE-001 at `Meters/Seconds`); the velocity unit is the prelude's named `MetersPerSecond` (the compiler's dim_basic.npk) |
+| `ty1987` | run 1: `@x =>! any->` parses as `@(x =>! any->)`, an `any->->` (TYPE-007); the address is taken first, `(@x) =>! any->` |
+| `ty1989` | run 1: `@x =>! any->` parses as `@(x =>! any->)`, an `any->->` (TYPE-007); the address is taken first, `(@x) =>! any->` (this refusal had agreed for that reason) |
+| `ty2007` | run 1: `@x =>! any->` parses as `@(x =>! any->)`, an `any->->` (TYPE-007); the address is taken first, `(@x) =>! any->` (this refusal had agreed for that reason) |
 | `vf0007` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
 | `vf0039` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
 | `vf0075` | the rows helper missed main's rows (its symbol is `@main`, not `<module>.main`): the helper was corrected in every script that embeds it |
@@ -462,6 +489,6 @@ column says whether each gave the same result (npkc, codes, both legs, verdict) 
 | `vf0866c` | the field rule `$ > 0` refused the vacant value (TYPE-077); `$ >= 0` admits it, and the write points the claim counts are the same |
 | `vf0866d` | run 1: the field rule `$ > 0` refused the vacant value (TYPE-077), now `$ >= 0`; run 2: reading `t` while its `$$m` claim lived is BORROW-013 (D-286): the pointer is `@t`, an address that claims nothing, so the write still goes through a pointer |
 
-Run 1 against the final run: 1237 of 2700 programs identical (npkc, both legs, verdict); the
+Run 1 against the final run: 1237 of 2872 programs identical (npkc, both legs, verdict); the
 others are programs above, whose text changed (a text change that did not move
 the verdict leaves its program identical).

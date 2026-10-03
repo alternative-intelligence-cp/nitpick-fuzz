@@ -8,9 +8,9 @@ that every disagreement has a class and every class a disagreement.
 import json, os
 
 GROUPS = {
-    "swa": "compiler: a silent wrong answer (F-018 to F-021)",
+    "swa": "compiler: a silent wrong answer (F-018 to F-021; TYPE's F-047)",
     "mem": "compiler: a lifetime rule not enforced, a use after destroy (F-022)",
-    "ir": "compiler: accepted, then invalid IR (F-023)",
+    "ir": "compiler: accepted, then invalid IR (F-023; TYPE's F-048)",
     "crash": "compiler: npkc traps, exit 3 (F-024)",
     "hang": "compiler: npkc does not terminate (F-041)",
     "flag": "compiler: a flag that refuses every program (F-025)",
@@ -332,6 +332,50 @@ DOC44B = (
      "no Result elision is emitted", ("ty1535",)),
 )
 for _t, _ids in DOC44B:
+    put("doc", _t, *_ids)
+
+# ---- session 9: TYPE_REFERENCE 1593-2122, part C (F-044 documentation rows, F-046 lower-priority
+#      compiler rows, F-047 a silent wrong answer, F-048 invalid IR)
+put("swa", "F-047: a `fixed uint8[]` view is not immutable: a write through it is accepted and lands, a "
+    "callee's through a `fixed` parameter included, against TYPE:1719 (D-074's immutable byte view)", "ty1719b")
+put("ir", "F-048: a struct with a `NIL` field is accepted, and its IR (`type { i32, void }`) is refused by "
+    "llc and opt", "ty1944")
+put("comp", "F-046 a: an assignment to a frac's `.num` passes the checker and is EMIT-002, where TYPE:1649 "
+    "makes the members read-only views", "ty1649")
+put("comp", "F-046 b: a `fixed` parameter is reassigned, against TYPE:1873 and :1876 (ASSIGN-002 in every "
+    "position)", "ty1873")
+put("comp", "F-046 c: the backward pipe takes its function on the right, against TYPE:2084 (as AST's F-039 b)",
+    "ty2084")
+put("unit", "F-026: `int32<Meters>` is accepted and its unit ignored, where TYPE:1599-1601 says D-036 rejected "
+    "units on plain integers (as `tfp64<Meters>`)", "ty1598")
+put("known", "DEF-131 (F-015): `<=>` refused by the emitter, TYPE:2038", "ty2038")
+DOC44C = (
+    ("F-044: frac `ToString` \"whole num/denom\", \"-2 5/8\": the example does not say its value. The "
+     "compiler renders -(1 3/8) = {-2, 5, 8} as \"-2 5/8\" and -(2 5/8) = {-3, 3, 8} as \"-3 3/8\"; a reader "
+     "of mixed numbers takes \"-2 5/8\" for -2.625", ("ty1657",)),
+    ("F-044: complex `ToString` \"3+4i\": via the element's own rendering it is \"3.0+4.0i\"", ("ty1700",)),
+    ("F-044: `pass(NIL)` \"desugars to `return Result{ value: NIL, err: 0i32 }`\": an `err` is an `Error` "
+     "(D-179, TYPE-007)", ("ty1942",)),
+    ("F-044: \"call a NIL-returning function without checking: `drop(myFunc());`\": `drop` is licensed by "
+     "`never fails` only (D-163, TYPE-042)", ("ty1943",)),
+    ("F-044: `void` \"ONLY valid inside `extern { }` blocks\": a driver method returns NIL, int32 or int64 "
+     "(EXTERN-001, D-190)", ("ty1975",)),
+    ("F-044: `void` elsewhere is not the quoted diagnostic: there is no type named `void` (TYPE-001)",
+     ("ty1976",)),
+    ("F-044: §28's IR column gives `add`/`sub`/`mul` for `+ - *`: integers lower through "
+     "`llvm.s{add,sub,mul}.with.overflow` (TYPE:56 says so), floats through `fadd`/`fsub`/`fmul`",
+     ("ty2032", "ty2033", "ty2034")),
+    ("F-044: `**` \"power, library call\": there is no `**` (PARSE-002)", ("ty2037",)),
+    ("F-044: `!=` is `fcmp one` on floats: it is `fcmp une`, the IEEE predicate (NaN != NaN is true; "
+     "`one` would make it false)", ("ty2054",)),
+    ("F-044: \"`string_eq` for strings\": the function is `string_equals` (RESOLVE-002)", ("ty2053e",)),
+    ("F-044: `ptr->field` \"member via ptr\": it does not parse; a member is `.` (D-098)", ("ty2073",)),
+    ("F-044: `val.field` is \"`getelementptr` + `load`\": it is `extractvalue` (as TYPE:936)", ("ty2074",)),
+    ("F-044: §28's `?` safe unwrap: PARSE-011 since D-175", ("ty2079",)),
+    ("F-044: the ternary is \"`select i1`\": it branches (`br i1`), evaluating one arm (x05 agrees)",
+     ("ty2101b",)),
+)
+for _t, _ids in DOC44C:
     put("doc", _t, *_ids)
 
 # ---- known, strict, extraction

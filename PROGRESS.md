@@ -41,7 +41,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 10.2 one program per testable item, its expected verdict written from the text before the first run; run at the baseline and HUNT2, both legs
   - [x] 10.3 DEF-108's shapes flagged at the baseline and refused `FLOW-001` at HUNT2
   - [x] 10.4 `REPORT.md` §11; stop (M11 waits for the author)
-- [ ] **M11** — the reference, checked against the compiler. **In part.**
+- [x] **M11** — the reference, checked against the compiler: all fourteen references,
+  10 419 lines, 3 385 claims, 2 872 tested, 2 587 agree, 285 disagree, every one triaged.
   - Session 6 stopped part-way on the author's word, the cloud credit nearly spent.
   - Session 7 (local, branch `local-m11`) reviewed, ran and triaged the drafted ranges:
     F-018 … F-028.
@@ -52,16 +53,18 @@ committed. A session that starts here resumes at the first unticked box.
     started, smallest first. MODULE, LEXICAL, AST, BUILD, TRAITS and VERIFICATION
     1248–2351 are done, each to a clean point: F-033 … F-043, among them F-037, a use
     after free, and F-041, an npkc hang. BUILD's 38 and VERIFICATION 1248–2351's 16
-    tested claims all agree. TYPE 661–2122 is under way in three parts (S65); parts A and
-    B, 661–1592, are done: F-044 (seventeen documentation rows) and F-045 (a compiler
-    message that advises the retired `?`).
-  - Extracted so far: 9 889 of 10 419 lines; 3 207 claims, 2 700 tested, 2 438 agree,
-    262 disagree.
+    tested claims all agree. TYPE 661–2122 followed in three parts (S65):
+    - F-044 (thirty-three documentation rows);
+    - F-045 (a compiler message that advises the retired `?`);
+    - F-046 (three safe departures);
+    - **F-047, a silent wrong answer: a `fixed uint8[]` view written through**;
+    - F-048 (a `NIL` field emitted as invalid IR).
+  - Extracted: all 10 419 lines; 3 385 claims, 2 872 tested, 2 587 agree, 285 disagree.
 
   Resume from "M11 — the state at the stop" below.
-  - [ ] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION whole, TYPE 1–1592 done; TYPE 1593–2122 not started
-  - [ ] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — done for the extracted ranges (the final run: 2 438 agree, 262 disagree, all triaged)
-  - [ ] 11.3 `REPORT.md` §12; stop — §12 written for the extracted ranges
+  - [x] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — all fourteen whole
+  - [x] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — the final run: 2 587 agree, 285 disagree, all triaged
+  - [x] 11.3 `REPORT.md` §12; stop — §12 written; session 9 stopped there (2026-10-02)
 
 ## Compilers
 
@@ -965,21 +968,20 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
 
 ### M11 — the state at the stop (read this first to resume)
 
-*The last clean point is session 9's TYPE 1177–1592, part B of TYPE 661–2122 (S65), after
-its MODULE, LEXICAL, AST, BUILD, TRAITS, VERIFICATION 1248–2351 and TYPE 661–1176:
-extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+*The last clean point is session 9's TYPE 1593–2122, part C of TYPE 661–2122 (S65), which
+completes M11: every reference extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
 
 **Done, committed and measured.**
 - Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST,
-  BUILD, TRAITS and VERIFICATION whole, and TYPE 1–1592. That is 9 889 of the references'
+  BUILD, TRAITS, VERIFICATION and TYPE whole. That is all 10 419 of the references'
   10 419 lines (S58 corrected the count).
-- **3 207 claims, 2 700 testable, 507 untestable** with reasons (`m11/CLAIMS.md`).
-- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 438 agree, 262 disagree**.
+- **3 385 claims, 2 872 testable, 513 untestable** with reasons (`m11/CLAIMS.md`).
+- The final run at HUNT2 (`results/9126350/m11.jsonl`): **2 587 agree, 285 disagree**.
 - Every disagreement is triaged (`gen/m11_triage.py`) and run at the baseline and at
   its session's newest `main`: `1b4f0c6` for session 7's, `93bcb66` for sessions 8's
   and 9's.
 
-Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-045:
+Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-048:
 - MEMORY's are F-029 (a reserved word accepted as a binding's name) and F-030 (eight
   documentation rows);
 - OP's is F-031 (five documentation rows);
@@ -997,12 +999,15 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-045:
   - F-041: **npkc does not terminate** on an unbounded generic instantiation;
   - F-042: one lower-priority compiler row;
   - F-043: thirteen documentation rows.
-- TYPE 661–1592's (parts A and B of TYPE 661–2122, S65):
-  - F-044: seventeen documentation rows (it grows with part C);
-  - F-045: a compiler message that advises the retired `?`.
+- TYPE 661–2122's (in three parts, S65):
+  - F-044: thirty-three documentation rows;
+  - F-045: a compiler message that advises the retired `?`;
+  - F-046: three safe departures;
+  - F-047: **a silent wrong answer**, a `fixed uint8[]` view written through;
+  - F-048: a `NIL` struct field emitted as invalid IR.
 
-**Not started:** TYPE 1593–2122, part C of S65 (§19–28), 530 lines, roughly 225 claims:
-the rest of session 9's brief (S60).
+**Not started:** nothing. M11 is done. PLAN.md: "After M11, if the credit remains, the
+author and the workbench choose the next task together."
 
 **To resume (a later session):**
 1. The start checks; M0's rebuild only where `.work/` is stale. HUNT2 stays `9126350`;
@@ -1016,8 +1021,7 @@ the rest of session 9's brief (S60).
 4. Triage into `gen/m11_triage.py`. Run the disagreements at the baseline and the
    newest `main`, appending to `results/<commit>/m11-disagree.jsonl`. Do a full final
    run, then `gen/m11_rows.py` (add the row finding to `FINDINGS`), `gen/m11_report.py`,
-   and extend `REPORT.md` §12. Findings number on from F-046 (F-044, TYPE 661–2122's
-   documentation rows, grows with each part).
+   and extend `REPORT.md` §12. Findings number on from F-049.
 
 ### M11 — the state at session 6's stop (history)
 
@@ -1547,7 +1551,35 @@ author set for TYPE is 95 % (the workbench's go).
     - §28 (every row of the operator tables, as IR or as behaviour).
   - `lib_run` gained failsafe arms for a library's own errors, defaulting to none, so part
     B's scripts are unchanged (regenerated identical).
-  - Committed before any of its programs ran.
+  - Committed before any of its programs ran (`a66247f`, with the files `gen/m11.py`
+    writes).
+- **Run 1:** 147 agree, 25 disagree. Every agreeing refusal's first diagnostic was read.
+  - Two agreed for a reason of their own: `ty1989` and `ty2007` hit `@x =>! any->`, which
+    parses as `@(x =>! any->)`.
+  - Four programs were fixed: those two, `ty1987` (the same spelling), and `ty1607` (an
+    inline unit `Meters/Seconds` does not parse; the prelude names `MetersPerSecond`).
+- **Run 2** (the four): 4 agree, each for the claim's reason.
+- **Triage.** 23 disagree. All give the same result at the baseline, and all but two at
+  `93bcb66`. The 23 are:
+  - **F-047, a silent wrong answer.** A `fixed uint8[]` is the reference's immutable byte
+    view (TYPE:1719, D-074), yet a write through it lands, a callee's through a `fixed`
+    parameter included. Measured with two controls at three compilers. The class is
+    reasoned: a reading where `fixed` fixes only the view would make it a documentation
+    row.
+  - **F-048:** a `NIL` struct field is accepted and emitted as `{ i32, void }`, which
+    `llc` and `opt` refuse.
+  - **F-046,** three lower-priority rows:
+    - a frac member assignment passes the checker and is EMIT-002;
+    - a `fixed` parameter is reassigned;
+    - the backward pipe, F-039 b's shape.
+  - **F-026's shape on `int32`:** `int32<Meters>` is accepted. It is refused at
+    `93bcb66`, and so is F-026's own `tfp64<Meters>` (`ty0553`, re-run there).
+  - **DEF-131's `<=>`,** which compiles at `93bcb66`.
+  - **Sixteen F-044 rows.** One is frac's `ToString`: −(1 3/8) renders "-2 5/8", the
+    reference's own example, which a reader of mixed numbers takes for −2.625. It was
+    measured at three compilers and is flagged for the author.
+- **The final full run**, all 2 872 programs: 2 587 agree, 285 disagree. The 2 700 earlier
+  programs re-ran identical.
 
 ## Environment
 
@@ -2283,3 +2315,13 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     (`2e9f871`). Run 1: 114 agree, 9 disagree. Two scripts fixed. Final: 114 agree, 9
     disagree. Triaged: F-044 grows to seventeen rows, plus F-045 (a diagnostic that
     advises the retired `?`, found while screening the agreements).
+  - **TYPE 1593–2122**, part C (S65). 178 claims, 172 testable, committed before any run
+    (`a66247f`). Run 1: 147 agree, 25 disagree. Four programs fixed. Final: 149 agree, 23
+    disagree. Triaged:
+    - **F-047, a silent wrong answer** (a `fixed uint8[]` view written through);
+    - F-048 (a `NIL` field emitted as invalid IR);
+    - F-046 (three lower-priority rows);
+    - F-044 grows to thirty-three rows;
+    - F-026's shape and DEF-131, both fixed at `93bcb66`.
+  - **M11 is done**: all fourteen references, 10 419 lines. The session stopped there, as
+    11.3 says.

@@ -11,7 +11,7 @@ struct:S = { int32:x; };
 
 func:main = int32(cstring[]:_~argv) {
     S:s = S{ x: raw v32(4i32) };
-    any->:p = @s =>! any->;
+    any->:p = (@s) =>! any->;
     if (p.x != 4i32) { exit 10i32; }
     exit 0i32;
 };

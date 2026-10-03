@@ -1,16 +1,13 @@
-// M11 ty1989 -- meta/specs/TYPE_REFERENCE.md:1989 (rule)
-// quote: This read `p => T`
-// claim: Giving an `any->` a type with `=>` is refused (D-095).
-// expect: refuse
-// wrong: accepted
-mod:ty1989;
+// F-047 s1_fixed_view_written -- a write through a local `fixed uint8[]` view: refused by the reference (TYPE:1719); exit 10 if it lands
+mod:s1_fixed_view_written;
 
-func:v32 = int32(int32:x) never fails { pass x; };
+func:v64 = int64(int64:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
-    int32:x = raw v32(5i32);
-    any->:p = (@x) =>! any->;
-    int32->:q = p => int32->;
+    uint8[4]:arr = [1u8, 2u8, 3u8, 4u8];
+    fixed uint8[]:v = arr[0i64...4i64];
+    v[raw v64(0i64)] = 9u8;
+    if (arr[0i64] == 9u8) { exit 10i32; }
     exit 0i32;
 };
 

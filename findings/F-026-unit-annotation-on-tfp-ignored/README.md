@@ -30,3 +30,12 @@ No entry of `KNOWN_DEFECTS.md` concerns units. Present at the baseline.
 - **Measured:** the verdicts.
 - **Inferred:** that the parser accepts a type argument on `tfp64` and the checker
   drops it. Whether it is kept anywhere was not looked for.
+
+## Met again in TYPE §19 (session 9)
+
+TYPE:1599–1601 says D-036 rejected value-generic units on plain integers. `int32<Meters>`
+is accepted at HUNT2 and the baseline, the same shape on `int32` (M11's `ty1598`). At
+`93bcb66` it is refused, `NITPICK-TYPE-016` ("`int32` takes no type argument"), so that
+form is **fixed at `93bcb66`**. So is this finding's own shape: `ty0553` (`tfp64<Meters>`)
+was re-run at `93bcb66` by session 9, and it is refused, TYPE-016, as its claim expects.
+

@@ -1,0 +1,13 @@
+# F-048-a-nil-field-emits-invalid-ir — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-03 00:44 UTC; HUNT 9126350 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_n3_no_nil_field                          9126350  run 1  npkc=0  codes=-  O0=0  O2=0
+n1_nil_field                                 9126350  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+n2_nil_field_built                           9126350  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_n3_no_nil_field                          9126350  run 2  npkc=0  codes=-  O0=0  O2=0
+n1_nil_field                                 9126350  run 2  npkc=0  codes=-  O0=llc!1  O2=opt!1
+n2_nil_field_built                           9126350  run 2  npkc=0  codes=-  O0=llc!1  O2=opt!1
+ctl_n3_no_nil_field                          c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+n1_nil_field                                 c3bdae2  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
+n2_nil_field_built                           c3bdae2  run 1  npkc=0  codes=-  O0=llc!1  O2=opt!1
