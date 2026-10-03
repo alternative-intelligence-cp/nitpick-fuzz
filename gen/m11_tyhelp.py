@@ -149,12 +149,32 @@ LIB="$(dirname "$NPKC")/../../lib"
 '''
 
 
-def lib_run(libs, body, decls=""):
+def lib_run(libs, body, decls="", arms="", code=0):
     """sh:0: copy the compiler's `libs` beside a root that uses them, build both legs,
-    and require exit 0"""
+    and require exit `code`; `arms` (each ending in a comma) open the failsafe, for the
+    errors a library declares"""
+    uses = "".join('use "./%s.npk".*;\n' % l for l in libs)
+    h = helpers_text(body + "\n" + decls)
+    src = "mod:r;\n" + uses + "\n" + (h + "\n\n" if h else "") + main_(body, decls) + "\n"
+    fs = failsafe_text(src)
+    if arms:
+        fs = fs.replace("    pick (e) {\n", "    pick (e) {\n" + arms.rstrip() + "\n", 1)
+    src += fs
+    return (SH_LIB + 'cp ' + " ".join('"$LIB/%s.npk"' % l for l in libs) + " . || exit 5\n" +
+            "cat > r.npk <<'NPK_EOF'\n" + src + "NPK_EOF\nbuild r.npk || exit $?\nlegs %d\n" % code)
+
+
+def lib_refused(libs, body, decls="", pat=""):
+    """sh:0: copy `libs` beside a root that uses them, and require it refused (npkc 1,
+    no EMIT-002), its output matching `pat` if given"""
     uses = "".join('use "./%s.npk".*;\n' % l for l in libs)
     h = helpers_text(body + "\n" + decls)
     src = "mod:r;\n" + uses + "\n" + (h + "\n\n" if h else "") + main_(body, decls) + "\n"
     src += failsafe_text(src)
     return (SH_LIB + 'cp ' + " ".join('"$LIB/%s.npk"' % l for l in libs) + " . || exit 5\n" +
-            "cat > r.npk <<'NPK_EOF'\n" + src + "NPK_EOF\nbuild r.npk || exit $?\nlegs 0\n")
+            "cat > r.npk <<'NPK_EOF'\n" + src + "NPK_EOF\nrefused r.npk '%s'\n" % pat)
+
+
+def sh_refused_with(src, pat):
+    """sh:0: a whole program refused (npkc 1, no EMIT-002), its output holding `pat`"""
+    return SH_LIB + "cat > r.npk <<'NPK_EOF'\n" + prog(src, "r") + "NPK_EOF\nrefused r.npk '%s'\n" % pat

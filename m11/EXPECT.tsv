@@ -2226,6 +2226,178 @@ ty1572	TYPE	1572	example	m11/programs/ty1572.npk	ir:(?s)\A(?=.*?^define [^@\n]*@
 ty1576	TYPE	1576	rule	m11/programs/ty1576.npk	run:0	-
 ty1584	TYPE	1584	rule	m11/programs/ty1584.npk	run:0	-
 ty1586	TYPE	1586	rule	m11/programs/ty1586.npk	run:0	-
+ty1595	TYPE	1595	rule	m11/programs/ty1595.npk	ir:(?s)\A(?=.*?@"?(?:[\w$]+\.)*m11d"?\(([^ ,)]+))(?=.*?@"?(?:[\w$]+\.)*m11t"?\(\1[ ,)])	-
+ty1598	TYPE	1598	example	m11/programs/ty1598.npk	refuse	-
+ty1606	TYPE	1606	rule	m11/programs/ty1606.npk	run:0	-
+ty1607	TYPE	1607	rule	m11/programs/ty1607.npk	run:0	-
+ty1619	TYPE	1619	row	m11/programs/ty1619.npk	run:0	-
+ty1620	TYPE	1620	row	m11/programs/ty1620.npk	run:0	-
+ty1621	TYPE	1621	row	m11/programs/ty1621.npk	run:0	-
+ty1622	TYPE	1622	row	m11/programs/ty1622.npk	run:0	-
+ty1624	TYPE	1624	example	m11/programs/ty1624.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\(\{ ?i32, i32, i32 ?\}(?=[\s,)]))	-
+ty1631	TYPE	1631	rule	m11/programs/ty1631.npk	run:0	-
+ty1633	TYPE	1633	rule	m11/programs/ty1633.npk	refuse	-
+ty1634	TYPE	1634	rule	m11/programs/ty1634.npk	refuse	-
+ty1634b	TYPE	1634	rule	m11/programs/ty1634b.npk	refuse	-
+ty1634c	TYPE	1634	rule	m11/programs/ty1634c.npk	run:0	-
+ty1635	TYPE	1635	rule	m11/programs/ty1635.npk	run:0	-
+ty1637	TYPE	1637	rule	m11/programs/ty1637.npk	refuse	-
+ty1639	TYPE	1639	rule	m11/programs/ty1639.npk	run:0	-
+ty1642	TYPE	1642	rule	m11/programs/ty1642.npk	run:0	-
+ty1643	TYPE	1643	rule	m11/programs/ty1643.npk	run:110	-
+ty1644	TYPE	1644	rule	m11/programs/ty1644.npk	run:0	-
+ty1646	TYPE	1646	rule	m11/programs/ty1646.npk	run:0	-
+ty1646b	TYPE	1646	rule	m11/programs/ty1646b.npk	refuse	-
+ty1647	TYPE	1647	rule	m11/programs/ty1647.npk	refuse	-
+ty1649	TYPE	1649	rule	m11/programs/ty1649.npk	refuse	-
+ty1651	TYPE	1651	rule	m11/programs/ty1651.npk	run:0	-
+ty1651b	TYPE	1651	rule	m11/programs/ty1651b.npk	refuse	-
+ty1652	TYPE	1652	rule	m11/programs/ty1652.npk	run:0	-
+ty1652b	TYPE	1652	rule	m11/programs/ty1652b.npk	run:0	-
+ty1653	TYPE	1653	rule	m11/programs/ty1653.npk	refuse	-
+ty1654	TYPE	1654	rule	m11/programs/ty1654.npk	run:0	-
+ty1655	TYPE	1655	rule	m11/programs/ty1655.npk	run:110	-
+ty1655b	TYPE	1655	rule	m11/programs/ty1655b.npk	refuse	-
+ty1656	TYPE	1656	rule	m11/programs/ty1656.npk	refuse	-
+ty1657	TYPE	1657	rule	m11/programs/ty1657.npk	run:0	-
+ty1658	TYPE	1658	rule	m11/programs/ty1658.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fa"?\((?=(?:(?!\n\}).)*?call [^\n]*frac)	-
+ty1669	TYPE	1669	example	m11/programs/ty1669.npk	run:0	-
+ty1673	TYPE	1673	example	m11/programs/ty1673.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11c"?\(\{ ?double, double ?\}(?=[\s,)]))	-
+ty1681	TYPE	1681	rule	m11/programs/ty1681.npk	refuse	-
+ty1681b	TYPE	1681	rule	m11/programs/ty1681b.npk	run:0	-
+ty1683	TYPE	1683	rule	m11/programs/ty1683.npk	refuse	-
+ty1683b	TYPE	1683	rule	m11/programs/ty1683b.npk	refuse	-
+ty1685	TYPE	1685	rule	m11/programs/ty1685.npk	refuse	-
+ty1686	TYPE	1686	rule	m11/programs/ty1686.npk	run:0	-
+ty1690	TYPE	1690	rule	m11/programs/ty1690.npk	run:0	-
+ty1691	TYPE	1691	rule	m11/programs/ty1691.npk	refuse	-
+ty1692	TYPE	1692	rule	m11/programs/ty1692.npk	run:0	-
+ty1693	TYPE	1693	rule	m11/programs/ty1693.npk	run:110	-
+ty1693b	TYPE	1693	rule	m11/programs/ty1693b.npk	refuse	-
+ty1694	TYPE	1694	rule	m11/programs/ty1694.npk	run:0	-
+ty1695	TYPE	1695	rule	m11/programs/ty1695.npk	refuse	-
+ty1696	TYPE	1696	rule	m11/programs/ty1696.npk	run:0	-
+ty1697	TYPE	1697	rule	m11/programs/ty1697.npk	refuse	-
+ty1700	TYPE	1700	rule	m11/programs/ty1700.npk	run:0	-
+ty1710	TYPE	1710	rule	m11/programs/ty1710.npk	refuse	-
+ty1721	TYPE	1721	rule	m11/programs/ty1721.npk	refuse	-
+ty1719	TYPE	1719	rule	m11/programs/ty1719.npk	run:0	-
+ty1719b	TYPE	1719	rule	m11/programs/ty1719b.npk	refuse	-
+ty1726	TYPE	1726	rule	m11/programs/ty1726.npk	run:0	-
+ty1739	TYPE	1739	example	m11/programs/ty1739.npk	run:0	-
+ty1742	TYPE	1742	rule	m11/programs/ty1742.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\(\{ ?ptr, i64, i64 ?\}(?=[\s,)]))	-
+ty1745	TYPE	1745	example	m11/programs/ty1745.npk	run:0	-
+ty1754	TYPE	1754	rule	m11/programs/ty1754.npk	run:0	-
+ty1755	TYPE	1755	rule	m11/programs/ty1755.npk	run:0	-
+ty1756	TYPE	1756	rule	m11/programs/ty1756.npk	run:42	-
+ty1757	TYPE	1757	rule	m11/programs/ty1757.npk	refuse	-
+ty1762	TYPE	1762	rule	m11/programs/ty1762.npk	refuse:NITPICK-TYPE-046	-
+ty1767	TYPE	1767	rule	m11/programs/ty1767.npk	refuse	-
+ty1771	TYPE	1771	rule	m11/programs/ty1771.npk	refuse	-
+ty1772	TYPE	1772	rule	m11/programs/ty1772.npk	refuse	-
+ty1773	TYPE	1773	rule	m11/programs/ty1773.npk	refuse	-
+ty1773b	TYPE	1773	rule	m11/programs/ty1773b.npk	refuse	-
+ty1780	TYPE	1780	rule	m11/programs/ty1780.npk	refuse	-
+ty1786	TYPE	1786	rule	m11/programs/ty1786.sh	sh:0	-
+ty1792	TYPE	1792	rule	m11/programs/ty1792.sh	sh:0	-
+ty1797	TYPE	1797	example	m11/programs/ty1797.sh	sh:0	-
+ty1805	TYPE	1805	rule	m11/programs/ty1805.sh	sh:0	-
+ty1811	TYPE	1811	rule	m11/programs/ty1811.sh	sh:0	-
+ty1812	TYPE	1812	rule	m11/programs/ty1812.sh	sh:0	-
+ty1815	TYPE	1815	rule	m11/programs/ty1815.sh	sh:0	-
+ty1816	TYPE	1816	rule	m11/programs/ty1816.sh	sh:0	-
+ty1825	TYPE	1825	rule	m11/programs/ty1825.sh	sh:0	-
+ty1843	TYPE	1843	example	m11/programs/ty1843.npk	compile	-
+ty1845	TYPE	1845	rule	m11/programs/ty1845.npk	refuse	-
+ty1845b	TYPE	1845	rule	m11/programs/ty1845b.npk	refuse	-
+ty1852	TYPE	1852	rule	m11/programs/ty1852.npk	refuse:NITPICK-ASSIGN-002	-
+ty1860	TYPE	1860	rule	m10/programs/d12_fixed_local_written_later.npk	run:0	-
+ty1861	TYPE	1861	rule	m10/programs/d13_fixed_local_written_twice.npk	refuse:NITPICK-ASSIGN-002	-
+ty1865	TYPE	1865	rule	m10/programs/d14_fixed_field_written.npk	refuse:NITPICK-ASSIGN-002	-
+ty1866	TYPE	1866	rule	m11/programs/ty1866.npk	refuse:NITPICK-ASSIGN-002	-
+ty1873	TYPE	1873	rule	m11/programs/ty1873.npk	refuse:NITPICK-ASSIGN-002	-
+ty1884	TYPE	1884	example	m11/programs/ty1884.npk	run:0	-
+ty1886	TYPE	1886	rule	m11/programs/ty1886.npk	refuse:NITPICK-TYPE-004	-
+ty1891	TYPE	1891	rule	m11/programs/ty1891.npk	ir:(?m)^@"npk\.ty1891\.MAX_SIZE" = [^\n]*\bconstant i32 1024\b	-
+ty1922	TYPE	1922	rule	m11/programs/ty1922.npk	run:0	-
+ty1941	TYPE	1941	rule	m11/programs/ty1941.npk	run:0	-
+ty1942	TYPE	1942	rule	m11/programs/ty1942.npk	run:0	-
+ty1943	TYPE	1943	rule	m11/programs/ty1943.npk	run:0	-
+ty1944	TYPE	1944	rule	m11/programs/ty1944.npk	run:0	-
+ty1953	TYPE	1953	rule	m11/programs/ty1953.npk	refuse	-
+ty1954	TYPE	1954	rule	m11/programs/ty1954.npk	run:0	-
+ty1956	TYPE	1956	rule	m11/programs/ty1956.npk	refuse	-
+ty1957	TYPE	1957	rule	m11/programs/ty1957.npk	run:0	-
+ty1957b	TYPE	1957	rule	m11/programs/ty1957b.npk	ir:(?m)^define \{ i32 \} @"?(?:[\w$]+\.)*m11n"?\(	-
+ty1968	TYPE	1968	rule	m11/programs/ty1968.npk	run:0	-
+ty1970	TYPE	1970	rule	m11/programs/ty1970.npk	refuse	-
+ty1971	TYPE	1971	rule	m11/programs/ty1971.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11z"?\((?=(?:(?!\n\}).)*?\bptr null\b)	-
+ty1975	TYPE	1975	rule	m11/programs/ty1975.sh	sh:0	-
+ty1976	TYPE	1976	rule	m11/programs/ty1976.sh	sh:0	-
+ty1983	TYPE	1983	rule	m11/programs/ty1983.sh	sh:0	-
+ty1987	TYPE	1987	rule	m11/programs/ty1987.npk	run:0	-
+ty1989	TYPE	1989	rule	m11/programs/ty1989.npk	refuse	-
+ty1998	TYPE	1998	rule	m11/programs/ty1998.npk	run:0	-
+ty1999	TYPE	1999	rule	m11/programs/ty1999.npk	refuse	-
+ty2007	TYPE	2007	rule	m11/programs/ty2007.npk	refuse	-
+ty2011	TYPE	2011	rule	m11/programs/ty2011.npk	refuse	-
+ty2013	TYPE	2013	rule	m11/programs/ty2013.npk	refuse	-
+ty2014	TYPE	2014	rule	m11/programs/ty2014.npk	run:0	-
+ty2019	TYPE	2019	rule	m11/programs/ty2019.npk	refuse	-
+ty2032	TYPE	2032	row	m11/programs/ty2032.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\badd\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfadd\b))	-
+ty2033	TYPE	2033	row	m11/programs/ty2033.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsub\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfsub\b))	-
+ty2034	TYPE	2034	row	m11/programs/ty2034.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bmul\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfmul\b))	-
+ty2035	TYPE	2035	row	m11/programs/ty2035.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsdiv\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfdiv\b))	-
+ty2036	TYPE	2036	row	m11/programs/ty2036.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsrem\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfrem\b))	-
+ty2035b	TYPE	2035	row	m11/programs/ty2035b.npk	run:97	-
+ty2037	TYPE	2037	row	m11/programs/ty2037.npk	run:0	-
+ty2038	TYPE	2038	row	m11/programs/ty2038.npk	run:0	-
+ty2043	TYPE	2043	row	m11/programs/ty2043.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\band i32\b)	-
+ty2044	TYPE	2044	row	m11/programs/ty2044.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\bor i32\b)	-
+ty2045	TYPE	2045	row	m11/programs/ty2045.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\bxor i32\b)	-
+ty2046	TYPE	2046	row	m11/programs/ty2046.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?\bxor i32 %[^,\n]+, -1\b)	-
+ty2046b	TYPE	2046	row	m10/programs/s09_bitwise_not.npk	run:0	-
+ty2047	TYPE	2047	row	m11/programs/ty2047.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11s"?\((?=(?:(?!\n\}).)*?\bshl i32\b)(?=(?:(?!\n\}).)*?\bicmp ult i32\b)	-
+ty2047b	TYPE	2047	row	m11/programs/ty2047b.npk	refuse:NITPICK-TYPE-070	-
+ty2047c	TYPE	2047	row	m11/programs/ty2047c.npk	run:111	-
+ty2048	TYPE	2048	row	m11/programs/ty2048.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11a"?\((?=(?:(?!\n\}).)*?\bashr i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11l"?\((?=(?:(?!\n\}).)*?\blshr i32\b))	-
+ty2048b	TYPE	2048	row	m10/programs/s01_signed_right_shift_arithmetic.npk	run:0	-
+ty2048c	TYPE	2048	row	m11/programs/ty2048c.npk	refuse	-
+ty2053	TYPE	2053	row	m11/programs/ty2053.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp eq i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp oeq double\b))	-
+ty2054	TYPE	2054	row	m11/programs/ty2054.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp ne i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp one double\b))	-
+ty2055	TYPE	2055	row	m11/programs/ty2055.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp slt i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp olt double\b))	-
+ty2056	TYPE	2056	row	m11/programs/ty2056.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sle i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp ole double\b))	-
+ty2057	TYPE	2057	row	m11/programs/ty2057.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sgt i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp ogt double\b))	-
+ty2058	TYPE	2058	row	m11/programs/ty2058.npk	ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sge i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp oge double\b))	-
+ty2054b	TYPE	2054	row	m10/programs/m07_nan_comparisons.npk	run:0	-
+ty2053b	TYPE	2053	row	m11/programs/ty2053b.npk	refuse	-
+ty2053c	TYPE	2053	row	m11/programs/ty2053c.npk	refuse	-
+ty2053d	TYPE	2053	row	m11/programs/ty2053d.npk	refuse	-
+ty2053e	TYPE	2053	row	m11/programs/ty2053e.npk	run:0	-
+ty2063	TYPE	2063	row	m11/programs/ty2063.npk	run:0	-
+ty2064	TYPE	2064	row	m11/programs/ty2064.npk	run:0	-
+ty2065	TYPE	2065	row	m11/programs/ty2065.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?\bxor i1 %[^,\n]+, true\b)	-
+ty2070	TYPE	2070	row	m11/programs/ty2070.npk	refuse:NITPICK-TYPE-071	-
+ty2070b	TYPE	2070	row	m11/programs/ty2070b.npk	refuse	-
+ty2071	TYPE	2071	row	m11/programs/ty2071.npk	run:0	-
+ty2072	TYPE	2072	row	m11/programs/ty2072.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11d"?\((?=(?:(?!\n\}).)*?\bload i32, ptr %)	-
+ty2073	TYPE	2073	row	m11/programs/ty2073.npk	run:0	-
+ty2074	TYPE	2074	row	m11/programs/ty2074.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11g"?\((?=(?:(?!\n\}).)*?\bgetelementptr\b)(?=(?:(?!\n\}).)*?\bload i32\b)	-
+ty2079	TYPE	2079	row	m11/programs/ty2079.npk	run:0	-
+ty2080	TYPE	2080	row	m11/programs/ty2080.npk	run:81	-
+ty2081	TYPE	2081	row	m11/programs/ty2081.npk	run:0	-
+ty2082	TYPE	2082	row	m11/programs/ty2082.npk	run:0	-
+ty2083	TYPE	2083	row	m11/programs/ty2083.npk	run:0	-
+ty2084	TYPE	2084	row	m11/programs/ty2084.npk	run:0	-
+ty2089	TYPE	2089	row	m11/programs/ty2089.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11w"?\((?=(?:(?!\n\}).)*?\bsext i8\b)	-
+ty2090	TYPE	2090	row	m11/programs/ty2090.npk	run:0	-
+ty2095	TYPE	2095	row	m11/programs/ty2095.npk	run:0	-
+ty2096	TYPE	2096	row	m11/programs/ty2096.npk	run:0	-
+ty2101	TYPE	2101	row	m10/programs/x05_ternary_evaluates_one_branch.npk	run:0	-
+ty2101b	TYPE	2101	row	m11/programs/ty2101b.npk	ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\((?=(?:(?!\n\}).)*?\bselect i1\b)	-
+ty2106	TYPE	2106	row	m11/programs/ty2106.npk	run:0	-
+ty2107	TYPE	2107	row	m11/programs/ty2107.npk	run:0	-
+ty2108	TYPE	2108	row	m11/programs/ty2108.npk	run:0	-
 vf0007	VERIFICATION	7	rule	m11/programs/vf0007.sh	sh:0	-
 vf0026	VERIFICATION	26	rule	m11/programs/vf0026.npk	refuse	-
 vf0028	VERIFICATION	28	example	m11/programs/vf0028.npk	run:0	-

@@ -1,0 +1,52 @@
+// M11 ty1756 -- meta/specs/TYPE_REFERENCE.md:1756 (rule)
+// quote: Allocation failure traps
+// claim: A buffer_new the allocator cannot meet traps (2^50 bytes).
+// expect: run:42
+// wrong: no trap: an empty buffer (11) or a huge one (10)
+mod:ty1756;
+
+func:v64 = int64(int64:x) never fails { pass x; };
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 42i32; },
+        (HeapOom) { exit 42i32; },
+        (IntOverflow) { exit 42i32; },
+        (OutOfBounds) { exit 42i32; },
+        (Unreachable) { exit 42i32; },
+        (WildLeak) { exit 42i32; },
+        (DivByZero) { exit 42i32; },
+        (DivOverflow) { exit 42i32; },
+        (StaleHandle) { exit 42i32; },
+        (DeadlineExceeded) { exit 42i32; },
+        (ChannelClosed) { exit 42i32; },
+        (DriverLeak) { exit 42i32; },
+        (IoEof) { exit 42i32; },
+        (WouldBlock) { exit 42i32; },
+        (StackExhausted) { exit 42i32; },
+        (MachineFault) { exit 42i32; },
+        (LimitViolated) { exit 42i32; },
+        (DecreasesViolated) { exit 42i32; },
+        (TbbErr) { exit 42i32; },
+        (ShiftRange) { exit 42i32; },
+        (CastRange) { exit 42i32; },
+        (BadStep) { exit 42i32; },
+        (BorrowOverlap) { exit 42i32; },
+        (RequiresViolated) { exit 42i32; },
+        (EnsuresViolated) { exit 42i32; },
+        (InvariantViolated) { exit 42i32; },
+        (Interrupted) { exit 42i32; },
+        (NotFound) { exit 42i32; },
+        (Exists) { exit 42i32; },
+        (CrossDevice) { exit 42i32; },
+        (BadPath) { exit 42i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    buffer:b = buffer_new(raw v64(1125899906842624i64));
+    if (b.len == 0i64) { exit 11i32; }
+    exit 10i32;
+};

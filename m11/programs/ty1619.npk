@@ -1,0 +1,58 @@
+// M11 ty1619 -- meta/specs/TYPE_REFERENCE.md:1619 (row)
+// quote: | `frac8` |
+// claim: `frac8` holds a whole int8, a numerator int8 and a denominator uint8: 3 bytes.
+// expect: run:0
+// wrong: refused (a member's type), or 10-12: 1/3 misread; 13: another size
+mod:ty1619;
+
+func:v8 = int8(int8:x) never fails { pass x; };
+
+func:main = int32(cstring[]:_~argv) {
+    frac8:a = ((raw v8(1i8) => frac8) / (3i8 => frac8));
+    int8:wh = a.whole;
+    int8:nu = a.num;
+    uint8:de = a.denom;
+    if (wh != 0i8) { exit 10i32; }
+    if (nu != 1i8) { exit 11i32; }
+    if (de != 3u8) { exit 12i32; }
+    if (#size_of<frac8>() != 3i64) { exit 13i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

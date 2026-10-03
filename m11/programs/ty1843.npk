@@ -1,0 +1,81 @@
+// M11 ty1843 -- meta/specs/TYPE_REFERENCE.md:1843 (example)
+// quote: ```nitpick
+// claim: The example's positions (module bindings, a local, a late local, a struct field, a parameter) compile.
+// expect: compile
+// wrong: refused
+mod:ty1843;
+
+func:compute = int32(int32:x) never fails { pass x; };
+
+// A module binding. Its initialiser is the only place it can be written
+// (D-165), it must be a compile-time constant, and D-211 requires the keyword.
+pub fixed int32:MAX_SIZE = 1024i32;
+pub fixed string:VERSION = "1.0.0";
+
+// A local, written where it is declared...
+func:f = NIL() never fails {
+    fixed int32:cap = 100i32;
+    // cap = 200i32;        // NITPICK-ASSIGN-002
+    pass NIL;
+};
+
+// ...or written ONCE, LATER, from a value nothing knew at compile time.
+// This is the case other languages make you work around.
+func:g = int32(int32:seed) never fails {
+    fixed int32:derived;
+    derived = raw compute(seed);   // the one write, at run time
+    // derived = 0i32;             // NITPICK-ASSIGN-002
+    pass derived;
+};
+
+// A struct field, written when the aggregate is constructed and never after —
+// including through a pointer.
+pub struct:Config = {
+    fixed string:name;
+    int32:value;
+};
+
+// A parameter the callee may not reassign.
+func:greet = NIL(fixed string:name) { pass NIL; };
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest) { exit 91i32; },
+        (HeapOom) { exit 92i32; },
+        (IntOverflow) { exit 93i32; },
+        (OutOfBounds) { exit 94i32; },
+        (Unreachable) { exit 95i32; },
+        (WildLeak) { exit 96i32; },
+        (DivByZero) { exit 97i32; },
+        (DivOverflow) { exit 98i32; },
+        (StaleHandle) { exit 100i32; },
+        (DeadlineExceeded) { exit 101i32; },
+        (ChannelClosed) { exit 102i32; },
+        (DriverLeak) { exit 103i32; },
+        (IoEof) { exit 104i32; },
+        (WouldBlock) { exit 105i32; },
+        (StackExhausted) { exit 106i32; },
+        (MachineFault) { exit 107i32; },
+        (LimitViolated) { exit 108i32; },
+        (DecreasesViolated) { exit 109i32; },
+        (TbbErr) { exit 110i32; },
+        (ShiftRange) { exit 111i32; },
+        (CastRange) { exit 112i32; },
+        (BadStep) { exit 113i32; },
+        (BorrowOverlap) { exit 114i32; },
+        (RequiresViolated) { exit 115i32; },
+        (EnsuresViolated) { exit 116i32; },
+        (InvariantViolated) { exit 117i32; },
+        (Interrupted) { exit 118i32; },
+        (NotFound) { exit 119i32; },
+        (Exists) { exit 120i32; },
+        (CrossDevice) { exit 121i32; },
+        (BadPath) { exit 122i32; },
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

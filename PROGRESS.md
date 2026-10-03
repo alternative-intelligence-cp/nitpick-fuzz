@@ -1529,6 +1529,26 @@ land at a clean point by 95 % of the week. The week read 90 % before it.
 - **The final full run**, all 2 700 programs: 2 438 agree, 262 disagree. The 2 577 earlier
   programs re-ran identical.
 
+**TYPE 1593–2122, `gen/m11_claims/type4.py`** (part C, S65). The week read 91 % before it.
+TYPE is one reference, so its last part is not a new reference. The landing line the
+author set for TYPE is 95 % (the workbench's go).
+- **The extraction.** 178 claims (9 examples, 58 rows, 111 rules); 172 testable, 7 of them
+  M10's programs; 6 untestable: 3 `tool`, 1 `internal`, 1 `unobservable`, 1 `vague`. One
+  table is excluded: the implementation-priority table, a plan by cycle.
+  - The range is:
+    - §19 (dimensional types);
+    - §20 (frac: rows, the five invariants, ERR, casts, `ToString`);
+    - §21 (complex);
+    - §22 (`binary` removed);
+    - §23 (`buffer`);
+    - §25 (the library tier, by scripts over the compiler's `lib/`);
+    - §26 (`fixed`);
+    - §27 (NIL, NULL, `void`, `any`, auto-dereference, `unknown`);
+    - §28 (every row of the operator tables, as IR or as behaviour).
+  - `lib_run` gained failsafe arms for a library's own errors, defaulting to none, so part
+    B's scripts are unchanged (regenerated identical).
+  - Committed before any of its programs ran.
+
 ## Environment
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*

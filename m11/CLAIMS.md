@@ -10,7 +10,7 @@ answer), `refuse[:CODE]` (npkc 1), `compile` (npkc 0 and both legs build),
 `ir:RE`/`ir!:RE` (the emitted IR does/does not match), `sh:N` (a script's exit).
 A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverflow 93, OutOfBounds 94, Unreachable 95, WildLeak 96, DivByZero 97, DivOverflow 98, StaleHandle 100, DeadlineExceeded 101, ChannelClosed 102, DriverLeak 103, IoEof 104, WouldBlock 105, StackExhausted 106, MachineFault 107, LimitViolated 108, DecreasesViolated 109, TbbErr 110, ShiftRange 111, CastRange 112, BadStep 113, BorrowOverlap 114, RequiresViolated 115, EnsuresViolated 116, InvariantViolated 117, Interrupted 118, NotFound 119, Exists 120, CrossDevice 121, BadPath 122.
 
-**3207 claims: 2700 testable, 507 untestable** (each with its reason).
+**3385 claims: 2872 testable, 513 untestable** (each with its reason).
 
 | reference | claims | examples | rows | rules | testable | untestable |
 |---|---|---|---|---|---|---|
@@ -26,7 +26,7 @@ A trap exits its `failsafe` arm's code: HeapBadRequest 91, HeapOom 92, IntOverfl
 | MODULE | 139 | 7 | 3 | 129 | 124 | 15 |
 | OP | 159 | 0 | 87 | 72 | 157 | 2 |
 | TRAITS | 119 | 19 | 16 | 84 | 115 | 4 |
-| TYPE | 719 | 38 | 179 | 502 | 675 | 44 |
+| TYPE | 897 | 47 | 237 | 613 | 847 | 50 |
 | VERIFICATION | 716 | 11 | 146 | 559 | 473 | 243 |
 
 The line ranges extracted (each module declares its own with `covers()`; coverage
@@ -47,7 +47,7 @@ extracted:
 | MODULE | 300 | 1–300 | 300 | — |
 | OP | 403 | 1–403 | 403 | — |
 | TRAITS | 766 | 1–766 | 766 | — |
-| TYPE | 2122 | 1–660, 661–1176, 1177–1592 | 1592 | 1593–2122 |
+| TYPE | 2122 | 1–660, 661–1176, 1177–1592, 1593–2122 | 2122 | — |
 | VERIFICATION | 2351 | 1–845, 846–1247, 1248–2351 | 2351 | — |
 
 ## AST (`meta/specs/AST_REFERENCE.md`)
@@ -2613,6 +2613,188 @@ Tables whose rows are not claims:
 | `ty1579` | 1579 | rule | “; Vtable: function pointers in TRAIT DECLARATION ORDER (D-158)” | A vtable holds one adapter thunk per method, in declaration order. | untestable [internal] a vtable's slot order is not observable from a program |
 | `ty1584` | 1584 | rule | “The bounds are **canonically ordered by trait name at type interning**” | `dyn A & B` and `dyn B & A` are one type: one binds to the other. | `run:0` |
 | `ty1586` | 1586 | rule | “Widening (`dyn A & B` → `dyn A`) is a” | Widening `dyn A & B` to `dyn A` compiles and keeps the value. | `run:0` |
+| `ty1595` | 1595 | rule | “Dimensional analysis types carry unit metadata at compile time only.” | A dimensional value is its base numeric type at run time: a `dim256<Meters>` parameter and a `tfp256` one have the same IR type. | `ir:(?s)\A(?=.*?@"?(?:[\w$]+\.)*m11d"?\(([^ ,)]+))(?=.*?@"?(?:[\w$]+\.)*m11t"?\(\1[ ,)])` |
+| `ty1598` | 1598 | example | “```nitpick” | D-036 rejected value-generic units on plain integers: `int32<Meters>` is refused. | `refuse` |
+| `ty1606` | 1606 | rule | “`Joules`, `Meters`, `Seconds`, `Newtons`, `Kelvin`” | `Joules`, `Meters`, `Seconds`, `Newtons` and `Kelvin` are units a `dim256` takes. | `run:0` |
+| `ty1607` | 1607 | rule | “Arithmetic across dimensions is validated at compile time” | Arithmetic across dimensions composes units: Meters / Seconds binds to `dim256<Meters/Seconds>`. | `run:0` |
+| `ty1619` | 1619 | row | “\| `frac8` \|” | `frac8` holds a whole int8, a numerator int8 and a denominator uint8: 3 bytes. | `run:0` |
+| `ty1620` | 1620 | row | “\| `frac16` \|” | `frac16` holds a whole int16, a numerator int16 and a denominator uint16: 6 bytes. | `run:0` |
+| `ty1621` | 1621 | row | “\| `frac32` \|” | `frac32` holds a whole int32, a numerator int32 and a denominator uint32: 12 bytes. | `run:0` |
+| `ty1622` | 1622 | row | “\| `frac64` \|” | `frac64` holds a whole int64, a numerator int64 and a denominator uint64: 24 bytes. | `run:0` |
+| `ty1624` | 1624 | example | “```llvm” | `frac32` is `{ i32, i32, i32 }`: a frac32 parameter has that type. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\(\{ ?i32, i32, i32 ?\}(?=[\s,)]))` |
+| `ty1631` | 1631 | rule | “is AUTOMATIC after every operation, never a call” | Normalization is automatic: 1/2 + 1/3 is 5/6, and 2/4 equals 1/2 with denominator 2. | `run:0` |
+| `ty1633` | 1633 | rule | “**Operators are `+ - * /` and the comparisons, exactly** — no `%`, no” | `%` on frac is refused. | `refuse` |
+| `ty1634` | 1634 | rule | “bitwise. Same-width only.” | Bitwise `&` on frac is refused. | `refuse` |
+| `ty1634b` | 1634 | rule | “bitwise. Same-width only.” | frac operators are same-width only: `frac32 + frac64` is refused. | `refuse` |
+| `ty1634c` | 1634 | rule | “Negation is unary `-` (through the same core).” | Unary `-` negates a frac: -(1/3) has numerator -1. | `run:0` |
+| `ty1635` | 1635 | rule | “**The five invariants hold after every operation**” | The invariants hold: -(2 5/8) is whole -3 and num 3 over 8 (num >= 0 when whole != 0, the sign on whole), and 1/2 - 5/6 is whole 0, num -1, denom 3 (the sign on num). | `run:0` |
+| `ty1637` | 1637 | rule | “"Call `frac_simplify` yourself" was a latent-ERR” | `frac_simplify` is gone: calling it is refused. | `refuse` |
+| `ty1639` | 1639 | rule | “is `{minN, minN, 0}` canonically, and `is_err` answers the” | A frac's ERR is `{min, min, 0}`, and `is_err` is true for it. | `run:0` |
+| `ty1642` | 1642 | rule | “division by an exact zero yields ERR” | frac division by an exact zero yields ERR, and ERR is sticky. | `run:0` |
+| `ty1643` | 1643 | rule | “operand at a comparison traps (” | A tainted frac at a comparison traps (-4100, TbbErr). | `trap:TbbErr` |
+| `ty1644` | 1644 | rule | “reduced form that still exceeds the width — is ERR” | A result whose reduced form exceeds the width is ERR: frac8 100 + 100. | `run:0` |
+| `ty1646` | 1646 | rule | “`int => frac` is the lossless entry” | `int => frac` is the lossless entry: 7 is `{7, 0, 1}`. | `run:0` |
+| `ty1646b` | 1646 | rule | “**No literals**” | There are no frac literals: `5frac32` is refused. | `refuse` |
+| `ty1647` | 1647 | rule | “No `pick` selectors” | There are no frac pick selectors: a pick on a frac is refused. | `refuse` |
+| `ty1649` | 1649 | rule | “**Members `.whole` / `.num` / `.denom`** are read-only component views” | The members are not places: assigning `.num` is refused. | `refuse` |
+| `ty1651` | 1651 | rule | “**Casts**: widths widen `=>`, narrow `=>!`” | A frac widens with `=>` and narrows with `=>!`, keeping the value. | `run:0` |
+| `ty1651b` | 1651 | rule | “**Casts**: widths widen `=>`, narrow `=>!`” | Narrowing a frac with `=>` is refused. | `refuse` |
+| `ty1652` | 1652 | rule | “reduced form does not fit)” | Narrowing a frac whose reduced form does not fit absorbs as ERR: 200 1/3 =>! frac8. | `run:0` |
+| `ty1652b` | 1652 | rule | “`frac =>! flt64` rounds” | `frac =>! flt64` rounds: 1/3 is about 0.3333. | `run:0` |
+| `ty1653` | 1653 | rule | “implied a checked conversion,” | A checked `frac => flt64` is refused: the conversion rounds, so it takes the bang. | `refuse` |
+| `ty1654` | 1654 | rule | “`frac =>! intN` truncates toward zero” | `frac =>! intN` truncates toward zero: -(2 5/8) is -2, not -3. | `run:0` |
+| `ty1655` | 1655 | rule | “traps under BOTH spellings on any exit” | An ERR frac leaving the family traps TbbErr (`=>!` to flt64). | `trap:TbbErr` |
+| `ty1655b` | 1655 | rule | “a float never enters” | A float never enters frac: `flt64 =>! frac32` is refused. | `refuse` |
+| `ty1656` | 1656 | rule | “other twisted families are reached through the plain integer” | Another twisted family is reached through the plain integer: tbb32 => frac32 is refused, (tbb32 => int32) => frac32 converts. | `refuse` |
+| `ty1657` | 1657 | rule | “**`ToString`**: "whole num/denom"” | ToString renders "3 1/3", "-2 5/8", "0" and "ERR". | `run:0` |
+| `ty1658` | 1658 | rule | “**The implementation is the PRELUDE's** (1.3.5)” | frac arithmetic is the prelude's: a frac32 addition calls a prelude function. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11fa"?\((?=(?:(?!\n\}).)*?call [^\n]*frac)` |
+| `ty1669` | 1669 | example | “```nitpick” | `complex<flt64>:z = complex(3.0flt64, 4.0flt64);` is 3 + 4i. | `run:0` |
+| `ty1673` | 1673 | example | “```llvm” | `complex<flt64>` is `{ double, double }`: a parameter has that type. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11c"?\(\{ ?double, double ?\}(?=[\s,)]))` |
+| `ty1681` | 1681 | rule | “`T` ∈ {`flt32`, `flt64`, `tfp32`, `tfp64`} exactly, gated at resolution” | `complex<int32>` is refused. | `refuse` |
+| `ty1681b` | 1681 | rule | “`T` ∈ {`flt32`, `flt64`, `tfp32`, `tfp64`} exactly, gated at resolution” | `complex<flt32>` and `complex<tfp32>` are accepted. | `run:0` |
+| `ty1683` | 1683 | rule | “slot (the `simd(…)` shape); there are no literals and NO CASTS in either” | There are no casts out of complex: `complex<flt64> =>! complex<flt32>` is refused. | `refuse` |
+| `ty1683b` | 1683 | rule | “slot (the `simd(…)` shape); there are no literals and NO CASTS in either” | There are no casts into complex: `flt64 => complex<flt64>` is refused. | `refuse` |
+| `ty1685` | 1685 | rule | “**Operators `+ - * /`, same-type only.**” | complex operators are same-type only: `complex<flt64> + complex<flt32>` is refused. | `refuse` |
+| `ty1686` | 1686 | rule | “the naive formula's denominator” | Float complex division is Smith's: 1 / (1e200 + 1e200i) is finite (about 5e-201), where the naive formula overflows. | `run:0` |
+| `ty1688` | 1688 | rule | “flt32 (no double-rounding through a wider width)” | flt32 complex arithmetic computes in flt32, with no double rounding. | untestable [unobservable] no input is given whose flt32 result differs under double rounding |
+| `ty1690` | 1690 | rule | “component ERR canonicalizes to BOTH components ERR after every operation” | On tfp elements, one ERR component makes both components ERR after an operation. | `run:0` |
+| `ty1691` | 1691 | rule | “**No order**” | complex has no order: `<` is refused. | `refuse` |
+| `ty1692` | 1692 | rule | “`==`/`!=` are per-component, IEEE on floats” | complex `==`/`!=` are per-component IEEE: a NaN component makes `==` false and `!=` true. | `run:0` |
+| `ty1693` | 1693 | rule | “taint-trapping on tfp (D-008 §5)” | complex `==` on a tfp element ERR traps TbbErr. | `trap:TbbErr` |
+| `ty1693b` | 1693 | rule | “No `pick`” | There are no complex pick selectors. | `refuse` |
+| `ty1694` | 1694 | rule | “`is_err` reads the pair disjunction on tfp elements” | `is_err` on a tfp complex is the disjunction of its components. | `run:0` |
+| `ty1695` | 1695 | rule | “refuses on float elements (a float carries NaN, not ERR)” | `is_err` on a float complex is refused. | `refuse` |
+| `ty1696` | 1696 | rule | “**Methods**: `.re()` `.im()` `.conj()` `.abs2()` on every element type” | `.re() .im() .conj() .abs2()` work on flt64 and tfp32 elements, and `.abs()` on flt64. | `run:0` |
+| `ty1697` | 1697 | rule | “`.abs()` on FLOAT elements only” | `.abs()` on a tfp complex is refused. | `refuse` |
+| `ty1700` | 1700 | rule | “**`ToString`**: "3+4i" / "3-4i"” | ToString renders "3+4i" and "3-4i", and a tfp ERR pair "ERR". | `run:0` |
+| `ty1702` | 1702 | rule | “**The arithmetic is the PRELUDE'S**, per element type” | complex arithmetic is the prelude's, in Nitpick. | untestable [internal] where a body lives; Smith's result is tested (ty1686) |
+| `ty1710` | 1710 | rule | “there is no `buffer_free`” | There is no `buffer_free`: calling it is refused. | `refuse` |
+| `ty1719` | 1719 | rule | “property, so an immutable byte view is `fixed uint8[]`” | An immutable byte view is `fixed uint8[]`: it binds and reads. | `run:0` |
+| `ty1719b` | 1719 | rule | “property, so an immutable byte view is `fixed uint8[]`” | A `fixed uint8[]` is immutable: writing an element through it is refused. | `refuse` |
+| `ty1721` | 1721 | rule | “Redundant twice over. `binary` and its seven `binary_*` operations are removed;” | `binary` is removed: a `binary` parameter is refused. | `refuse` |
+| `ty1726` | 1726 | rule | “keyword that was never defined. D-074 returns it to userland along with” | `stream`, `process`, `pipe`, `debug` and `log` are not keywords: locals of those names compile. | `run:0` |
+| `ty1739` | 1739 | example | “```llvm” | A buffer is `{ ptr, i64, i64 }`: 24 bytes, alignment 8. | `run:0` |
+| `ty1742` | 1742 | rule | “%buffer = type { ptr, i64, i64 }” | A buffer parameter is `{ ptr, i64, i64 }`. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\(\{ ?ptr, i64, i64 ?\}(?=[\s,)]))` |
+| `ty1745` | 1745 | example | “```nitpick” | The buffer example runs: 42 written as an int32 through `#ptr_add`, read back, and its low byte read through the ptr. | `run:0` |
+| `ty1754` | 1754 | rule | “`buffer_new(n)` — `int64 → buffer`, **never fails**” | `buffer_new(n)` gives n zeroed bytes with len == cap == n, and `.ptr` is a `uint8->`. | `run:0` |
+| `ty1755` | 1755 | rule | “`n <= 0` is the EMPTY non-owning buffer” | `buffer_new(n)` for n <= 0 is the empty buffer: a null ptr and cap 0. | `run:0` |
+| `ty1756` | 1756 | rule | “Allocation failure traps” | A buffer_new the allocator cannot meet traps (2^50 bytes). | `run:42` |
+| `ty1757` | 1757 | rule | “The count is `int64` by declaration” | buffer_new's count is int64 by declaration: an int32 count is refused. | `refuse` |
+| `ty1762` | 1762 | rule | “a buffer is move-only” | A buffer is move-only: copying one is TYPE-046. | `refuse:NITPICK-TYPE-046` |
+| `ty1763` | 1763 | rule | “rides a channel whole under the send's `move`” | A buffer rides a channel whole under the send's `move`. | untestable [tool] needs the concurrency runtime's spawn and channel; CONCURRENCY's claims test sends |
+| `ty1767` | 1767 | rule | “`==` refuses as the string's does (D-169)” | `==` on buffers is refused. | `refuse` |
+| `ty1771` | 1771 | rule | “the per-width `buffer_write_i8/…/read_i64` verb family” | `buffer_write_i8` was not landed: calling it is refused. | `refuse` |
+| `ty1772` | 1772 | rule | “`buffer_free` (the managed drop IS the free” | `buffer_free` was not landed: calling it is refused. | `refuse` |
+| `ty1773` | 1773 | rule | “`buffer_resize`” | `buffer_resize` was not landed: calling it is refused. | `refuse` |
+| `ty1773b` | 1773 | rule | “`buffer_bytes` (a borrow” | `buffer_bytes` was not landed: calling it is refused. | `refuse` |
+| `ty1780` | 1780 | rule | “None of these are compiler types.” | vec2 is not a compiler type: without the library, `vec2` as a type is refused. | `refuse` |
+| `ty1786` | 1786 | rule | “Structs of one `simd<flt64, N>` field, with constructor FUNCTIONS” | vec3 is built by `vec3_of`, and its methods are lane reads, `.dot`, `.length2`, `.length` and `.cross`. | `sh:0` |
+| `ty1792` | 1792 | rule | “`.cross(o)` on `vec3` alone” | `.cross` is on vec3 alone: `vec2.cross` is refused. | `sh:0` |
+| `ty1797` | 1797 | example | “```nitpick” | vec9 has the nine named fields `m00` … `m22`, and `vec9_id()` is the identity. | `sh:0` |
+| `ty1805` | 1805 | rule | “`mRC` = row R, col C” | `mRC` is row R, column C, and `.mul` is the 3x3 product: (I + 2·e01)(I + 3·e10) has m00 = 7. | `sh:0` |
+| `ty1811` | 1811 | rule | “`matrix<T>` is `{ buffer:cells; int64:rows; int64:cols; }`” | `matrix<T>` is a buffer and two int64s: 40 bytes. | `sh:0` |
+| `ty1812` | 1812 | rule | “`mat_of::<T>(rows, cols)` (zeroed birth) and bounds-checked `.get(r, c)` /” | `mat_of` makes a zeroed matrix; `.set`/`.get` reach a cell; an index out of bounds fails BadIndex. | `sh:0` |
+| `ty1815` | 1815 | rule | “`tensor<T>` is `{ buffer:cells; int64:ndims; int64[9]:dims; }`” | `tensor<T>` is a buffer, an int64 and nine inline int64 dims: 104 bytes. | `sh:0` |
+| `ty1816` | 1816 | rule | “**rank capped at 9**” | A tensor's rank is capped at 9: `tensor_of` with ten dims fails, and with three succeeds. | `sh:0` |
+| `ty1825` | 1825 | rule | “`matrix<tryte>` and” | `matrix<tryte>` is the ternary matrix: a cell holds a tryte, and ERR rides through it. | `sh:0` |
+| `ty1843` | 1843 | example | “```nitpick” | The example's positions (module bindings, a local, a late local, a struct field, a parameter) compile. | `compile` |
+| `ty1845` | 1845 | rule | “(D-165), it must be a compile-time constant” | A module binding's initialiser must be a compile-time constant: a run-time call is refused. | `refuse` |
+| `ty1845b` | 1845 | rule | “and D-211 requires the keyword” | D-211 requires the keyword: a module binding without `fixed` is refused. | `refuse` |
+| `ty1852` | 1852 | rule | “// cap = 200i32;        // NITPICK-ASSIGN-002” | A fixed local written again is ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` |
+| `ty1860` | 1860 | rule | “derived = raw compute(seed);   // the one write, at run time” | A fixed local may be written once, later, at run time. | `run:0` (M10 `d12_fixed_local_written_later`) |
+| `ty1861` | 1861 | rule | “// derived = 0i32;             // NITPICK-ASSIGN-002” | A second write to a late fixed local is ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` (M10 `d13_fixed_local_written_twice`) |
+| `ty1865` | 1865 | rule | “// A struct field, written when the aggregate is constructed and never after —” | A fixed field written after construction is ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` (M10 `d14_fixed_field_written`) |
+| `ty1866` | 1866 | rule | “// including through a pointer.” | A fixed field written through a pointer is ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` |
+| `ty1873` | 1873 | rule | “func:greet = NIL(fixed string:name) { pass NIL; };” | A fixed parameter may not be reassigned: ASSIGN-002. | `refuse:NITPICK-ASSIGN-002` |
+| `ty1884` | 1884 | example | “```nitpick” | `comptime(…)` around a folding initialiser is accepted: `comptime(2i32 * 3i32)` is 6. | `run:0` |
+| `ty1886` | 1886 | rule | “fixed int32:no = comptime(raw runtime_val());  // refused: does not fold” | `comptime(…)` around a run-time value is TYPE-004. | `refuse:NITPICK-TYPE-004` |
+| `ty1891` | 1891 | rule | “A module binding lowers to `@"npk.<module>.name" =” | A fixed module binding is a constant global: `@"npk.<module>.MAX_SIZE" = constant i32 1024`. | `ir:(?m)^@"npk\.ty1891\.MAX_SIZE" = [^\n]*\bconstant i32 1024\b` |
+| `ty1922` | 1922 | rule | “`const` is not a reserved word” | `const` is an ordinary identifier: a local named `const` compiles. | `run:0` |
+| `ty1941` | 1941 | rule | “"void functions" DO NOT EXIST in Nitpick” | A NIL function returns `Result<NIL>`: its call binds to a `Result<NIL>`, which is not an error. | `run:0` |
+| `ty1942` | 1942 | rule | “`pass(NIL)` desugars to `return Result{ value: NIL, err: 0i32 }`” | The desugared form `return Result{ value: NIL, err: 0i32 };` is a success. | `run:0` |
+| `ty1943` | 1943 | rule | “To call a NIL-returning function without checking: `drop(myFunc());`” | A NIL-returning function is called without checking by `drop(myFunc());`. | `run:0` |
+| `ty1944` | 1944 | rule | “**`NIL` is zero-sized** (D-084)” | NIL is zero-sized: a struct of an int32 and a NIL field is 4 bytes. | `run:0` |
+| `ty1953` | 1953 | rule | “**`NULL` with no context is” | NULL with no context is an error. | `refuse` |
+| `ty1954` | 1954 | rule | “an error and `NIL` is not**” | NIL with no context is not an error: it is the unit value. | `run:0` |
+| `ty1956` | 1956 | rule | “`NIL?` is refused” | `NIL?` is refused. | `refuse` |
+| `ty1957` | 1957 | rule | “IR: `Result<NIL>` is therefore `{ i32 }`” | `Result<NIL>` is `{ i32 }`, 4 bytes, alignment 4. | `run:0` |
+| `ty1957b` | 1957 | rule | “IR: `Result<NIL>` is therefore `{ i32 }`” | A NIL function returns `{ i32 }`. | `ir:(?m)^define \{ i32 \} @"?(?:[\w$]+\.)*m11n"?\(` |
+| `ty1968` | 1968 | rule | “Represents address zero — the null pointer” | NULL is the null pointer: a pointer set to NULL compares equal to it. | `run:0` |
+| `ty1970` | 1970 | rule | “NOT valid as a general "no value" — that's `NIL`” | NULL is not a general no-value: `int32:x = NULL;` is refused. | `refuse` |
+| `ty1971` | 1971 | rule | “IR: `ptr null`” | NULL is `ptr null` in the IR. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11z"?\((?=(?:(?!\n\}).)*?\bptr null\b)` |
+| `ty1975` | 1975 | rule | “ONLY valid inside `extern { }` blocks, for functions that return C `void`” | `void` is valid inside an extern block, as a method's return type. | `sh:0` |
+| `ty1976` | 1976 | rule | “**Forbidden everywhere else** — type checker error with diagnostic:” | `void` outside an extern block is refused with "'void' is reserved for extern blocks; use 'NIL' for Nitpick functions returning nothing". | `sh:0` |
+| `ty1978` | 1978 | rule | “IR: maps to LLVM `void` return type in the extern function's `declare`” | An extern void function is a `declare void`. | untestable [tool] an extern block lowers to driver-wire stubs (D-149), whose shape needs a driver to observe |
+| `ty1983` | 1983 | rule | “MUST be used with the pointer suffix: `any->`  (NOT bare `any`)” | Bare `any` is refused with "'any' must be used as a pointer type: 'any->'. Bare 'any' is not a valid type." | `sh:0` |
+| `ty1987` | 1987 | rule | “Cast to concrete type via **`p =>! T`** before dereferencing” | An `any->` is cast to a concrete pointer with `=>!` and then dereferenced. | `run:0` |
+| `ty1989` | 1989 | rule | “This read `p => T`” | Giving an `any->` a type with `=>` is refused (D-095). | `refuse` |
+| `ty1998` | 1998 | rule | “`.` dereferences a pointer once.” | `p.x` reaches the field through a `T->`, and `(<-pp).x` through a `T->->`. | `run:0` |
+| `ty1999` | 1999 | rule | “`pp.x` where `pp` is `T->->` is an error” | `pp.x` through a `T->->` is refused. | `refuse` |
+| `ty2004` | 2004 | rule | “The same rule applies to UFCS: `q.method()` peels exactly one” | A method call peels exactly one level. | untestable [vague] which receiver types a method accepts after its one peel is not stated |
+| `ty2007` | 2007 | rule | “`any->` has no members at any level.” | `any->` has no members: `p.x` is refused. | `refuse` |
+| `ty2011` | 2011 | rule | “Not a type the user can write directly” | `unknown` is not a type a user writes: `unknown:x = …` is refused. | `refuse` |
+| `ty2013` | 2013 | rule | “Propagates through operations: `unknown + 1` → result is also `unknown`” | The taint propagates: `r.value + 1` from an unchecked Result is refused. | `refuse` |
+| `ty2014` | 2014 | rule | “Must be cleared by checking `Result.is_error` first” | Checking `is_error` clears the taint: after the check, `r.value + 1` is 6. | `run:0` |
+| `ty2019` | 2019 | rule | “has been removed from the language” | `ok` is removed: `ok(r)` is refused. | `refuse` |
+| `ty2021` | 2021 | rule | “IR: uses `undef` value with taint metadata in debug builds” | A tainted value is `undef` with taint metadata in debug builds. | untestable [tool] no debug build is defined for the harness; release IR has no taint metadata to read |
+| `ty2032` | 2032 | row | “\| `+` \|” | `+` lowers to `add` on int32 and `fadd` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\badd\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfadd\b))` |
+| `ty2033` | 2033 | row | “\| `-` \|” | `-` lowers to `sub` on int32 and `fsub` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsub\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfsub\b))` |
+| `ty2034` | 2034 | row | “\| `*` \|” | `*` lowers to `mul` on int32 and `fmul` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bmul\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfmul\b))` |
+| `ty2035` | 2035 | row | “\| `/` \|” | `/` lowers to `sdiv` on int32 and `fdiv` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsdiv\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfdiv\b))` |
+| `ty2035b` | 2035 | row | “div-by-zero → failsafe” | Integer division by zero goes to failsafe (DivByZero). | `trap:DivByZero` |
+| `ty2036` | 2036 | row | “\| `%` \|” | `%` lowers to `srem` on int32 and `frem` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bsrem\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfrem\b))` |
+| `ty2037` | 2037 | row | “\| `**` \| power \| library call \| Tier 1 \|” | `**` is power: 2 ** 10 is 1024. | `run:0` |
+| `ty2038` | 2038 | row | “\| `<=>` \| spaceship \| `icmp`+select \| Returns -1/0/1 \|” | `<=>` returns -1, 0 or 1. | `run:0` |
+| `ty2043` | 2043 | row | “\| `&` \|” | `&` lowers to `and i32`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\band i32\b)` |
+| `ty2044` | 2044 | row | “\| `\\|` \|” | `\|` lowers to `or i32`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\bor i32\b)` |
+| `ty2045` | 2045 | row | “\| `^` \|” | `^` lowers to `xor i32`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11b"?\((?=(?:(?!\n\}).)*?\bxor i32\b)` |
+| `ty2046` | 2046 | row | “\| `~` \| bitwise NOT \| `xor %v, -1` \|” | `~` lowers to `xor %v, -1`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?\bxor i32 %[^,\n]+, -1\b)` |
+| `ty2046b` | 2046 | row | “\| `~` \| bitwise NOT \| `xor %v, -1` \|” | `~` is bitwise NOT. | `run:0` (M10 `s09_bitwise_not`) |
+| `ty2047` | 2047 | row | “\| `<<` \| left shift \| `shl` \|” | `<<` lowers to `shl`, guarded by one `icmp ult` for a computed amount. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11s"?\((?=(?:(?!\n\}).)*?\bshl i32\b)(?=(?:(?!\n\}).)*?\bicmp ult i32\b)` |
+| `ty2047b` | 2047 | row | “TYPE-070 for a known amount outside it” | A known shift amount outside [0, width) is TYPE-070. | `refuse:NITPICK-TYPE-070` |
+| `ty2047c` | 2047 | row | “one `icmp ult` and `ShiftRange` for a computed one” | A computed shift amount outside [0, width) traps ShiftRange. | `trap:ShiftRange` |
+| `ty2048` | 2048 | row | “Arithmetic on a SIGNED operand, logical on an UNSIGNED one” | `>>` is `ashr` on a signed operand and `lshr` on an unsigned one. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11a"?\((?=(?:(?!\n\}).)*?\bashr i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11l"?\((?=(?:(?!\n\}).)*?\blshr i32\b))` |
+| `ty2048b` | 2048 | row | “the operand's signedness decides” | A signed right shift is arithmetic. | `run:0` (M10 `s01_signed_right_shift_arithmetic`) |
+| `ty2048c` | 2048 | row | “a `>>>` row until 1.5.1b (the workbench's O-N12): it never lexed” | `>>>` does not exist: it is refused. | `refuse` |
+| `ty2053` | 2053 | row | “\| `==` \|” | `==` lowers to `icmp eq` on int32 and `fcmp oeq` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp eq i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp oeq double\b))` |
+| `ty2053b` | 2053 | row | “**A struct, array, `Result`, `string` or `dyn` does not compare with `==`**” | A struct does not compare with `==`. | `refuse` |
+| `ty2053c` | 2053 | row | “**A struct, array, `Result`, `string` or `dyn` does not compare with `==`**” | A string does not compare with `==`. | `refuse` |
+| `ty2053d` | 2053 | row | “**A struct, array, `Result`, `string` or `dyn` does not compare with `==`**” | An array does not compare with `==`. | `refuse` |
+| `ty2053e` | 2053 | row | “`string_eq` for strings” | Strings compare with `string_eq`. | `run:0` |
+| `ty2054` | 2054 | row | “\| `!=` \|” | `!=` lowers to `icmp ne` on int32 and `fcmp one` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp ne i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp one double\b))` |
+| `ty2054b` | 2054 | row | “\| `!=` \| not equal \| `icmp ne`/`fcmp one` \|” | NaN comparisons follow IEEE. | `run:0` (M10 `m07_nan_comparisons`) |
+| `ty2055` | 2055 | row | “\| `<` \|” | `<` lowers to `icmp slt` on int32 and `fcmp olt` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp slt i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp olt double\b))` |
+| `ty2056` | 2056 | row | “\| `<=` \|” | `<=` lowers to `icmp sle` on int32 and `fcmp ole` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sle i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp ole double\b))` |
+| `ty2057` | 2057 | row | “\| `>` \|” | `>` lowers to `icmp sgt` on int32 and `fcmp ogt` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sgt i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp ogt double\b))` |
+| `ty2058` | 2058 | row | “\| `>=` \|” | `>=` lowers to `icmp sge` on int32 and `fcmp oge` on flt64. | `ir:(?s)\A(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11i"?\((?=(?:(?!\n\}).)*?\bicmp sge i32\b))(?=.*?^define [^@\n]*@"?(?:[\w$]+\.)*m11f"?\((?=(?:(?!\n\}).)*?\bfcmp oge double\b))` |
+| `ty2063` | 2063 | row | “\| `&&` \| logical AND \| `and i1` (short-circuit) \| Both sides bool \|” | `&&` short-circuits: `false && f()` does not call f. | `run:0` |
+| `ty2064` | 2064 | row | “\| `\\|\\|` \| logical OR \| `or i1` (short-circuit) \| Both sides bool \|” | `\|\|` short-circuits: `true \|\| f()` does not call f. | `run:0` |
+| `ty2065` | 2065 | row | “\| `!` \| logical NOT \| `xor i1 %v, true` \|” | `!` lowers to `xor i1 %v, true`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11n"?\((?=(?:(?!\n\}).)*?\bxor i1 %[^,\n]+, true\b)` |
+| `ty2070` | 2070 | row | “a `fixed` binding has no address (D-287, TYPE-071)” | A fixed binding has no address: `@k` is TYPE-071. | `refuse:NITPICK-TYPE-071` |
+| `ty2070b` | 2070 | row | “val must be lvalue” | `@` needs an lvalue: `@(1 + 2)` is refused. | `refuse` |
+| `ty2071` | 2071 | row | “\| `$$i val` / `$$m val` \| shared / exclusive claim \| the same address \|” | `$$i` and `$$m` are the same address, one pointer type: a `$$i` read sees what a `$$m` wrote. | `run:0` |
+| `ty2072` | 2072 | row | “\| `<-ptr` \| dereference \| `load T, ptr %ptr` \|” | `<-ptr` lowers to a `load` of T through the pointer. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11d"?\((?=(?:(?!\n\}).)*?\bload i32, ptr %)` |
+| `ty2073` | 2073 | row | “\| `ptr->field` \| member via ptr \|” | `ptr->field` reads a member through a pointer. | `run:0` |
+| `ty2074` | 2074 | row | “\| `val.field` \| direct member \| `getelementptr` + `load` \|” | `val.field` lowers to a `getelementptr` and a `load`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11g"?\((?=(?:(?!\n\}).)*?\bgetelementptr\b)(?=(?:(?!\n\}).)*?\bload i32\b)` |
+| `ty2079` | 2079 | row | “\| `?` \| safe unwrap with default \| branch + select \| `res ? default` \|” | `res ? default` is the safe unwrap. | `run:0` |
+| `ty2080` | 2080 | row | “\| `?!` \| emphatic unwrap \| branch → failsafe \| No default \|” | `?!` goes to failsafe on an error, with its own code (E1 exits 81). | `run:81` |
+| `ty2081` | 2081 | row | “\| `??` \| null coalesce \| branch + select \| `opt ?? default` \|” | `opt ?? default` coalesces an empty Optional. | `run:0` |
+| `ty2082` | 2082 | row | “\| `?.\\|` \| safe navigation \| branch + select \| `opt?.field` \|” | `opt?.field` is safe navigation. | `run:0` |
+| `ty2083` | 2083 | row | “\| `\\|>` \| pipe forward \| `call f(%v)` \| `v \\|> f` = `f(v)` \|” | `v \|> f` is `f(v)`. | `run:0` |
+| `ty2084` | 2084 | row | “\| `<\\|` \| pipe backward \| `call f(%v)` \| `f <\\| v` = `f(v)` \|” | `f <\| v` is `f(v)`. | `run:0` |
+| `ty2089` | 2089 | row | “\| `expr => T` \| checked cast \|” | `expr => T` is the checked cast: int8 -5 => int32 sign-extends (`sext`). | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11w"?\((?=(?:(?!\n\}).)*?\bsext i8\b)` |
+| `ty2090` | 2090 | row | “\| `expr =>! T` \| unchecked cast \| same but no bounds check \|” | `expr =>! T` narrows with no bounds check: int64 2^32 + 5 =>! int32 is 5. | `run:0` |
+| `ty2095` | 2095 | row | “\| `a..b` \| inclusive range [a, b] \| Used in `for`, `pick` patterns \|” | `a..b` is inclusive, in a `for` and in a `pick` pattern. | `run:0` |
+| `ty2096` | 2096 | row | “\| `a...b` \| exclusive range [a, b) \| Used in `for`, `pick` patterns \|” | `a...b` is exclusive, in a `for` and in a `pick` pattern. | `run:0` |
+| `ty2101` | 2101 | row | “\| `is (cond) : then : else` \|” | The ternary evaluates one branch. | `run:0` (M10 `x05_ternary_evaluates_one_branch`) |
+| `ty2101b` | 2101 | row | “`select i1 %cond, %then, %else`” | The ternary lowers to `select i1`. | `ir:(?s)^define [^@\n]*@"?(?:[\w$]+\.)*m11t"?\((?=(?:(?!\n\}).)*?\bselect i1\b)` |
+| `ty2106` | 2106 | row | “\| `` `text &{expr}` `` \| template literal \| Interpolation via `&{ }` \|” | A template interpolates `&{ }`. | `run:0` |
+| `ty2107` | 2107 | row | “\| `r"raw"` \| raw string \| No escape processing \|” | A raw string does no escape processing: `r"a\nb"` is four bytes. | `run:0` |
+| `ty2108` | 2108 | row | “\| `"""triple"""` \| triple-quoted string \| Multiline, preserves indentation \|” | A triple-quoted string spans lines and keeps indentation: `"""ab` newline `  cd"""` is 7 bytes. | `run:0` |
+
+Tables whose rows are not claims:
+
+- line 2114: the type implementation priority table: a plan by cycle, history, not behaviour
 
 ## VERIFICATION (`meta/specs/VERIFICATION_REFERENCE.md`)
 
