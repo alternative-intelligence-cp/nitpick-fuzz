@@ -71,7 +71,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded (a no-op at `d44dfe3`), M11 ticked and merged, the tree clean, branch `local-m12` new (S69); the go quoted (S67)
   - [x] 2 HUNT3 named (`0c0f5a3`, carrying landings 112 and 113); the baseline and HUNT2 rebuilt byte-identical and commissioned under 20.1.2
   - [x] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
-  - [ ] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
+  - [x] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
   - [ ] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
   - [ ] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [ ] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
@@ -85,6 +85,7 @@ committed. A session that starts here resumes at the first unticked box.
 | hunt | `6fb85d3` (`6fb85d3d834fb7d5568ab996005f800d6d269e8f`), 2026-09-25 18:25:47 -0400 | 1.6.0 step 3f: DEF-99 — `NITPICK-TYPE-084` refuses the move out of `fixed` | 28 132 333 / `25eb7ee168604005…` | 69 s |
 | HUNT2 (M8) | `9126350` (`9126350d11d12d20bbcc087dc261405bf2729f29`), 2026-09-26 03:42:01 -0400 | 1.6.1 step 0, the NIKOS half (D-324) — docs and `meta/roadmap/1.6/` tools over `2eea6f4` (1.6.1 step 0: DEF-107, `NITPICK-BORROW-015`) | 28 857 206 / `2448b3b60d9eb189…` | 75.8 s |
 | newest `main` (M10, findings only; S37) | `9f6f370`, 2026-09-26 06:04:05 -0400 | 1.6.1 step 0c, the record of S-107's and S-108's approval — over `b564746` (1.6.1 step 0c: DEF-116, `NITPICK-TYPE-014`; DEF-117) | 28 872 365 / `7bab110a1e45cc9d…` | 88.9 s |
+| HUNT3 (M12) | `0c0f5a3` (`0c0f5a39fcd2a54e78bf7409add841cbc16927b7`), 2026-10-15 12:00:05 -0400 | 1.6.1e, landing 113: DEF-235, DEF-236 (c)(d)(e), DEF-237 and DEF-234 (c), over landing 112 (`958890a`, DEF-232); built under LLVM 20.1.8 | 31 701 272 / `f520d5744b1e9951…` | 55.2 s |
 
 Other build products (M0.5):
 
@@ -93,14 +94,19 @@ Other build products (M0.5):
 | baseline | 9 724 232 / `0cbc150ced5d20f7…` | 72 576 / `162b897539285a77…` |
 | HUNT2 | 9 972 944 / `20d35e2822b99080…` | 72 576 / `162b897539285a77…` |
 | hunt | 9 739 968 / `a81223d352d316be…` | 72 576 / `162b897539285a77…` |
+| HUNT3 | 11 283 680 / `02e7b06321a16950…` (linked by the release `ld.lld` 20.1.8) | 72 656 / `c8e5033ad17c70f8…` |
 
 **Commissioning check (M0.5): PASSED.** The baseline's `.internal/quickemit/npkc.ll`
 is exactly 28 111 929 bytes with sha256 `4029fc70efbe9cd3…`, as GitHub's CI
 printed. The emission is identical on this machine.
 
-**LLVM:** `.work/llvm/bin/llvm-config --version` prints `20.1.2` (the
-`LLVM-20.1.2-Linux-X64` release tarball, downloaded and extracted by the
-command in PLAN.md 0.2).
+**LLVM:** **20.1.2 for every `c3bdae2` and `9126350` record**, and for `6fb85d3`'s, `9f6f370`'s,
+`1b4f0c6`'s and `93bcb66`'s: the `LLVM-20.1.2-Linux-X64` release tarball in sessions 1–6 (PLAN.md
+0.2, S13), the machine's `/usr/lib/llvm-20` from session 7 on (S48), `llvm-config --version`
+printing `20.1.2` either way. **20.1.8 for HUNT3** (`0c0f5a3`, M12), on the author's go (S67): the
+`LLVM-20.1.8-Linux-X64` release tarball, 2 021 269 412 bytes, sha256
+`1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, fetched in S13's form; its
+`llvm-config --version` prints `20.1.8`.
 
 **Canaries (M0.6), both compilers:** `commission/canary.npk` — npkc rc 0, links,
 runs to 0 on the -O0 leg and on the -O2 leg. `commission/canary_malformed.npk`
@@ -1700,6 +1706,50 @@ result. Its gate is cell-for-cell identity with the committed records, and **it 
 **The prediction held: identical.** The spelling is neutral at both compilers, so no per-compiler
 spelling was needed. The scratch was then removed: `.work/shake` and every `VERDICTS-shake.txt`.
 
+**LLVM 20.1.8** (section 3, run after section 4; S67's go). A header request first showed the asset
+exists (HTTP 200, 2 021 269 412 bytes). The tarball was then fetched in S13's form: `curl -C -` to a
+file in a bounded retry loop (one attempt, 56 s), `xz -t`, and `tar -xJ --strip-components=1` into
+`.work/llvm-20.1.8` (328 s in all). `llvm-config --version` prints exactly `20.1.8`, and `llc` and
+`opt` print "LLVM version 20.1.8". The tarball is 2 021 269 412 bytes, sha256
+`1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`; no reference digest for it is
+recorded anywhere. The machine's apt.llvm.org prefix was not used (S67).
+
+**HUNT3, built** by M0.5's command under `.work/llvm-20.1.8` and the lock, in 55.2 s:
+
+| product | HUNT3 `0c0f5a3` | the ladder row (notice 113's, S68) | |
+|---|---|---|---|
+| `npkc.ll` | 31 701 272 / `f520d5744b1e9951…` | 31 701 272 / `f520d5744b1e9951…` | equal |
+| `npkrt.o` | 72 656 / `c8e5033ad17c70f8…` | 72 656 / `c8e5033ad17c70f8…` | equal |
+| `npkc` | 11 283 680 / `02e7b06321a16950…` | 11 283 608 / `bd85ba7a09d6b963…` | 72 bytes longer |
+
+The emission and the runtime object equal the ladder row. The linked `npkc`'s `.comment` reads
+`Linker: LLD 20.1.8 (https://github.com/llvm/llvm-project 87f0227c…)`. *Reasoned, not measured:*
+the ladder's `npkc` was linked by apt.llvm.org's `ld.lld`, whose comment is shorter. 72 bytes is the
+difference the release `ld.lld` made at 20.1.2 too (sessions 1–6's `npkc` against session 7's, S48).
+Canaries at HUNT3 under 20.1.8: `canary.npk` gives npkc 0 and runs 0/0; `canary_malformed.npk` gives
+npkc 1 with `NITPICK-PARSE-001` and writes no `.ll`.
+
+**The LLVM control** (section 3): `9126350` re-run under 20.1.8 into `.work/control/`, with the
+re-spelled corpus and section 4's comparers, against its committed records, which were measured
+under 20.1.2. **Identical in every record:**
+
+| record | `9126350` under 20.1.8 |
+|---|---|
+| recall, `known-m10.txt` | 25 of 25 lines identical (4.6 s) |
+| M2 grid | 956 cells, 0 moved (55.8 s, from "0 already done") |
+| M9 grid, heap words included | 7 571 cells, 0 moved (429.5 s, from "0 already done") |
+| M10 | 223 ids, 0 changed (17.1 s): 212 agree, 11 disagree |
+| M11 | 2 872 ids, 0 changed (342.9 s): 2 587 agree, 285 disagree |
+
+- **P32 at `9126350`: no BUILD claim moved**, so the dispatch's allowance for the pin refusal (S66
+  (a)) was not needed. 21 BUILD scripts write a `[toolchain]` pin, and under 20.1.8 each stops where
+  it stopped under 20.1.2: before npkg's toolchain check (a missing lock, a bogus `kind`: S64's
+  design). `bd0299`, whose claim is that a 20.1.1 pin is refused, now reads "ld.lld is 20.1.8 but
+  nitpick.toml pins 20.1.1", which shows the scripts ran with 20.1.8 on `PATH`.
+- So **0 cells moved by the toolchain**, in every record, and every move at HUNT3 is the compiler's.
+  The question for the author, whether 20.1.8 stands for the fuzzer, does not arise. The scratch was
+  removed (`rm -rf .work/control`).
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2548,3 +2598,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(2c) The shakedown, identical** at `c3bdae2` and `9126350` under 20.1.2: M2 956/956, M9
     7 571/7 571 with the heap words, recall 25/25, M10 223/223, and the ten re-spelled findings line
     for line. No per-compiler spelling was needed.
+  - **(3) LLVM 20.1.8 and HUNT3:** the release tarball fetched in S13's form (sha256
+    `1ead36b3…`); HUNT3 built in 55.2 s, its `npkc.ll` and `npkrt.o` equal to notice 113's ladder
+    row; the canaries pass. The LLVM control at `9126350` is identical in every record (recall, M2,
+    M9 with heap words, M10, M11): 0 cells moved by the toolchain.
