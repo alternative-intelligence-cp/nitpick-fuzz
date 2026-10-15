@@ -1661,6 +1661,21 @@ expectations never change (S45). Regenerated, the grids are unchanged in size: `
 cells (1 284 skipped), `gen/grid9.py` 7 571 (28 519 skipped), and `gen/grid9.py --selfcheck` prints
 "956 of 956 M2 programs byte-identical".
 
+**The two comparers** (section 4, written before the shakedown, which needs them; S72, S73).
+- `gen/compare.py --grid9 OLD/ NEW/` compares two widened-grid records, `cells9.jsonl` and
+  `classified9.jsonl`, and writes `MOVES9.md` in the new directory. The move key is (npkc rc, codes,
+  -O0, -O2, `heap_O0`, `heap_O2`). No M2 rule applies: every moved cell is listed, grouped by place,
+  operation, both classes and verdicts, with a column naming what moved. Tested in scratch: the
+  committed `9126350` record against a copy of itself gives "7571 cells, 0 moved", and one planted
+  `allocated` word gives 1 moved, `heap_O0:a`.
+- Without `--grid9`, `compare.py` is unchanged: on copies of the `c3bdae2` and `9126350` records,
+  the committed script and the new one write byte-identical `MOVES.md` and print the same lines.
+- `gen/compare_runs.py OLD.jsonl NEW.jsonl` compares two M10 or M11 records by `id`, on npkc, codes,
+  O0, O2, `sh`, verdict, kind and the heap words; a field absent from both is equal. It lists every
+  changed id and every id on one side only, prints the totals and writes nothing. The committed
+  `9126350` records against themselves: "223 ids, 0 changed" and "2872 ids, 0 changed"; M10 at
+  `c3bdae2` against `9126350`: 10 changed, DEF-108's and the block string's, as recorded.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2311,6 +2326,15 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   stands. One spelling serves all three compilers; the shakedown checks it is neutral at `c3bdae2` and
   `9126350`. Not re-spelled: M11's six generated programs that bind a plain `uint8[]`, and the claims
   that pass a view to a plain parameter or return one (`gen/m11_claims/`, Option C's).
+- **S72 — `gen/compare.py --grid9`, additive (S28's practice).** No comparer existed for the widened
+  grid. The option reads `cells9.jsonl`/`classified9.jsonl` in both directories and writes
+  `MOVES9.md` in the new one; its key adds the leak observer's heap words to M2's (npkc rc, codes,
+  -O0, -O2). It applies none of M8's rules, so every moved cell is listed. Without the option the
+  script behaves exactly as before, which was checked byte for byte.
+- **S73 — `gen/compare_runs.py`, a claim-by-claim comparer for M10 and M11.** None existed. It keys
+  by `id` and compares npkc, codes, O0, O2, `sh`, verdict, kind and `heap_O0`/`heap_O2`, a field
+  absent from both being equal. It lists every changed id and every one-sided id, prints the totals,
+  and writes nothing; a listing worth keeping is redirected into `results/<commit>/`.
 
 ## Log
 
@@ -2495,3 +2519,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(2) The landing-103 spelling** (S71): `fixed uint8[]` in three generator lines and in 53 lines
     of 48 hand-written programs; `gen/m10.py` regenerated `t07` alone. The anchored grep lists only
     M11's six generated programs, left for Option C.
+  - **(2b) The comparers:** `gen/compare.py --grid9` (S72, additive, checked byte for byte) and
+    `gen/compare_runs.py` (S73), each tested on the committed records.
