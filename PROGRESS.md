@@ -70,7 +70,7 @@ committed. A session that starts here resumes at the first unticked box.
   they run: section 3 runs after section 4, whose corpus and comparers its control needs.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded (a no-op at `d44dfe3`), M11 ticked and merged, the tree clean, branch `local-m12` new (S69); the go quoted (S67)
   - [x] 2 HUNT3 named (`0c0f5a3`, carrying landings 112 and 113); the baseline and HUNT2 rebuilt byte-identical and commissioned under 20.1.2
-  - [ ] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
+  - [x] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
   - [ ] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
   - [ ] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
   - [ ] 6 the move table, `results/0c0f5a3/MOVES12.md`
@@ -1676,6 +1676,30 @@ cells (1 284 skipped), `gen/grid9.py` 7 571 (28 519 skipped), and `gen/grid9.py 
   `9126350` records against themselves: "223 ids, 0 changed" and "2872 ids, 0 changed"; M10 at
   `c3bdae2` against `9126350`: 10 changed, DEF-108's and the block string's, as recorded.
 
+**The shakedown** (section 4): under LLVM 20.1.2, into `.work/shake/`, with nothing committed as a
+result. Its gate is cell-for-cell identity with the committed records, and **it holds everywhere**:
+- the grid statistics, regenerated through a scratch directory, are byte-identical to
+  `results/GRID.md` (956 generated, 1 284 skipped) and `results/GRID9.md` (7 571, 28 519);
+- the runs, each from a fresh directory and each `run.py` from "0 already done":
+
+| record | `c3bdae2` | `9126350` |
+|---|---|---|
+| M2 grid, `cells.jsonl` (`compare.py`) | 956 cells, 0 moved (68.5 s) | 956 cells, 0 moved (62.6 s) |
+| M9 grid, `cells9.jsonl`, heap words included (`compare.py --grid9`) | 7 571 cells, 0 moved (509.5 s) | 7 571 cells, 0 moved (484.1 s) |
+| recall, `known-m10.txt` (`diff`) | 25 of 25 lines identical (7.5 s) | 25 of 25 (5.1 s) |
+| M10, `m10.jsonl` (`compare_runs.py`) | 223 ids, 0 changed (17.4 s): 210 agree, 13 disagree | 223 ids, 0 changed (18.2 s): 212 agree, 11 disagree |
+
+  At `c3bdae2`, `compare.py`'s MISSING count is 136: M8's rules read against the old compiler, as
+  the brief expects, and not the gate.
+- **the findings shakedown**, once: the ten findings that hold a re-spelled file, HUNT `9126350`
+  twice and the baseline once (`run_findings.py … --name VERDICTS-shake.txt`, the seven with heap
+  words under `--heap`; 21.2 s and 32.5 s). Every line but the timestamp equals the committed record
+  (`VERDICTS-9126350.txt` for F-001 and F-002, `VERDICTS.txt` for the other eight): all ten print
+  `same`, and the HUNT runs agree in each.
+
+**The prediction held: identical.** The spelling is neutral at both compilers, so no per-compiler
+spelling was needed. The scratch was then removed: `.work/shake` and every `VERDICTS-shake.txt`.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2521,3 +2545,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     M11's six generated programs, left for Option C.
   - **(2b) The comparers:** `gen/compare.py --grid9` (S72, additive, checked byte for byte) and
     `gen/compare_runs.py` (S73), each tested on the committed records.
+  - **(2c) The shakedown, identical** at `c3bdae2` and `9126350` under 20.1.2: M2 956/956, M9
+    7 571/7 571 with the heap words, recall 25/25, M10 223/223, and the ten re-spelled findings line
+    for line. No per-compiler spelling was needed.
