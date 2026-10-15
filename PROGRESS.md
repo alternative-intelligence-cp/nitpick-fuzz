@@ -1782,6 +1782,25 @@ the lock, into `results/0c0f5a3/` and each finding's `VERDICTS-0c0f5a3.txt` (S21
   (8:26); F-045's `d1` stays `TYPE-007`, its advice now naming `?!`/`?|` (D-175) where `9126350`'s
   named `?`.
 
+**A candidate: F-049** (section 9; S74). Of the M9 grid's 393 moved cells, 24 SAFE cells are newly
+refused `MOVE-001`: `pick_own × loop_move` (16) and the read-after and reuse-sentinel cells of
+`pick_own × swap` (8). A consuming pick's binding, moved and then re-assigned, cannot be read; its
+`local` twins run clean. Taken through PLAN 5.2:
+- **(a)** Neither KNOWN_DEFECTS (DEF-118 is the opposite fault; DEF-124, F-009, is this shape at a
+  `move` parameter, its fix reaching parameters only) nor HUNT3's registry has it. **Bisected**
+  (S23): the 32 `pick_own × {loop_move, swap}` cells and their 98 `local` twins were run at landing
+  73 `bbb1530` and landing 74 `40deffa`, built in `.work/bisect/` under 20.1.2 (55.8 s, 56.9 s;
+  canaries pass): all run at 73, and the 24 are refused at 74, 1.6.1d step 1 (DEF-118). New at 74.
+- **(b)** Written small by hand in F-009's form, from its helpers: the re-initialised read, the loop
+  form, the local control, and a control moved and not re-assigned.
+- **(c)** HUNT3 twice, both legs: the two reproducers and the moved-not-reassigned control refused
+  `MOVE-001`, the local control 0/22/22.
+- **(d)** The baseline, HUNT2 and landing 73: the reproducers 0/22/22 (the right answer); the
+  moved-not-reassigned control 0/21/21, DEF-118's shape.
+- **(e)** `findings/F-049-pick-binding-reinit-refused/` (README, four programs, `VERDICTS.txt` at
+  HUNT3, `VERDICTS-9126350.txt`). Lower priority, an over-restriction; a regression against HUNT2.
+  The bisection's worktrees and runs were then removed (`.work/bisect`).
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2441,6 +2460,12 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   by `id` and compares npkc, codes, O0, O2, `sh`, verdict, kind and `heap_O0`/`heap_O2`, a field
   absent from both being equal. It lists every changed id and every one-sided id, prints the totals,
   and writes nothing; a listing worth keeping is redirected into `results/<commit>/`.
+- **S74 — F-049, a candidate the workbench verifies (PLAN D6).** The M12 brief's section 9 takes an
+  unexplained move through M5's five steps. The 24 `pick_own` cells are explained by landing 74
+  (bisected, S23), but what 74 left is a refusal of a legal program, so they are taken through the
+  five steps as a finding, numbered on from F-048 as M11's state note says. Its programs are written
+  by hand in F-009's form, as M9 wrote its probe-found shapes, because `gen/minimize.py` keeps only
+  npkc's exit and the legs, and a refusal minimised that way can keep any refusal at all.
 
 ## Log
 
@@ -2638,3 +2663,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     to `9126350` (25/25 "once fixed"); findings 67 programs moved in 29 findings, every baseline line
     as committed; M2 0 moved; M9 0 anomalies, 393 moved; M10 218/5, 9 changed; M11 2 628/244, 95
     changed. No memory fault at HUNT3.
+  - **F-049, a candidate** (S74): a consuming pick's binding re-initialised after a move cannot be
+    read (`MOVE-001`), new at landing 74 (bisected); 24 SAFE cells of the M9 grid. Lower priority.

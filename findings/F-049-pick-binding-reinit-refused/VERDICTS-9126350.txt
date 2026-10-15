@@ -1,0 +1,12 @@
+# F-049-pick-binding-reinit-refused — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-15 22:22 UTC; HUNT 9126350 run 1 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_local_reinit_read                        9126350  run 1  npkc=0  codes=-  O0=22  O2=22
+ctl_pick_moved_read                          9126350  run 1  npkc=0  codes=-  O0=21  O2=21
+pick_reinit_loop                             9126350  run 1  npkc=0  codes=-  O0=22  O2=22
+pick_reinit_read                             9126350  run 1  npkc=0  codes=-  O0=22  O2=22
+ctl_local_reinit_read                        c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22
+ctl_pick_moved_read                          c3bdae2  run 1  npkc=0  codes=-  O0=21  O2=21
+pick_reinit_loop                             c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22
+pick_reinit_read                             c3bdae2  run 1  npkc=0  codes=-  O0=22  O2=22
