@@ -1,0 +1,19 @@
+# F-024-compiler-traps-exit-3 — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-15 21:45 UTC; HUNT 0c0f5a3 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+c1_macro_method_into_impl                    0c0f5a3  run 1  npkc=1  codes=NITPICK-PARSE-001  O0=-  O2=-
+c2_nested_expression_500                     0c0f5a3  run 1  npkc=1  codes=NITPICK-PARSE-012  O0=-  O2=-
+c3_macro_emits_comptime_function             0c0f5a3  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_c4_nested_expression_250                 0c0f5a3  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_c5_comptime_function_direct              0c0f5a3  run 1  npkc=0  codes=-  O0=0  O2=0
+c1_macro_method_into_impl                    0c0f5a3  run 2  npkc=1  codes=NITPICK-PARSE-001  O0=-  O2=-
+c2_nested_expression_500                     0c0f5a3  run 2  npkc=1  codes=NITPICK-PARSE-012  O0=-  O2=-
+c3_macro_emits_comptime_function             0c0f5a3  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_c4_nested_expression_250                 0c0f5a3  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_c5_comptime_function_direct              0c0f5a3  run 2  npkc=0  codes=-  O0=0  O2=0
+c1_macro_method_into_impl                    c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+c2_nested_expression_500                     c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+c3_macro_emits_comptime_function             c3bdae2  run 1  npkc=3  codes=-  O0=-  O2=-
+ctl_c4_nested_expression_250                 c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_c5_comptime_function_direct              c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0

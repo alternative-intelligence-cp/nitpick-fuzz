@@ -72,7 +72,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 2 HUNT3 named (`0c0f5a3`, carrying landings 112 and 113); the baseline and HUNT2 rebuilt byte-identical and commissioned under 20.1.2
   - [x] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
   - [x] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
-  - [ ] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
+  - [x] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
   - [ ] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [ ] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
   - [ ] 8 the gate; `REPORT.md` §13
@@ -1750,6 +1750,38 @@ under 20.1.2. **Identical in every record:**
   The question for the author, whether 20.1.8 stands for the fuzzer, does not arise. The scratch was
   removed (`rm -rf .work/control`).
 
+**The runs at HUNT3** (section 5): every runner under `--llvm .work/llvm-20.1.8`, one at a time under
+the lock, into `results/0c0f5a3/` and each finding's `VERDICTS-0c0f5a3.txt` (S21).
+`git ls-files results/0c0f5a3` printed nothing before the first.
+
+| run | at HUNT3 `0c0f5a3` | against `9126350` | time |
+|---|---|---|---|
+| recall, `known-m12.txt` | 25 rows; `check_known_fixed.py` prints 19 `match` and no MISMATCH or MISSING; its 6 gaps are DEF-106's and DEF-108's rows, each its "once fixed" verdict by hand (`TYPE-086` twice, `FLOW-001` twice, both controls 0/0) | identical to `known-m10.txt`, 25 of 25 | 4.9 s |
+| findings, `VERDICTS-0c0f5a3.txt` (HUNT3 twice, the baseline once) | 48 findings, 156 programs; the two HUNT3 runs agree for every program; F-003 … F-010 re-run with `--heap` | 67 programs moved, in 29 findings; every baseline line equals the committed one | 247.1 s, then 29.7 s |
+| M2 grid, `cells.jsonl` | 956: 562 clean, 394 refused, 0 anomalies | 956 cells, 0 moved (`MOVES.md`) | 58.4 s |
+| M9 grid, `cells9.jsonl` | 7 571: 4 047 clean, 3 524 refused, **0 anomalies** (HUNT2: 197) | 393 moved (`MOVES9.md`) | 465.7 s |
+| M10, `m10.jsonl` | 223: 218 agree, 5 disagree | 9 changed (`m10-changes.txt`) | 17.4 s |
+| M11, `m11.jsonl` | 2 872: 2 628 agree, 244 disagree | 95 changed (`m11-changes.txt`) | 323.2 s |
+| M11, HUNT2's 285 disagreements, `m11-disagree.jsonl` | 62 agree, 223 disagree, each as in the full run | — | 22.8 s |
+
+- **No memory fault at HUNT3.** No HUNT3 line of any finding exits 70, 95, 107 or 139 (312 lines);
+  neither grid has a `DEFECT` class; no M11 claim has a leg mismatch or reads the poison, and the 14
+  that exit 70 or 95 each expect that trap and agree. Every memory finding (F-001 … F-008, F-011,
+  F-022, F-037, F-047) gives its fixed verdict.
+- **Fifteen header-only records.** `run_findings.py` run over every finding writes a
+  `VERDICTS-0c0f5a3.txt` for the fifteen row findings too (F-027, F-028, F-030 … F-036, F-039,
+  F-040, F-042 … F-044, F-046), whose programs are M11's claim programs, measured in `m11.jsonl`.
+  Their files hold the header and no program; they are kept as the brief's command wrote them.
+- **F-025** has no `run_findings.py` record of its own: its committed `VERDICTS.txt` is `run.sh`'s, at
+  `9126350` twice. Its `run.sh` at HUNT3, twice: `plain: npkc=0   no-wildx: npkc=0, 0 x WILDX-003`
+  both times, so the flag accepts the program; at the baseline once: `no-wildx: npkc=1, 256 x
+  WILDX-003`, as recorded at `9126350`. Its canary's new line (0/0 at all three runs) has no
+  committed counterpart.
+- **Probes for the move table**, one lock each, with `gen/snip.py --show-msg`: F-041's `h1` is
+  `TYPE-018` in 0.09 s at HUNT3; F-024's `c1` is `PARSE-001` "expected a type" at its `$$i` receiver
+  (8:26); F-045's `d1` stays `TYPE-007`, its advice now naming `?!`/`?|` (D-175) where `9126350`'s
+  named `?`.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2602,3 +2634,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     `1ead36b3…`); HUNT3 built in 55.2 s, its `npkc.ll` and `npkrt.o` equal to notice 113's ladder
     row; the canaries pass. The LLVM control at `9126350` is identical in every record (recall, M2,
     M9 with heap words, M10, M11): 0 cells moved by the toolchain.
+  - **(4) The runs at HUNT3**, in `results/0c0f5a3/` and `VERDICTS-0c0f5a3.txt`: recall identical
+    to `9126350` (25/25 "once fixed"); findings 67 programs moved in 29 findings, every baseline line
+    as committed; M2 0 moved; M9 0 anomalies, 393 moved; M10 218/5, 9 changed; M11 2 628/244, 95
+    changed. No memory fault at HUNT3.

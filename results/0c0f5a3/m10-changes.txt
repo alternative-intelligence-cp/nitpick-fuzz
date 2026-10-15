@@ -1,0 +1,10 @@
+CHANGED c23_c_hex_prefix_refused: codes [LEX-003,PARSE-002] -> [LEX-003]
+CHANGED c25_flt32_literal_16_digits: npkc 1 -> 0; codes [TYPE-030] -> []; O0 - -> 10; O2 - -> 10; verdict AGREE -> DISAGREE; kind  -> accepted
+CHANGED h02_for_binding_shadow: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED l06_for_inclusive_to_int8_max: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED l08_for_inclusive_to_int64_max: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED l11_till_nonpositive_limit: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED m06_spaceship: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED p05_negative_patterns: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED v12_constant_div_by_zero: npkc 0 -> 1; codes [] -> [TYPE-004]; O0 97 -> -; O2 97 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+223 ids, 9 changed, 0 only in results/9126350/m10.jsonl, 0 only in results/0c0f5a3/m10.jsonl

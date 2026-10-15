@@ -1,0 +1,96 @@
+CHANGED as0043: npkc 0 -> 1; codes [] -> [RESOLVE-014]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED as0202: npkc 3 -> 1; codes [] -> [TYPE-094]; verdict DISAGREE -> AGREE; kind crash -> 
+CHANGED as0203: npkc 3 -> 1; codes [] -> [TYPE-094]; verdict DISAGREE -> AGREE; kind crash -> 
+CHANGED as0267: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED as0295b: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED as0453: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED as0492: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED as0555: npkc 0 -> 1; codes [] -> [TYPE-045]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED as0572: npkc 0 -> 1; codes [] -> [DERIVE-007]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED as0583: npkc 0 -> 1; codes [] -> [DERIVE-007]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED bd0075: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bd0299: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bd0462: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bd0463b: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bd0464: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bd0464b: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED bi0010: codes [BORROW-001] -> [TYPE-007]
+CHANGED bi0017: codes [BORROW-001] -> [TYPE-007]
+CHANGED bi0105: npkc 0 -> 1; codes [] -> [TYPE-007]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED bi0241: npkc 0 -> 1; codes [] -> [TYPE-007]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused; heap_O0 3/3/1 -> None; heap_O2 3/3/1 -> None
+CHANGED bi0256: codes [EMIT-002] -> [TYPE-043]; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED cc0080: O0 11 -> 0; O2 11 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED cc0321: npkc 0 -> 1; codes [] -> [BORROW-016]; O0 96 -> -; O2 96 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED cc0380: npkc 0 -> 1; codes [] -> [LOCK-001]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED cc0568b: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED ct0235: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED ct0236: O0 10 -> 110; O2 10 -> 110; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED ct0258: O0 10 -> 0; O2 10 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED io0045: npkc 0 -> 1; codes [] -> [TYPE-043]; O0 llc!1 -> -; O2 opt!1 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED lx0054: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED lx0114: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED lx0121: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED lx0178: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED lx0321: codes [LEX-004,PARSE-002] -> [LEX-004]
+CHANGED lx0343: codes [LEX-003,PARSE-002] -> [LEX-003]
+CHANGED lx0346: codes [LEX-003,PARSE-002] -> [LEX-003]
+CHANGED lx0349: codes [LEX-003,PARSE-002] -> [LEX-003]
+CHANGED mc0046b: npkc 1 -> 0; codes [MACRO-005] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED mc0136: npkc 3 -> 1; codes [] -> [PARSE-001]; kind crash -> refused
+CHANGED mc0188: O0 11 -> 0; O2 11 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED mc0202: O0 11 -> 0; O2 11 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED mc0246: npkc 0 -> 1; codes [] -> [MACRO-004]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED mc0250: npkc 3 -> 1; codes [] -> [PARSE-012]; verdict DISAGREE -> AGREE; kind crash -> 
+CHANGED mc0251: sh 3 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED mc0256: sh 2 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED mc0278: npkc 1 -> 0; codes [MACRO-006] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED mc0309b: npkc 1 -> 0; codes [TYPE-004] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED mc0327: npkc 3 -> 0; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind crash -> 
+CHANGED mc0344: sh 3 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED mc0388: npkc 0 -> 1; codes [] -> [MACRO-011]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED md0042: sh 0 -> 1; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED md0183: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED md0296b: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED me0119: npkc 0 -> 1; codes [] -> [PARSE-001]; O0 96 -> -; O2 96 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED me0119b: npkc 0 -> 1; codes [] -> [PARSE-001]; O0 96 -> -; O2 96 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED me0183: codes [PARSE-002] -> [PARSE-001,PARSE-002]
+CHANGED me0208: codes [BORROW-015] -> [TYPE-007]; verdict AGREE -> DISAGREE; kind  -> other_code
+CHANGED me0217: npkc 0 -> 1; codes [] -> [TYPE-007]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED me0221: npkc 0 -> 1; codes [] -> [TYPE-007]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED me0228: codes [BORROW-012] -> [TYPE-007]; verdict AGREE -> DISAGREE; kind  -> other_code
+CHANGED me0461: npkc 0 -> 1; codes [] -> [BORROW-016]; O0 96 -> -; O2 96 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED op0068: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED op0213: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED tr0368: npkc 0 -> 1; codes [] -> [RESOLVE-014]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED tr0586: npkc T -> 1; codes [] -> [TYPE-018]; verdict DISAGREE -> AGREE; kind crash -> 
+CHANGED ty0176: codes [EMIT-002] -> [TYPE-001]; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED ty0178: npkc 0 -> 1; codes [] -> [LEX-009]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty0189b: npkc 0 -> 1; codes [] -> [LEX-009]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty0190: npkc 1 -> 0; codes [TYPE-030] -> []; O0 - -> 10; O2 - -> 10; verdict AGREE -> DISAGREE; kind  -> accepted
+CHANGED ty0272: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED ty0280: npkc 0 -> 1; codes [] -> [TYPE-007]; O0 10 -> -; O2 10 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty0285: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED ty0290: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED ty0322: O0 0 -> 10; O2 0 -> 10; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED ty0414: npkc 1 -> 0; codes [TYPE-007] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind refused -> 
+CHANGED ty0414b: codes [TYPE-007] -> [TYPE-092]
+CHANGED ty0507: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED ty0553: npkc 0 -> 1; codes [] -> [TYPE-016]; O0 10 -> -; O2 10 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty0616b: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED ty1598: npkc 0 -> 1; codes [] -> [TYPE-016]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty1635: O0 0 -> 10; O2 0 -> 10; verdict AGREE -> DISAGREE; kind  -> wrong_exit
+CHANGED ty1646b: codes [LEX-003,PARSE-002] -> [LEX-003]
+CHANGED ty1649: codes [EMIT-002] -> [TYPE-024]; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED ty1657: O0 11 -> 0; O2 11 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED ty1669: npkc 0 -> 1; codes [] -> [LEX-009]; O0 0 -> -; O2 0 -> -; verdict AGREE -> DISAGREE; kind  -> refused
+CHANGED ty1719b: npkc 0 -> 1; codes [] -> [TYPE-086]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty1873: npkc 0 -> 1; codes [] -> [ASSIGN-002]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED ty1944: O0 llc!1 -> 0; O2 opt!1 -> 0; verdict DISAGREE -> AGREE; kind build_fail -> 
+CHANGED ty2038: npkc 1 -> 0; codes [EMIT-002] -> []; O0 - -> 0; O2 - -> 0; verdict DISAGREE -> AGREE; kind emit_defect -> 
+CHANGED vf0215b: npkc 0 -> 1; codes [] -> [BORROW-013]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED vf0808: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED vf0811: sh 1 -> 0; verdict DISAGREE -> AGREE; kind wrong_exit -> 
+CHANGED vf0831: npkc 0 -> 1; codes [] -> [LOCK-002]; O0 0 -> -; O2 0 -> -; verdict DISAGREE -> AGREE; kind accepted -> 
+CHANGED vf0983: npkc 1 -> 0; codes [TYPE-030] -> []; O0 - -> 10; O2 - -> 10; kind refused -> wrong_exit
+CHANGED vf1149: npkc 1 -> 0; codes [TYPE-030] -> []; O0 - -> 10; O2 - -> 10; kind refused -> wrong_exit
+2872 ids, 95 changed, 0 only in results/9126350/m11.jsonl, 0 only in results/0c0f5a3/m11.jsonl

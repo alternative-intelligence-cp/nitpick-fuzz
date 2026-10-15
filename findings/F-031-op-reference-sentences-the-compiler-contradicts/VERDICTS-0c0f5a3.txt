@@ -1,0 +1,4 @@
+# F-031-op-reference-sentences-the-compiler-contradicts — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-15 21:45 UTC; HUNT 0c0f5a3 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
