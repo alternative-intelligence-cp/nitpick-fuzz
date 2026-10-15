@@ -73,7 +73,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
   - [x] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
   - [x] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
-  - [ ] 6 the move table, `results/0c0f5a3/MOVES12.md`
+  - [x] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [ ] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
   - [ ] 8 the gate; `REPORT.md` §13
 
@@ -1801,6 +1801,35 @@ refused `MOVE-001`: `pick_own × loop_move` (16) and the read-after and reuse-se
   HUNT3, `VERDICTS-9126350.txt`). Lower priority, an over-restriction; a regression against HUNT2.
   The bisection's worktrees and runs were then removed (`.work/bisect`).
 
+**The move table** (section 6): `results/0c0f5a3/MOVES12.md`, 97 rows over the six runs and the LLVM
+control. **Every move carries a landing number or a finding id; zero UNEXPLAINED.**
+- Recall 0 of 25 and M2 0 of 956 moved. Findings: 67 programs in 29 findings, plus F-025's `run.sh`
+  and F-045's message, each its registry fix (74 … 113). M9: 393 cells in ten groups, among them the
+  60 `OwnedFd` cells whose `to_cstring` buffers are now freed (78) and F-049's 24 (74, bisected). M10:
+  9 programs. M11: 95 claims, 62 to AGREE, 21 to DISAGREE, 4 changed inside DISAGREE and 8 inside
+  AGREE.
+- Evidence (i), the registry or notice text at HUNT3 naming the program or its shape, for every row
+  but F-049's, whose evidence is (ii), the bisection.
+- **New disagreements at HUNT3, each a recorded change:** the six `uint8[]` bindings (103), `mc0388`
+  (106), `me0119`/`me0119b`, `as0572` and `md0042` (113), six BUILD scripts (71: `[toolchain]` now
+  requires a `triple` pin), `c25`/`ty0190` and `vf0983`/`vf1149` (88, 91: a long `flt32` literal now
+  compiles to the nearest float), `ty0322` (78: `cstring` is 24 bytes), `ty1635` (97: D-347's
+  invariants) and `ty1669` (83: `flt64` is no literal suffix). Expectations unchanged (S45).
+- **Two reference rows still contradict HUNT3**, for the author and the compiler seat: TYPE_REFERENCE:1858
+  at HUNT3 spells `complex(3.0flt64, 4.0flt64)`, which HUNT3 refuses `LEX-009`; and
+  AST_REFERENCE:578's node comment still lists `#[align(16)]` and `#[cfg(...)]`, while the paragraph
+  under it says `#[derive]` is the one attribute (DERIVE-007 since 113).
+- **`as0572`** (dispatch note (g)), through PLAN 5.2: the move is 113's (DEF-236 (d)). At `9126350`
+  and `c3bdae2` the attribute was a silent no-op, measured: `#size_of<Aligned>()` is 8 with
+  `#[align(16i32)]` and 8 without, at both. No reference sentence at HUNT2 gave `#[align]` a result
+  (AST_REFERENCE §6 shows it as syntax; DECISIONS says types "will lower onto it"), so the acceptance
+  was F-039 (d)'s shape, an attribute the language does not have accepted and ignored, which DEF-236
+  (d) fixes; not a silent wrong answer against a stated result.
+- **Predicted moves:** 29 of 33 ticked. P1 and P2 split (4 cells each went to a refusal, F-008's fix
+  and F-049), P17's F-024 is `PARSE-001` where the brief said `MACRO-010` (DEF-150's record says so),
+  and P32's pin refusal never arose (landing 71's `triple` rule comes first); each is explained in
+  the table.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2665,3 +2694,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     changed. No memory fault at HUNT3.
   - **F-049, a candidate** (S74): a consuming pick's binding re-initialised after a move cannot be
     read (`MOVE-001`), new at landing 74 (bisected); 24 SAFE cells of the M9 grid. Lower priority.
+  - **(5) The move table**, `results/0c0f5a3/MOVES12.md`: 97 rows, every move explained by a
+    landing or a finding id, zero UNEXPLAINED; 29 of 33 predictions ticked, the other four explained.
