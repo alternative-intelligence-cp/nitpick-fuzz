@@ -65,6 +65,17 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — all fourteen whole
   - [x] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — the final run: 2 587 agree, 285 disagree, all triaged
   - [x] 11.3 `REPORT.md` §12; stop — §12 written; session 9 stopped there (2026-10-02)
+- [ ] **M12** — the re-baseline at HUNT3 `0c0f5a3`, the compiler's `main` after landing 113, under
+  LLVM 20.1.8 (session 10, the Team seat; S66–S68). The boxes are the brief's sections, in the order
+  they run: section 3 runs after section 4, whose corpus and comparers its control needs.
+  - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded (a no-op at `d44dfe3`), M11 ticked and merged, the tree clean, branch `local-m12` new (S69); the go quoted (S67)
+  - [x] 2 HUNT3 named (`0c0f5a3`, carrying landings 112 and 113); the baseline and HUNT2 rebuilt byte-identical and commissioned under 20.1.2
+  - [ ] 4 the landing-103 spelling committed before any HUNT3 run; `compare.py --grid9` and `gen/compare_runs.py`; the shakedown identical at `c3bdae2` and `9126350`
+  - [ ] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
+  - [ ] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
+  - [ ] 6 the move table, `results/0c0f5a3/MOVES12.md`
+  - [ ] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
+  - [ ] 8 the gate; `REPORT.md` §13
 
 ## Compilers
 
@@ -1581,7 +1592,76 @@ author set for TYPE is 95 % (the workbench's go).
 - **The final full run**, all 2 872 programs: 2 587 agree, 285 disagree. The 2 700 earlier
   programs re-ran identical.
 
+## M12 — the re-baseline at HUNT3 (session 10, the Team seat)
+
+**The start checks** (the brief's section 1; PLAN.md's start rules (a)–(d)).
+- **The remote.** `git remote get-url origin` is GitHub's (this clone's remote is SSH), so no
+  `set-url`; `git fetch origin` at 16:42 EDT.
+- **The gate.** `git switch main && git merge --ff-only origin/main` was a no-op: `main` =
+  `origin/main` = `d44dfe3`. `git merge-base --is-ancestor d44dfe3 origin/main` exits 0. M11 is
+  ticked (line 44) and there were no M12 boxes. "M11 stays unticked" in M11's state note is FZ-3's
+  wording defect, fixed with section 7.
+- **Clean tree.** `git status --porcelain` printed nothing.
+- **The branch.** There was no `origin/local-m12` and no local one, so `git switch -c local-m12
+  --no-track origin/main` (S69). No upstream is set.
+- **(a)** `uname -a`, `nproc`, `free -g`, `df -h .` and `python3 --version` are under Environment
+  below. **(b)** `CLAUDE.md` was re-read, the silent-wrong-answer rule with it: an accepted program
+  whose result differs from the reference's, with no memory error, is a defect. **(c)** `.work/` was
+  absent, so the compilers were rebuilt by M0's commands (below). **(d)** M12 starts at its first box.
+- **The go** is S67, quoted verbatim. It covers LLVM 20.1.8, and HUNT3 as "after 113 lands" (S68).
+
+**HUNT3** (section 2; S68). The compiler was cloned from GitHub to `.work/nitpick` at 16:43 EDT
+(3.9 s). Its `origin/main` is `0c0f5a3` (`0c0f5a39fcd2a54e78bf7409add841cbc16927b7`, 2026-10-15
+12:00:05 -0400, "1.6.1e, landing 113: DEF-235, DEF-236 (c)(d)(e), DEF-237 AND DEF-234 (c)"). The
+brief's four confirmations:
+- `meta/NOTICES.md` has a `| 113 |` row (its line 174; the sha cell reads "—");
+- the registry has DEF-235 (`OPEN_DECISIONS.md:3937`), DEF-237 (`:3980`) and DEF-236 (c)(d)(e)
+  (`:3957`) FIXED at landing 113, and DEF-234 (c) with them (`:3922`);
+- `git merge-base --is-ancestor 0c0f5a3 origin/main` exits 0: it is `origin/main`;
+- the go names it, as "after 113 lands" (S67).
+
+The landings past 111 it carries: **112** (`958890a`, DEF-232, this repository's F-048) and **113**.
+Not 114 or 115: DEF-250 (`:4159`) and DEF-251 (`:4175`) are OPEN in HUNT3's registry. Landing 113's
+commit also registers DEF-252 (a view re-seated by a callee outlives its string: a use after free in
+safe code) and DEF-253 (a `Self->` trait method through a bound does not link), both OPEN.
+
+**HUNT3's ladder row.** HUNT3's NOTICES rows 112 and 113 and its 1.6.1e record carry no digests.
+The workbench's BOARD (`nitpick-libs`, "THE BASELINE NOTICE 114 MUST QUOTE", notice 113's rows "at
+`0c0f5a3`") transcribes them: `npkc.ll` 31 701 272 B `f520d5744b1e9951…`, `npkrt.o` 72 656 B
+`c8e5033ad17c70f8…`, `npkc` 11 283 608 B `bd85ba7a09d6b963…`. Section 3 checks HUNT3 against that row
+(S68).
+
+**The baseline and HUNT2** (section 2), built one at a time by M0.5's command under LLVM 20.1.2
+(`.work/llvm-20.1.2`, S70), each under the Team seat's harness lock:
+
+| compiler | build | `npkc.ll` bytes / sha256 | `npkrt.o` | `npkc` |
+|---|---|---|---|---|
+| `c3bdae2` | 74.6 s | 28 111 929 / `4029fc70efbe9cd3…` | 72 576 / `162b897539285a77…` | 9 724 160 / `5fd636b9ab557c19…` |
+| `9126350` | 72.7 s | 28 857 206 / `2448b3b60d9eb189…` | 72 576 / `162b897539285a77…` | 9 972 872 / `c7212b6be06fe6a4…` |
+
+All six are byte-identical to the committed digests (`npkc` in its Ubuntu-lld form, session 7's), so
+the commissioning check passes again. Canaries (PLAN 0.6) at both: `canary.npk` gives npkc 0 and runs
+0/0; `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no `.ll`.
+
 ## Environment
+
+*(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 33 used, 69 free, 123 available; Swap 15 (0 used)
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  2.4T used  4.2T avail (37%)
+os:        Linux Mint 22.3 (Ubuntu 24.04 base)
+python3:   Python 3.12.3
+git:       2.43.0
+llvm:      /usr/lib/llvm-20 (llvm-config 20.1.2), linked as .work/llvm-20.1.2 (S48, S70)
+earlyoom:  active
+```
+
+The author's machine, shared with the compiler seat, the library agents and two other Team agents.
+Every build and every run takes the Team seat's harness lock, one at a time, and parallelism stays at
+4 jobs (S1).
 
 *(session 9, measured 2026-10-02 16:31 UTC; M11 resumed here — the start check (a))*
 
@@ -2151,6 +2231,61 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   claims would load twice), so `type2.py` copies the scaffolding it shares with `type1.py`
   and `verif3.py`.
 
+- **S66 — M12 is the re-baseline at HUNT3, on management's corrected brief**
+  (`fuzz-m12-brief-revise-2026-10-15.md`, READY by its re-verification
+  `fuzz-m12-brief-reverify-2026-10-15.md` with one gate fix). PLAN.md ends at M11 ("the author and
+  the workbench choose the next task together"); the brief is that choice (management_0's queue, item
+  3; its proposal's Option A). PLAN.md is not edited (rule 9). The session is the brief's single
+  worker, dispatched on the Team seat by its manager, Ailp-team_3, on 2026-10-15 at 16:41: no
+  sub-agents, at most 4 jobs. `nitpick-fuzz_2`, this repository's manager, reviews `local-m12` and
+  merges it. The dispatch adds seven binding notes, (a)–(e) from management_0 and (f)–(g) from
+  `nitpick-fuzz_2`:
+  - (a) the gate fix: sections 3 and 8 allow M11 BUILD claims whose new output is the pin refusal
+    (their manifests pin `llvm = "20.1.2"`, P32), recorded as P32's toolchain moves; any other
+    difference stops the run, and section 6's "0 cells moved by the toolchain" excludes those claims;
+  - (b) an existing local `local-m12` is resumed with `git switch`;
+  - (c) a bisected findings run uses `--name VERDICTS-bisect.txt`, deleted afterwards;
+  - (d) `gen/m10.py` reads the `.work/hunt2` and `.work/base` worktrees, which exist by section 4;
+  - (e) section 3 runs after section 4;
+  - (f) landing 112 (DEF-232, F-048) is on the compiler's `main`, so HUNT3 carries it: P21 and
+    section 7's item 2 take their "carries 112" branch, and M11's `ty1944`, F-048's source claim,
+    moves with it;
+  - (g) from `nitpick-libs_19`'s advance notice of landing 113 (F55), each measured here: P22's
+    programs, with F-029's `k2` already refused `PARSE-002` at `9126350`; `me0119`, `me0119b` and
+    `me0183`, refused `PARSE-001` at a binding named `buffer` before their claims are reached
+    (DEF-235), explained by landing 113, listed in REPORT §13.12 and NOT re-spelled in M12 (that is
+    `nitpick-fuzz_2`'s to schedule); and `as0572`, whose `#[align(16i32)]` is refused at 113 because the
+    language has no `#[align]` (D-020), triaged through PLAN 5.2 with its acceptance at `9126350`
+    checked for a silent no-op.
+- **S67 — the author's go** (the brief's section 1, step 7), as the dispatch relays it. Quoted
+  verbatim, all three parts:
+  - management_0's recommendation 6, as put to the author at 07:28:59 on 2026-10-15:
+    > "6. **Fuzzer re-baseline (M12):** run it on the Team seat after 113 lands. It needs your go to switch to LLVM 20.1.8, because the fuzzer's plan forbids changing LLVM without your word. This independently re-checks 29 compiler fixes that only the compiler has checked so far. *I recommend yes.*"
+  - The author's answer, 07:42:39 on 2026-10-15, from management_0's transcript:
+    > "great work. i just got back form the school. I just finished looking over the questions and from the best i can tell all the recommendations look fine to me. Lets go with those."
+  - The mapping, as management_0 gives it:
+    > - (i) LLVM 20.1.8 is covered in so many words.
+    > - (ii) HUNT3 is covered by "after 113 lands", which is the brief's §2 "main after 113": HUNT3 is origin/main at your fetch, with 113 on it. The go never names HUNT3; this is management's reading of its own recommendation, and S67 says so.
+    > - The go does NOT cover the e50eaf4 fallback. If 113 is not on origin/main at your fetch, STOP (brief §2, "If neither holds").
+    > - The go does not name the apt.llvm.org prefix ~/.local/llvm-20.1.8, so never use it (brief §3).
+
+  So (i), LLVM 20.1.8, is the go's own words. **(ii), HUNT3, is management's reading of its own
+  recommendation**: the go never names HUNT3. The go does not reach the `e50eaf4` fallback, nor the
+  machine's apt.llvm.org prefix, and neither is used.
+- **S68 — HUNT3 is `0c0f5a3`**, the compiler's `origin/main` at this session's fetch (16:43 EDT), with
+  landing 113 on it (M12 section above). It carries landings 112 and 113, and not 114 or 115. Its
+  ladder row is not in its own NOTICES: rows 112 and 113 carry no digests. The row checked is the
+  workbench BOARD's transcription of notice 113's rows "at `0c0f5a3`", the same source the repin
+  inventory took landing 111's row from.
+- **S69 — the branch is `local-m12` of the Team seat's clone**, `git switch -c local-m12 --no-track
+  origin/main` at `d44dfe3`. `--no-track` keeps a bare `git push` from ever reaching `main` (S47).
+  Every push is `git push origin local-m12`; `nitpick-fuzz_2` reviews and merges. The clone's
+  `origin` is GitHub over SSH, which carries the push credentials, so no `set-url`.
+- **S70 — two LLVMs, each named on every runner.** `.work/llvm-20.1.2` links `/usr/lib/llvm-20`
+  (20.1.2, S48) for the baseline, HUNT2 and the shakedown. `.work/llvm-20.1.8` is the 20.1.8 release
+  tarball (section 3), for HUNT3 and the LLVM control. Every runner gets `--llvm`, and no
+  `.work/llvm` is made, so a runner run without `--llvm` fails rather than silently picking one.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -2325,3 +2460,9 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     - F-026's shape and DEF-131, both fixed at `93bcb66`.
   - **M11 is done**: all fourteen references, 10 419 lines. The session stopped there, as
     11.3 says.
+- 2026-10-15 (session 10, the Team seat, branch `local-m12`): **M12, the re-baseline at HUNT3**, on
+  management's corrected brief (S66).
+  - **(1) The start checks** passed: GitHub fetched, `main` = `origin/main` = `d44dfe3`, M11 ticked,
+    the tree clean, `local-m12` new (S69). The go is S67, verbatim.
+  - **HUNT3 is `0c0f5a3`**, landing 113, carrying 112 (S68). The baseline and HUNT2 were rebuilt under
+    20.1.2 in 74.6 s and 72.7 s, byte-identical to the committed digests; the canaries pass at both.
