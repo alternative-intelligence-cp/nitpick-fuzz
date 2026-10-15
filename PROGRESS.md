@@ -65,7 +65,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — all fourteen whole
   - [x] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — the final run: 2 587 agree, 285 disagree, all triaged
   - [x] 11.3 `REPORT.md` §12; stop — §12 written; session 9 stopped there (2026-10-02)
-- [ ] **M12** — the re-baseline at HUNT3 `0c0f5a3`, the compiler's `main` after landing 113, under
+- [x] **M12** — the re-baseline at HUNT3 `0c0f5a3`, the compiler's `main` after landing 113, under
   LLVM 20.1.8 (session 10, the Team seat; S66–S68). The boxes are the brief's sections, in the order
   they run: section 3 runs after section 4, whose corpus and comparers its control needs.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded (a no-op at `d44dfe3`), M11 ticked and merged, the tree clean, branch `local-m12` new (S69); the go quoted (S67)
@@ -75,7 +75,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
   - [x] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [x] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
-  - [ ] 8 the gate; `REPORT.md` §13
+  - [x] 8 the gate; `REPORT.md` §13
 
 ## Compilers
 
@@ -1858,6 +1858,37 @@ control. **Every move carries a landing number or a finding id; zero UNEXPLAINED
   files: every newest column is `0c0f5a3`, and of their 224 rows the 27 that do not read "same" are
   exactly the claims that moved at HUNT3.
 
+**The gate** (section 8), at the commit that ticks M12:
+- [x] The start checks passed: GitHub fetched, `main` fast-forwarded (a no-op at `d44dfe3`), `d44dfe3`
+  an ancestor, M11 ticked, the tree clean, `local-m12` new; the go quoted as S67.
+- [x] The baseline's and HUNT2's products byte-identical to the committed digests (`npkc` in its
+  Ubuntu-lld form); the canaries pass at all three compilers, and at landings 73 and 74.
+- [x] HUNT3's digests recorded against notice 113's ladder row: `npkc.ll` and `npkrt.o` equal to it;
+  `npkc` 72 bytes longer, its linker comment (reasoned).
+- [x] The re-spelling committed (`daad233`) before HUNT3 was built or run; the anchored grep lists only
+  the 6 `m11/` files; identity at `c3bdae2` and `9126350` in M2, M9 with heap words, recall, M10 and
+  the ten findings.
+- [x] The LLVM control at `9126350` under 20.1.8 identical in every record; S66 (a)'s allowance unused.
+- [x] Recall 25/25 at the baseline as committed (the shakedown); at HUNT3 19/19 by the script, 6/6 by
+  hand.
+- [x] Every finding whose registry row is FIXED gives its fixed verdict at HUNT3, and every control its
+  recorded answer but one, listed with its cause: F-020's `ctl_j3`, 10/10 under D-334.
+- [x] Every finding's new baseline line equals its committed one. F-025's committed record is
+  `run.sh`'s at `9126350` only; its `run.sh` at the baseline gives what `9126350` recorded.
+- [x] Every moved cell and claim carries a landing number or a finding id (`MOVES12.md`); zero
+  UNEXPLAINED; every prediction ticked (29) or explained (4).
+- [x] `KNOWN_DEFECTS.md` carries DEF-227 … DEF-251, with DEF-190, DEF-252 and DEF-253, with landing
+  numbers, and the F-001/F-002 note.
+- [x] FZ-1 … FZ-10 applied, FZ-2's counting and `PLAN.md:16`/`README.md:25` listed for the author;
+  `NEWEST` rebased.
+- [x] REPORT §13's denominators add up: M2 956 = 562 + 394; M9 7 571 = 4 047 + 3 524; M10 223 = 218 + 5;
+  M11 2 872 = 2 628 + 244; the 285 = 62 + 223; in every run, moved = explained.
+- [x] No committed record of `c3bdae2` or `9126350` changed: the brief's `git diff --stat origin/main --
+  results/c3bdae2 results/9126350 results/GRID.md results/GRID9.md 'findings/*/VERDICTS.txt'
+  'findings/*/VERDICTS-9126350.txt'` lists only F-049's two new files, added, and with
+  `--diff-filter=MDR` it prints nothing. The scratch is gone: no `.work/shake`, `.work/control` or
+  `.work/bisect`, and no `VERDICTS-shake.txt`, `VERDICTS-scratch.txt` or `VERDICTS-bisect.txt`.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2731,3 +2762,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(6) The registry rows and FZ-1 … FZ-10:** KNOWN_DEFECTS.md's DEF-227 … DEF-253 section, every
     status read and every fixed row measured at HUNT3; FZ-1 … FZ-10 applied (FZ-2's counting,
     `PLAN.md:16` and `README.md:25` left for the author); `NEWEST` rebased to `0c0f5a3`.
+  - **(7) REPORT.md §13** written, with a pointer in its opening; the gate holds in every box; **M12 is
+    ticked**. The session stops here (18:37 EDT), as the brief says.

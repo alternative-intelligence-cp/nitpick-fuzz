@@ -69,6 +69,13 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
       by the emitter (`EMIT-002`).
     - **F-017**: seven reference sentences the compiler contradicts
       (documentation findings).
+- **M12, the re-baseline at HUNT3 (section 13).** At HUNT3 `0c0f5a3`, the compiler's `main` after
+  landing 113, under LLVM 20.1.8 on the author's go: the recall suite gives "once fixed" in all 25
+  rows; every finding whose registry row is FIXED gives its fixed verdict, measured here for the first
+  time outside the compiler seat; the widened grid has no anomaly left (197 at HUNT2); and every move
+  from HUNT2 carries a landing number (`results/0c0f5a3/MOVES12.md`, zero unexplained). One new
+  lower-priority finding: **F-049**, a consuming `pick`'s binding re-initialised after a move is
+  refused, since landing 74.
 
 ## 1. The two compilers
 
@@ -1206,3 +1213,271 @@ own message for `??` on a `Result` advises the bare `?`, which D-175 retired.
   another kind (a parse, lex, resolve or reach error). One was found (`mc0312b`), and
   it now agrees for its own reason. Sessions 8 and 9 screened theirs the same way and
   found four more (`me0179`, `ct0032f`, `md0099b`, `md0273`), each re-spelled.
+
+## 13. M12 — the re-baseline at HUNT3
+
+M12 is the task the author and the workbench chose after M11 (PLAN.md ends there; S66): every record
+re-run at the compiler's current `main`, and every move from HUNT2 explained. It ran on 2026-10-15,
+on the Team seat, on branch `local-m12`, one harness at a time under the seat's lock, at 4 jobs.
+
+### 13.1 The compilers and the toolchain
+
+| role | commit | LLVM | build | `npkc.ll` bytes / sha256 | `npkrt.o` | `npkc` |
+|---|---|---|---|---|---|---|
+| baseline | `c3bdae2` | 20.1.2 | 74.6 s | 28 111 929 / `4029fc70efbe9cd3…`, as committed | 72 576 / `162b897539285a77…` | 9 724 160 / `5fd636b9ab557c19…` |
+| HUNT2 | `9126350` | 20.1.2 | 72.7 s | 28 857 206 / `2448b3b60d9eb189…`, as committed | 72 576 / `162b897539285a77…` | 9 972 872 / `c7212b6be06fe6a4…` |
+| HUNT3 | `0c0f5a3` (`0c0f5a39fcd2a54e78bf7409add841cbc16927b7`) | 20.1.8 | 55.2 s | 31 701 272 / `f520d5744b1e9951…`, equal to notice 113's ladder row | 72 656 / `c8e5033ad17c70f8…`, equal | 11 283 680 / `02e7b06321a16950…`; the row's is 72 bytes shorter, its linker comment (reasoned) |
+
+- **HUNT3** is the compiler's `origin/main` at the session's fetch (16:43 EDT): landing 113 (DEF-235,
+  DEF-236 (c)(d)(e), DEF-237, DEF-234 (c)) over landing 112 (DEF-232, this repository's F-048). It
+  carries neither 114 nor 115: DEF-250 and DEF-251 are OPEN in its registry (S68). Its ladder row is
+  notice 113's as the workbench's BOARD transcribes it; HUNT3's own NOTICES rows carry no digests.
+- **LLVM 20.1.2** is the machine's `/usr/lib/llvm-20` (S48). **LLVM 20.1.8** is the release tarball
+  `LLVM-20.1.8-Linux-X64.tar.xz`, 2 021 269 412 bytes, sha256
+  `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, fetched in S13's form; no reference
+  digest exists for it. Every runner names its LLVM (S70).
+- **The author's go** (S67): management_0's recommendation 6 — "run it on the Team seat after 113 lands.
+  It needs your go to switch to LLVM 20.1.8" — and the author's answer, "all the recommendations look
+  fine to me. Lets go with those." LLVM 20.1.8 is in its words; HUNT3 is management's reading of "after
+  113 lands", recorded as such.
+- The canaries pass at all three compilers, and at the two built for the bisection (13.11).
+
+### 13.2 The landing-103 spelling and the shakedown
+
+From landing 103 `string_bytes` returns `fixed uint8[]`, which never converts back to a plain `uint8[]`
+(`TYPE-007`, D-351). Before any HUNT3 run the corpus was re-spelled in its own commit (S71): three
+generator lines (`grid.py` and `grid9.py`'s observer, `m10.py`'s `t07`) and 53 lines in 48 hand-written
+programs (5 in `known/`, 43 in `findings/`). M11's six generated programs that bind a plain `uint8[]`
+are left for Option C.
+
+**The shakedown**, under 20.1.2 into scratch, is identical cell for cell at both old compilers:
+
+| record | `c3bdae2` | `9126350` |
+|---|---|---|
+| M2 grid, 956 cells | 0 moved | 0 moved |
+| M9 grid, 7 571 cells, heap words included | 0 moved | 0 moved |
+| recall, 25 rows | identical | identical |
+| M10, 223 programs | 0 changed | 0 changed |
+| the ten findings holding a re-spelled file | line for line | line for line |
+
+The grid statistics regenerate byte-identical to `results/GRID.md` and `GRID9.md`. Two comparers were
+written for it and kept: `gen/compare.py --grid9` (S72, additive, checked byte for byte) and
+`gen/compare_runs.py` (S73).
+
+### 13.3 The LLVM control
+
+`9126350` re-run under 20.1.8 against its own records, which were measured under 20.1.2: recall 25 of
+25 identical, M2 956 cells 0 moved, M9 7 571 cells 0 moved with the heap words, M10 223 programs 0
+changed, M11 2 872 claims 0 changed. **0 cells moved by the toolchain**, so every move at HUNT3 is the
+compiler's. No BUILD claim reaches npkg's toolchain check (the 21 scripts that write a `[toolchain]`
+stop before it), so the pin refusal the brief foresaw (P32) does not arise; `bd0299`'s own message,
+"ld.lld is 20.1.8 but nitpick.toml pins 20.1.1", shows the scripts ran with 20.1.8.
+
+### 13.4 Recall and findings at HUNT3
+
+**Recall:** 25 rows, every one "once fixed": 19 by `gen/check_known_fixed.py`, DEF-106's and DEF-108's
+six by hand (`TYPE-086` twice, `FLOW-001` twice, both controls 0/0). Identical to `9126350`'s record.
+
+**Findings** (`findings/F-0NN-*/VERDICTS-0c0f5a3.txt`: HUNT3 twice and the baseline once, under 20.1.8;
+the HUNT3 runs agree for every program; every baseline line equals the committed one):
+
+| F | DEF | landing | HUNT3 | baseline `c3bdae2` |
+|---|---|---|---|---|
+| F-001, F-002 | faces of DEF-102, DEF-104 | 59 (step 3g) | refused `TYPE-085`, `TYPE-047`; controls as recorded, `ctl_gen_move_param` 21/21 | as committed |
+| F-003 | DEF-118 | 74 | `MOVE-001` | as committed |
+| F-004 | DEF-119 | 74 | `BORROW-015`, `BORROW-013` | as committed |
+| F-005 | DEF-120 | 76 | live 0; the descriptor closed | as committed |
+| F-006 | DEF-121 | 76 | live 0 | as committed |
+| F-007 | DEF-122 | 78 | peak 10, not 10 × N | as committed |
+| F-008 | DEF-123 | 74 | `BORROW-013` | as committed |
+| F-009, F-010 | DEF-124, DEF-125 | 79 | 22/22; 0/22/22 | as committed |
+| F-011 | DEF-127 | 74 | 0/0 | as committed |
+| F-012, F-013, F-014 | DEF-128, DEF-129, DEF-130 | 75 | 0/0 | as committed |
+| F-015, F-016 | DEF-131, DEF-132 | 79 | 0/0; 4/4 | as committed |
+| F-017 | DEF-133 | 79 | `d7` `TYPE-004`; the six sentences' programs unmoved (the references were corrected) | as committed |
+| F-018, F-019, F-021 | DEF-144, DEF-145, DEF-147 | 77 | agree | as committed |
+| F-020 | DEF-146, under D-334 | 77 | `j1` 0/0; **the control `ctl_j3` now 10/10** | as committed |
+| F-022 | DEF-148 | 77 | `BORROW-016` | as committed |
+| F-023 | DEF-149 | 80 | `TYPE-043` | as committed |
+| F-024 | DEF-150 | 80 | `PARSE-001` (c1's `$$i` receiver), `PARSE-012`, 0/0 | as committed |
+| F-025 | DEF-151 | 80 | `run.sh`, twice: the flag accepts the program | `run.sh`: 256 × `WILDX-003`, as at `9126350` |
+| F-026 | DEF-152 | 80 | `TYPE-016` | as committed |
+| F-027 | DEF-153 | 78, 83, 90 | 15 of its 16 claims agree; `mc0085b` is a documentation row by DEF-153's record | claims |
+| F-028 | DEF-154 | OPEN | none of its 94 claims moved | claims |
+| F-029 | DEF-235 | 113 | `k1` `PARSE-001`; `k2` `PARSE-001` beside its `PARSE-002` | as committed |
+| F-030 … F-033, F-035, F-040, F-043, F-044 | DEF-239 | OPEN | none moved but `me0183`'s code (113); F-044's frac row `ty1657` agrees (DEF-231, 97) | claims |
+| F-034 | DEF-234 | (c) 113; (a)(b) OPEN | (c) agrees | claims |
+| F-036 | (a) DEF-235; (b) DEF-190 | 113; OPEN | (a) agrees; (b) unmoved | claims |
+| F-037 | DEF-227 | 94 | 0/0: it answers 7 | as committed |
+| F-038 | DEF-233 | 111 | `TYPE-094`; `ctl_c3` 0/0 | as committed |
+| F-039, F-042 | DEF-236 | (c)(d)(e) 113; (a) OPEN | (c)(d)(e) agree; (a) unmoved; (b) a documentation row | claims |
+| F-041 | DEF-229 | 96 | `TYPE-018` in 0.09 s | as committed (the 120 s timeout) |
+| F-045 | DEF-237 | 113 | `TYPE-007`, its advice naming `?!`/`?|` | as committed |
+| F-046 | (a) DEF-238; (b) DEF-248 | 111; 102 | both agree; (c) a documentation row | claims |
+| F-047 | DEF-230 | 98, 103 | `TYPE-086`; the controls as recorded | as committed |
+| F-048 | DEF-232 | 112 | 0/0; `ctl_n3` 0/0 | as committed |
+| **F-049** (new) | — | (74) | `MOVE-001`; its local control 22/22 | 22/22, the right answer |
+
+**Every memory finding (F-001 … F-008, F-011, F-022, F-037, F-047) gives its fixed verdict at HUNT3**,
+and no HUNT3 line exits 70, 95, 107 or 139. The fifteen row findings get a header-only
+`VERDICTS-0c0f5a3.txt`: their programs are M11's claims (13.8).
+
+### 13.5 The M2 grid
+
+| class | `c3bdae2` | `9126350` | HUNT3 `0c0f5a3` |
+|---|---|---|---|
+| clean | 612 | 562 | 562 |
+| refused | 230 | 394 | 394 |
+| `DEFECT:double_free` | 56 | 0 | 0 |
+| `DEFECT:leg_mismatch` | 25 | 0 | 0 |
+| `DEFECT:uaf` | 22 | 0 | 0 |
+| `DEFECT:segv` | 5 | 0 | 0 |
+| `OVERRESTRICT` | 4 | 0 | 0 |
+| `DEFECT:wrong_value` | 2 | 0 | 0 |
+| **generated** | **956** | **956** | **956** |
+
+No cell moved from `9126350` (`results/0c0f5a3/MOVES.md`).
+
+### 13.6 The M9 grid
+
+| class | `c3bdae2` | `9126350` | HUNT3 `0c0f5a3` |
+|---|---|---|---|
+| clean | 4 168 | 3 874 | 4 047 |
+| refused | 2 584 | 3 500 | 3 524 |
+| `DEFECT:double_free` | 260 | 16 | 0 |
+| `DEFECT:leak` | 214 | 149 | 0 |
+| `DEFECT:leg_mismatch` | 149 | 0 | 0 |
+| `DEFECT:uaf` | 109 | 6 | 0 |
+| `DEFECT:wrong_value` | 46 | 24 | 0 |
+| `DEFECT:segv` | 37 | 2 | 0 |
+| `OVERRESTRICT` | 4 | 0 | 0 |
+| **generated** | **7 571** | **7 571** | **7 571** |
+
+**No anomaly is left.** 393 cells moved from `9126350` (`results/0c0f5a3/MOVES9.md`): F-003's 44 and
+F-008's 40 accepted REFUSE cells are refused (74); the store-through-pointer and pick-binding leaks
+are clean (76), 141 cells; F-009's 72 and F-010's 12 refused SAFE cells are clean (79); 60 `OwnedFd`
+cells lost F-007's `to_cstring` bytes (78); and 24 SAFE `pick_own` cells are newly refused, F-049
+(74). D-065's 262 `MOVE-001` cells and the 28 `TYPE-047` receiver cells did not move.
+
+### 13.7 M10
+
+At HUNT3, **218 agree and 5 disagree** (HUNT2: 212 and 11; 223 tested). Seven of HUNT2's
+disagreements now agree: `h02` (74), `l06`, `l08`, `l11` (75), `m06_spaceship`, `p05_negative_patterns`
+and `v12` (79). Four still disagree with HUNT2's text, F-017's documentation sentences (`t02`, `t08`,
+`t09`, `l28`), which the references have since corrected. One newly disagrees: `c25`, a 16-digit `flt32`
+literal, which landing 91 accepts on purpose (D-346 lifted the 15-digit rule). `t07`, re-spelled, is
+unchanged at 94.
+
+### 13.8 M11
+
+At HUNT3, **2 628 agree and 244 disagree** (HUNT2: 2 587 and 285; 2 872 tested). 95 claims changed: 62
+to AGREE, 21 to DISAGREE, 4 inside DISAGREE and 8 inside AGREE (`results/0c0f5a3/m11-changes.txt`).
+
+**The 285, by registry status** (`results/0c0f5a3/m11-disagree.jsonl`):
+
+| status at HUNT3 | claims | at HUNT3 |
+|---|---|---|
+| FIXED, with its landing (MOVES12 rows 54–80, 91) | 69 | 62 agree; 7 still disagree: `mc0136` (80, DEF-150: the program copies the reference's old `$$i` example, now `PARSE-001`), `mc0085b` (DEF-153: a documentation row), and DEF-133's five (79: the references corrected, the claims keep HUNT2's text) |
+| OPEN, DEF-154: F-028's documentation rows | 94 | disagree |
+| OPEN, DEF-239: F-030 … F-044's documentation rows | 95 | disagree |
+| OPEN, DEF-234 (a)(b), DEF-190, DEF-236 (a) | 6 | disagree |
+| not a defect: the backward pipe (F-039 b, F-046 c) | 2 | disagree |
+| not findings: strict 2, extraction 17 | 19 | disagree |
+| **total** | **285** | **62 agree, 223 disagree** |
+
+**The 21 new disagreements are each a change the compiler made on purpose** (MOVES12 rows 81–90): the
+six `uint8[]` bindings (103), `mc0388` (106), `me0119`/`me0119b`, `as0572` and `md0042` (113), six BUILD
+scripts (71: npkg requires a `[toolchain]` `triple` pin), `ty0190` (91), `ty0322` (78: `cstring` is 24
+bytes), `ty1635` (97: D-347's invariants) and `ty1669` (83: `flt64` is no literal suffix). Two
+agreements now agree for another reason (S55's screen): `bi0010` and `bi0017` are refused `TYPE-007` at
+the view, not `BORROW-001` (Option C's).
+
+### 13.9 The move table
+
+`results/0c0f5a3/MOVES12.md`, 97 rows: one per group of moves sharing a shape and a cause, with the
+LLVM control as row 0. Recall 0, M2 0, findings 67 programs (and F-025's script, F-045's message), M9
+393 cells, M10 9, M11 95. **Every move carries a landing number with its DEF or D- number, or a finding
+id; zero UNEXPLAINED.** The evidence is the registry or notice text at HUNT3 naming the program or its
+shape, or for F-049's 24 cells a bisection. **Predicted moves: 29 of 33 ticked**; the other four are
+explained there: P1 and P2 each lost four cells to a refusal (F-008's fix; F-049), P17's F-024 is
+`PARSE-001` as DEF-150's record says, and P32's pin refusal never arose. The grid comparisons are
+`results/0c0f5a3/MOVES.md` and `MOVES9.md`.
+
+### 13.10 The registry refresh and the FZ items
+
+`KNOWN_DEFECTS.md` gains the DEF-227 … DEF-253 section (FZ-8), every status read at HUNT3 and every
+fixed row measured there; each older DEF bullet carries its landing and its HUNT3 verdict; the
+F-001/F-002 note sits with the faces of known defects. FZ-1 … FZ-10 are applied as the document-fix
+draft words them. For the author: FZ-2's counting (F-044's 33 → 32 and the counts that follow),
+`PLAN.md:16` and `README.md:25` ("the five known defects"), and F-020's `ctl_j3`.
+
+### 13.11 Candidates and findings
+
+- **F-049**, lower priority, an over-restriction (`findings/F-049-pick-binding-reinit-refused/`): a
+  consuming `pick`'s binding, moved and then re-assigned, cannot be read; `MOVE-001` says it "is
+  invalid until it is assigned again" just after it was. Its local twin compiles and reads 22. It is
+  DEF-124's shape (F-009) at a pattern binding. **Bisected to landing 74** (`40deffa`, DEF-118's fix):
+  the grid's 24 cells and the finding's programs run at landing 73 `bbb1530` and are refused at 74. At
+  the baseline and HUNT2 the reproducers give the right answer. Not registered; the workbench verifies
+  it first (PLAN D6).
+- **Two reference rows contradict HUNT3**, documentation, the compiler right: TYPE_REFERENCE:1858 at
+  HUNT3 spells `complex(3.0flt64, 4.0flt64)`, which HUNT3 refuses `LEX-009` (`flt64` is no suffix); and
+  AST_REFERENCE:578's node comment lists `#[align(16)]` and `#[cfg(...)]` while its paragraph says
+  `#[derive]` is the one attribute (`DERIVE-007` since 113). Measured by `ty1669` and `as0572`.
+- **`as0572`, the dispatch's question**: at `9126350` and the baseline `#[align(16i32)]` was a silent
+  no-op, measured (`#size_of<Aligned>()` is 8 with and without it). No reference sentence gave the
+  attribute a result, so it is F-039 (d)'s shape, an attribute the language does not have accepted and
+  ignored, fixed by DEF-236 (d) at 113; not a silent wrong answer against a stated result.
+
+### 13.12 What M12 does not cover
+
+- **Option C's reference delta.** Every claim keeps the sentence it was extracted from at HUNT2; the
+  references have moved since, and the new disagreements above are where. Re-extracting is Option C.
+- **The `m11_claims` spellings**: the six `uint8[]` bindings and `bi0010`/`bi0017`, and the claims that pass
+  a view to a plain parameter or return one.
+- **Re-spellings left to `nitpick-fuzz_2`**: `me0119`, `me0119b` and `me0183` (a binding named `buffer`,
+  refused before their claims are reached), `md0042` (a `mod:mod;` header), the six BUILD scripts
+  (no `triple` pin), and F-020's `ctl_j3`.
+- **Option B's class**: the -O2 initialisation and pointer-store defects (DEF-250, DEF-251), and DEF-252's
+  view re-seated by a callee, a use after free registered at 113; none lies on the grid's axes.
+- The grid's own blind spots (section 7) stand.
+
+### 13.13 Cost
+
+At 4 jobs, one harness at a time (wall time of each run; the lock waits are not counted):
+
+| step | wall |
+|---|---|
+| builds: the baseline, HUNT2, HUNT3 | 74.6 + 72.7 + 55.2 s |
+| LLVM 20.1.8: fetch, test, extract | 328 s (the download 56 s) |
+| the shakedown: M2, M9, recall, M10 at each old compiler, and the findings | 602.9 + 570.0 + 53.7 s ≈ 20.5 min |
+| the LLVM control | 849.9 s ≈ 14.2 min |
+| the runs at HUNT3: recall, findings (two passes), M2, M9, M10, M11, the 285 | 1 169.2 s ≈ 19.5 min |
+| F-049: two bisection builds, 130 cells twice, its programs | 112.7 + 25.3 + 5.6 s |
+| **in all** | about 66 min of harness time |
+
+The session ran from 16:41 to 18:37 EDT on 2026-10-15.
+
+### 13.14 Reproducing
+
+From a clone at the commit that closes M12, with the compiler cloned to `.work/nitpick`:
+```
+git -C .work/nitpick worktree add ../base c3bdae2
+git -C .work/nitpick worktree add ../hunt2 9126350
+git -C .work/nitpick worktree add ../hunt3 0c0f5a39fcd2a54e78bf7409add841cbc16927b7
+ln -s /usr/lib/llvm-20 .work/llvm-20.1.2     # llvm-config: 20.1.2
+# .work/llvm-20.1.8: LLVM-20.1.8-Linux-X64.tar.xz, sha256 1ead36b3…, extracted --strip-components=1
+(cd .work/hunt3 && PATH=$PWD/../llvm-20.1.8/bin:$PATH python3 bootstrap/harness/quickemit.py --keep npkg/main.npk)
+python3 gen/grid.py && python3 gen/grid9.py
+python3 gen/run_known.py .work/hunt3 --llvm .work/llvm-20.1.8 --out results/0c0f5a3/known-m12.txt
+python3 gen/run_findings.py --hunt .work/hunt3 --base .work/base --llvm .work/llvm-20.1.8 --name VERDICTS-0c0f5a3.txt
+python3 gen/run.py .work/hunt3 --llvm .work/llvm-20.1.8
+python3 gen/run.py .work/hunt3 --llvm .work/llvm-20.1.8 --cells cells9 --out results/0c0f5a3/cells9.jsonl
+python3 gen/m10_run.py .work/hunt3 --llvm .work/llvm-20.1.8
+python3 gen/m11_run.py .work/hunt3 --llvm .work/llvm-20.1.8
+python3 gen/compare.py results/9126350/ results/0c0f5a3/
+python3 gen/compare.py --grid9 results/9126350/ results/0c0f5a3/
+python3 gen/compare_runs.py results/9126350/m11.jsonl results/0c0f5a3/m11.jsonl
+```
+The baseline and HUNT2 are built the same way under `.work/llvm-20.1.2`; the findings with heap words
+are re-run with `--heap` (F-003 … F-010). `PROGRESS.md`'s M12 section has every command and time.
