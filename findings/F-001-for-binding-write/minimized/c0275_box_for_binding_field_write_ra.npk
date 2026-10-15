@@ -7,7 +7,7 @@ func:nw = string() never fails {
     pass string_concat("xyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "w");
 };
 func:obs_s = int32(string:v) never fails {
-    uint8[]:bs = string_bytes(v);
+    fixed uint8[]:bs = string_bytes(v);
     if (bs[0i64] == 120u8) { pass 22i32; }
     pass 24i32;
 };

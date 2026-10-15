@@ -1389,7 +1389,7 @@ item("t07_bytes_view_bounds", AREA_T,
       ("TYPE", "- **Indexing is bounds-checked against the runtime `len`**, trapping to")],
      "run:94",
      main_("""    string:s = "abc";
-    uint8[]:b = string_bytes(s);
+    fixed uint8[]:b = string_bytes(s);
     if (b.len != 3i64) { exit 10i32; }
     if (b[raw v64(1i64)] != 98u8) { exit 11i32; }
     uint8:x = b[raw v64(3i64)];

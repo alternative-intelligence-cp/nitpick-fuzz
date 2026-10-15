@@ -1643,6 +1643,24 @@ All six are byte-identical to the committed digests (`npkc` in its Ubuntu-lld fo
 the commissioning check passes again. Canaries (PLAN 0.6) at both: `canary.npk` gives npkc 0 and runs
 0/0; `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` and writes no `.ll`.
 
+**The landing-103 spelling** (section 4; S71). From landing 103 `string_bytes` returns `fixed
+uint8[]`, and a `fixed` view never converts back to a plain `uint8[]`: that is `TYPE-007` (D-351,
+DEF-246). So every binding of its result into a plain `uint8[]` becomes `fixed uint8[]`:
+- **three generator lines:** `gen/grid.py`'s and `gen/grid9.py`'s `obs_s` (`uint8[]:bs =
+  string_bytes(v);`), changed together (S27), and `gen/m10.py`'s `t07_bytes_view_bounds`
+  (`uint8[]:b = string_bytes(s);`);
+- **the hand-written programs,** found by the brief's anchored grep over `known/` and `findings/`:
+  48 files (5 in `known/`, 43 in `findings/`, among them F-004's five with two sites each), 53 lines,
+  re-spelled by its `sed` and by nothing else;
+- `python3 gen/m10.py` regenerated `t07`'s program and nothing else in `m10/`.
+
+The anchored grep over every `.npk` now lists only six files, `m11/programs/{bi0105, bi0241, me0208,
+me0217, me0221, me0228}.npk`, generated from `gen/m11_claims/`. They are left for Option C, as the
+brief says: at HUNT3 they are refused `TYPE-007`, a move explained by landing 103 (D-351), and their
+expectations never change (S45). Regenerated, the grids are unchanged in size: `gen/grid.py` 956
+cells (1 284 skipped), `gen/grid9.py` 7 571 (28 519 skipped), and `gen/grid9.py --selfcheck` prints
+"956 of 956 M2 programs byte-identical".
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2285,6 +2303,14 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   (20.1.2, S48) for the baseline, HUNT2 and the shakedown. `.work/llvm-20.1.8` is the 20.1.8 release
   tarball (section 3), for HUNT3 and the LLVM control. Every runner gets `--llvm`, and no
   `.work/llvm` is made, so a runner run without `--llvm` fails rather than silently picking one.
+- **S71 — the landing-103 spelling, `fixed uint8[]` for `string_bytes`'s result, is its own commit
+  before any HUNT3 run** (the brief's section 4; 8.3's precedent). It is three generator lines and
+  53 lines in 48 hand-written programs. S36's list for M10 gains one text change after the first run:
+  `t07_bytes_view_bounds`, `uint8[]:b` → `fixed uint8[]:b`. That is a spelling of the program's own:
+  the item is about the view's bounds check, not the binding's qualifier, and its expectation `run:94`
+  stands. One spelling serves all three compilers; the shakedown checks it is neutral at `c3bdae2` and
+  `9126350`. Not re-spelled: M11's six generated programs that bind a plain `uint8[]`, and the claims
+  that pass a view to a plain parameter or return one (`gen/m11_claims/`, Option C's).
 
 ## Log
 
@@ -2466,3 +2492,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     the tree clean, `local-m12` new (S69). The go is S67, verbatim.
   - **HUNT3 is `0c0f5a3`**, landing 113, carrying 112 (S68). The baseline and HUNT2 were rebuilt under
     20.1.2 in 74.6 s and 72.7 s, byte-identical to the committed digests; the canaries pass at both.
+  - **(2) The landing-103 spelling** (S71): `fixed uint8[]` in three generator lines and in 53 lines
+    of 48 hand-written programs; `gen/m10.py` regenerated `t07` alone. The anchored grep lists only
+    M11's six generated programs, left for Option C.

@@ -6,7 +6,7 @@ func:truth = bool(int64:n) never fails {
     pass n > 0i64;
 };
 func:obs_s = int32(string:v) never fails {
-    uint8[]:bs = string_bytes(v);
+    fixed uint8[]:bs = string_bytes(v);
     if (bs[0i64] == 170u8) { pass 70i32; }
     pass 24i32;
 };

@@ -4,7 +4,7 @@ struct:Box = {
 };
 func:overwrite_m = int64(move Box:b) never fails {
     b.s = string_concat("xyzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", "w");
-    uint8[]:bs = string_bytes(b.s);
+    fixed uint8[]:bs = string_bytes(b.s);
     if (bs[0i64] == 120u8) { pass 0i64; }
     pass 1i64;
 };

@@ -5,7 +5,7 @@ func:v64 = int64(int64:x) never fails { pass x; };
 
 func:main = int32(cstring[]:_~argv) {
     string:s = "hello";
-    uint8[]:b = string_bytes(s);
+    fixed uint8[]:b = string_bytes(s);
     if (b[raw v64(1i64)] != 101u8) { exit 10i32; }
     exit 0i32;
 };
