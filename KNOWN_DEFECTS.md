@@ -3,8 +3,11 @@
 Every verdict in the `c3bdae2` columns was **measured on 2026-09-25** by the
 library workbench's orchestrator. It used the recipe in `PLAN.md`, at the
 workbench's pinned compiler built from `c3bdae2`. The "once fixed" columns are
-what the compiler's maintainers stated for their fix, measured there. Here they
-are expectations until M1.3 measures them.
+what the compiler's maintainers stated for their fix, measured there. This
+repository has measured them since: M1.3 at HUNT, M8 at HUNT2, and **M12 at HUNT3
+`0c0f5a3`** (`results/0c0f5a3/known-m12.txt`), where every row gives its "once
+fixed" verdict: 19 by `gen/check_known_fixed.py`, DEF-106's and DEF-108's six by
+hand.
 
 Identify a fix at HUNT by its commit:
 `git merge-base --is-ancestor <commit> <HUNT>`. Where no commit is given, the
@@ -167,6 +170,12 @@ for them.
   at 3g. That was a stale cached binary in the compiler seat's batch loop. Run one at
   a time, it exits **21 on both legs under 3g** (the amended tree `5bdae98`). Any HUNT
   carrying 3g must still give 21.
+- **The F-001/F-002 note (M12).** The compiler's registry names neither finding: DEF-102's and
+  DEF-104's records (OPEN_DECISIONS:2282-2330 at the time of the registration audit) do not cite
+  them. Their closure rests on the workbench's O-N21 and O-N22, step 3g (landing 59), this
+  repository's `VERDICTS-9126350.txt`, and now `VERDICTS-0c0f5a3.txt`: at HUNT3 `0c0f5a3` F-001's
+  13 programs are `TYPE-085` and F-002's 4 `TYPE-047`, the controls as recorded, `ctl_gen_move_param`
+  21/21.
 - The compiler's chain was re-based after 3g's first harness. The planned shas are 3g
   `5bdae98`, 3h `c1a4a05`, step 3 `0da2be7`, step 4 `996784e`, 4b `f87d2df` (DEF-106),
   5 `4e467bc`, 5b `77314e9`, then 5c (DEF-108, `FLOW-001`). **Identify each by its
@@ -178,58 +187,145 @@ Registered on 2026-09-26 in the compiler's OPEN_DECISIONS §4, each citing this
 repository's `findings/` directory and `main` `88e6355` as its evidence. **All
 nine are fixed in the compiler's subcycle 1.6.1d, which lands after 1.6.1c** —
 so none is fixed in HUNT2 `9126350`, nor in `9f6f370`. Find each fix by its
-subject.
+subject. Each bullet now carries its landing (1.6.1d step 1 = landing 74, step 3 =
+76, step 3b = 78, step 4 = 79) and M12's measurement at HUNT3 `0c0f5a3`
+(`findings/F-0NN-*/VERDICTS-0c0f5a3.txt`, `results/0c0f5a3/MOVES12.md`).
 
 - **DEF-118** — F-003: a consuming `pick`'s binding escapes the move rules (a
-  read after its move, a second move).
+  read after its move, a second move). **Fixed at landing 74.** At HUNT3: F-003's four defect programs `MOVE-001`; the grid's 44 cells refused.
 - **DEF-119** — F-004: a move out through a pointer while a view of the root is
-  live (the freeze records a write, not a move out).
-- **DEF-120** — F-005: `(<-p) = v` never drops the old value.
-- **DEF-121** — F-006: a consuming `pick`'s binding is never dropped.
-- **DEF-122** — F-007: `to_cstring`'s buffer is never freed.
-- **DEF-123** — F-008: a write through a `$$i` claim's holder is not refused.
-- **DEF-124** — F-009: a re-initialised `move` parameter cannot be read.
+  live (the freeze records a write, not a move out). **Fixed at 74.** At HUNT3: `BORROW-015` and `BORROW-013`.
+- **DEF-120** — F-005: `(<-p) = v` never drops the old value. **Fixed at 76.** At HUNT3: live 0; the grid's 113 leak cells clean (its other 4 are DEF-123's REFUSE cells, refused).
+- **DEF-121** — F-006: a consuming `pick`'s binding is never dropped. **Fixed at 76.** At HUNT3: live 0; 24 of the grid's 28 cells clean, the other 4 F-049's (below).
+- **DEF-122** — F-007: `to_cstring`'s buffer is never freed. **Fixed at 78** (D-328). At HUNT3: the churn's peak is 10, not 10 × N; 60 `OwnedFd` cells' live bytes fell to 0.
+- **DEF-123** — F-008: a write through a `$$i` claim's holder is not refused. **Fixed at 74.** At HUNT3: `BORROW-013`; the grid's 40 cells refused.
+- **DEF-124** — F-009: a re-initialised `move` parameter cannot be read. **Fixed at 79.** At HUNT3: 22/22; the grid's 72 cells clean. The same shape at a consuming pick's binding is F-049, new at 74.
 - **DEF-125** — F-010: the lent-`dyn` swap refused `BORROW-002` since 1.6.1
-  step 0.
+  step 0. **Fixed at 79.** At HUNT3: 0/22/22; the grid's 12 cells clean.
 - **DEF-126** — M8's observation: a `TYPE-007` message names two same-named
-  types by one word (the workbench's O-N29). The refusal is right.
+  types by one word (the workbench's O-N29). The refusal is right. **Fixed at 1.6.1d
+  step 4, landing 79** (NOTICES row 79 names it); a message, not measured here.
 
 ## M10's findings, and one of the compiler seat's own — deduplicate against these
 
 Registered on 2026-09-26 by the compiler seat, each citing this repository's
 `findings/` and its M10 verdicts; **all are fixed in the compiler's subcycle
 1.6.1d** (its step 1: DEF-127 and DEF-134; step 2: DEF-128 … DEF-130; step 4:
-DEF-131 … DEF-133), so HUNT2 `9126350` and `9f6f370` still carry them.
+DEF-131 … DEF-133), so HUNT2 `9126350` and `9f6f370` still carry them. Those steps
+are landings 74, 75 and 79. At HUNT3 `0c0f5a3` (M12) every finding below gives its
+fixed verdict.
 
 - **DEF-127** — F-011: a `for` binding outlives its loop in the emitter; an
-  outer binding of the same name reads the loop's slot, and past it.
-- **DEF-128** — F-012: a `for` over a range runs zero times at its type's edges.
-- **DEF-129** — F-013: `loop` and `till` widen an unsigned bound by its sign.
-- **DEF-130** — F-014: `till` with a negative limit counts down.
-- **DEF-131** — F-015: `<=>` refused by the emitter (`EMIT-002`).
-- **DEF-132** — F-016: a `pick` range pattern with a negative bound is `EMIT-002`.
-- **DEF-133** — F-017: seven reference sentences the compiler contradicts.
+  outer binding of the same name reads the loop's slot, and past it. **Fixed at 74.** At HUNT3: 0/0.
+- **DEF-128** — F-012: a `for` over a range runs zero times at its type's edges. **Fixed at 75.** At HUNT3: 0/0.
+- **DEF-129** — F-013: `loop` and `till` widen an unsigned bound by its sign. **Fixed at 75.** At HUNT3: 0/0.
+- **DEF-130** — F-014: `till` with a negative limit counts down. **Fixed at 75.** At HUNT3: 0/0.
+- **DEF-131** — F-015: `<=>` refused by the emitter (`EMIT-002`). **Fixed at 79.** At HUNT3: 0/0, and M11's seven `<=>` claims agree.
+- **DEF-132** — F-016: a `pick` range pattern with a negative bound is `EMIT-002`. **Fixed at 79.** At HUNT3: 4/4.
+- **DEF-133** — F-017: seven reference sentences the compiler contradicts. **Fixed at 79** (d7 by D-331, d1–d6 by correcting the references). At HUNT3: `d7` is `TYPE-004`.
 - **DEF-134** — the compiler seat's own: a by-value receiver method called on
   a POINTER (`q.peek()` with `Box->:q`, `peek = int64(Box:self)`) reads the
-  pointer's bits as the struct — a silent wrong answer at every pin.
+  pointer's bits as the struct — a silent wrong answer at every pin. **Fixed at 1.6.1d
+  step 1, landing 74** (NOTICES row 74 names it); no program of this repository's.
 
 ## M11's findings, registered by the compiler seat — deduplicate against these
 
-Registered on 2026-09-26, each citing this repository's `findings/` and `main` `3d7d924`; **fixed in the compiler's
-subcycle 1.6.1e**, planned after 1.6.1d step 3 — so HUNT2, `9f6f370` and `1b4f0c6` still carry them. A resumed M11
-must not report these again.
+Registered on 2026-09-26, each citing this repository's `findings/` and `main` `3d7d924`. **DEF-144 … DEF-153 are
+fixed in the compiler's subcycle 1.6.1e** (DEF-153 for its sixteen rows), so HUNT2, `9f6f370` and `1b4f0c6` still carry
+them. **DEF-154 (F-028's ninety-four documentation rows) is OPEN** in the compiler's registry (status read at HUNT3
+`0c0f5a3`, 2026-10-15). A resumed M11 must not report these again. Landings: 1.6.1e step 1 = 77, step 2 = 80, step 3 =
+83; M12's measurement at HUNT3 follows each.
 
-- **DEF-144** — F-018: a macro's free name, alone or as a comparison's operand, reads the call site's local.
-- **DEF-145** — F-019: a `'\u{…}'` escape is typed `char8` and truncated to its low byte.
-- **DEF-146** — F-020: the scope-exit join relays the last-spawned child's error, not the first.
-- **DEF-147** — F-021: an expired `timedwait` returns success after the full wait.
-- **DEF-148** — F-022: a shared arena destroyed while a spawned thread holds it.
-- **DEF-149** — F-023: an un-awaited `async` method call is accepted and emits an undefined symbol.
-- **DEF-150** — F-024: `npkc` traps (exit 3) on three macro and depth shapes.
-- **DEF-151** — F-025: `--extra-picky=no-wildx` refuses every program, at the prelude.
-- **DEF-152** — F-026: `tfp64<Meters>` is accepted and its unit ignored.
-- **DEF-153** — F-027: the sixteen lower-priority rows.
-- **DEF-154** — F-028: the ninety-four documentation rows.
+- **DEF-144** — F-018: a macro's free name, alone or as a comparison's operand, reads the call site's local. **Fixed at 77.** At HUNT3: 0/0; `mc0188`, `mc0202` agree.
+- **DEF-145** — F-019: a `'\u{…}'` escape is typed `char8` and truncated to its low byte. **Fixed at 77** (the escape is `char32`). At HUNT3: `u1` `TYPE-007`, `u2` 0/0.
+- **DEF-146** — F-020: the scope-exit join relays the last-spawned child's error, not the first. **Fixed at 77** under D-334 (the earliest-*spawned* child's error). At HUNT3: `j1` 0/0; the control `ctl_j3` now 10/10, the file the fuzzer's to re-spell (the author's call).
+- **DEF-147** — F-021: an expired `timedwait` returns success after the full wait. **Fixed at 77.** At HUNT3: 0/0.
+- **DEF-148** — F-022: a shared arena destroyed while a spawned thread holds it. **Fixed at 77.** At HUNT3: `BORROW-016`.
+- **DEF-149** — F-023: an un-awaited `async` method call is accepted and emits an undefined symbol. **Fixed at 80.** At HUNT3: `TYPE-043`.
+- **DEF-150** — F-024: `npkc` traps (exit 3) on three macro and depth shapes. **Fixed at 80.** At HUNT3: `PARSE-001` (c1's `$$i` receiver, the reference's own example's), `PARSE-012`, 0/0.
+- **DEF-151** — F-025: `--extra-picky=no-wildx` refuses every program, at the prelude. **Fixed at 80.** At HUNT3: the flag accepts the canary.
+- **DEF-152** — F-026: `tfp64<Meters>` is accepted and its unit ignored. **Fixed at 80.** At HUNT3: `TYPE-016`.
+- **DEF-153** — F-027: the sixteen lower-priority rows. **Fixed for its rows**: three at 78 (the `cstring` literal), twelve at 83, `mc0309b` at 90 (D-338); `mc0085b` became a documentation row. At HUNT3 its claims agree.
+- **DEF-154** — F-028: the ninety-four documentation rows. **OPEN** (documentation; no landing). At HUNT3 none of its claims moved.
+
+## M11 sessions 8 and 9's findings (F-029 … F-048), and the registry's DEF-227 … DEF-253 — deduplicate against these
+
+Registered from 2026-10-07 in the compiler's OPEN_DECISIONS §4 (from the workbench's O-N35 and O-N36), with
+the compiler seat's own and the library seats' entries beside them. **Status read at HUNT3 `0c0f5a3`** (landing
+113, 2026-10-15; `git show 0c0f5a3:meta/roadmap/OPEN_DECISIONS.md` and `meta/NOTICES.md`), and every fixed row
+**measured there by M12** (`findings/F-0NN-*/VERDICTS-0c0f5a3.txt`, `results/0c0f5a3/`). HUNT2 `9126350` and
+`93bcb66` carry every one of these.
+
+Fixed:
+- **DEF-227** — F-037: a trait object built by `x => dyn Trait` read freed memory. **Fixed at landing 94**
+  (`05a7b02`). At HUNT3: `u1`/`u2`/`u3` 0/0 (they answer 7), and `as0453` agrees.
+- **DEF-228** — the workbench's O-N38 item 1: the `&{ }` splice leaked every `to_string` result. **Fixed at 95**
+  (`d98c5e1`). No program of this repository's.
+- **DEF-229** — F-041: npkc did not terminate on an unbounded generic instantiation. **Fixed at 96** (`afa8499`):
+  `NITPICK-TYPE-018`. At HUNT3: `h1` is `TYPE-018` in 0.09 s, and `tr0586` agrees.
+- **DEF-230** — F-047: a write through a `fixed uint8[]` view landed. **Fixed in two steps**, at 98 (`9fede45`,
+  D-348) and 103 (`7e91730`, D-350/D-351: `fixed T[]` a type). At HUNT3: `s1`/`s2` `TYPE-086`, `ctl_s3` 0/0,
+  `ctl_s4` `ASSIGN-002`; `ty1719b` agrees.
+- **DEF-231** — `ty1657`, F-044's frac row: a `frac` printed its stored parts, so −(1 3/8) read "-2 5/8". **Fixed
+  at 97** (`28194e0`, D-347). At HUNT3: `ty1657` agrees. `ty1635`, whose claim was the old invariants, now
+  disagrees (10/10): D-347 changed them.
+- **DEF-232** — F-048: a struct with a `NIL` field was emitted as `{ i32, void }`. **Fixed at 112** (`958890a`): a
+  `NIL` member occupies nothing in the emitter too (D-084). At HUNT3: `n1`/`n2` 0/0, `ctl_n3` 0/0; `ty1944` agrees.
+- **DEF-233** — F-038: npkc exited 3 on `give` or `fall` outside a pick arm. **Fixed at 111** (`e50eaf4`):
+  `NITPICK-TYPE-094`; `NITPICK-TYPE-040` inside a `defer` body. At HUNT3: `c1`/`c2` `TYPE-094`, `ctl_c3` 0/0;
+  `as0202`, `as0203` and `as0267.sh` agree.
+- **DEF-235** — F-029 and F-036 (a): a keyword accepted as a declared name. **Fixed at 113** (`0c0f5a3`): every
+  declared name of every kind is an identifier, `PARSE-001`. At HUNT3: `k1` `PARSE-001`, `k2` `PARSE-001` beside
+  its `PARSE-002`; `lx0054`, `lx0114`, `lx0121` agree. Three claims are now refused at a binding named `buffer`
+  before their own claims are reached (`me0119`, `me0119b`, `me0183`), and `md0042` at a `mod:mod;` header:
+  their re-spelling is `nitpick-fuzz_2`'s to schedule.
+- **DEF-237** — F-045: `??` on a `Result` advised the retired `?`. **Fixed at 113**: the advice names `?!`/`?|`
+  (D-175). At HUNT3: `d1` is still `TYPE-007`, with the new advice.
+- **DEF-238** — F-046 (a): a `frac` member assigned or addressed passed the checker and was `EMIT-002`. **Fixed
+  at 111**, "both rows": `NITPICK-TYPE-024` by name. At HUNT3: `ty1649` agrees.
+- **DEF-241** — the template's lone string item aliased. **Fixed at 95** (`d98c5e1`). No program of ours.
+- **DEF-243** — the workbench's O-N40 item 1: a builtin named as a value. **Fixed at 107** (`508d7c5`):
+  `NITPICK-TYPE-054`. No program of ours.
+- **DEF-246** — DEF-230's faces: a `fixed` view meeting a plain slot. **Fixed at 103**: `TYPE-007`. At HUNT3:
+  the six M11 claims binding `string_bytes` into a plain `uint8[]` are refused `TYPE-007` (Option C's), and
+  `bi0010`/`bi0017` agree for that reason, not their own.
+- **DEF-247** — `fixed`/`stack` as return qualifiers. **Fixed at 103.**
+- **DEF-248** — F-046 (b): a `fixed` parameter reassigned. **Fixed at 102** (`98cfe35`): `ASSIGN-002`. At HUNT3:
+  `ty1873` agrees.
+- **DEF-249** — the workbench's O-N41: `exit` of a fallible call. **Fixed at 104** (`085bc01`).
+
+Partly fixed:
+- **DEF-234** — F-034: (a) an `extern` method with a byte-slice parameter generates a stub refused `TYPE-072`,
+  (b) `use mod.f;` is `RESOLVE-002`, (c) a constant cycle's `RESOLVE-006` named no cycle. **(c) fixed at 113**
+  (one report per cycle, naming its chain; `md0183` agrees at HUNT3); **(a) and (b) OPEN.**
+- **DEF-236** — F-039 (a)(c)(d)(e) and F-042: **(c), (d) and (e) fixed at 113**: a non-constant `joins` deadline
+  is `TYPE-045`, an attribute the language does not have `NITPICK-DERIVE-007`, an `opaque struct` outside an
+  `extern` block `NITPICK-RESOLVE-014`. At HUNT3 `as0555`, `as0583`, `as0043` and `tr0368` agree, and `as0572`'s
+  `#[align(16i32)]` is refused (D-020: the language has no `#[align]`). **(a), a `comptime` value parameter
+  (`EMIT-002`), OPEN**, with S-135 settled as D-353 (a refusal by name, planned).
+
+Open:
+- **DEF-190** — F-036 (b): a literal's trailing `_` (`10_i32`) accepted. OPEN at HUNT3.
+- **DEF-239** — documentation: F-030, F-031, F-032, F-033, F-035, F-040, F-043 and F-044 (32 TYPE rows), by file.
+  OPEN; a documentation-sync landing, none scheduled. F-039 (b) and F-046 (c), the backward pipe, are **not
+  defects**: `<|` takes its function on the right (DEF-236's note); they correct F-031's pipe row.
+- **DEF-240** — this repository's BUILD observation: npkg's unknown-stage message omits `explore`. OPEN.
+- **DEF-242** — the prelude's site table in every emission. OPEN, low.
+- **DEF-244** — the workbench's O-N40 item 2: a sibling import (`RESOLVE-010`). OPEN.
+- **DEF-245** — the sixth face of DEF-164: a failing declaration header's body reported again. It names
+  `as0100` and six more fuzz programs (`tr0425`, `cc0151c`, `md0219`, `tr0448`, `vf0580`, `tr0550`). OPEN, low.
+  At HUNT3 none of the seven moved.
+- **DEF-250** — the library seats' report: a module binding with no initialiser emitted read-only; -O2 answers 0.
+  OPEN, registered at HUNT3 by `nitpick-compiler_37`; planned as landing 114.
+- **DEF-251** — the same report: a NULL store; -O2 is `unreachable`. OPEN; S-136 settled as D-355; planned as 115.
+- **DEF-252** — the library seat's report of 2026-10-15: a view re-seated by a CALLEE outlives the block's
+  string, exit 170 at both legs, **a use after free in safe code**. OPEN, registered at 113; placed behind 115.
+- **DEF-253** — the same report: a `Self->` trait method called through a bound does not link. OPEN, registered at
+  113.
+
+Not registered: **F-049** (M12), a consuming `pick`'s binding re-initialised after a move cannot be read
+(`MOVE-001`), new at landing 74 (`findings/F-049-pick-binding-reinit-refused/`). A candidate for the workbench
+(PLAN D6).
 
 ## Other known defects, for deduplication only (not in `known/`)
 

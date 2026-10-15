@@ -2,7 +2,7 @@
 // quote: **`ToString`**: "whole num/denom"
 // claim: ToString renders "3 1/3", "-2 5/8", "0" and "ERR".
 // expect: run:0
-// wrong: 11: the canonical parts rendered ("-3 3/8"); 10/12/13: another rendering
+// wrong: 11: the parts rendered other than as written (before D-347, landing 97: "-3 3/8"); 10/12/13: another rendering
 mod:ty1657;
 
 func:v32 = int32(int32:x) never fails { pass x; };

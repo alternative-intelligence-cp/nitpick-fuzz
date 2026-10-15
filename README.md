@@ -6,7 +6,7 @@ memory, or behave differently at `-O0` and `-O2`.
 
 Nitpick's promise is that an accepted program without an explicit unsafe
 construct (`wild`, `=>!`, raw pointer arithmetic) cannot do any of those things.
-On 2026-09-25 the libraries built on it found five places where that promise
+On 2026-09-25 the libraries built on it found four places where that promise
 did not hold — a move out of `fixed` storage, a write through a lent parameter,
 a generic identity function, an imported table read with the importer's row
 type — each by hand, each in the same space: **where an owning value lives,

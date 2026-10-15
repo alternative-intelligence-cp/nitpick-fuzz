@@ -1,4 +1,4 @@
-# F-046 — TYPE_REFERENCE 661–2122: three places where the compiler departs from the reference safely (lower priority)
+# F-046 — TYPE_REFERENCE 661–2122: two places where the compiler departs from the reference safely (lower priority), and one documentation row
 
 None of these is a memory fault or a wrong answer at run time. The rows, with each claim's
 program and its verdicts at HUNT2 `9126350`, the baseline `c3bdae2` and `93bcb66`, are in
@@ -24,6 +24,8 @@ hole** (`ty1649`)
   [F-047](../F-047-a-fixed-byte-view-is-not-immutable/).
 
 **c. The backward pipe takes its function on the right** (`ty2084`)
+*Reclassified 2026-10-15 (M12, FZ-7): a documentation row, not a compiler departure. The compiler
+registered it as not a defect (DEF-236's note) and as a documentation correction (DEF-239).*
 - TYPE:2084: "`f <| v` = `f(v)`". `m11dbl <| x` is TYPE-007, "the right side of a pipe is
   the function the value is passed to".
 - This is AST's F-039 b, met in TYPE's words. OP:378 and AST:301 say the same as TYPE.

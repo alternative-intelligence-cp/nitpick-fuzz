@@ -294,7 +294,7 @@ claim("ty1657", D, 1657, "**`ToString`**: \"whole num/denom\"", "rule",
     exit 0i32;""" % (frac_of(1, 3), chk('string_equals(s, "3 1/3")', 10), frac_of(5, 8),
                      chk('string_equals(t, "-2 5/8")', 11), chk('string_equals(u, "0")', 12),
                      chk('string_equals(w, "ERR")', 13))),
-      wrong="11: the canonical parts rendered (\"-3 3/8\"); 10/12/13: another rendering")
+      wrong="11: the parts rendered other than as written (before D-347, landing 97: \"-3 3/8\"); 10/12/13: another rendering")
 claim("ty1658", D, 1658, "**The implementation is the PRELUDE's** (1.3.5)", "rule",
       "frac arithmetic is the prelude's: a frac32 addition calls a prelude function.",
       expect=ir_fn("m11fa", r"call [^\n]*frac"),

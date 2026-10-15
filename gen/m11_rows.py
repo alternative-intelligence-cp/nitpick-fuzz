@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""M11 -- the row tables of the two findings made of claims (F-027, F-028).
+"""M11 -- the row tables of the findings made of claims (the fifteen in FINDINGS: F-027, F-028,
+F-030 … F-036, F-039, F-040, F-042, F-043, F-044, F-046).
 
 usage: python3 gen/m11_rows.py
 
@@ -31,7 +32,14 @@ FINDINGS = {"F-027": "F-027-lower-priority-compiler-rows",
             "F-043": "F-043-traits-reference-sentences-the-compiler-contradicts",
             "F-044": "F-044-type-reference-661-2122-sentences-the-compiler-contradicts",
             "F-046": "F-046-type-reference-661-2122-lower-priority-compiler-rows"}
-NEWEST = ("93bcb66", "1b4f0c6")   # the compiler's newest main, newest first (S37, S49)
+NEWEST = ("0c0f5a3", "93bcb66", "1b4f0c6")   # the compiler's newest main, newest first (S37, S49; M12's HUNT3)
+
+# M12 (FZ-7): a note printed under the group whose triage text starts with the key.
+NOTES = {
+    "F-031: the pipe examples": "*Correction (2026-10-15, M12, FZ-7; F-039 b):* `func <| val` is refused too. "
+        "`<|` takes the value on its left and the function on its right, as `|>` does, so `(x <| dbl)` is "
+        "`dbl(x)`. The compiler records this as DEF-236's note and DEF-239's pipe row.",
+}
 
 
 def load(path):
@@ -80,7 +88,9 @@ def main():
         for i in ids:
             what = t.CLASS[i][1]
             if what != cur:
-                out += ["", "**%s**" % md(what), "",
+                out += ["", "**%s**" % md(what), ""]
+                out += [n for k, n in NOTES.items() if what.startswith(k) for n in (n, "")]
+                out += [
                         "| claim | sentence | the claim | expected | HUNT2 | `c3bdae2` | `%s` |" % nc,
                         "|---|---|---|---|---|---|---|"]
                 cur = what

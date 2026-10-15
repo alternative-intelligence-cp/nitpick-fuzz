@@ -1,4 +1,4 @@
-# F-039 — AST_REFERENCE: five places where the compiler departs from the reference safely (lower priority)
+# F-039 — AST_REFERENCE: four places where the compiler departs from the reference safely (lower priority), and one documentation row
 
 None of these is a wrong answer at run time or a memory fault. The rows, with each claim's
 program and its verdicts at HUNT2 `9126350`, the baseline `c3bdae2` and the newest `main`
@@ -13,6 +13,8 @@ program and its verdicts at HUNT2 `9126350`, the baseline `c3bdae2` and the newe
 - This is F-027 b's kind: the compiler names its own hole.
 
 **b. The backward pipe takes its function on the right** (`as0301`)
+*Reclassified 2026-10-15 (M12, FZ-7): a documentation row, not a compiler departure. The compiler
+registered it as not a defect (DEF-236's note) and as a documentation correction (DEF-239).*
 - OP:378: "`<|` Pipe Backward — evaluates the right expression first, passes to the left
   function", example `func() <| val`. AST:301 lists `|>` / `<|`.
 - `dbl <| x` is TYPE-007: "the right side of a pipe is the function the value is passed

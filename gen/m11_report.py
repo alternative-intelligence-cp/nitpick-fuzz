@@ -67,7 +67,10 @@ def main():
            "Written by `gen/m11_report.py` from the claims (`m11/CLAIMS.md`) and the run",
            "(`results/%s/m11.jsonl`, the final run, both legs, 4 jobs). A claim's program AGREES when npkc and" % HUNT2,
            "both legs give the outcome its expectation states, written from the reference's text",
-           "before the first run.", ""]
+           "before the first run.", "",
+           "Every reference line number in the findings and results is a line of the reference at HUNT2",
+           "`%s`. The references have moved since (for example `MEMORY_REFERENCE.md`'s `wildx_alloc`" % HUNT2,
+           "example is at line 168 at HUNT3 `0c0f5a3`, not 126); find a sentence by its quoted text.", ""]
     # denominators
     tot = collections.Counter()
     rows = []

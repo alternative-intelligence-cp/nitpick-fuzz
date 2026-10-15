@@ -22,6 +22,9 @@ all three.
   - The pipes `val |> func()` and `func() <| val` (OP:377–378) are refused (`TYPE-007`).
     A pipe's other side is the function itself: `val |> func` compiles, and its result
     is a `Result` that `?|` unwraps.
+  - *Correction (2026-10-15, M12, FZ-7; F-039 b):* `func <| val` is refused too. `<|` takes the
+    value on its left and the function on its right, as `|>` does, so `(x <| dbl)` is `dbl(x)`.
+    The compiler records this as DEF-236's note and DEF-239's pipe row.
 - **A sentence that contradicts its own reference.** "Only an explicit check (`is_err`)
   or a fallback (`?`) leaves the [ERR] state" (OP:171). The bare `?` is struck (OP:73,
   D-175), and `?|` "take[s] a `Result` and nothing else", an ERR being handled "by

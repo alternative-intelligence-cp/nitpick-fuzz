@@ -1,4 +1,4 @@
-# F-030 — MEMORY_REFERENCE: nine sentences the compiler contradicts, where the compiler is right or at least safe (documentation findings)
+# F-030 — MEMORY_REFERENCE: eight sentences the compiler contradicts, where the compiler is right or at least safe (documentation findings)
 
 M11's claims over MEMORY_REFERENCE (all 533 lines) at HUNT2: 181 claims, 146 tested,
 137 agree, 9 disagree. Eight of the nine are documentation rows (below). The ninth is

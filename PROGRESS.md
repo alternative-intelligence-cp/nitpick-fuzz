@@ -61,7 +61,7 @@ committed. A session that starts here resumes at the first unticked box.
     - F-048 (a `NIL` field emitted as invalid IR).
   - Extracted: all 10 419 lines; 3 385 claims, 2 872 tested, 2 587 agree, 285 disagree.
 
-  Resume from "M11 — the state at the stop" below.
+  M11 is complete; "M11 — the state at the stop" below is its record, not a resume point.
   - [x] 11.1 every code example, normative claim and table row of the fourteen references at HUNT2 in `m11/CLAIMS.md`, with its file and line — all fourteen whole
   - [x] 11.2 a program per testable claim, its expected outcome from the text, committed before the first run; run at HUNT2 — the final run: 2 587 agree, 285 disagree, all triaged
   - [x] 11.3 `REPORT.md` §12; stop — §12 written; session 9 stopped there (2026-10-02)
@@ -74,7 +74,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 3 LLVM 20.1.8 fetched; HUNT3 built and checked against its ladder row; the LLVM control at `9126350`
   - [x] 5 the runs at HUNT3 (recall, findings, M2, M9, M10, M11) and the comparisons with `9126350`
   - [x] 6 the move table, `results/0c0f5a3/MOVES12.md`
-  - [ ] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
+  - [x] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
   - [ ] 8 the gate; `REPORT.md` §13
 
 ## Compilers
@@ -983,10 +983,10 @@ Canaries (M0.6), at all three compilers: `canary.npk` gives npkc 0 and runs 0/0,
   223 of 223 (npkc rc, codes, both legs, verdict; 16 s): 212 agree, 11 disagree, as
   recorded.
 
-### M11 — the state at the stop (read this first to resume)
+### M11 — the state at the stop
 
 *The last clean point is session 9's TYPE 1593–2122, part C of TYPE 661–2122 (S65), which
-completes M11: every reference extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 stays unticked.*
+completes M11: every reference extracted, run, triaged, committed, pushed. Session 8 did MEMORY, OP and CONTROL the same way (S57). M11 is ticked (line 44).*
 
 **Done, committed and measured.**
 - Extracted: BUILTIN, CONCURRENCY, IO, MACRO, MEMORY, OP, CONTROL, MODULE, LEXICAL, AST,
@@ -1010,7 +1010,7 @@ Written up in `m11/RESULTS.md`, `REPORT.md` §12 and findings F-018 … F-048:
 - AST's are:
   - F-037: **a use after free**, a trait object built by `x => dyn Trait`;
   - F-038: npkc traps on `give`/`fall` outside a pick;
-  - F-039: four lower-priority compiler rows;
+  - F-039: five lower-priority compiler rows;
   - F-040: eighteen documentation rows (two classes corrected at BUILD's clean point);
 - TRAITS' are:
   - F-041: **npkc does not terminate** on an unbounded generic instantiation;
@@ -1830,6 +1830,34 @@ control. **Every move carries a landing number or a finding id; zero UNEXPLAINED
   and P32's pin refusal never arose (landing 71's `triple` rule comes first); each is explained in
   the table.
 
+**The registry rows, FZ-1 … FZ-10 and `NEWEST`** (section 7). None of FZ-1 … FZ-10 was on GitHub's
+`main` (`d44dfe3`) already.
+- **KNOWN_DEFECTS.md** gains "M11 sessions 8 and 9's findings (F-029 … F-048), and the registry's
+  DEF-227 … DEF-253" (FZ-8), from DR §2's draft: every status read at HUNT3, every fixed row
+  measured there, with DEF-190, DEF-252 and DEF-253 (registered at 113), and F-049 named as
+  unregistered. Every DEF-118 … DEF-154 bullet carries its landing and its HUNT3 measurement
+  (DEF-126 at 1.6.1d step 4 and DEF-134 at step 1, landings 79 and 74, which those NOTICES rows
+  name); the header's "expectations until M1.3 measures them" gives way to the measurements; and the
+  F-001/F-002 note is under "Closed as faces of known defects".
+- **FZ-1**: the M11 section's lead and DEF-154's bullet (OPEN).
+- **FZ-2**: F-044's frac row reclassified, and `ty1657`'s `wrong:` line in `gen/m11_claims/type4.py`;
+  `python3 gen/m11.py` changed only `m11/programs/ty1657.npk`. **The counting is the author's**:
+  33 → 32 in F-044's README, its `ROWS.md`, `m11/RESULTS.md:309`, REPORT §12.2 and the PROGRESS counts.
+- **FZ-3**: the M11 "resume" and "unticked" wording, three places. **FZ-4**: F-039's rows, five.
+- **FZ-5**: REPORT §12's baseline sentence names three, `cc0042`, `tr0404` and `tr0435`.
+- **FZ-6**: F-030's title, eight. Its third line already counts eight rows and DEF-148's one, so it
+  was left.
+- **FZ-7**: F-039 (b) and F-046 (c) reclassified as documentation rows (titles and notes); F-031's
+  correction note in its README and, through `gen/m11_rows.py`'s new `NOTES` (S75), in its `ROWS.md`;
+  REPORT §12.2's lower-priority counts 5 → 4 and 3 → 2, documentation + 2, the total 285 unchanged.
+- **FZ-9**: README's "five places" is "four". **`PLAN.md:16` and `README.md:25`** ("the five known
+  defects") are the author's.
+- **FZ-10**: `gen/m11_rows.py`'s docstring, and the line-number note in REPORT §12.1 and
+  `gen/m11_report.py`'s intro; `m11/RESULTS.md` regenerated, its diff that note only (4 lines).
+- **`NEWEST`** is `("0c0f5a3", "93bcb66", "1b4f0c6")`. `python3 gen/m11_rows.py` rewrote 15 `ROWS.md`
+  files: every newest column is `0c0f5a3`, and of their 224 rows the 27 that do not read "same" are
+  exactly the claims that moved at HUNT3.
+
 ## Environment
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
@@ -2495,6 +2523,10 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   five steps as a finding, numbered on from F-048 as M11's state note says. Its programs are written
   by hand in F-009's form, as M9 wrote its probe-found shapes, because `gen/minimize.py` keeps only
   npkc's exit and the legs, and a refusal minimised that way can keep any refusal at all.
+- **S75 — `gen/m11_rows.py` gains `NOTES`, additive.** FZ-7 puts a correction pointer in F-031's
+  `ROWS.md`, which `gen/m11_rows.py` writes. The group's heading is the triage text, which also feeds
+  `m11/RESULTS.md`, and FZ-10 requires that file to move by its note only. So the pointer is a note
+  keyed by the group's text and printed under it; every other `ROWS.md` is written as before.
 
 ## Log
 
@@ -2696,3 +2728,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     read (`MOVE-001`), new at landing 74 (bisected); 24 SAFE cells of the M9 grid. Lower priority.
   - **(5) The move table**, `results/0c0f5a3/MOVES12.md`: 97 rows, every move explained by a
     landing or a finding id, zero UNEXPLAINED; 29 of 33 predictions ticked, the other four explained.
+  - **(6) The registry rows and FZ-1 … FZ-10:** KNOWN_DEFECTS.md's DEF-227 … DEF-253 section, every
+    status read and every fixed row measured at HUNT3; FZ-1 … FZ-10 applied (FZ-2's counting,
+    `PLAN.md:16` and `README.md:25` left for the author); `NEWEST` rebased to `0c0f5a3`.

@@ -1048,6 +1048,8 @@ The records are:
 
 ### 12.1 The denominators
 
+Every reference line number in the findings and results is a line of the reference at HUNT2 `9126350`. The references have moved since (for example `MEMORY_REFERENCE.md`'s `wildx_alloc` example is at line 168 at HUNT3 `0c0f5a3`, not 126); find a sentence by its quoted text.
+
 | reference | claims | examples | rows | rules | untestable | testable = tested | agree | disagree |
 |---|---|---|---|---|---|---|---|---|
 | AST | 202 | 8 | 116 | 78 | 21 | 181 | 151 | 30 |
@@ -1108,15 +1110,16 @@ mistakes:
 | compiler: npkc does not terminate (TRAITS' F-041) | 1 |
 | compiler: a flag that refuses every program (F-025) | 2 |
 | compiler: a unit annotation accepted and ignored (F-026, and in TYPE §19) | 1 + 1 |
-| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039; TRAITS' F-042; TYPE's F-046) | 16 + 5 + 4 + 5 + 1 + 3 |
-| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040; TRAITS' F-043; TYPE 661–2122's F-044) | 94 + 8 + 5 + 6 + 7 + 6 + 18 + 13 + 33 |
+| compiler, lower priority (F-027; MODULE's F-034; LEXICAL's F-036; AST's F-039; TRAITS' F-042; TYPE's F-046) | 16 + 5 + 4 + 4 + 1 + 2 |
+| documentation (F-028; MEMORY's F-030; OP's F-031; CONTROL's F-032; MODULE's F-033; LEXICAL's F-035; AST's F-040; TRAITS' F-043; TYPE 661–2122's F-044; the backward pipe, AST's F-039 b and TYPE's F-046 c, reclassified in M12, FZ-7) | 94 + 8 + 5 + 6 + 7 + 6 + 18 + 13 + 33 + 2 |
 | known (DEF-123, DEF-131, DEF-133; MEMORY's DEF-148; OP's DEF-131 twice; CONTROL's DEF-133, DEF-130 twice, DEF-135; MODULE's DEF-153; LEXICAL's DEF-131; AST's DEF-131 and DEF-153; TYPE's DEF-131) | 7 + 1 + 2 + 4 + 1 + 1 + 2 + 1 |
 | not a finding: refused at compile time where the text says it traps | 2 |
 | not a finding: the program tests more than its sentence, or cannot be written | 10 + 2 (OP) + 2 (MODULE) + 1 (AST) + 1 (TRAITS) + 1 (TYPE 661–1176) |
 | **total** | **285** |
 
-**Every disagreement gives the same result at the baseline** (one, `cc0042`, with other
-codes), so each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
+**Every disagreement fails at the baseline too, though three give a different result there**:
+`cc0042` (other codes), and `tr0404` and `tr0435` (both compiled at the baseline, npkc 0 and 0/0,
+and are refused at HUNT2). So each is old. Session 7's all stand at its newest `main` `1b4f0c6`. Session 8's
 MEMORY, OP and CONTROL rows all stand at `93bcb66` but six, all known: `me0461`,
 DEF-148's shape, is refused there (`BORROW-016`); OP's two `<=>` claims (DEF-131)
 compile and run; and CONTROL's DEF-130 pair and DEF-135 agree there. MEMORY's run 1 also found F-029, a reserved word accepted as a binding's

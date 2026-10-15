@@ -5,6 +5,10 @@ Written by `gen/m11_report.py` from the claims (`m11/CLAIMS.md`) and the run
 both legs give the outcome its expectation states, written from the reference's text
 before the first run.
 
+Every reference line number in the findings and results is a line of the reference at HUNT2
+`9126350`. The references have moved since (for example `MEMORY_REFERENCE.md`'s `wildx_alloc`
+example is at line 168 at HUNT3 `0c0f5a3`, not 126); find a sentence by its quoted text.
+
 ## 1. The denominators
 
 | reference | claims | examples | rows | rules | untestable | testable | tested | agree | disagree |

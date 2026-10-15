@@ -121,14 +121,14 @@ Part C's 23 disagreements are:
 - DEF-131 (`<=>`, which compiles at `93bcb66`).
 
 The documentation rows:
-- **frac `ToString`** (:1657): "whole num/denom" — "-2 5/8". Measured by hand at three
-  compilers:
-  - −(1 3/8) is {−2, 5, 8} and renders "-2 5/8";
-  - −(2 5/8) is {−3, 3, 8} and renders "-3 3/8".
-  - So the compiler renders the stated format literally. The example does not say which
-    value it shows, and a reader of mixed numbers takes "-2 5/8" for −2.625, not −1.375.
-  - *Reasoned:* whether that rendering is a wrong answer is the author's call. Under the
-    reference's letter it is not.
+- **frac `ToString`** (:1657) — *not a documentation row; reclassified 2026-10-15 (M12, FZ-2).*
+  At HUNT2, the baseline and `93bcb66` the compiler printed −(1 3/8) as "-2 5/8" (its stored
+  parts {−2, 5, 8}), which a reader of mixed numbers takes for −2.625. The compiler registered
+  this as DEF-231, a silent wrong answer on the author's ruling (D-347), and **fixed it at
+  landing 97** (`28194e0`): the stored parts are now the readable parts, so "-2 5/8" is −2.625
+  and the example in TYPE:1657 is right. Measured at HUNT3 `0c0f5a3`: `ty1657` agrees (0/0).
+  This finding's other thirty-two rows stand; the counts that follow (33 → 32) are left to the
+  author.
 - **complex `ToString`** (:1700) is "3.0+4.0i", not "3+4i": each element renders as flt64
   does ("3.0").
 - **`pass(NIL)` "desugars to `return Result{ value: NIL, err: 0i32 }`"** (:1942): an `err`
