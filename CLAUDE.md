@@ -7,10 +7,10 @@ done, **resume from the first unticked box** — never redo a ticked one.
 
 ## First, before any work: the order is a gate
 
-A milestone starts only after the workbench has merged the one before it into
-`main`, and a session can start from a stale `main` — M9's did, from a `main`
-without M8, and was saved only because a message reached it. So, before
-anything else:
+A milestone starts only after the fuzzer's manager (the workbench until
+2026-10-15) has merged the one before it into `main`, and a session can start
+from a stale `main` — M9's did, from a `main` without M8, and was saved only
+because a message reached it. So, before anything else:
 
 1. **Fast-forward to `origin/main`:** `git fetch origin && git merge --ff-only
    origin/main`. If that is not a fast-forward, STOP and say so.

@@ -43,8 +43,8 @@ working in this repository — a cloud session or a local one — starts at
 ## Relation to the rest of the ecosystem
 
 Read-only use of the compiler at [`nitpick`](https://github.com/alternative-intelligence-cp/nitpick);
-findings are verified by the library workbench
-([`nitpick-libs`](https://github.com/alternative-intelligence-cp/nitpick-libs))
-and relayed to the compiler's maintainers from there.
+findings are verified by the fuzzer's manager (until 2026-10-15, the library workbench,
+[`nitpick-libs`](https://github.com/alternative-intelligence-cp/nitpick-libs))
+and relayed by it to the compiler's maintainers.
 
 Licensed under the Apache License 2.0.
