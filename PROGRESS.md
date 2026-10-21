@@ -76,6 +76,20 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [x] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
   - [x] 8 the gate; `REPORT.md` §13
+- [ ] **M13** — the initialisation and pointer-store grid, with the -O2 leg as the observer, at HUNT4
+  `c72639f` (landing 137) under LLVM 20.1.8 (session 11, the Team seat; S76–S81). The boxes are the
+  brief's sections §1–§11.
+  - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `d44dfe3` → `581c091`, `f31dfc6` an ancestor, M12 ticked, the tree clean before the switch, `local-m13` new (S79); the go quoted as S77, covering (i) and (ii)
+  - [x] 2 HUNT4 named (`c72639f`, landings 114–137; D-355 (ii) is 119) and built; its `npkc.ll` and `npkrt.o` equal notice 137's ladder row; both LLVMs as stated; the canaries pass at the baseline, HUNT3 and HUNT4
+  - [ ] 3 the housekeeping (1b), DEF-256 among it
+  - [ ] 4 learn by snippet, at HUNT4 and HUNT3
+  - [ ] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run
+  - [ ] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record
+  - [ ] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`
+  - [ ] 8 the regression leg at HUNT4 and `MOVES13.md`
+  - [ ] 9 triage
+  - [ ] 10 (optional) the M11 re-spellings
+  - [ ] 11 the gate; `REPORT.md` §14
 
 ## Compilers
 
@@ -86,6 +100,7 @@ committed. A session that starts here resumes at the first unticked box.
 | HUNT2 (M8) | `9126350` (`9126350d11d12d20bbcc087dc261405bf2729f29`), 2026-09-26 03:42:01 -0400 | 1.6.1 step 0, the NIKOS half (D-324) — docs and `meta/roadmap/1.6/` tools over `2eea6f4` (1.6.1 step 0: DEF-107, `NITPICK-BORROW-015`) | 28 857 206 / `2448b3b60d9eb189…` | 75.8 s |
 | newest `main` (M10, findings only; S37) | `9f6f370`, 2026-09-26 06:04:05 -0400 | 1.6.1 step 0c, the record of S-107's and S-108's approval — over `b564746` (1.6.1 step 0c: DEF-116, `NITPICK-TYPE-014`; DEF-117) | 28 872 365 / `7bab110a1e45cc9d…` | 88.9 s |
 | HUNT3 (M12) | `0c0f5a3` (`0c0f5a39fcd2a54e78bf7409add841cbc16927b7`), 2026-10-15 12:00:05 -0400 | 1.6.1e, landing 113: DEF-235, DEF-236 (c)(d)(e), DEF-237 and DEF-234 (c), over landing 112 (`958890a`, DEF-232); built under LLVM 20.1.8 | 31 701 272 / `f520d5744b1e9951…` | 55.2 s |
+| HUNT4 (M13) | `c72639f` (`c72639f2332208649309b91796d6f173d19a64d2`), 2026-10-19 15:08:30 -0400 | 1.6.1e, landing 137: DEF-267 (the awaited and the spawned qualified call), over landings 114–136; built under LLVM 20.1.8 | 32 424 412 / `2f1b9480701e1c86…` | 56.0 s |
 
 Other build products (M0.5):
 
@@ -95,6 +110,7 @@ Other build products (M0.5):
 | HUNT2 | 9 972 944 / `20d35e2822b99080…` | 72 576 / `162b897539285a77…` |
 | hunt | 9 739 968 / `a81223d352d316be…` | 72 576 / `162b897539285a77…` |
 | HUNT3 | 11 283 680 / `02e7b06321a16950…` (linked by the release `ld.lld` 20.1.8) | 72 656 / `c8e5033ad17c70f8…` |
+| HUNT4 | 11 528 072 / `ba798aa0e5500a8d…` (linked by the release `ld.lld` 20.1.8) | 72 656 / `c8e5033ad17c70f8…` |
 
 **Commissioning check (M0.5): PASSED.** The baseline's `.internal/quickemit/npkc.ll`
 is exactly 28 111 929 bytes with sha256 `4029fc70efbe9cd3…`, as GitHub's CI
@@ -1889,7 +1905,115 @@ control. **Every move carries a landing number or a finding id; zero UNEXPLAINED
   `--diff-filter=MDR` it prints nothing. The scratch is gone: no `.work/shake`, `.work/control` or
   `.work/bisect`, and no `VERDICTS-shake.txt`, `VERDICTS-scratch.txt` or `VERDICTS-bisect.txt`.
 
+## M13 — the initialisation and pointer-store grid (session 11, the Team seat)
+
+**The start checks** (the brief's §1; PLAN.md's start rules (a)–(d)).
+- **The remote.** `git remote get-url origin` is GitHub's, over SSH, so no `set-url`. `git fetch origin`
+  at 04:10 EDT moved `origin/main` from `d44dfe3` to `581c091` (dispatch note (b)).
+- **Clean tree, before any switch.** On `local-m12` at `f31dfc6`, `git status --porcelain` printed
+  nothing, and there was no stash.
+- **The fast-forward.** `git switch main && git merge --ff-only origin/main` took `main` from `d44dfe3`
+  to `581c091`. `581c091` changes only `CLAUDE.md` and `README.md` from `f31dfc6`.
+- **The gate.** `git merge-base --is-ancestor f31dfc6 origin/main` exits 0; M12 is ticked; there were
+  no M13 boxes.
+- **The branch.** There was no `origin/local-m13` and no local one, so `git switch -c local-m13
+  --no-track origin/main` at `581c091` (S79). No upstream is set.
+- **The go** is S77, quoted verbatim. It names (i) HUNT4 as the compiler's `origin/main` at this fetch
+  and (ii) LLVM 20.1.8 for HUNT3 and HUNT4.
+- **(a)** `uname -a`, `nproc`, `free -g`, `df -h .` and `python3 --version` are under Environment
+  below. **(b)** `CLAUDE.md`'s defect definition was re-read: an accepted program whose result differs
+  from the reference's, with no memory error, is a defect. **(c)** Only HUNT4 needed building:
+  `.work/` holds M12's compiler clone, its base, hunt2 and hunt3 worktrees, and both LLVM trees.
+  **(d)** M13 starts at its first box.
+
+**The LLVM trees** (§2). `.work/llvm-20.1.8/bin/llvm-config --version` prints `20.1.8`, and
+`.work/llvm-20.1.2/bin/llvm-config --version` prints `20.1.2` (the symlink to `/usr/lib/llvm-20`, S48,
+S70). The 20.1.8 tarball's sha256 is `1ead36b3…`, as recorded under Compilers, so nothing was fetched
+again. `cells/INDEX.jsonl` has 956 lines and `cells9/INDEX.jsonl` 7 571, as M12 left them.
+
+**HUNT4** (§2; S78). `git -C .work/nitpick fetch origin` at 04:11 EDT moved the compiler's `origin/main`
+from `0c0f5a3` to `c72639f` (`c72639f2332208649309b91796d6f173d19a64d2`, 2026-10-19 15:08:30 -0400,
+"1.6.1e, landing 137: DEF-267 …"), written to `.work/H4.full` and `.work/H4`. It is not HUNT3, and its
+`meta/NOTICES.md` has a `| 114 |` row. It is 24 commits past HUNT3, one per landing, so it carries
+**landings 114 to 137**, each with its NOTICES row:
+- 114 `2f0937a` DEF-250: a module binding with no initialiser, `TYPE-055` at the declaration;
+- 115 `7992c77` DEF-251 (i): LLVM's `null_pointer_is_valid` on every emitted `define`;
+- 116 `2f50640` DEF-252: a view re-seated by a callee, `BORROW-002` at the destination argument; DEF-256
+  registered (F-049);
+- 117 `76a8102` D-353 / DEF-236 (a): a `comptime` value parameter, `TYPE-095` at its declaration;
+- 118 `c9baa9e` DEF-253 and DEF-254: a `Self->` trait method through a bound;
+- 119 `34979dc` D-355, S-136's option (c): `NULL` leaves the plain pointer, `TYPE-096` at the literal;
+- 120 `0156326` D-360: `??!`, the Optional's unwrap-or-trap;
+- 121 `f9a9428` D-361 and the `#ptr_add` confinement: a value of wild provenance enters a plain pointer
+  slot only through `=>! T->`, `TYPE-097` at the value;
+- 122 `29e93a9` D-357: a `comptime func:` exists at compile time only (`TYPE-098`);
+- 123 `284402d` D-356: a payload-less enum variant is a constant outside the enum;
+- 124 `ccf7f95` D-359: the orphan rule;
+- 125 `2b95bb4` DEF-234 (a) and (b);
+- 126 `e709f77` DEF-242: the site table holds the sites the emission holds;
+- 127 `1670427` D-339 / DEF-181: the lock walk's six holes;
+- 128 `463cf93` D-341: a `buffer` is indexed and ranged like a slice of bytes;
+- 129 `17d26ad` DEF-244: the source manager keys a file by its identity;
+- 130 `c1e20e8` DEF-245 and DEF-260: a declaration whose header fails is one report;
+- 131 `b1a23b8` DEF-255: the qualified trait call through a bound and a pointer receiver;
+- 132 `6f0f518` DEF-256 (F-049): a consuming `pick`'s binding re-assigned after a move is live again;
+- 133 `c230073` DEF-257 and D-362: a `pick` does not select on a pointer (`TYPE-065`);
+- 134 `a73b68d` DEF-178 and DEF-187: a `pick`'s value pattern is a constant of the selector's type;
+- 135 `0280fc9` DEF-190 and DEF-182: a numeral's digit run ends in a digit;
+- 136 `19d674b` DEF-258, DEF-259 and DEF-261: a keyword is never a parameter's name, and a local
+  `T:keyword` is `PARSE-001` at the name;
+- 137 `c72639f` DEF-267: the awaited and the spawned qualified call reach, as their dotted twins do.
+
+**D-355 (ii) has landed**, as landing 119: `NULL` where a plain pointer or an Optional is expected is
+`NITPICK-TYPE-096` at the literal, and keeps its meaning only in a `wild` context. §4 measures the code by
+name.
+
+**HUNT4, built** by the brief's command under `.work/llvm-20.1.8` and the lock, in 56.0 s (04:12–04:13
+EDT). Its log's `npkg/main.npk: exit 2` line is in HUNT3's build log too.
+
+| product | HUNT4 `c72639f` | notice 137's ladder row | |
+|---|---|---|---|
+| `npkc.ll` | 32 424 412 / `2f1b9480701e1c86…` | 32 424 412 / `2f1b9480701e1c86…` | equal |
+| `npkrt.o` | 72 656 / `c8e5033ad17c70f8…` | 72 656 / `c8e5033ad17c70f8…` | equal (HUNT3's too) |
+| `npkc.o` | 13 339 504 / `8299668097e438b3…` | 13 339 504 / `8299668097e438b3…` | equal |
+| `builder.o` | 12 067 840 / `5870b02dcf97950c…` | 12 067 840 / `5870b02dcf97950c…` | equal |
+| `npkc` | 11 528 072 / `ba798aa0e5500a8d…` | 11 528 000 / `e258d3249e2c5f7e…` | 72 bytes longer |
+| `builder` | 10 402 608 / `ff0489d70fc58347…` | 10 402 536 / `b4dff7b33b187ce0…` | 72 bytes longer |
+
+The ladder row is the workbench BOARD's "THE BASELINE NOTICE 138 MUST QUOTE" (notice 137's rows "at
+`c72639f`"; the Workspace copy at `93627bb`). The emission, the runtime object and both unlinked objects
+equal it. The two linked binaries are each 72 bytes longer, and `npkc`'s `.comment` reads `Linker: LLD
+20.1.8 (https://github.com/llvm/llvm-project 87f0227c…)`. *Reasoned, not measured:* that is the release
+`ld.lld`'s longer comment, the 72 bytes M12 found for HUNT3's `npkc` (S68).
+
+**The baseline and HUNT3** are M12's builds, unchanged: their `npkc.ll`, `npkrt.o` and `npkc` give the
+committed sizes and sha256 (`4029fc70…`, `162b8975…`, `5fd636b9…`; `f520d574…`, `c8e5033a…`, `02e7b063…`),
+and both worktrees are clean.
+
+**Canaries** (M0.6), one batch under the lock: at the baseline (20.1.2), HUNT3 and HUNT4 (20.1.8),
+`canary.npk` gives npkc 0 and runs 0/0, and `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001`
+and writes no `.ll`.
+
 ## Environment
+
+*(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 34 used, 50 free, 122 available; Swap 15 (0 used)
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  2.5T used  4.2T avail (38%)
+os:        Linux Mint 22.3 (Ubuntu 24.04 base)
+python3:   Python 3.12.3
+git:       2.43.0
+llvm:      .work/llvm-20.1.2 -> /usr/lib/llvm-20 (20.1.2; S48, S70); .work/llvm-20.1.8, the release tarball (S67, S77)
+earlyoom:  active
+```
+
+The author's machine, shared with the compiler seat, the library agents and the Workspace's other seats.
+Every build and every run takes the Team seat's harness lock (`flock -w 300 -E 75` on
+`/home/randy/Team/TMP/harness.lock`), one at a time, at 4 jobs (S1). Every runner runs with `TMPDIR` in
+the session's scratch (S80).
 
 *(session 10, measured 2026-10-15 16:43 EDT; M12 run here, on the Team seat: the start check (a))*
 
@@ -2558,6 +2682,55 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   `ROWS.md`, which `gen/m11_rows.py` writes. The group's heading is the triage text, which also feeds
   `m11/RESULTS.md`, and FZ-10 requires that file to move by its note only. So the pointer is a note
   keyed by the group's text and printed under it; every other `ROWS.md` is written as before.
+- **S76 — M13 is the initialisation and pointer-store grid, with the -O2 leg as the observer, on
+  `nitpick-fuzz_2`'s brief** `/home/randy/Workspace/REPOS/nitpick-fuzz/.work/briefs/fuzz-m13-brief-2026-10-15.md`
+  (536 lines, sha256 `2d09692a1604f3d4bae83d93613398df4de3692b558e91c0b30cdbebe6e6a91d`, read by
+  `sha256sum` at 04:09 EDT on 2026-10-21; the Team copy
+  `/home/randy/Team/META/nitpick-fuzz/briefs/fuzz-m13-brief-2026-10-15.md` gives the same), READY by its
+  final check. PLAN.md ends at M11 and M12 was S66's choice; this brief is the next one (its Option B).
+  PLAN.md is not edited (rule 9). The session is the brief's one worker, dispatched on the Team seat by its
+  manager, Ailp-team_13, on 2026-10-21 at 04:09, on management_1's word ("M13 now, in lane 2, as booked,
+  from its ready hand-off"): no sub-agents, at most 4 jobs. `nitpick-fuzz_2` reviews `local-m13` and
+  merges it, and verifies every candidate first (PLAN D6). The dispatch carries five notes from
+  `nitpick-fuzz_2`, each binding:
+  - (a) landing 117 (D-353, DEF-236 (a)) is in HUNT4: the housekeeping updates DEF-236's bullet, measured
+    by one compile of `m11/programs/as0062.npk` at HUNT4 (HUNT3 gave `EMIT-002`); `m11/` is not touched;
+  - (b) `main` moved to `581c091`, a wording-only fix to `CLAUDE.md` and `README.md`; `local-m13` branches
+    from it;
+  - (c) landing 119 is D-355 (ii), its code taken from HUNT4 by name; at the close, the DEF-250, DEF-251
+    and DEF-252 rows are updated from the three seeds' HUNT4 measurements, labelled with HUNT4's sha,
+    DEF-251's naming 115 (i) and 119 (ii); `m11/` is not touched;
+  - (d) landings 118–121; in grid13 B, for the `wild T->` local, the dereferencing callee's parameter is
+    declared `wild T->` (as `dalloc`'s is `wild any->`), so the cell stays in wild context; a cell that
+    still draws `TYPE-097` at HUNT4 is D-361 working, explained by 121 and listed;
+  - (e) three of `nitpick-fuzz_2`'s readings, not measurements: F-049 read by hand against `VERDICTS.txt`
+    at HUNT4 (§8's loop skips it); MOVES12 row 44's 24 M9 cells should leave `MOVE-001` at 132; F-029's
+    `ctl_k3_int64_buffer_refused` should move from `PARSE-002` to `PARSE-001` at 136.
+  Every prediction in those notes is `nitpick-fuzz_2`'s reading of the files; every code, verdict and
+  move here is taken from HUNT4 by measurement.
+- **S77 — the author's go** (the brief's §1, step 6), as the dispatch relays it. Quoted verbatim:
+  - the author's message of 2026-10-15 21:00:54 EDT, relayed by management_0:
+    > "i rand the shell script and also approve the two points"
+  - what it answers, as `nitpick-fuzz_2`'s hand-off gives it (21:11:49 on 2026-10-15): (i) HUNT4 = the
+    compiler's `origin/main` at your fetch; (ii) LLVM 20.1.8 for HUNT3 and HUNT4 in M13. "The shell
+    script" is an unrelated settings step: A2's `apply.sh`, run at 21:00:34.
+  - This is the recorded go that §1 step 6 looks for. It names (i) and (ii).
+- **S78 — HUNT4 is `c72639f`** (`c72639f2332208649309b91796d6f173d19a64d2`), the compiler's `origin/main`
+  at this session's fetch (04:11 EDT on 2026-10-21), landing 137. It carries landings 114 to 137 (the M13
+  section lists each), many more than the brief, written at 116–121, foresaw; the brief provides for that
+  (§2 records each, §8 explains each move by its landing). D-355 (ii) is landing 119, `TYPE-096`. Its
+  ladder row is the workbench BOARD's "THE BASELINE NOTICE 138 MUST QUOTE" (notice 137's rows at
+  `c72639f`), which its `npkc.ll` and `npkrt.o` equal.
+- **S79 — the branch is `local-m13` of the Team seat's clone**, `git switch -c local-m13 --no-track
+  origin/main` at `581c091` (S47, S69). Every push is `git push origin local-m13`; `nitpick-fuzz_2`
+  reviews and merges. The clone's `origin` is GitHub over SSH, which carries the push credentials.
+- **S80 — every runner runs with `TMPDIR` in the session's scratch** (`/home/randy/Team/TMP/M13/tmp`).
+  `gen/run.py`, `gen/snip.py` and the other runners make their working directories with Python's
+  `tempfile`, which reads `TMPDIR`, so nothing of M13's lands in `/tmp`. A program runs under `env -i`,
+  so it never sees the variable: no verdict can depend on it.
+- **S81 — HUNT2 (`9126350`) is not run in M13** (the brief's §2). M12 re-baselined at HUNT3, and HUNT2's
+  records stand. M13's compilers are the baseline `c3bdae2` under 20.1.2 (M5 step (d)), HUNT3 `0c0f5a3`
+  under 20.1.8 (the class before 114 and 115) and HUNT4 under 20.1.8 (the hunt).
 
 ## Log
 
@@ -2764,3 +2937,11 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     `PLAN.md:16` and `README.md:25` left for the author); `NEWEST` rebased to `0c0f5a3`.
   - **(7) REPORT.md §13** written, with a pointer in its opening; the gate holds in every box; **M12 is
     ticked**. The session stops here (18:37 EDT), as the brief says.
+- 2026-10-21 (session 11, the Team seat, branch `local-m13`): **M13, the initialisation and pointer-store
+  grid**, on `nitpick-fuzz_2`'s brief (S76), dispatched at 04:09 EDT.
+  - **(1) The start checks** passed: GitHub fetched, `main` fast-forwarded `d44dfe3` → `581c091`, `f31dfc6`
+    an ancestor, M12 ticked, the tree clean before the switch, `local-m13` new (S79). The go is S77,
+    verbatim, naming (i) and (ii).
+  - **HUNT4 is `c72639f`**, landing 137, carrying 114–137; D-355 (ii) is 119 (S78). Built in 56.0 s under
+    20.1.8; `npkc.ll` and `npkrt.o` equal notice 137's ladder row. The baseline and HUNT3 are M12's builds,
+    byte-identical to the committed digests. The canaries pass at all three.
