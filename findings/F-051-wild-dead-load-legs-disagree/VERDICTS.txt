@@ -1,0 +1,16 @@
+# F-051-wild-dead-load-legs-disagree — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-21 09:20 UTC; HUNT c72639f run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_wild_used_load                           c72639f  run 1  npkc=0  codes=-  O0=107  O2=107
+wild_dead_load                               c72639f  run 1  npkc=0  codes=-  O0=107  O2=14
+wild_dead_load_exit0                         c72639f  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_dead_struct_load                        c72639f  run 1  npkc=0  codes=-  O0=107  O2=14
+ctl_wild_used_load                           c72639f  run 2  npkc=0  codes=-  O0=107  O2=107
+wild_dead_load                               c72639f  run 2  npkc=0  codes=-  O0=107  O2=14
+wild_dead_load_exit0                         c72639f  run 2  npkc=0  codes=-  O0=107  O2=0
+wild_dead_struct_load                        c72639f  run 2  npkc=0  codes=-  O0=107  O2=14
+ctl_wild_used_load                           c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=12
+wild_dead_load                               c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=14
+wild_dead_load_exit0                         c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_dead_struct_load                        c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=14

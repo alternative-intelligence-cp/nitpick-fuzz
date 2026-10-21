@@ -1,0 +1,19 @@
+# F-052-atomic-method-through-pointer-not-lowered — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-21 09:20 UTC; HUNT 0c0f5a3 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+atomic_local_ptr                             0c0f5a3  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_load                              0c0f5a3  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_store                             0c0f5a3  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_atomic_direct                            0c0f5a3  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_atomic_ptr_explicit                      0c0f5a3  run 1  npkc=0  codes=-  O0=0  O2=0
+atomic_local_ptr                             0c0f5a3  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_load                              0c0f5a3  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_store                             0c0f5a3  run 2  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_atomic_direct                            0c0f5a3  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_atomic_ptr_explicit                      0c0f5a3  run 2  npkc=0  codes=-  O0=0  O2=0
+atomic_local_ptr                             c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_load                              c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+atomic_ptr_store                             c3bdae2  run 1  npkc=1  codes=NITPICK-EMIT-002  O0=-  O2=-
+ctl_atomic_direct                            c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_atomic_ptr_explicit                      c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0

@@ -1,0 +1,19 @@
+# F-050-callee-view-store-into-array-element — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-21 09:20 UTC; HUNT c72639f run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_elem_direct                              c72639f  run 1  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-
+ctl_elem_outlives                            c72639f  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_whole_callee                             c72639f  run 1  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-
+elem_callee                                  c72639f  run 1  npkc=0  codes=-  O0=170  O2=170
+elem_field_callee                            c72639f  run 1  npkc=0  codes=-  O0=170  O2=170
+ctl_elem_direct                              c72639f  run 2  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-
+ctl_elem_outlives                            c72639f  run 2  npkc=0  codes=-  O0=0  O2=0
+ctl_whole_callee                             c72639f  run 2  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-
+elem_callee                                  c72639f  run 2  npkc=0  codes=-  O0=170  O2=170
+elem_field_callee                            c72639f  run 2  npkc=0  codes=-  O0=170  O2=170
+ctl_elem_direct                              c3bdae2  run 1  npkc=1  codes=NITPICK-BORROW-002  O0=-  O2=-
+ctl_elem_outlives                            c3bdae2  run 1  npkc=0  codes=-  O0=0  O2=0
+ctl_whole_callee                             c3bdae2  run 1  npkc=0  codes=-  O0=170  O2=170
+elem_callee                                  c3bdae2  run 1  npkc=0  codes=-  O0=170  O2=170
+elem_field_callee                            c3bdae2  run 1  npkc=1  codes=NITPICK-PARSE-001  O0=-  O2=-

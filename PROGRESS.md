@@ -87,7 +87,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record: the seeds 107/11, 107/99, 170/170 as `ACCEPTED:DEFECT:…` (P1); HUNT3's record 933 cells, its self-compare 0; the control under 20.1.2 moves 0 cells
   - [x] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`: HUNT4's two runs agree (0 cells differ); 184 faces moved from HUNT3; 10 HUNT4 cells for triage
   - [x] 8 the regression leg at HUNT4 and `MOVES13.md`: recall 25/25; findings moved F-029 (136) and F-049 (132); M2 0; M9 24 (132); M10 0; zero UNEXPLAINED; P1–P11 ticked or explained
-  - [ ] 9 triage
+  - [x] 9 triage: F-050 (a soundness hole, DEF-252's array-element face), F-051 (the check of DEF-251 (i), scope wild), F-052 (crash / loud emission); C's six `OVERRESTRICT` a wrong expectation of mine (D-004 rule 3); each finding through the five steps with its control
   - [ ] 10 (optional) the M11 re-spellings
   - [ ] 11 the gate; `REPORT.md` §14
 
@@ -2229,6 +2229,42 @@ too (one `--llvm` serves both, as in M12):
   through a parameter or a helper's return gives 107/0, the `NULL` test folded away after the dereference,
   DEF-251's inferred face measured.
 
+**Triage** (§9; S90), every HUNT4 cell that is not `refused` or `clean` (10) and the probe result, through
+M5's five steps. The triage programs were run as probes (`.work/probes13/t_*`, 23) under the lock at HUNT4
+twice and HUNT3 under 20.1.8 and at the baseline under its own 20.1.2; each finding's programs were then
+recorded by `gen/run_findings.py` at HUNT4 twice and the baseline (`VERDICTS.txt`) and at HUNT3 twice and the
+baseline (`VERDICTS-0c0f5a3.txt`), under 20.1.8.
+- **(a) The tie to a later registry:** `git -C .work/nitpick fetch origin` at 05:05 EDT left `origin/main` at
+  `c72639f`, HUNT4 itself, so no face is "fixed at a later landing". Dedup against `KNOWN_DEFECTS.md` and the
+  registry at HUNT4 is in each README.
+- **F-050** (`g0915`, `g0916`; `findings/F-050-callee-view-store-into-array-element/`), **a soundness hole**:
+  a callee storing a block-local view into an element of the array behind its pointer argument, `(<-a)[0i64]
+  = Cursor{ src: src, … }`, compiles and the program reads the free poison after the block, 170 at both
+  legs, at HUNT4, HUNT3 and the baseline. DEF-252's shape at a destination landing 116's sixteen sites do not
+  name; the direct element store is `BORROW-002` everywhere, the whole-pointee callee store `BORROW-002` at
+  HUNT4. (b) minimised by `gen/minimize.py` (`--want 0,170,170`: the body kept whole, the failsafe cut to the
+  arms the compiler demands); (c) HUNT4 twice, both legs; (d) the baseline, the same. Its control
+  `ctl_elem_outlives` (0/0) is the case an implementation refusing every element store gets wrong.
+- **F-051** (`g0249`, `g0250`; `findings/F-051-wild-dead-load-legs-disagree/`), **reported apart as the check
+  of DEF-251 (i)**, scope wild: a load through a `wild` `NULL` pointer whose value is unused faults at -O0 and
+  is deleted at -O2 (107/14 before a `NULL` test, 107/0 without one) at all three compilers; the used-load
+  control is 107/107 at HUNT4 and 107/12 before 115. (b) `gen/minimize.py --want 0,107,14`, the body kept
+  whole.
+- **F-052** (§4's probe `q_a09`; `findings/F-052-atomic-method-through-pointer-not-lowered/`), lower priority,
+  **crash / loud emission**: `p.store(…)` and `p.load()` through an `atomic<int64>->` are `EMIT-002` at all
+  three compilers, where `(<-p).load()` lowers (0/0). Written by hand (S74's reason). In grid13 it shows at
+  HUNT3 and the baseline as A's four atomic address cells refused `EMIT-002`; at HUNT4 `TYPE-055` comes first.
+- **C's six `OVERRESTRICT`** (`g0692`, `g0694`, `g0696`, `g0704`, `g0706`, `g0708`): **not a finding — my
+  expectation was wrong.** Each twin stores `@z` into a field or element of a local inside a branch, a loop
+  or an arm. The probes show the refusal does not depend on the nesting: `w.f = @z;` in the same block is
+  `BORROW-002` too, while `W{ a: 1i64, f: @z }` and `x = @z` are accepted. The compiler's sentence is D-004
+  rule 3's: "a borrow cannot be stored here: only a local binding in the borrowing frame is provably no
+  longer-lived than the borrow", and D-004 says "Rule 3 is deliberately strict to start. If real compiler
+  code needs borrow-into-inner-aggregate, relax it then, with evidence." The compiler is right by the
+  ruling. The expectation stays as committed (S36, S45), and the six cells' verdict is read against it.
+- **A slip of mine**, not a finding: the triage probe `t_4_atomic_ptr_fetch_add` named a local `old`, a
+  keyword at HUNT4 (`PARSE-001`, landing 136); it is not used.
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -3031,6 +3067,18 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   template ran 0/0 at both compilers, every REFUSE template drew its code at HUNT4, and the departures were
   the faces §4 had already measured (DEF-250's and DEF-251's at HUNT3, `??!` absent at HUNT3, the dead
   `wild` load at HUNT4).
+- **S90 — the triage's findings are F-050, F-051 and F-052, numbered on from F-049** (the brief). Each
+  candidate goes to `nitpick-fuzz_2` for D6 verification before anyone else sees it. F-051 is scope wild and
+  reported apart as the check of DEF-251 (i), outside `CLAUDE.md`'s definition and §9's classes. F-052 came
+  from §4's probe, not a HUNT4 grid cell: a compiler defect found is recorded, never worked around (rule 8),
+  and grid13 sees it at HUNT3 and the baseline. C's six `OVERRESTRICT` are recorded as a wrong expectation
+  of mine (D-004 rule 3 is deliberately strict) and no finding; their expectation is not changed (S36,
+  S45). The triage probes ran the baseline under its own 20.1.2; `gen/run_findings.py`'s records ran it under
+  20.1.8, as the regression leg's did.
+- **S91 — §10, the optional M11 re-spellings, is not done.** It edits `gen/m11_claims/` and regenerates
+  `m11/programs/` with `gen/m11.py`, and dispatch notes (a) and (c), binding, both say "Don't touch m11/"
+  (the Team seat's readings repeat it). The ten re-spellings (`me0119`, `me0119b`, `me0183`, `md0042`, the six
+  BUILD scripts' `triple` and `datalayout`) stay with `nitpick-fuzz_2` for Option C.
 
 ## Log
 
@@ -3262,3 +3310,8 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(5) The regression leg at HUNT4:** recall 25/25 as at HUNT3; findings: F-029's `ctl_k3` code (136) and
     F-049's two reproducers to 22/22 (132), nothing else; M2 0 moved; M9 24 moved, row 44's cells (132); M10 0
     changed. `MOVES13.md`: zero UNEXPLAINED, P1–P11 ticked or explained; note (e)'s three readings ticked.
+  - **(6) Triage:** F-050, a callee storing a block-local view into an element of an array of holders,
+    170/170 at HUNT4 (a soundness hole, DEF-252's face left by 116); F-051, a dead `wild` load deleted at -O2
+    (107/14), the check of DEF-251 (i); F-052, an atomic's method through a pointer `EMIT-002` (crash / loud
+    emission). C's six `OVERRESTRICT` are D-004 rule 3 working: my expectation was wrong. All three findings
+    present at the baseline. §10 is not done (S91).
