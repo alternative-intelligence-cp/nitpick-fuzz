@@ -86,7 +86,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run: 933 cells, 431 skipped with reasons, `--selfcheck` passing; every expectation with its rule (S83–S88)
   - [x] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record: the seeds 107/11, 107/99, 170/170 as `ACCEPTED:DEFECT:…` (P1); HUNT3's record 933 cells, its self-compare 0; the control under 20.1.2 moves 0 cells
   - [x] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`: HUNT4's two runs agree (0 cells differ); 184 faces moved from HUNT3; 10 HUNT4 cells for triage
-  - [ ] 8 the regression leg at HUNT4 and `MOVES13.md`
+  - [x] 8 the regression leg at HUNT4 and `MOVES13.md`: recall 25/25; findings moved F-029 (136) and F-049 (132); M2 0; M9 24 (132); M10 0; zero UNEXPLAINED; P1–P11 ticked or explained
   - [ ] 9 triage
   - [ ] 10 (optional) the M11 re-spellings
   - [ ] 11 the gate; `REPORT.md` §14
@@ -2192,6 +2192,43 @@ exits 0 on a file against itself, lists three planted differences (a class move,
   `const` initialiser must be a constant expression"); A's four atomic address cells are refused
   `EMIT-002`, as at HUNT3. Read at triage step (d).
 
+**The regression leg at HUNT4** (§8), every runner under `--llvm .work/llvm-20.1.8` and the lock, into
+`results/c72639f/` and each finding's `VERDICTS-c72639f.txt`; the findings' baseline line runs under 20.1.8
+too (one `--llvm` serves both, as in M12):
+
+| run | at HUNT4 `c72639f` | against HUNT3 `0c0f5a3` | time |
+|---|---|---|---|
+| recall, `known-m13.txt` | 25 rows; `check_known_fixed.py`: 19 `match`, no MISMATCH; its 6 gaps DEF-106's and DEF-108's rows, each its "once fixed" verdict by hand (`TYPE-086` twice, `FLOW-001` twice, both controls 0/0) | identical to `known-m12.txt` (`diff` prints nothing) | 5 s |
+| findings, `VERDICTS-c72639f.txt` (HUNT4 twice, the baseline once) | 49 findings: 160 programs in 34; the 15 row findings write no file (M12v (7)'s fix, §3); the HUNT4 runs agree for every program; F-003 … F-010 re-run with `--heap` | the loop prints `moved: F-029` alone; F-049 read by hand; every baseline line as committed | 250 s, then 30 s |
+| M2 grid, `cells.jsonl` | 956: 562 clean, 394 refused | 0 moved (`MOVES.md`) | 59 s |
+| M9 grid, `cells9.jsonl` | 7 571: 4 071 clean, 3 500 refused, 0 anomalies | 24 moved, refused → clean (`MOVES9.md`) | 458 s |
+| M10, `m10.jsonl` | 223: 218 agree, 5 disagree | 0 changed (`m10-changes.txt`) | 18 s |
+
+- **F-029** (`moved:`): `ctl_k3_int64_buffer_refused` is `PARSE-001` at 7:11 at HUNT4 ("expected a name:
+  `buffer` is a keyword and cannot name a binding") where HUNT3 gives `PARSE-002` at 7:5 ("expected an
+  expression"), both by `gen/snip.py --show-msg` under the lock; `k1` and `k2` unchanged. Landing 136.
+- **F-049**, read by hand against `VERDICTS.txt` (its `0c0f5a3` lines; the loop skips a finding with no
+  `VERDICTS-0c0f5a3.txt`): `pick_reinit_read` and `pick_reinit_loop` `MOVE-001` → 0/22/22 at both HUNT4 runs;
+  `ctl_local_reinit_read` 22/22 and `ctl_pick_moved_read` `MOVE-001` unchanged; the baseline lines as
+  committed. Landing 132 (DEF-256).
+- **M9's 24** are MOVES12 row 44's cells exactly (checked by id against HUNT2's and HUNT3's records): the
+  16 `pick_own × loop_move` (the four that leaked at HUNT2 now live 0/0) and the 8 `pick_own × swap`
+  read-after and reuse-sentinel cells, each SAFE, refused `MOVE-001` at HUNT3, clean at HUNT4. Landing 132.
+- **F-025's `run.sh`** at HUNT4, twice (outside §8's written commands, as M12 ran it): "plain: npkc=0
+  no-wildx: npkc=0, 0 x WILDX-003" both times, as at HUNT3.
+- **No memory fault in the regression leg** at HUNT4: no finding line moved to 70, 95, 107, 139 or 170;
+  M2 and M9 have no `DEFECT` class.
+- **Dispatch note (e), each from HUNT4:** (1) F-049 as read: `pick_reinit_read` and `pick_reinit_loop`
+  `MOVE-001` → 22 at both legs, `ctl_local_reinit_read` 22/22 and `ctl_pick_moved_read` `MOVE-001`
+  unchanged — ticked. (2) The 24 cells left `MOVE-001` and run clean, the 4 F-006 leak cells clean too; none
+  stays refused, so no may-fact shape arises; no memory fault — ticked. (3) `ctl_k3_int64_buffer_refused`
+  `PARSE-002` → `PARSE-001`, 7:5 → 7:11, still refused; `k1` and `k2` unchanged — ticked.
+- **The move table** is `results/c72639f/MOVES13.md`: the regression leg's moves (F-029 by 136; F-049 and
+  M9's 24 by 132) and grid13's 184 faces by landing (114, 115, 116, 119, 120), **zero UNEXPLAINED**, and
+  P1–P11 each ticked or explained. One detail of P6 there: at HUNT3 and the baseline a struct reached
+  through a parameter or a helper's return gives 107/0, the `NULL` test folded away after the dereference,
+  DEF-251's inferred face measured.
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -3222,3 +3259,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(4) grid13 at the baseline and HUNT4:** HUNT4's two runs agree; HUNT4 546 refused, 377 clean and 10
     cells for triage (2 `ACCEPTED:DEFECT:uaf`, 2 wild `DEFECT:leg_mismatch`, 6 `OVERRESTRICT`); FACES13: 184
     faces moved from HUNT3.
+  - **(5) The regression leg at HUNT4:** recall 25/25 as at HUNT3; findings: F-029's `ctl_k3` code (136) and
+    F-049's two reproducers to 22/22 (132), nothing else; M2 0 moved; M9 24 moved, row 44's cells (132); M10 0
+    changed. `MOVES13.md`: zero UNEXPLAINED, P1–P11 ticked or explained; note (e)'s three readings ticked.
