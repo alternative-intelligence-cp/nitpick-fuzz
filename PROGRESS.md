@@ -76,7 +76,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 6 the move table, `results/0c0f5a3/MOVES12.md`
   - [x] 7 `KNOWN_DEFECTS.md` DEF-227 … DEF-251; FZ-1 … FZ-10; `NEWEST`
   - [x] 8 the gate; `REPORT.md` §13
-- [ ] **M13** — the initialisation and pointer-store grid, with the -O2 leg as the observer, at HUNT4
+- [x] **M13** — the initialisation and pointer-store grid, with the -O2 leg as the observer, at HUNT4
   `c72639f` (landing 137) under LLVM 20.1.8 (session 11, the Team seat; S76–S81). The boxes are the
   brief's sections §1–§11.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `d44dfe3` → `581c091`, `f31dfc6` an ancestor, M12 ticked, the tree clean before the switch, `local-m13` new (S79); the go quoted as S77, covering (i) and (ii)
@@ -88,8 +88,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`: HUNT4's two runs agree (0 cells differ); 184 faces moved from HUNT3; 10 HUNT4 cells for triage
   - [x] 8 the regression leg at HUNT4 and `MOVES13.md`: recall 25/25; findings moved F-029 (136) and F-049 (132); M2 0; M9 24 (132); M10 0; zero UNEXPLAINED; P1–P11 ticked or explained
   - [x] 9 triage: F-050 (a soundness hole, DEF-252's array-element face), F-051 (the check of DEF-251 (i), scope wild), F-052 (crash / loud emission); C's six `OVERRESTRICT` a wrong expectation of mine (D-004 rule 3); each finding through the five steps with its control
-  - [ ] 10 (optional) the M11 re-spellings
-  - [ ] 11 the gate; `REPORT.md` §14
+  - [ ] 10 (optional) the M11 re-spellings — not done: dispatch notes (a) and (c) keep `m11/` untouched (S91)
+  - [x] 11 the gate holds in every box; `REPORT.md` §14; `KNOWN_DEFECTS.md`'s DEF-250, DEF-251 and DEF-252 rows from the seeds at HUNT4 (note (c)); the scratch removed
 
 ## Compilers
 
@@ -2265,6 +2265,41 @@ baseline (`VERDICTS-0c0f5a3.txt`), under 20.1.8.
 - **A slip of mine**, not a finding: the triage probe `t_4_atomic_ptr_fetch_add` named a local `old`, a
   keyword at HUNT4 (`PARSE-001`, landing 136); it is not used.
 
+**The close** (§11, §13): `REPORT.md` §14 written, with a pointer in its opening; `KNOWN_DEFECTS.md`'s DEF-250,
+DEF-251 and DEF-252 rows updated from the three seeds' HUNT4 measurements, labelled `c72639f` (dispatch note
+(c); DEF-251's names 115 (i) and 119 (ii)), DEF-253's status read from the registry (fixed at 118), and F-050,
+F-051 and F-052 listed as candidates. The scratch is removed: `.work/probes13`, `.work/ctl13` and
+`.work/shake13`; no `VERDICTS-scratch.txt` was made.
+
+**The gate** (§11), at the commit that ticks M13:
+- [x] Start checks passed: the tree clean before the switch, GitHub fetched, `main` fast-forwarded `d44dfe3` →
+  `581c091`, `f31dfc6` an ancestor, M12 ticked, `local-m13` new; the go quoted as S77, covering (i) and (ii).
+- [x] The compiler fetched; `.work/H4.full` is `c72639f…`, not `0c0f5a3`, and NOTICES has a `| 114 |` row. The
+  three compilers built (HUNT4 here, the baseline and HUNT3 M12's, their digests re-read); HUNT4's `npkc.ll` and
+  `npkrt.o` equal notice 137's ladder row; the canaries pass at all three; `llvm-config` prints 20.1.8 and 20.1.2.
+- [x] Housekeeping (1b) committed (`b8f9a4f`), DEF-256 among it, with no committed record changed but MOVES12's
+  row 4 wording.
+- [x] grid13, classify13 and compare13 committed (`cbc38b9`, 04:49:57) before any grid13 run (the first, the
+  seeds at HUNT3, at 04:50:05). The 89 template probes before it were §4's, for spellings only (S89). Every
+  cell's expectation carries its rule and source; ids equal `mod:` names; the denominators are stated with
+  `SKIPPED.txt` (933 generated, 431 skipped).
+- [x] The seeds flagged at HUNT3 as `ACCEPTED:DEFECT:…` (107/11, 107/99, 170/170); the LLVM control run, and no
+  cell differs, so there is no candidate from it.
+- [x] grid13 run at the baseline, at HUNT3 (the record) and at HUNT4 twice; the two HUNT4 runs agree in all 933
+  cells.
+- [x] The regression leg at HUNT4: `MOVES13.md`, zero UNEXPLAINED, every prediction ticked or explained.
+- [x] Every candidate through the five steps and classed by §9's table (F-050 a soundness hole, F-052 crash /
+  loud emission, F-051 reported apart as the check of DEF-251 (i)); every finding has a control a wrong
+  implementation gets wrong (`ctl_elem_outlives`, `ctl_wild_used_load`, `ctl_atomic_ptr_explicit`). C's six
+  `OVERRESTRICT` are recorded as a wrong expectation, with the rule.
+- [x] §14's denominators add up: in each of the three runs, 933 = refused + clean + `OVERRESTRICT` +
+  `REFUSED_TRAP` + each `DEFECT` and `ACCEPTED` count (no `LOUD`, `CRASH`, `timeout` or `other` but the baseline's
+  and HUNT3's two `ACCEPTED:other`); moved = explained (184 in FACES13; 3 programs, 0, 24 and 0 cells in the
+  regression leg).
+- [x] No committed record changed: `git diff --name-only --diff-filter=MDR origin/main -- results/c3bdae2
+  results/9126350 results/0c0f5a3 'findings/*/VERDICTS*.txt'` prints only `results/0c0f5a3/MOVES12.md`, the
+  (1b)(2) wording edit. No scratch is left (`.work/probes13`, `.work/ctl13`, `.work/shake13`).
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -3315,3 +3350,9 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     (107/14), the check of DEF-251 (i); F-052, an atomic's method through a pointer `EMIT-002` (crash / loud
     emission). C's six `OVERRESTRICT` are D-004 rule 3 working: my expectation was wrong. All three findings
     present at the baseline. §10 is not done (S91).
+  - **(7) The close:** REPORT.md §14 with a pointer in its opening; KNOWN_DEFECTS.md's DEF-250, DEF-251 and
+    DEF-252 rows from the seeds' HUNT4 measurements (note (c)), DEF-253's registry status, and F-050 … F-052
+    as candidates; the scratch removed; the gate holds in every box; **M13 is ticked**. §10 is not done (S91).
+    The work ran from 04:09 to 05:26 EDT; nothing was written from 05:25:35 until `date` read 07:49:43, an
+    idle gap, so the close commit came more than 45 minutes after the one before it (05:22:49). The session
+    stops here, as the brief says.

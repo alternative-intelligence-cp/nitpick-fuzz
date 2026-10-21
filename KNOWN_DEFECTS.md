@@ -326,19 +326,46 @@ Open:
   `as0100` and six more fuzz programs (`tr0425`, `cc0151c`, `md0219`, `tr0448`, `vf0580`, `tr0550`). OPEN, low.
   At HUNT3 none of the seven moved.
 - **DEF-250** — the library seats' report: a module binding with no initialiser emitted read-only; -O2 answers 0.
-  OPEN, registered at HUNT3 by `nitpick-compiler_37`; planned as landing 114.
-- **DEF-251** — the same report: a NULL store; -O2 is `unreachable`. OPEN; S-136 settled as D-355; planned as 115.
+  OPEN at HUNT3 (registered there by `nitpick-compiler_37`). **Fixed at landing 114** (`2f0937a`): D-211 is asked of
+  every module binding, `TYPE-055` at the declaration. **Measured by M13 at HUNT4 `c72639f`:** the seed
+  `bare_binding` is refused `NITPICK-TYPE-055` (107/11 at HUNT3 and the baseline), and all 86 of grid13's section A
+  faces with it (a write faulting at -O0 and reading zero at -O2, a read of the zero default, an atomic store
+  faulting on both legs, a channel `send` failing); `results/c72639f/MOVES13.md` rows 8, 11–15.
+- **DEF-251** — the same report: a NULL store; -O2 is `unreachable`. **(i) fixed at landing 115** (`7992c77`):
+  `null_pointer_is_valid` on every emitted `define`. **(ii) fixed at landing 119** (`34979dc`, D-355, S-136's option
+  (c)): `NULL` where a plain pointer or an Optional is expected is `TYPE-096` at the literal. **Measured by M13 at
+  HUNT4 `c72639f`:** the seed `null_store` is refused `NITPICK-TYPE-096` (107/99 at HUNT3 and the baseline), and so
+  are grid13's 78 plain section B faces, among them the inferred face measured at HUNT3 and the baseline (a struct
+  reached through a parameter or a return, loaded and unread: the `NULL` test folded away, 107/0); under (i) the
+  `wild` store, used load, field read and `wild` callee fault on both legs (107/107). **A dead `wild` load still
+  faults at -O0 and is deleted at -O2 (107/14): F-051**, the check of (i), scope wild. `MOVES13.md` rows 9, 16, 17.
 - **DEF-252** — the library seat's report of 2026-10-15: a view re-seated by a CALLEE outlives the block's
-  string, exit 170 at both legs, **a use after free in safe code**. OPEN, registered at 113; placed behind 115.
-- **DEF-253** — the same report: a `Self->` trait method called through a bound does not link. OPEN, registered at
-  113.
+  string, exit 170 at both legs, **a use after free in safe code**. OPEN at HUNT3 (registered at 113). **Fixed at
+  landing 116** (`2f50640`): `BORROW-002` at a callee's store into a destination the frame owns. **Measured by M13
+  at HUNT4 `c72639f`:** the seed `probe08h_view_reseated` is refused `NITPICK-BORROW-002` (170/170 at HUNT3 and the
+  baseline), and so are grid13's section E faces for a callee storing into the whole pointee, into a field,
+  through a method and two levels down (8). **A callee storing into an element of an array of holders still reads
+  the poison at HUNT4 (170/170): F-050.** `MOVES13.md` rows 10, 19.
+- **DEF-253** — the same report: a `Self->` trait method called through a bound does not link. OPEN at HUNT3
+  (registered at 113). The registry at HUNT4 records it **fixed at landing 118** (`c9baa9e`, with DEF-254); no
+  program of ours exercises it (read, not measured).
 
 Registered since M12 (status read in the registry at HUNT4 `c72639f`, landing 137, 2026-10-21):
 - **DEF-256** — F-049 (M12, `findings/F-049-pick-binding-reinit-refused/`): a consuming `pick`'s binding re-assigned
   after a move was `MOVE-001` at its next read, a false refusal new at landing 74 (DEF-118's fix), DEF-124's shape at
   a third binding kind. Registered at landing 116 by `nitpick-compiler_38`, lower priority (a refusal of what
   MEMORY_REFERENCE §2.3 admits). **Fixed at landing 132** (`6f0f518`, 2026-10-18): `assign_assign` (bindings.npk)
-  marks a `SYM_PAT` target assigned, as it marks a local and a parameter. M13 measures F-049 at HUNT4 (§8).
+  marks a `SYM_PAT` target assigned, as it marks a local and a parameter. **Measured by M13 at HUNT4:**
+  `pick_reinit_read` and `pick_reinit_loop` 0/22/22, the controls unchanged; the M9 grid's 24 cells clean.
+
+Not registered: M13's findings (2026-10-21), candidates for the workbench (PLAN D6), each present at the baseline:
+- **F-050** (`findings/F-050-callee-view-store-into-array-element/`): a callee storing a block-local view into an
+  element of the array behind its pointer argument outlives the storage, 170 at both legs at HUNT4: a use after
+  free in safe code, DEF-252's shape at a destination landing 116 does not reach.
+- **F-051** (`findings/F-051-wild-dead-load-legs-disagree/`): a dead load through a `wild` `NULL` pointer faults at
+  -O0 and is deleted at -O2 (107/14), under DEF-251 (i). Scope wild, the check of (i).
+- **F-052** (`findings/F-052-atomic-method-through-pointer-not-lowered/`): an atomic's method called through a
+  pointer with `.` passes the checker and is `EMIT-002`; `(<-p).load()` lowers. Lower priority.
 
 ## Other known defects, for deduplication only (not in `known/`)
 

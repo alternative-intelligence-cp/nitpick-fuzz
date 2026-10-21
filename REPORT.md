@@ -76,6 +76,14 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
   from HUNT2 carries a landing number (`results/0c0f5a3/MOVES12.md`, zero unexplained). One new
   lower-priority finding: **F-049**, a consuming `pick`'s binding re-initialised after a move is
   refused, since landing 74.
+- **M13, the initialisation and pointer-store grid (section 14).** 933 cells aimed at DEF-250, DEF-251
+  and DEF-252's class, with the -O2 leg as the observer, run at the baseline, HUNT3 and HUNT4 `c72639f`
+  (landing 137). At HUNT3 190 cells are off their expectation; at HUNT4 landings 114, 115, 116, 119 and 120
+  bring 180 of them to it, the regression leg moves only by landings 132 and 136, and three findings remain,
+  all present at the baseline: **F-050**, a callee storing a block-local view into an element of an array of holders,
+  a use after free in safe code at HUNT4 (a soundness hole, DEF-252's face that 116 does not reach);
+  **F-051**, a dead `wild` load deleted at -O2, the legs disagreeing under DEF-251 (i) (scope wild, reported
+  apart); and **F-052**, an atomic's method through a pointer that the emitter cannot lower (`EMIT-002`).
 
 ## 1. The two compilers
 
@@ -1488,3 +1496,243 @@ python3 gen/compare_runs.py results/9126350/m11.jsonl results/0c0f5a3/m11.jsonl
 ```
 The baseline and HUNT2 are built the same way under `.work/llvm-20.1.2`; the findings with heap words
 are re-run with `--heap` (F-003 … F-010). `PROGRESS.md`'s M12 section has every command and time.
+
+## 14. M13 — the initialisation and pointer-store grid
+
+M13 is the task after M12 (S76): a grid aimed at the class the libraries found silent wrong answers in at
+-O2, with the -O2 leg as the observer. DEF-250 (a module binding with no initialiser emitted read-only),
+DEF-251 (a store through `NULL`) and DEF-252 (a view re-seated by a callee) each had one reproducer; the grid
+asks how many more faces each has and whether the fixes cover them. It ran on 2026-10-21, on the Team seat,
+on branch `local-m13`, one harness at a time under the seat's lock, at 4 jobs.
+
+### 14.1 The compilers and the toolchain
+
+| role | commit | LLVM | build | `npkc.ll` bytes / sha256 | `npkrt.o` | `npkc` |
+|---|---|---|---|---|---|---|
+| baseline | `c3bdae2` | 20.1.2 | M12's | 28 111 929 / `4029fc70efbe9cd3…`, as committed | 72 576 / `162b897539285a77…` | 9 724 160 / `5fd636b9ab557c19…` |
+| HUNT3 | `0c0f5a3` | 20.1.8 | M12's | 31 701 272 / `f520d5744b1e9951…`, as committed | 72 656 / `c8e5033ad17c70f8…` | 11 283 680 / `02e7b06321a16950…` |
+| HUNT4 | `c72639f` (`c72639f2332208649309b91796d6f173d19a64d2`) | 20.1.8 | 56.0 s | 32 424 412 / `2f1b9480701e1c86…`, equal to notice 137's ladder row | 72 656 / `c8e5033ad17c70f8…`, equal | 11 528 072 / `ba798aa0e5500a8d…`; the row's is 72 bytes shorter, its linker comment (reasoned) |
+
+- **HUNT4** is the compiler's `origin/main` at the session's fetch (04:11 EDT): landing 137, carrying landings
+  114 to 137 (PROGRESS.md's M13 section lists each). Among them: 114 (DEF-250, `TYPE-055`), 115 (DEF-251 (i),
+  `null_pointer_is_valid`), 116 (DEF-252, `BORROW-002` at a callee's store), 117 (D-353), 118 (DEF-253, DEF-254),
+  **119 (D-355 (ii): `NULL` leaves the plain pointer, `TYPE-096`)**, 120 (D-360, `??!`), 121 (D-361, `TYPE-097`),
+  132 (DEF-256, this repository's F-049) and 136 (a keyword local is `PARSE-001`). The ladder row is the
+  workbench BOARD's "THE BASELINE NOTICE 138 MUST QUOTE"; `npkc.o` and `builder.o` equal it too. A second
+  fetch at 05:05 EDT found no newer landing.
+- **The baseline and HUNT3** are M12's builds, unchanged (their digests re-read). The canaries pass at all
+  three compilers.
+- **LLVM:** 20.1.2 is the machine's `/usr/lib/llvm-20`; 20.1.8 the release tarball (sha256 `1ead36b3…`, as
+  M12 recorded). Every runner names its LLVM, and every runner's temporary directories sit in the session's
+  scratch (S80).
+- **The author's go** (S77): "i rand the shell script and also approve the two points", the message of
+  2026-10-15 21:00:54 EDT relayed by management_0, answering (i) HUNT4 = the compiler's `origin/main` at the
+  fetch and (ii) LLVM 20.1.8 for HUNT3 and HUNT4.
+
+### 14.2 The housekeeping
+
+M12v's non-blocking findings, each a wording edit or a note (commit M13 (1b)): (1) the P32 bullet and §13.3
+now count 23 `[toolchain]` scripts by a quoted grep, and name `bd0075` and `bd0299` as reaching npkg's
+toolchain check by design; (2) MOVES12 row 4 and DEF-119's bullet give `BORROW-013` to DEF-123; (4) M12's box
+13 says which form it was ticked on; (6) DEF-247 and DEF-249 say "no program of ours", with the searches; (7)
+an erratum line in §13.4, and `gen/run_findings.py` writes no file for a finding with no programs; (8) "no
+anomaly is left by the classifier's classes". DEF-256's row is added from the registry at HUNT4 (F-049, fixed
+at 132), and F-049's README gains the registration and the workbench's reproduction, each labelled as
+reported. Dispatch note (a): DEF-236 (a) is fixed at 117; `m11/programs/as0062.npk` is `TYPE-095` at 10:12 at
+HUNT4 (`EMIT-002` at 10:71 at HUNT3). No committed record changed but MOVES12's row 4 wording.
+
+### 14.3 The grid
+
+`gen/grid13.py` writes 933 cells and states 431 combinations it skips, each with its reason
+(`cells13/SKIPPED.txt`); `--selfcheck` passes (S83–S88). Every cell carries its expectation, written before
+any run from the rule that governs it, with the rule's text and source in `meta.json` (S85). The learning by
+snippet (§4) is in PROGRESS.md's M13 section: 130 probes, 51 more, and 89 template copies for spellings only
+(S89).
+
+| section | axes | rules | generated | REFUSE | SAFE | TRAP | skipped |
+|---|---|---|---|---|---|---|---|
+| S | the three seeds, byte for byte | D-211; D-355 (ii); D-004 rule 3 | 3 | 3 | | | |
+| A | 11 types and qualifiers × 5 declarations × 9 operations | D-211 (`TYPE-055`); TYPE_REFERENCE §26 (`ASSIGN-002`); D-287 (`TYPE-086`, `TYPE-071`) | 166 | 157 | 9 | | 329 (99 `const`, retired at 1.4.2c) |
+| B | 8 places × 8 operations × 2 types | D-355 (ii) (`TYPE-096`); DEF-251 (i) (TRAP 107); §11.1 (`TYPE-007`); D-360 (TRAP 95) | 106 | 87 | 8 | 11 | 22 |
+| C | 8 types × 5 places × 7 operations, each with its definitely-assigned twin | D-010 (`ASSIGN-001`; `TYPE-027` for a literal) | 500 | 250 | 250 | | 60 |
+| D | 5 types × 15 operations × 2 operand forms | D-277, D-310, D-331 (`TYPE-070`, `TYPE-076`, `TYPE-004`); D-007, D-210 (TRAP 111, 97, 98, 93) | 130 | 37 | 56 | 37 | 20 |
+| E | 7 stores × 2 lifetimes × 2 observers | D-004 rule 3 with landing 116 (`BORROW-002`) | 28 | 14 | 14 | | |
+| **all** | | | **933** | **548** | **337** | **48** | **431** |
+
+**The codes** (S84): 0 success; 12 a value read back that is not the one written; 13 a zero read where a
+value was written or where nothing was; 14 a `NULL` test after a dereference that took the null branch; 21–25
+E's view (the original, the new value, vacant, another value, the reuse sentinel); 70 the free poison as an
+observation; 170 the poison byte as the exit (the DEF-252 seed); 91–98 and 106–117 `gen/m10.py`'s TRAPS; 100–105
+and 118–122 the prelude's eleven other identities with S44's codes, so the failsafe names all 31 and its `(*)`
+arm (99) is reached only by a garbage argument, DEF-251's -O2 face; every template declares its helpers before
+`main` and `failsafe` directly after it (S83). 29 cells contain `wild` and are scope wild.
+
+### 14.4 The seeds
+
+| seed | DEF | baseline | HUNT3 | HUNT4 |
+|---|---|---|---|---|
+| `bare_binding` | DEF-250 | 107/11 `ACCEPTED:DEFECT:leg_mismatch` | 107/11 `ACCEPTED:DEFECT:leg_mismatch` | refused `TYPE-055` (114) |
+| `null_store` | DEF-251 | 107/99 `ACCEPTED:DEFECT:fallthrough` | 107/99 `ACCEPTED:DEFECT:fallthrough` | refused `TYPE-096` (119) |
+| `probe08h_view_reseated` | DEF-252 | 170/170 `ACCEPTED:DEFECT:uaf` | 170/170 `ACCEPTED:DEFECT:uaf` | refused `BORROW-002` (116) |
+
+At HUNT3 each is flagged as the recall gate requires (P1), and at HUNT4 each is refused by its fix (P2).
+
+### 14.5 The LLVM control
+
+HUNT3 under 20.1.2 against HUNT3's record under 20.1.8: **0 of 933 cells differ** (P11). No undefined
+behaviour in grid13's emission is folded apart by the two versions. The control cannot see undefined
+behaviour both fold alike, which is why -O0 against -O2 stays the observer.
+
+### 14.6 Results by section and compiler
+
+From `results/<commit>/classified13.jsonl` (each run generated = refused + `OVERRESTRICT` + `REFUSED_TRAP` +
+clean + each `DEFECT`, `ACCEPTED`, `LOUD`, `CRASH`, `timeout` and `other` count; none of the last four
+occurs). HUNT4's two runs agree in all 933 cells.
+
+**At the baseline `c3bdae2` (20.1.2):**
+
+| class | S | A | B | C | D | E | all |
+|---|---|---|---|---|---|---|---|
+| clean |  | 7 | 8 | 244 | 93 | 10 | 362 |
+| refused |  | 73 | 22 | 250 | 21 | 8 | 374 |
+| `DEFECT:fallthrough` |  |  | 6 |  |  |  | 6 |
+| `DEFECT:leg_mismatch` |  |  | 3 |  |  |  | 3 |
+| `OVERRESTRICT` |  | 2 |  | 6 |  | 4 | 12 |
+| `REFUSED_TRAP` |  |  | 2 |  |  |  | 2 |
+| `ACCEPTED:DEFECT:fallthrough` | 1 |  | 31 |  |  |  | 32 |
+| `ACCEPTED:DEFECT:false_trap` |  |  |  |  | 16 |  | 16 |
+| `ACCEPTED:DEFECT:leg_mismatch` | 1 | 46 | 14 |  |  |  | 61 |
+| `ACCEPTED:DEFECT:segv` |  | 2 |  |  |  |  | 2 |
+| `ACCEPTED:DEFECT:uaf` | 1 |  |  |  |  | 6 | 7 |
+| `ACCEPTED:DEFECT:wrong_value` |  | 34 |  |  |  |  | 34 |
+| `ACCEPTED:clean` |  |  | 20 |  |  |  | 20 |
+| `ACCEPTED:other` |  | 2 |  |  |  |  | 2 |
+| **generated** | **3** | **166** | **106** | **500** | **130** | **28** | **933** |
+
+**At HUNT3 `0c0f5a3` (20.1.8):**
+
+| class | S | A | B | C | D | E | all |
+|---|---|---|---|---|---|---|---|
+| clean |  | 9 | 8 | 244 | 93 | 14 | 368 |
+| refused |  | 75 | 9 | 250 | 37 | 4 | 375 |
+| `DEFECT:fallthrough` |  |  | 6 |  |  |  | 6 |
+| `DEFECT:leg_mismatch` |  |  | 3 |  |  |  | 3 |
+| `OVERRESTRICT` |  |  |  | 6 |  |  | 6 |
+| `REFUSED_TRAP` |  |  | 2 |  |  |  | 2 |
+| `ACCEPTED:DEFECT:fallthrough` | 1 |  | 37 |  |  |  | 38 |
+| `ACCEPTED:DEFECT:leg_mismatch` | 1 | 44 | 17 |  |  |  | 62 |
+| `ACCEPTED:DEFECT:segv` |  | 2 |  |  |  |  | 2 |
+| `ACCEPTED:DEFECT:uaf` | 1 |  |  |  |  | 10 | 11 |
+| `ACCEPTED:DEFECT:wrong_value` |  | 34 |  |  |  |  | 34 |
+| `ACCEPTED:clean` |  |  | 24 |  |  |  | 24 |
+| `ACCEPTED:other` |  | 2 |  |  |  |  | 2 |
+| **generated** | **3** | **166** | **106** | **500** | **130** | **28** | **933** |
+
+**At HUNT4 `c72639f` (20.1.8):**
+
+| class | S | A | B | C | D | E | all |
+|---|---|---|---|---|---|---|---|
+| clean |  | 9 | 17 | 244 | 93 | 14 | 377 |
+| refused | 3 | 157 | 87 | 250 | 37 | 12 | 546 |
+| `DEFECT:leg_mismatch` |  |  | 2 |  |  |  | 2 |
+| `OVERRESTRICT` |  |  |  | 6 |  |  | 6 |
+| `ACCEPTED:DEFECT:uaf` |  |  |  |  |  | 2 | 2 |
+| **generated** | **3** | **166** | **106** | **500** | **130** | **28** | **933** |
+
+The wild-scoped cells (29) are counted above and read apart in 14.7 and 14.8. At HUNT4 every refused cell
+names the code its rule names.
+
+### 14.7 The faces of DEF-250, DEF-251 and DEF-252, and what each fix covers
+
+From `results/c72639f/FACES13.txt` (HUNT3 against HUNT4: 184 cells moved) and `MOVES13.md` rows 8–19:
+
+| DEF | grid13's faces at HUNT3 | the fix | at HUNT4 |
+|---|---|---|---|
+| DEF-250 (A) | 86 cells: every binding with no initialiser, `pub` with none, and the `stack`, `wild` and `wildx` forms, of every type. A write faults at -O0 and reads zero at -O2 (107/13: a write, a compound assignment, a field or element write, a write through `@g` in a callee); a read gives the zero default on both legs (13/13, a default standing in); an atomic store faults on both legs (107/107); a channel `send` fails (`ChannelClosed`, 102/102). Four atomic address cells are refused `EMIT-002` (F-052's shape) | 114: `TYPE-055` at the declaration | **all 86 refused**. A binding with an initialiser was refused at HUNT3 already (D-211); `fixed` reads run clean at every compiler; `@g` of a `fixed` binding is `TYPE-071` (D-287) at every compiler, so P4's suspect has no face |
+| DEF-251, plain (B) | 78 cells: `NULL` in a plain local, a `fixed` local, a module `fixed T->`, a struct field, a parameter, a helper's return. A store, a used load, a field read or a dereferencing callee falls through (107/99) or disagrees (107/12); the unused load before a `NULL` test answers 14 at -O2 where -O0 faults, and for a struct reached through a parameter or a return the -O2 leg folds the test away and reports success (107/0, **DEF-251's inferred face, measured**); the guarded store and the comparison run 0/0, accepted (24) | 119, D-355 (ii): `TYPE-096` at the literal | **all 78 refused** |
+| DEF-251, `wild` (B, scope wild) | 9 cells: a store, a used load, a field read, a `wild` callee falls through or disagrees (107/99, 107/12); the unused load before a test gives 107/14 | 115, DEF-251 (i): `null_pointer_is_valid` | 7 move to the expected 107/107; **the dead load stays 107/14 (F-051)**; the guarded store and the comparison run clean |
+| DEF-252 (E) | 10 dies-first cells read freed memory (70 through the observer, 25 with the reuse sentinel): a callee storing the view into the whole pointee, into a field, through a method, two levels down, and into an element of an array of holders. The direct store and a returned holder are refused `BORROW-002` at HUNT3 already | 116: `BORROW-002` at a callee's store into a destination the frame owns | 8 refused; **the array-element store stays 70/70 and 25/25 (F-050)**; the outlives twins run clean |
+
+Landing 120 adds the Optional's `??!`, refused at HUNT3 (`TYPE-007`, read as `??` then `!`), and at HUNT4 it
+traps its identity on both legs (95/95), 2 cells.
+
+### 14.8 Candidates and findings
+
+Each goes to `nitpick-fuzz_2` for D6 verification first (PLAN D6), through the dispatcher.
+
+| finding | §9 class | grid13 cells | HUNT4 | HUNT3 | baseline |
+|---|---|---|---|---|---|
+| **F-050**, a callee storing a block-local view into an ELEMENT of the array behind its pointer argument outlives the storage (`findings/F-050-callee-view-store-into-array-element/`) | **soundness hole**: accepted, reads the free poison | `g0915`, `g0916` (`ACCEPTED:DEFECT:uaf`) | 0 / 170 / 170 | 0 / 170 / 170 | 0 / 170 / 170 |
+| **F-051**, a dead load through a `wild` `NULL` pointer faults at -O0 and is deleted at -O2 (`findings/F-051-wild-dead-load-legs-disagree/`) | **reported apart: the check of DEF-251 (i)**, scope wild (outside CLAUDE.md's definition) | `g0249`, `g0250` (`DEFECT:leg_mismatch`) | 0 / 107 / 14; 0 / 107 / 0 with no test | the same | the same |
+| **F-052**, an atomic's method through a pointer with `.` is `EMIT-002`; `(<-p).load()` lowers (`findings/F-052-atomic-method-through-pointer-not-lowered/`) | **crash / loud emission**, lower priority | at HUNT3 and the baseline, A's four atomic address cells; found by §4's probe | 1 `EMIT-002` | the same | the same |
+
+All three are old: present at the baseline. Each README holds the shape, the verdicts as compiler × leg ×
+(npkc, run), the control a wrong implementation gets wrong, the deduplication and what was measured apart
+from what is inferred.
+
+**Not a finding:** C's six `OVERRESTRICT` cells (`g0692` … `g0708`) store `@z` into a field or element of a
+local in a branch, loop or arm, and are `BORROW-002` at every compiler. The compiler cites D-004 rule 3 ("only a
+local binding in the borrowing frame is provably no longer-lived than the borrow"), which D-004 makes
+"deliberately strict to start". The expectation was mine and wrong; it stays as committed, and the six cells
+are read against it.
+
+### 14.9 The regression leg and `MOVES13.md`
+
+At HUNT4 under 20.1.8: recall 25/25 "once fixed", identical to HUNT3's record; findings, 160 programs in 34
+(the 15 row findings write no file now), every baseline line as committed, two findings moved: F-029's
+control `PARSE-002` → `PARSE-001` at 7:11 (136) and F-049's two reproducers `MOVE-001` → 22/22 (132); M2 956
+cells, 0 moved; M9 7 571 cells, 4 071 clean and 3 500 refused, 24 moved, MOVES12 row 44's cells exactly (132);
+M10 223, 0 changed. **No memory fault in the regression leg.** `results/c72639f/MOVES13.md` carries every
+move with its landing, **zero UNEXPLAINED**, and P1–P11 each ticked or explained. Dispatch note (e)'s three
+readings hold as written.
+
+### 14.10 What M13 does not cover
+
+- **The roads landing 121 leaves** for a later run's family (note (d)): a pick expression's `give` and a
+  method's receiver taking a value of wild provenance.
+- **Module state across tasks**, D-211's reason: grid13's channels and atomics run in one task.
+- **E's holders** are a struct and an array of structs; the lists, `dyn`, function values and async callees
+  of landing 116's own test are not re-tested here.
+- **D's types** are int8, uint8, int32, int64 and uint64; the compound spellings (`<<=`, `/=`) and `CastRange`
+  are M10's.
+- **The `const` axis** has no cells: `const` is no declaration form (99 combinations skipped).
+- **Option C** (M11's reference delta) and §10's re-spellings, which dispatch notes (a) and (c) keep out of
+  M13 (S91).
+- The LLVM control's blind spot (14.5), and the grid's own (section 7).
+
+### 14.11 Cost
+
+At 4 jobs, one harness at a time (the wall time of each command, any lock wait included; no `flock` ever
+returned 75):
+
+| step | wall |
+|---|---|
+| HUNT4's build | 56.0 s |
+| the canaries, `as0062`, three probe batches (130, 51 and 89 programs at two compilers) | about 35 s |
+| the seeds at HUNT3, HUNT3's record, the LLVM control | 1 + 57 + 64 s |
+| grid13 at the baseline and HUNT4 twice | 53 + 47 + 47 s |
+| the regression leg: recall, findings (two passes), M2, M9, M10 | 5 + 280 + 59 + 458 + 18 s |
+| triage: 23 programs at four runs, two minimisations, three findings recorded | about 60 s |
+| **in all** | about 21 min of harness time |
+
+The work ran from 04:09 EDT (the dispatch) to 05:26 EDT on 2026-10-21, and the close was committed after a gap
+with no activity, from 05:26 to 07:49 (the last file written at 05:25:35, the next `date` read 07:49:43);
+PROGRESS.md's Log has the times.
+
+### 14.12 Reproducing
+
+From a clone at the commit that closes M13, with the compiler cloned to `.work/nitpick` and M12's worktrees:
+```
+git -C .work/nitpick worktree add --detach ../hunt4 c72639f2332208649309b91796d6f173d19a64d2
+(cd .work/hunt4 && PATH=$PWD/../llvm-20.1.8/bin:$PATH python3 bootstrap/harness/quickemit.py --keep npkg/main.npk)
+python3 gen/grid13.py --out cells13 && python3 gen/grid13.py --selfcheck
+python3 gen/run.py .work/hunt3 --cells cells13 --llvm .work/llvm-20.1.8 --jobs 4 --out results/0c0f5a3/cells13.jsonl
+python3 gen/run.py .work/base  --cells cells13 --llvm .work/llvm-20.1.2 --jobs 4 --out results/c3bdae2/cells13.jsonl
+python3 gen/run.py .work/hunt4 --cells cells13 --llvm .work/llvm-20.1.8 --jobs 4 --out results/c72639f/cells13.jsonl
+python3 gen/classify13.py --cells cells13 results/c72639f/cells13.jsonl
+python3 gen/compare13.py results/0c0f5a3/classified13.jsonl results/c72639f/classified13.jsonl
+python3 gen/run_findings.py --hunt .work/hunt4 --base .work/base --llvm .work/llvm-20.1.8 --name VERDICTS-c72639f.txt
+python3 gen/run.py .work/hunt4 --cells cells9 --llvm .work/llvm-20.1.8 --jobs 4 --out results/c72639f/cells9.jsonl
+```
+The other regression runs are §8's commands with `hunt4` and `c72639f`; `PROGRESS.md`'s M13 section has every
+command and time.
