@@ -82,8 +82,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `d44dfe3` → `581c091`, `f31dfc6` an ancestor, M12 ticked, the tree clean before the switch, `local-m13` new (S79); the go quoted as S77, covering (i) and (ii)
   - [x] 2 HUNT4 named (`c72639f`, landings 114–137; D-355 (ii) is 119) and built; its `npkc.ll` and `npkrt.o` equal notice 137's ladder row; both LLVMs as stated; the canaries pass at the baseline, HUNT3 and HUNT4
   - [x] 3 the housekeeping (1b): M12v's (1), (2), (4), (6), (7) and (8); DEF-256's row and F-049's two reported facts; DEF-236 (a) measured at HUNT4 (note (a)); no committed record changed but MOVES12's row 4 wording
-  - [ ] 4 learn by snippet, at HUNT4 and HUNT3
-  - [ ] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run
+  - [x] 4 learn by snippet, at HUNT4 and HUNT3: 130 + 51 probes and 89 template probes (S82, S89); the spellings and codes in the M13 section
+  - [x] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run: 933 cells, 431 skipped with reasons, `--selfcheck` passing; every expectation with its rule (S83–S88)
   - [ ] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record
   - [ ] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`
   - [ ] 8 the regression leg at HUNT4 and `MOVES13.md`
@@ -2027,6 +2027,91 @@ wording edit the brief names.
   line 10's `func:scale<comptime int32:K> = …`; at HUNT3 npkc 1, `NITPICK-EMIT-002` at 10:71, as note (a)
   says.
 
+**Learn by snippet** (§4; S82). Three batches of probes in `.work/probes13/`, each compiled and run at
+HUNT4 and HUNT3 under 20.1.8 by `gen/snip.py`'s recipe, one batch per lock: 130 probes, one per axis
+value (04:30); 51 for the spellings the templates need (04:40); 89 copies of generated templates, for
+spellings only (04:46, S89). None is committed. What they settle, by code at HUNT4 / HUNT3:
+- **Module bindings (A).** `int64:x;` and every other binding that is neither `fixed` nor a constant
+  initialiser of `fixed` (`pub`, `stack`, `wild`, `wildx`, a struct, `int64[4]`, `atomic<int64>`,
+  `Channel<int64, 1i32, 4i64>`, `bool`, `uint8`, `int32`) is `TYPE-055` at the declaration at HUNT4 (114);
+  at HUNT3 the bare forms compile, and a write faults at -O0 and reads back zero at -O2 (107/12, 107/13),
+  a read gives the zero default (13/13), an atomic store faults on both legs (107/107), and a channel
+  `send` reports `ChannelClosed` (102/102). With an initialiser the binding is `TYPE-055` at both.
+  `fixed T:g = c;` reads its constant (0/0 at both), `fixed stack`, `fixed wild … = NULL` and `fixed wildx
+  … = NULL` too. A write to a `fixed` binding is `ASSIGN-002`, a compound assignment too; a field or
+  element write `TYPE-086`; `@g` of a `fixed` binding `TYPE-071` (D-287) at both compilers, into a writer
+  or a reader alike, so **P4's suspect is refused at HUNT3 already**. `const` is no keyword:
+  `const int64:X = 5i64;` is `PARSE-001` "expected `:`, found `int64`" at both (TYPE_REFERENCE §26). No
+  constant of type `atomic<int64>` exists for a module initialiser (`TYPE-007`), nor of a channel
+  (`channel()` is `TYPE-035`).
+- **Pointers (B).** `NULL` in a plain slot (a local, a `fixed` local, a module `fixed T->`, a struct field,
+  a parameter's argument, a `pass`, and `p == NULL` itself) is `TYPE-096` at the literal at HUNT4 (119);
+  at HUNT3 each store through it gives 107/99, DEF-251's face. A `wild` store or load through `NULL` is
+  107/107 at HUNT4 (115) and 107/99 at HUNT3, through a `wild` parameter too (note (d): no `TYPE-097`);
+  a `wild` value into a plain parameter is `TYPE-097` at HUNT4 (121). **A dead `wild` load followed by a
+  `NULL` test is 107/14 at HUNT4 and at HUNT3**: the -O2 leg deletes the load and takes the null branch.
+  `T->?` exists: `NIL`, `!= NIL`, `?? @d` and `?.` run 0/0; `<-p`, `p.a` and a `T->?` passed to a plain
+  parameter are `TYPE-007`; `p ??! Unreachable` traps 95/95 at HUNT4 and is `TYPE-007` at HUNT3 (`??!`
+  is landing 120's).
+- **Locals (C).** Every read before definite assignment is `ASSIGN-001` at both, whatever the type
+  (`int64`, `int32`, `bool`, a struct, an array, `string`, `T->`, `T?`) and whatever the path (one `if`
+  branch, a loop that may run zero times, one `pick` arm, `@x` to a reader, by value, `x = x + 1`, a
+  helper's local, a loop body's); a field write into an unassigned struct is `ASSIGN-001` too; a struct
+  literal missing a field is `TYPE-027`. The definitely-assigned twins run 0/0.
+- **Operators (D)**, M10's measured rows at both: a known shift amount outside the range is `TYPE-070`; a
+  constant `/ 0`, `% 0`, `MIN / -1`, `MIN % -1` is `TYPE-004`; a constant `-MIN` is `TYPE-076`; at run
+  time 111, 97, 98 and 93 on both legs; an unsigned negation is `TYPE-008`; the twins run 0/0. A
+  `uint64` literal above 2⁶³−1 is `LEX-004`, so the top bit is built as `9223372036854775807u64 + 1u64`.
+- **The trap identities.** HUNT4's prelude declares 31 (`pub error:`), the same 31 names as HUNT3's and
+  HUNT2's: `gen/m10.py`'s twenty TRAPS and eleven more, which S44 already coded for M11 (100–105,
+  118–122). None is new, so no code is added (S83). A failsafe naming all 31 compiles at both.
+- **DEF-252's shape (E).** The direct store is `BORROW-002` at both; a callee storing the view whole,
+  into a field, two levels down or through a method is `BORROW-002` at HUNT4 (116) and reads the poison
+  at HUNT3 (170/170; 25/25 with a reuse sentinel). A callee returning a holder assigned outside is
+  `BORROW-002` at both. **A callee storing into an element of an array of holders through a pointer
+  compiles at HUNT4 and reads the poison, 170/170 (25/25 with a sentinel)**, a face 116 does not reach.
+  Each outlives twin runs 0/0.
+- **One more probe result**, outside grid13's axes: `p.store(7i64)` and `p.load()` through an
+  `atomic<int64>->` parameter are `NITPICK-EMIT-002` ("the emitter could not lower this, although the
+  frontend accepted it") at both compilers (`q_a09`). It goes to triage (§9).
+
+**The grid** (§5; S83–S88): `gen/grid13.py` (936 lines), `gen/classify13.py`, `gen/compare13.py`.
+`python3 gen/grid13.py --out cells13` generates **933 cells** and skips 431 combinations, each with its
+reason in `cells13/SKIPPED.txt`; 1 364 combinations in all, plus the three seeds:
+
+| section | generated | REFUSE | SAFE | TRAP | skipped |
+|---|---|---|---|---|---|
+| S, the seeds | 3 | 3 | 0 | 0 | 0 |
+| A, module bindings (11 types × 5 declarations × 9 operations) | 166 | 157 | 9 | 0 | 329 (99 `const`) |
+| B, `NULL` and pointer stores (8 places × 8 operations × 2 types) | 106 | 87 | 8 | 11 | 22 |
+| C, definite assignment (8 types × 5 places × 7 operations, each with its twin) | 500 | 250 | 250 | 0 | 60 |
+| D, constants at the edge (5 types × 15 operations × 2 forms) | 130 | 37 | 56 | 37 | 20 |
+| E, stores into a pointee (7 stores × 2 lifetimes × 2 observers) | 28 | 14 | 14 | 0 | 0 |
+| **all** | **933** | **548** | **337** | **48** | **431** |
+
+29 cells carry `"scope": "wild"`. The expected codes: `ASSIGN-001` 200, `TYPE-055` 129, `TYPE-096` 79,
+`TYPE-027` 50, `TYPE-070` 18, `TYPE-004` 16, `BORROW-002` 15, `TYPE-071` 14, `ASSIGN-002` 13, `TYPE-007`
+9, `TYPE-076` 3, `TYPE-086` 2; the TRAP exits 111 ×18, 97 ×10, 107 ×9, 98 ×6, 93 ×3, 95 ×2.
+`python3 gen/grid13.py --selfcheck` prints "selfcheck: 933 cells (A 166, B 106, C 500, D 130, E 28, S 3),
+431 skipped, 1364 combinations; every check passes": two builds identical; ids are module names equal
+to their `mod:` lines; every meta has `run.py`'s keys, its rule and its source; every REFUSE cell names
+a code, every TRAP exit is a failsafe arm; the layout (helpers before `main`, `failsafe` directly after
+it, grid13's failsafe) and D-013 (`exit` only in `main` and `failsafe`) hold in every cell; TRAPS equals
+`gen/m10.py`'s and the 31 arms `gen/m11lib.py`'s; the seeds' embedded text and their sources give the
+recorded sha256; generated + skipped = the combinations; and `cells13/` is this build byte for byte.
+`cells13/` is gitignored (`.gitignore` gains the line).
+
+**The classifier and the comparer, tested before any run** on synthetic records in scratch: a record
+meeting every expectation classes as 548 `refused` and 385 `clean`; 23 planted cases each give the class
+the brief names (the seeds' 107/11, 107/99 and 170/170 as `ACCEPTED:DEFECT:leg_mismatch`, `…:fallthrough`
+and `…:uaf`; `ACCEPTED:clean`; `OVERRESTRICT`; `REFUSED_TRAP`; `CRASH:npkc` for an exit 3 and a compile
+timeout; `timeout`; `LOUD`; `DEFECT:fallthrough`; a TRAP 107 cell at 107/107 `clean`; 107/14
+`DEFECT:leg_mismatch`; a TRAP cell at 0/0 `DEFECT:wrong_value`; `DEFECT:segv`, `false_trap` (a TRAP cell
+raising another identity, and a SAFE cell at 93/93), `double_free`, `uaf` for 25, and `other` for 102 and
+an unbuilt leg); a refusal missing its code reads `exp_mismatch` "codes". `compare13.py` lists 0 and
+exits 0 on a file against itself, lists three planted differences (a class move, a code move, a
+`MISSING:new`) with their class pairs and exits 1; `classify13.py` exits 1 without the index.
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -2764,6 +2849,71 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
 - **S81 — HUNT2 (`9126350`) is not run in M13** (the brief's §2). M12 re-baselined at HUNT3, and HUNT2's
   records stand. M13's compilers are the baseline `c3bdae2` under 20.1.2 (M5 step (d)), HUNT3 `0c0f5a3`
   under 20.1.8 (the class before 114 and 115) and HUNT4 under 20.1.8 (the hunt).
+- **S82 — §4's probes run at HUNT4 and HUNT3, both legs, under 20.1.8, never committed.** They live in
+  `.work/probes13/<name>/<name>.npk` (one directory each, so `gen/snip.py`'s copy of a probe's directory
+  is the probe alone), run by `gen/snip.py`'s `build_and_run` at most 4 at a time under the lock. Their
+  spellings and codes are summarised in the M13 section; the probe results recorded there were measured,
+  each at both compilers.
+- **S83 — grid13's failsafe names all 31 identities of HUNT4's prelude.** The brief takes the failsafe from
+  `gen/m10.py`'s TRAPS so that `(*)` (99) is reached only by a garbage argument, and asks that an identity
+  missing from TRAPS get a code from 118 up. HUNT4's prelude declares 31 identities, the same 31 names as
+  HUNT3's and HUNT2's: TRAPS's twenty and eleven M10 left out, which S44 coded for M11 (`StaleHandle` 100,
+  `DeadlineExceeded` 101, `ChannelClosed` 102, `DriverLeak` 103, `IoEof` 104, `WouldBlock` 105,
+  `Interrupted` 118, `NotFound` 119, `Exists` 120, `CrossDevice` 121, `BadPath` 122). None is new since
+  M10, and 118–122 are S44's already, so no new code is made: grid13 arms all 31 with their existing codes
+  (exactly `gen/m11lib.py`'s TRAPS, M11's failsafe), which is what makes `(*)` a garbage argument's alone.
+  A channel cell's failed `send` or `recv` raises `ChannelClosed` (102) by `?!`; grid13 has no user error.
+  No fall-through sentinel (D-013): every template declares its helpers before `main` and `failsafe`
+  directly after it, the `null_store` seed's layout.
+- **S84 — grid13's codes**, the brief's table with S83's arms: 0 success; 12 a value read back that is not
+  the one written; 13 a zero read where a non-zero value was written or where nothing was; 14 a `NULL` test
+  after a dereference that took the null branch; 21–25 E's view (the original, the new value, vacant,
+  another live value, the reuse sentinel); 70 the free poison as an observation; 170 the poison byte as the
+  exit (the DEF-252 seed); 91–98 and 106–117 TRAPS; 100–105 and 118–122 S44's; 99 `(*)`. A helper passes
+  its code to `main`, which exits with it.
+- **S85 — expectations from rulings, written in the generator before any run.** Each cell's `meta.json`
+  carries `expect`, `expect_codes`, `expect_exit`, the rule's text and its source at HUNT4: D-211 with its
+  landing-114 note (`TYPE-055`), TYPE_REFERENCE §26 (`ASSIGN-002`), D-287 (`TYPE-086`, `TYPE-071`), D-355
+  (ii) (`TYPE-096`), TYPE_REFERENCE §27 with landing 115 (`wild` `NULL` traps 107 on both legs), §11.1
+  with D-355 (a `T->?` dereferenced without `??`/`??!`/`?.` is refused: `TYPE-007`, the code §4's probes
+  found, the rule naming none), D-360 (`??!` on an empty `T->?` traps its identity), D-010 (`ASSIGN-001`,
+  named by TYPE_REFERENCE §27; `TYPE-027` for a struct literal), D-277, D-310, D-331 and D-007 for D (by
+  form), D-004 rule 3 with landing 116 (`BORROW-002`). A settled D- ruling wins over reference text that
+  has not caught up. A REFUSE cell is `refused` when every code its rule names is among npkc's.
+- **S86 — the classify13 classes and compare13's contract are the brief's** (§5), in its order:
+  `CRASH:npkc`; `refused` (`exp_mismatch` "codes" when a named code is missing), `OVERRESTRICT` for any SAFE
+  cell, `REFUSED_TRAP`; then `timeout`, `LOUD`, `DEFECT:fallthrough`, `DEFECT:leg_mismatch`, `clean`,
+  `DEFECT:uaf`, `double_free`, `segv`, `wrong_value`, `false_trap`, `other`; an accepted REFUSE cell is
+  `ACCEPTED:<run class>`; `scope` comes from the index, and the `wild` cells are reported apart.
+  `classify13.py` refuses to run without `cells13/INDEX.jsonl`. `compare13.py` keys a cell by (npkc, codes,
+  O0, O2, class), counts a one-sided cell as `MISSING:old` or `MISSING:new`, and exits 1 when anything
+  differs.
+- **S87 — the axes as written, with these spellings and one addition.**
+  - A: `const` is dropped with its reason (no declaration form since 1.4.2c; 99 combinations in
+    `SKIPPED.txt`); `fixed atomic<int64>` and a channel with an initialiser are skipped (no constant of the
+    type); the channel is `Channel<int64, 1i32, 4i64>`; "pub" is `pub T:g;` with no initialiser.
+  - B: each place holds `NULL` (the `T->?` place `NIL`); the parameter place is a helper `runp` called with
+    `NULL`; the `wild` local's dereferencing callee takes `wild T->` (note (d)). **Added:** `unwrap_trap`,
+    `p ??! Unreachable` at the `T->?` place (2 cells, TRAP 95 by D-360), the Optional's third accessor,
+    landed at 120 after the brief was written; the other places skip it.
+  - C: "a struct literal missing a field" is `W{ a: 1i64 }` for `struct:W = { int64:a; T:f; }`, and "an
+    array declared with no initialiser" is `T[4]:arr;`, so every type meets every place; each REFUSE cell
+    has a twin (O `<o>_da`) that assigns on every path; a run-time condition keeps the assigning branch,
+    arm or loop untaken, so an accepted read meets the unassigned value.
+  - D: `x` is 1 for a shift and 5 for a division; the run-time form passes both operands through the
+    identity functions; the unsigned types skip the negative operand and negation (`TYPE-008`).
+  - E: the holders are landing 116's own, `Cursor` (a write-once view field, re-seated whole) and `Seat`
+    (`(fixed uint8[]):src`, a field written again); `ra` and `rs` read the view through `obs_v` (21–25, 70).
+- **S88 — the seeds are embedded in `gen/grid13.py`**, byte for byte, so `cells13/` regenerates on any
+  machine. The generator refuses to write if an embedded text's sha256 is not the recorded one, and
+  `--selfcheck` also checks each source's sha256 where the source exists.
+- **S89 — the templates were compiled as probes before the commit, for spellings only.** A covering set
+  of 89 generated programs (each section's T, P and O values at least once, a SAFE one where there is one),
+  each copied to `.work/probes13/r_<id>/` under its own module name and run as §4's probes at HUNT4 and
+  HUNT3. No expectation was set or changed from them, and none needed a spelling change: every SAFE
+  template ran 0/0 at both compilers, every REFUSE template drew its code at HUNT4, and the departures were
+  the faces §4 had already measured (DEF-250's and DEF-251's at HUNT3, `??!` absent at HUNT3, the dead
+  `wild` load at HUNT4).
 
 ## Log
 
@@ -2981,3 +3131,8 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(1b) The housekeeping:** M12v's (1), (2), (4), (6), (7) and (8) as worded edits; DEF-256's row and
     F-049's two reported facts; DEF-236 (a) fixed at 117, `as0062` `TYPE-095` at HUNT4 (note (a)).
     `gen/run_findings.py` writes no file for a finding with no programs.
+  - **(2) Learn by snippet and the grid:** 130 + 51 probes and 89 template probes at HUNT4 and HUNT3
+    (S82, S89). `gen/grid13.py` writes 933 cells (S 3, A 166, B 106, C 500, D 130, E 28) and skips 431 with
+    reasons; `--selfcheck` passes; `gen/classify13.py` and `gen/compare13.py` tested on synthetic records.
+    Committed before any grid13 run. Two probe results ahead of the runs: the dead `wild` load is 107/14 at
+    HUNT4, and a callee storing into an element of an array of holders reads the poison at HUNT4.
