@@ -85,7 +85,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 4 learn by snippet, at HUNT4 and HUNT3: 130 + 51 probes and 89 template probes (S82, S89); the spellings and codes in the M13 section
   - [x] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run: 933 cells, 431 skipped with reasons, `--selfcheck` passing; every expectation with its rule (S83–S88)
   - [x] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record: the seeds 107/11, 107/99, 170/170 as `ACCEPTED:DEFECT:…` (P1); HUNT3's record 933 cells, its self-compare 0; the control under 20.1.2 moves 0 cells
-  - [ ] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`
+  - [x] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`: HUNT4's two runs agree (0 cells differ); 184 faces moved from HUNT3; 10 HUNT4 cells for triage
   - [ ] 8 the regression leg at HUNT4 and `MOVES13.md`
   - [ ] 9 triage
   - [ ] 10 (optional) the M11 re-spellings
@@ -2146,6 +2146,52 @@ exits 0 on a file against itself, lists three planted differences (a class move,
   none differ), so the control finds no undefined behaviour that the two versions fold apart. It cannot see
   undefined behaviour both versions fold alike, which is why -O0 against -O2 stays the observer.
 
+**The runs** (§7), one at a time under the lock, at 4 jobs:
+- **The baseline** `c3bdae2` under 20.1.2 (`results/c3bdae2/cells13.jsonl`, 53 s): 933 cells.
+- **HUNT4, run 1** (`results/c72639f/cells13.jsonl`, the record, 47 s) and **run 2** (`.work/shake13/h4-run2/`,
+  47 s): `compare13.py` lists **0 cells** between them and exits 0. HUNT4's two runs agree.
+- **HUNT3 against HUNT4**, `results/c72639f/FACES13.txt`: 184 cells differ (it exits 1 by design).
+
+| class | baseline `c3bdae2` | HUNT3 `0c0f5a3` | HUNT4 `c72639f` |
+|---|---|---|---|
+| refused | 374 | 375 | **546** |
+| clean | 362 | 368 | **377** |
+| `ACCEPTED:DEFECT:leg_mismatch` | 61 | 62 | 0 |
+| `ACCEPTED:DEFECT:fallthrough` | 32 | 38 | 0 |
+| `ACCEPTED:DEFECT:wrong_value` | 34 | 34 | 0 |
+| `ACCEPTED:clean` | 20 | 24 | 0 |
+| `ACCEPTED:DEFECT:false_trap` | 16 | 0 | 0 |
+| `ACCEPTED:DEFECT:uaf` | 7 | 11 | **2** |
+| `ACCEPTED:DEFECT:segv` | 2 | 2 | 0 |
+| `ACCEPTED:other` | 2 | 2 | 0 |
+| `DEFECT:fallthrough` (scope wild) | 6 | 6 | 0 |
+| `DEFECT:leg_mismatch` (scope wild) | 3 | 3 | **2** |
+| `OVERRESTRICT` | 12 | 6 | **6** |
+| `REFUSED_TRAP` | 2 | 2 | 0 |
+| **generated** | **933** | **933** | **933** |
+
+- **At HUNT4, by section:** S 3 refused; A 157 refused, 9 clean; B 87 refused, 17 clean, 2
+  `DEFECT:leg_mismatch` (scope wild); C 250 refused, 244 clean, 6 `OVERRESTRICT`; D 37 refused, 93 clean;
+  E 12 refused, 14 clean, 2 `ACCEPTED:DEFECT:uaf`. Every refused cell names the code its rule names.
+- **The ten cells for triage** (§9): `g0915`/`g0916` (E, a callee storing the view into an element of an
+  array of holders, dies-first: 70/70 and 25/25); `g0249`/`g0250` (B, the dead `wild` load before a `NULL`
+  test: 107/14, scope wild); and C's six pointer twins at the literal and array places, `if_one`,
+  `loop_zero`, `pick_one` (`g0692`, `g0694`, `g0696`, `g0704`, `g0706`, `g0708`): `BORROW-002`.
+- **FACES13's 184 moves**, by class pair: `ACCEPTED:DEFECT:leg_mismatch` → refused 62,
+  `ACCEPTED:DEFECT:fallthrough` → refused 38, `ACCEPTED:DEFECT:wrong_value` → refused 34, `ACCEPTED:clean`
+  → refused 24, `ACCEPTED:DEFECT:uaf` → refused 9, `DEFECT:fallthrough` → clean 6 (wild), refused → refused
+  4 (the atomic address cells: `EMIT-002` → `TYPE-055`), `ACCEPTED:DEFECT:segv` → refused 2,
+  `ACCEPTED:other` → refused 2, `REFUSED_TRAP` → clean 2 (`??!`), `DEFECT:leg_mismatch` → clean 1 (wild).
+  REPORT §14.7 reads them by DEF and landing.
+- **At the baseline** the class looks as at HUNT3, with these differences of its own: D's 16 constant
+  `/ 0`, `% 0`, `MIN / -1` and `MIN % -1` cells are accepted and trap at run time (97/98 on both legs,
+  `ACCEPTED:DEFECT:false_trap`: DEF-133's d7 shape, refused by name since D-331 at landing 79); E's 4
+  outlives `Seat` cells are `OVERRESTRICT` and its 4 dies-first `Seat` cells refused, by `PARSE-001`
+  "expected a type" (the grouped `(fixed uint8[])` field type is later); A's `fixed wild` and `fixed wildx
+  … = NULL` reads are `OVERRESTRICT` and B's module `fixed T-> = NULL` cells refused, by `TYPE-004` ("a
+  `const` initialiser must be a constant expression"); A's four atomic address cells are refused
+  `EMIT-002`, as at HUNT3. Read at triage step (d).
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -3173,3 +3219,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(3) The recall gate and the LLVM control at HUNT3:** the seeds flagged as §6 names them (P1); HUNT3's
     record, 933 cells (375 refused, 368 clean, 190 the class before 114–116 and `??!`); the control under
     20.1.2 moves 0 cells.
+  - **(4) grid13 at the baseline and HUNT4:** HUNT4's two runs agree; HUNT4 546 refused, 377 clean and 10
+    cells for triage (2 `ACCEPTED:DEFECT:uaf`, 2 wild `DEFECT:leg_mismatch`, 6 `OVERRESTRICT`); FACES13: 184
+    faces moved from HUNT3.
