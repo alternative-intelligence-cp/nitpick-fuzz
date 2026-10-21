@@ -84,7 +84,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 3 the housekeeping (1b): M12v's (1), (2), (4), (6), (7) and (8); DEF-256's row and F-049's two reported facts; DEF-236 (a) measured at HUNT4 (note (a)); no committed record changed but MOVES12's row 4 wording
   - [x] 4 learn by snippet, at HUNT4 and HUNT3: 130 + 51 probes and 89 template probes (S82, S89); the spellings and codes in the M13 section
   - [x] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run: 933 cells, 431 skipped with reasons, `--selfcheck` passing; every expectation with its rule (S83–S88)
-  - [ ] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record
+  - [x] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record: the seeds 107/11, 107/99, 170/170 as `ACCEPTED:DEFECT:…` (P1); HUNT3's record 933 cells, its self-compare 0; the control under 20.1.2 moves 0 cells
   - [ ] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`
   - [ ] 8 the regression leg at HUNT4 and `MOVES13.md`
   - [ ] 9 triage
@@ -2112,6 +2112,40 @@ an unbuilt leg); a refusal missing its code reads `exp_mismatch` "codes". `compa
 exits 0 on a file against itself, lists three planted differences (a class move, a code move, a
 `MISSING:new`) with their class pairs and exits 1; `classify13.py` exits 1 without the index.
 
+**The recall gate and the LLVM control at HUNT3** (§6), each run under the lock at 4 jobs:
+- **The seeds at HUNT3** (`.work/ctl13/seeds-h3/`, 04:50): `bare_binding` npkc 0, 107/11,
+  `ACCEPTED:DEFECT:leg_mismatch`; `null_store` npkc 0, 107/99, `ACCEPTED:DEFECT:fallthrough`;
+  `probe08h_view_reseated` npkc 0, 170/170, `ACCEPTED:DEFECT:uaf`. **Each is flagged as §6 names it
+  (P1 holds)**: the instrument sees the class.
+- **HUNT3's record under 20.1.8** (`results/0c0f5a3/cells13.jsonl`, 57 s): 933 cells. The self-compare
+  of `classified13.jsonl` lists 0 cells and exits 0.
+
+| class at HUNT3 | S | A | B | C | D | E | all |
+|---|---|---|---|---|---|---|---|
+| refused | | 75 | 9 | 250 | 37 | 4 | 375 |
+| clean | | 9 | 8 | 244 | 93 | 14 | 368 |
+| `ACCEPTED:DEFECT:leg_mismatch` | 1 | 44 | 17 | | | | 62 |
+| `ACCEPTED:DEFECT:fallthrough` | 1 | | 37 | | | | 38 |
+| `ACCEPTED:DEFECT:wrong_value` | | 34 | | | | | 34 |
+| `ACCEPTED:clean` | | | 24 | | | | 24 |
+| `ACCEPTED:DEFECT:uaf` | 1 | | | | | 10 | 11 |
+| `ACCEPTED:DEFECT:segv` | | 2 | | | | | 2 |
+| `ACCEPTED:other` | | 2 | | | | | 2 |
+| `DEFECT:fallthrough` (scope wild) | | | 6 | | | | 6 |
+| `DEFECT:leg_mismatch` (scope wild) | | | 3 | | | | 3 |
+| `OVERRESTRICT` | | | | 6 | | | 6 |
+| `REFUSED_TRAP` | | | 2 | | | | 2 |
+| **generated** | **3** | **166** | **106** | **500** | **130** | **28** | **933** |
+
+  HUNT3 is the class before 114 and 115, not the hunt: its faces are tabulated against HUNT4 in REPORT
+  §14.7 (FACES13). The `REFUSED_TRAP` pair is `??!`, which HUNT3 does not have (landing 120). The six
+  `OVERRESTRICT` are C's pointer twins at the literal and array places (an `@z` stored in a branch, a loop
+  or an arm); triage reads them at HUNT4.
+- **The LLVM control: HUNT3 under 20.1.2** (`.work/ctl13/h3-20.1.2/`, 64 s): `compare13.py` against the
+  record lists **0 cells** and exits 0. No cell of grid13 moves between 20.1.2 and 20.1.8 at HUNT3 (P11:
+  none differ), so the control finds no undefined behaviour that the two versions fold apart. It cannot see
+  undefined behaviour both versions fold alike, which is why -O0 against -O2 stays the observer.
+
 ## Environment
 
 *(session 11, measured 2026-10-21 04:11 EDT; M13 run here, on the Team seat: the start check (a))*
@@ -3136,3 +3170,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     reasons; `--selfcheck` passes; `gen/classify13.py` and `gen/compare13.py` tested on synthetic records.
     Committed before any grid13 run. Two probe results ahead of the runs: the dead `wild` load is 107/14 at
     HUNT4, and a callee storing into an element of an array of holders reads the poison at HUNT4.
+  - **(3) The recall gate and the LLVM control at HUNT3:** the seeds flagged as §6 names them (P1); HUNT3's
+    record, 933 cells (375 refused, 368 clean, 190 the class before 114–116 and `??!`); the control under
+    20.1.2 moves 0 cells.
