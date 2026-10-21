@@ -1269,9 +1269,12 @@ written for it and kept: `gen/compare.py --grid9` (S72, additive, checked byte f
 `9126350` re-run under 20.1.8 against its own records, which were measured under 20.1.2: recall 25 of
 25 identical, M2 956 cells 0 moved, M9 7 571 cells 0 moved with the heap words, M10 223 programs 0
 changed, M11 2 872 claims 0 changed. **0 cells moved by the toolchain**, so every move at HUNT3 is the
-compiler's. No BUILD claim reaches npkg's toolchain check (the 21 scripts that write a `[toolchain]`
-stop before it), so the pin refusal the brief foresaw (P32) does not arise; `bd0299`'s own message,
-"ld.lld is 20.1.8 but nitpick.toml pins 20.1.1", shows the scripts ran with 20.1.8.
+compiler's. No BUILD claim moved, so the pin refusal the brief foresaw (P32) does not arise. Of the 23
+shell scripts with a `[toolchain]` section (`/usr/bin/grep -l '\[toolchain\]' m11/programs/*.sh`), two,
+`bd0075` and `bd0299`, reach npkg's toolchain check by design and print its refusal under either LLVM;
+`bd0299`'s own message, "ld.lld is 20.1.8 but nitpick.toml pins 20.1.1", shows the scripts ran with
+20.1.8. *(Corrected in M13, M12v's finding (1): this said no BUILD claim reaches the check, and named 21
+scripts.)*
 
 ### 13.4 Recall and findings at HUNT3
 
@@ -1321,6 +1324,9 @@ the HUNT3 runs agree for every program; every baseline line equals the committed
 **Every memory finding (F-001 … F-008, F-011, F-022, F-037, F-047) gives its fixed verdict at HUNT3**,
 and no HUNT3 line exits 70, 95, 107 or 139. The fifteen row findings get a header-only
 `VERDICTS-0c0f5a3.txt`: their programs are M11's claims (13.8).
+*Erratum (M13, M12v's finding (7)):* those fifteen files' line "HUNT runs agree for every program: yes" is
+said of zero programs; the files are kept as the records the command wrote, and from M13
+`gen/run_findings.py` writes no file for a finding with no programs.
 
 ### 13.5 The M2 grid
 
@@ -1353,7 +1359,8 @@ No cell moved from `9126350` (`results/0c0f5a3/MOVES.md`).
 | `OVERRESTRICT` | 4 | 0 | 0 |
 | **generated** | **7 571** | **7 571** | **7 571** |
 
-**No anomaly is left.** 393 cells moved from `9126350` (`results/0c0f5a3/MOVES9.md`): F-003's 44 and
+**No anomaly is left by the classifier's classes** (`DEFECT`, `CRASH`, `OVERRESTRICT`; F-049's 24
+refused SAFE cells are named below; worded so in M13, M12v's finding (8)). 393 cells moved from `9126350` (`results/0c0f5a3/MOVES9.md`): F-003's 44 and
 F-008's 40 accepted REFUSE cells are refused (74); the store-through-pointer and pick-binding leaks
 are clean (76), 141 cells; F-009's 72 and F-010's 12 refused SAFE cells are clean (79); 60 `OwnedFd`
 cells lost F-007's `to_cstring` bytes (78); and 24 SAFE `pick_own` cells are newly refused, F-049

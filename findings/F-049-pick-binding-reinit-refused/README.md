@@ -67,3 +67,20 @@ binding is tracked from 74 on, and only its re-assignment is not read as one.
 - *Inferred, not measured:* that the cause is the bindings analysis reading a
   pattern binding's assignment as no re-initialisation, as DEF-124 described
   for parameters before its fix. The compiler's source was not read.
+
+## Reported since (added in M13; reported, not measured by this repository)
+
+- **Registration.** `nitpick-compiler_38` registered F-049 as **DEF-256**
+  (lower priority, a false refusal) and read the cause in the compiler:
+  `assign_assign` (`src/frontend/analysis/bindings.npk`) marks an assignment
+  only for `SYM_DECL` and `SYM_STMT` symbols, so a consuming arm's `SYM_PAT`
+  binding is never re-marked. *Reported by the compiler seat, in its registry;
+  not measured here.*
+- **The workbench's reproduction.** `nitpick-fuzz_2` reproduced it on
+  2026-10-15 on an independent build of `0c0f5a3` under LLVM 20.1.2, whose
+  `npkc.ll` (`f520d574…`) and `npkrt.o` (`c8e5033a…`) are byte-identical to
+  M12's, and at `2f0937a` (landing 114). *Reported by `nitpick-fuzz_2`; not
+  measured here.*
+
+The registry at HUNT4 `c72639f` records DEF-256 fixed at landing 132
+(`6f0f518`); M13 measures these programs there (`VERDICTS-c72639f.txt`).

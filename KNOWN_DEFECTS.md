@@ -194,7 +194,9 @@ subject. Each bullet now carries its landing (1.6.1d step 1 = landing 74, step 3
 - **DEF-118** — F-003: a consuming `pick`'s binding escapes the move rules (a
   read after its move, a second move). **Fixed at landing 74.** At HUNT3: F-003's four defect programs `MOVE-001`; the grid's 44 cells refused.
 - **DEF-119** — F-004: a move out through a pointer while a view of the root is
-  live (the freeze records a write, not a move out). **Fixed at 74.** At HUNT3: `BORROW-015` and `BORROW-013`.
+  live (the freeze records a write, not a move out). **Fixed at 74.** At HUNT3: `view_addr_to_freeing_callee`
+  `BORROW-015`, DEF-119's code; `view_claim_i_to_freeing_callee` `BORROW-013`, which is DEF-123's (a `$$i` claim's
+  holder), also landed at 74 (worded so in M13, M12v's finding (2)).
 - **DEF-120** — F-005: `(<-p) = v` never drops the old value. **Fixed at 76.** At HUNT3: live 0; the grid's 113 leak cells clean (its other 4 are DEF-123's REFUSE cells, refused).
 - **DEF-121** — F-006: a consuming `pick`'s binding is never dropped. **Fixed at 76.** At HUNT3: live 0; 24 of the grid's 28 cells clean, the other 4 F-049's (below).
 - **DEF-122** — F-007: `to_cstring`'s buffer is never freed. **Fixed at 78** (D-328). At HUNT3: the churn's peak is 10, not 10 × N; 60 `OwnedFd` cells' live bytes fell to 0.
@@ -289,10 +291,14 @@ Fixed:
 - **DEF-246** — DEF-230's faces: a `fixed` view meeting a plain slot. **Fixed at 103**: `TYPE-007`. At HUNT3:
   the six M11 claims binding `string_bytes` into a plain `uint8[]` are refused `TYPE-007` (Option C's), and
   `bi0010`/`bi0017` agree for that reason, not their own.
-- **DEF-247** — `fixed`/`stack` as return qualifiers. **Fixed at 103.**
+- **DEF-247** — `fixed`/`stack` as return qualifiers. **Fixed at 103.** No program of ours (M13's search: `git grep
+  -nE 'func:[A-Za-z_0-9]+ *= *(fixed|stack) ' -- '*.npk'` and the same over `cells/` and `cells9/` find none).
 - **DEF-248** — F-046 (b): a `fixed` parameter reassigned. **Fixed at 102** (`98cfe35`): `ASSIGN-002`. At HUNT3:
   `ty1873` agrees.
-- **DEF-249** — the workbench's O-N41: `exit` of a fallible call. **Fixed at 104** (`085bc01`).
+- **DEF-249** — the workbench's O-N41: `exit` of a fallible call. **Fixed at 104** (`085bc01`). No program of ours
+  (M13's search: `git grep -nE '\bexit +(raw +)?[A-Za-z_][A-Za-z_0-9.]*\(' -- '*.npk'` finds one `exit` of a call,
+  `cc0264`'s `exit c.load() - 1i32;`, an `atomic<int32>` load that cannot fail; `cells/` and `cells9/` have none, and
+  no M12 move is landing 104's).
 
 Partly fixed:
 - **DEF-234** — F-034: (a) an `extern` method with a byte-slice parameter generates a stub refused `TYPE-072`,
@@ -301,8 +307,12 @@ Partly fixed:
 - **DEF-236** — F-039 (a)(c)(d)(e) and F-042: **(c), (d) and (e) fixed at 113**: a non-constant `joins` deadline
   is `TYPE-045`, an attribute the language does not have `NITPICK-DERIVE-007`, an `opaque struct` outside an
   `extern` block `NITPICK-RESOLVE-014`. At HUNT3 `as0555`, `as0583`, `as0043` and `tr0368` agree, and `as0572`'s
-  `#[align(16i32)]` is refused (D-020: the language has no `#[align]`). **(a), a `comptime` value parameter
-  (`EMIT-002`), OPEN**, with S-135 settled as D-353 (a refusal by name, planned).
+  `#[align(16i32)]` is refused (D-020: the language has no `#[align]`). **(a), a `comptime` value parameter, is no
+  longer OPEN: fixed at 117** (`76a8102`; S-135 settled as D-353, out until designed): it is refused by name at its
+  declaration as `NITPICK-TYPE-095`. Measured by M13 at HUNT4 `c72639f`, one compile of `m11/programs/as0062.npk`:
+  npkc 1, `NITPICK-TYPE-095 as0062.npk:10:12`, "`K` is a `comptime` value parameter, a form the language reserves
+  and has not designed (D-353)", at line 10, `func:scale<comptime int32:K> = int32(int32:x) never fails { pass (x *
+  K); };`. HUNT3 gives `NITPICK-EMIT-002` at 10:71 (measured in M13 too). With (a), all of DEF-236 is fixed at HUNT4.
 
 Open:
 - **DEF-190** — F-036 (b): a literal's trailing `_` (`10_i32`) accepted. OPEN at HUNT3.
@@ -323,9 +333,12 @@ Open:
 - **DEF-253** — the same report: a `Self->` trait method called through a bound does not link. OPEN, registered at
   113.
 
-Not registered: **F-049** (M12), a consuming `pick`'s binding re-initialised after a move cannot be read
-(`MOVE-001`), new at landing 74 (`findings/F-049-pick-binding-reinit-refused/`). A candidate for the workbench
-(PLAN D6).
+Registered since M12 (status read in the registry at HUNT4 `c72639f`, landing 137, 2026-10-21):
+- **DEF-256** — F-049 (M12, `findings/F-049-pick-binding-reinit-refused/`): a consuming `pick`'s binding re-assigned
+  after a move was `MOVE-001` at its next read, a false refusal new at landing 74 (DEF-118's fix), DEF-124's shape at
+  a third binding kind. Registered at landing 116 by `nitpick-compiler_38`, lower priority (a refusal of what
+  MEMORY_REFERENCE §2.3 admits). **Fixed at landing 132** (`6f0f518`, 2026-10-18): `assign_assign` (bindings.npk)
+  marks a `SYM_PAT` target assigned, as it marks a local and a parameter. M13 measures F-049 at HUNT4 (§8).
 
 ## Other known defects, for deduplication only (not in `known/`)
 

@@ -81,7 +81,7 @@ committed. A session that starts here resumes at the first unticked box.
   brief's sections §1–§11.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `d44dfe3` → `581c091`, `f31dfc6` an ancestor, M12 ticked, the tree clean before the switch, `local-m13` new (S79); the go quoted as S77, covering (i) and (ii)
   - [x] 2 HUNT4 named (`c72639f`, landings 114–137; D-355 (ii) is 119) and built; its `npkc.ll` and `npkrt.o` equal notice 137's ladder row; both LLVMs as stated; the canaries pass at the baseline, HUNT3 and HUNT4
-  - [ ] 3 the housekeeping (1b), DEF-256 among it
+  - [x] 3 the housekeeping (1b): M12v's (1), (2), (4), (6), (7) and (8); DEF-256's row and F-049's two reported facts; DEF-236 (a) measured at HUNT4 (note (a)); no committed record changed but MOVES12's row 4 wording
   - [ ] 4 learn by snippet, at HUNT4 and HUNT3
   - [ ] 5 `gen/grid13.py`, `gen/classify13.py` and `gen/compare13.py`, committed before any grid13 run
   - [ ] 6 the seeds and the LLVM control at HUNT3, with HUNT3's record
@@ -1758,10 +1758,13 @@ under 20.1.2. **Identical in every record:**
 | M11 | 2 872 ids, 0 changed (342.9 s): 2 587 agree, 285 disagree |
 
 - **P32 at `9126350`: no BUILD claim moved**, so the dispatch's allowance for the pin refusal (S66
-  (a)) was not needed. 21 BUILD scripts write a `[toolchain]` pin, and under 20.1.8 each stops where
-  it stopped under 20.1.2: before npkg's toolchain check (a missing lock, a bogus `kind`: S64's
-  design). `bd0299`, whose claim is that a 20.1.1 pin is refused, now reads "ld.lld is 20.1.8 but
-  nitpick.toml pins 20.1.1", which shows the scripts ran with 20.1.8 on `PATH`.
+  (a)) was not needed. 23 shell scripts carry a `[toolchain]` section (`/usr/bin/grep -l
+  '\[toolchain\]' m11/programs/*.sh | wc -l`, run in M13's housekeeping), and under 20.1.8 each gives
+  the verdict it gave under 20.1.2. Two of them, `bd0075` and `bd0299`, reach npkg's toolchain check by
+  design: their committed output at `9126350` is its refusal ("… is 20.1.2 but nitpick.toml pins …").
+  `bd0299`, whose claim is that a 20.1.1 pin is refused, now reads "ld.lld is 20.1.8 but nitpick.toml
+  pins 20.1.1", which shows the scripts ran with 20.1.8 on `PATH`. *(Corrected in M13's housekeeping,
+  M12v's finding (1): this bullet said "21 BUILD scripts", and that each stops before the check.)*
 - So **0 cells moved by the toolchain**, in every record, and every move at HUNT3 is the compiler's.
   The question for the author, whether 20.1.8 stands for the fuzzer, does not arise. The scratch was
   removed (`rm -rf .work/control`).
@@ -1899,10 +1902,11 @@ control. **Every move carries a landing number or a finding id; zero UNEXPLAINED
   `NEWEST` rebased.
 - [x] REPORT §13's denominators add up: M2 956 = 562 + 394; M9 7 571 = 4 047 + 3 524; M10 223 = 218 + 5;
   M11 2 872 = 2 628 + 244; the 285 = 62 + 223; in every run, moved = explained.
-- [x] No committed record of `c3bdae2` or `9126350` changed: the brief's `git diff --stat origin/main --
+- [x] No committed record of `c3bdae2` or `9126350` changed. The brief's form, `git diff --stat origin/main --
   results/c3bdae2 results/9126350 results/GRID.md results/GRID9.md 'findings/*/VERDICTS.txt'
-  'findings/*/VERDICTS-9126350.txt'` lists only F-049's two new files, added, and with
-  `--diff-filter=MDR` it prints nothing. The scratch is gone: no `.work/shake`, `.work/control` or
+  'findings/*/VERDICTS-9126350.txt'`, did not print nothing, as the brief's box asked: it lists F-049's two new
+  files, added, which match its pathspec. The `--diff-filter=MDR` form prints nothing, so no existing record
+  changed, and the box is ticked on that form (worded so in M13, M12v's finding (4)). The scratch is gone: no `.work/shake`, `.work/control` or
   `.work/bisect`, and no `VERDICTS-shake.txt`, `VERDICTS-scratch.txt` or `VERDICTS-bisect.txt`.
 
 ## M13 — the initialisation and pointer-store grid (session 11, the Team seat)
@@ -1993,6 +1997,35 @@ and both worktrees are clean.
 **Canaries** (M0.6), one batch under the lock: at the baseline (20.1.2), HUNT3 and HUNT4 (20.1.8),
 `canary.npk` gives npkc 0 and runs 0/0, and `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001`
 and writes no `.ll`.
+
+**The housekeeping (1b)** (§3): M12v's non-blocking findings, DEF-256 and dispatch note (a), each a
+wording edit or a note. No committed record changed except `results/0c0f5a3/MOVES12.md`'s row 4, the
+wording edit the brief names.
+- **(1)** The P32 bullet above and REPORT §13.3: "21 scripts" is replaced by my grep's count, 23 with a
+  `[toolchain]` section (`/usr/bin/grep -l '\[toolchain\]' m11/programs/*.sh | wc -l`; 22 of them have an
+  `llvm =` line and 20 pin `"20.1.2"`). `bd0075` and `bd0299` are named as reaching npkg's toolchain check by
+  design: their committed output at `9126350` is its refusal.
+- **(2)** MOVES12 row 4 and DEF-119's bullet: `view_claim_i_to_freeing_callee`'s `BORROW-013` is DEF-123's
+  code, and `view_addr_to_freeing_callee`'s `BORROW-015` DEF-119's; both landed at 74 (F-004's
+  `VERDICTS-0c0f5a3.txt`; OD:2532 and OD:2586 at HUNT3).
+- **(4)** M12's box 13 now says which form it was ticked on: the brief's `--stat` form lists F-049's two new
+  files, and the `--diff-filter=MDR` form prints nothing.
+- **(6)** DEF-247 and DEF-249: no program of ours, each with its search. DEF-247: `git grep -nE
+  'func:[A-Za-z_0-9]+ *= *(fixed|stack) ' -- '*.npk'`, and the same over `cells/` and `cells9/`, find none.
+  DEF-249: `git grep -nE '\bexit +(raw +)?[A-Za-z_][A-Za-z_0-9.]*\(' -- '*.npk'` finds one `exit` of a call,
+  `cc0264`'s `exit c.load() - 1i32;`, an `atomic<int32>` load that cannot fail; the cells have none.
+- **(7)** The fifteen header-only `VERDICTS-0c0f5a3.txt` files are kept as records. REPORT §13.4 gains one
+  erratum line, and `gen/run_findings.py` writes no file for a finding with no programs. Checked on F-027
+  with `--name VERDICTS-scratch.txt`: it prints "0 programs, no file written" and writes nothing.
+- **(8)** REPORT §13.6: "No anomaly is left by the classifier's classes".
+- **DEF-256:** its row in KNOWN_DEFECTS.md, from the registry at HUNT4 (registered at 116, fixed at 132,
+  `6f0f518`). F-049's README gains the two facts the brief names, each labelled as reported, not measured
+  here: the registration with its cause in `assign_assign`, and `nitpick-fuzz_2`'s reproduction.
+- **Note (a):** DEF-236's bullet. (a) is fixed at 117, measured by one compile of `m11/programs/as0062.npk` (a
+  copy in scratch; `m11/` untouched) under the lock: at HUNT4 npkc 1, `NITPICK-TYPE-095 as0062.npk:10:12`
+  ("`K` is a `comptime` value parameter, a form the language reserves and has not designed (D-353)"), at
+  line 10's `func:scale<comptime int32:K> = …`; at HUNT3 npkc 1, `NITPICK-EMIT-002` at 10:71, as note (a)
+  says.
 
 ## Environment
 
@@ -2945,3 +2978,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **HUNT4 is `c72639f`**, landing 137, carrying 114–137; D-355 (ii) is 119 (S78). Built in 56.0 s under
     20.1.8; `npkc.ll` and `npkrt.o` equal notice 137's ladder row. The baseline and HUNT3 are M12's builds,
     byte-identical to the committed digests. The canaries pass at all three.
+  - **(1b) The housekeeping:** M12v's (1), (2), (4), (6), (7) and (8) as worded edits; DEF-256's row and
+    F-049's two reported facts; DEF-236 (a) fixed at 117, `as0062` `TYPE-095` at HUNT4 (note (a)).
+    `gen/run_findings.py` writes no file for a finding with no programs.

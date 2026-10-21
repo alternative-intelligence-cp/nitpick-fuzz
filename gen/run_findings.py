@@ -15,6 +15,10 @@ the HUNT runs agree with each other.
 M9: --heap runs every program under NPK_HEAP_STATS (gen/snip.py's build) and
 adds each leg's `heap:` words (allocated/peak_live/count) to its line: a leak
 finding's verdict is that line, not only the exit code.
+
+M13: a finding with no programs of its own (a row finding, whose programs are
+M11's claims) gets no file: a header alone would say "HUNT runs agree" of
+nothing (M12v's finding (7)). The line printed for it says so.
 """
 import argparse, os, shutil, subprocess, sys, tempfile, time
 
@@ -57,6 +61,9 @@ def main():
                                               or d in a.ids))
     for fdir in fdirs:
         progs = programs(fdir)
+        if not progs:
+            print("%s: 0 programs, no file written" % fdir)
+            continue
         rows, hunt_seen = [], {}
         for comp, run in comps:
             commit = commit_of(comp)
