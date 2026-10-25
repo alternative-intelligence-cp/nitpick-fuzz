@@ -95,8 +95,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `581c091` → `e289864`, `e289864` an ancestor, M13 ticked, the tree clean before the switch, `local-m14` new; the go quoted as S93
   - [x] 2 HUNT5 named (`249eae9`, carrying landing 155 and §27's S-140 sentence; landings 149–161 past 148) and built; its `npkc.ll`, `npkc.o` and `npkrt.o` equal notice 161's ladder row; `llvm-config` prints 20.1.2; the canaries pass at the baseline and HUNT5
   - [ ] 3 the housekeeping: items 1–4 in (1b), items 5 and 6 with the triage (4)
-  - [ ] 4 learn by snippet, at HUNT5
-  - [ ] 5 `gen/grid14.py` and `gen/classify14.py`, committed before any grid14 run, with `--selfcheck` and `--selftest` passing
+  - [x] 4 learn by snippet, at HUNT5 and the baseline: the manager's 22 probes give their landing-148 verdicts at HUNT5; 25 grid14 templates, for spellings only, all compile at HUNT5, so no respelling and no skip (S97)
+  - [x] 5 `gen/grid14.py` and `gen/classify14.py`, committed before any grid14 run: 109 cells (S 7, U 40, W 20, K 30, B 12), 0 skipped, `--selfcheck` passing with condition (c) literal on 43 flagged cells; `--selftest` 15 of 15 (S98, S99)
   - [ ] 6 the runs: grid14 at HUNT5 twice and at the baseline, `--against13` at both, F-050 … F-052 at HUNT5; the narrowness control
   - [ ] 7 triage, through M5's five steps
   - [ ] 8 the gate; `REPORT.md` §15
@@ -2396,6 +2396,100 @@ at the baseline and HUNT5, `canary.npk` gives npkc 0 and runs 0/0, and `canary_m
   04:49:55 (`git log -1 --format=%ci cbc38b9`) and its push 04:49:57 (`git reflog show --date=iso
   origin/local-m13`, "update by push").
 
+**Learn by snippet** (§4; S97). Two batches in `.work/probes14/` (probe files only, never committed), each run by
+`$L python3 gen/snip.py <files> --at hunt5 base --llvm .work/llvm-20.1.2` under the lock. By npkc and O0/O2, at
+HUNT5 / the baseline:
+- **The manager's 22 probes**, copied (`sha256sum` against their `SHA256SUMS`: 22 equal; 03:11:46, 12.8 s). At HUNT5
+  every one gives its landing-148 verdict (§4's table):
+  - the discard spellings are refused at both: `q01_discard` (`int64:_~v = <-p;`) and `q02_drop` (`drop <-p;`),
+    `PARSE-002` "expected an expression". So U has no discard form;
+  - the twin `q14_twin` 14/14 at both, and the unused bindings `t01_unused_p`, `t02_unused_q` and
+    `t03_discard_q` 0/0 at both;
+  - the dead load at four more places, `q10_param`, `q11_field`, `q12_module` and `q13_returned`: 107/14 at
+    HUNT5; at the baseline the same, but `q12_module` is `TYPE-004` ("a `const` initialiser must be a constant
+    expression", the module place's refusal there, as in M13);
+  - `q07_overwrite` (the overwrite, then `v` read) 107/0 at both;
+  - the used loads `q09_callee_reads` and `r08_arith` 107/107 (107/12 at the baseline), and `r04_deadcalc`
+    (`int64:w = v + 1i64;`, `w` unread) 107/107 (107/0 at the baseline);
+  - the boundary shapes `q03_untaken`, `q05_ignore`, `r15_copy`, `r06_selfcancel` and `r18_selfcmp`: **107/0**
+    at both;
+  - `q04_deadcalc`, `q06_selfcancel` and `q08_arith`, with the short six-arm failsafe: `REACH-002` at both,
+    "`failsafe` does not name `IntOverflow`, which can reach it (D-179)". grid14 uses `grid13.FAILSAFE13`, which
+    names every identity.
+- **25 grid14 templates, for spellings only** (03:18:44, 17.3 s): every spelling §4's batch had not compiled at
+  HUNT5, each a generated cell copied under its own name: the struct `S` at the five places (U's `overwrite` +
+  `test`: `wild S->`, `S:v = <-X;`, `v = S{ a: 5i64, b: 2i32 };`), the W `none` twins' unused bindings (`H:h` at
+  `field`, `P` at `module`, `p` at `returned`, for both T, and `S` at `local` and `param`), `v.a` in K's `cmp`,
+  `arith` and `callee` (at `local`, and `callee` at `param`), B's six struct forms (`argv.len`, `ign(v)` with
+  `S:_~x`, `S:w = v;`, `v.a - v.a`, `v.a != v.a`, `v.a + 1i64`), the `int64` overwrite with nothing read after,
+  and `wild_dead_struct_load_t`. **All 25 compile at HUNT5** (npkc 0), so no twin needs a respelling and none is
+  skipped. At the baseline the three `module` templates are `TYPE-004`. No expectation was set or changed from
+  these runs (S97). One reading ahead of the runs: at the baseline the struct `test` cells at `param` and
+  `returned` give 107/0, the folded `NULL` test that P9 expects to be the live control for condition (c).
+
+**The grid** (§5; S98). `gen/grid14.py` (539 lines) imports `gen/grid13.py`'s `Prog`, `X`, `FAILSAFE13`, `STRUCT_S`,
+`ARM`, `Skip` and `WILD_RE`, and does not edit it. `cells14/` was added to `.gitignore` before it first wrote
+anything. `python3 gen/grid14.py --out cells14` generates **109 cells** and skips none (`cells14/SKIPPED.txt`: "0
+combinations not emitted"):
+
+| section | what | generated | expect | flagged (`s140`) |
+|---|---|---|---|---|
+| S | F-051's four programs, byte for byte, and the three dead loads' twins | 7 | 4 TRAP 107, 3 SAFE (14, 0, 14) | 3 |
+| U | the unused load: O (`bind`, `overwrite`) × P × T × after (`test`, `none`) | 40 | TRAP 107 | 40 |
+| W | the twins: P × T × after, no load | 20 | SAFE, 14 (`test`) or 0 (`none`) | 0 |
+| K | the used load: O (`cmp`, `arith`, `callee`) × P × T | 30 | TRAP 107 | 0 |
+| B | the boundary of "uses": O (`untaken`, `ignore`, `copy`, `selfsub`, `selfcmp`, `deadadd`) × `local` × T | 12 | TRAP 107, the strict reading | 0 |
+| **all** | | **109** | 86 TRAP 107 (4 + 40 + 30 + 12), 23 SAFE (3 + 20) | **43** |
+
+Every cell is scope wild; its `rule` is
+§27's last `NULL` bullet copied from HUNT5's file (TYPE_REFERENCE.md:2314–2324 at `249eae9`, equal to the brief's
+quote), B's with the brief's note appended; its `source` names that bullet and D-364.
+`python3 gen/grid14.py --selfcheck` prints:
+```
+note: RULE27 equals §27's bullet at HUNT5 249eae9
+selfcheck: 109 cells (B 12, K 30, S 7, U 40, W 20), 0 skipped, 109 combinations; condition (c): 43 flagged cells, each its twin with the load deleted (0 respellings); every check passes
+```
+It checks: two builds identical; ids are module names, equal to their `mod:` lines and metas; every meta has
+`run.py`'s keys, `section`, `expect_exit`, `scope` "wild", `rule` and `source`; the rule equals HUNT5's text (read by
+`git show 249eae9…:meta/specs/TYPE_REFERENCE.md`); every TRAP exit is `MachineFault`'s arm and every SAFE cell a twin
+with 14 or 0; only U cells and the three dead-load seeds carry `s140`, each with `s140_o2` equal to its twin's
+expected exit and `s140_twin` naming an emitted, unflagged SAFE cell of the same P, T and after; **condition (c),
+literally**: each flagged cell's text with its one load line (and its one overwrite line) deleted and its `mod:`
+name changed to the twin's equals the twin's text; the layout and D-013 in every generated cell; the denominators
+(109 combinations = 109 cells + 0 skipped, per section); and `cells14/` is this build byte for byte.
+
+**The classifier** (§5; S99). `gen/classify14.py` (391 lines) imports `run_class` and `classify` from
+`gen/classify13.py` and nothing else; it never calls `classify13.main()` and writes no `*13.*` file. Its changes are
+marked CHANGE 1–5 in the code. `python3 gen/classify14.py --selftest` prints:
+```
+ok    flagged, 107/14, twin 14/14                                                                  -> PERMITTED:S-140
+ok    flagged, 107/107, twin 14/14                                                                 -> clean
+ok    flagged, 107/0 with s140_o2 14, twin 14/14 (condition 4)                                     -> DEFECT:leg_mismatch
+ok    flagged, 106/14, twin 14/14 (condition 3)                                                    -> DEFECT:leg_mismatch
+ok    flagged, 107/14, twin 14/0 (condition 5)                                                     -> DEFECT:leg_mismatch
+ok    flagged, 107/14, twin 0/0: the twin's legs agree, but not with s140_o2 (condition 5)         -> DEFECT:leg_mismatch
+ok    flagged, 107/99, twin 14/14                                                                  -> DEFECT:fallthrough
+ok    flagged but scope plain, 107/14, twin 14/14 (condition 2)                                    -> DEFECT:leg_mismatch
+ok    unflagged, 107/14: s140_o2 14 and a 14/14 twin, the flag alone absent (condition 1)          -> DEFECT:leg_mismatch
+ok    unflagged, 107/0: s140_o2 0 and a 0/0 twin, the flag alone absent (condition 1)              -> DEFECT:leg_mismatch
+ok    flagged, with its twin missing                                                               -> ERROR
+ok    flagged, 107/0 with s140_o2 0, twin 0/0 (the exit-0 seed's shape)                            -> PERMITTED:S-140
+ok    flagged, expect_exit 106, 107/14, twin 14/14 (condition 2)                                   -> DEFECT:leg_mismatch
+ok    a twin, SAFE with expect_exit 14, at 14/14 (change 1)                                        -> clean
+ok    a twin, SAFE with expect_exit 0, at 0/0 (change 1)                                           -> clean
+selftest: 15 cases, 15 pass
+```
+The brief's eleven cases come first, each flagged one with a twin agreeing with its `s140_o2` but for the three about
+the twin; the two unflagged ones carry everything but the flag, so they fail on condition 1 alone. Four more follow.
+**Tested before any run on synthetic records in scratch** (`/home/randy/Team/TMP/M14/synth/`, from `cells14/INDEX.jsonl`,
+no compiler): a record shaped like the predictions at HUNT5 classes as 43 `PERMITTED:S-140`, 56 `clean` and B's 10
+`DEFECT:leg_mismatch`, and `--against13` exits 0 with 43 moves of kind (a) and 12 of kind (b); a record shaped like
+the baseline's reading (the module cells refused, K at 107/12, the four struct `test` cells at `param` and `returned`
+at 107/0) exits 0 with the four counted as failing condition 4, each `DEFECT:leg_mismatch`. Two wrong classifiers put
+in place of the S-140 test, each a case the control must get right: "flagged and O0 = 107" (no condition (c)) makes
+`--against13` exit 1 on the baseline-shaped record (its four cells) and 0 on the HUNT5-shaped one, which has no live
+population; "any wild cell with 107 at -O0" makes it exit 1 on both.
+
 ## Environment
 
 *(session 12, measured 2026-10-25 03:02:45 EDT; M14 run here, on the Team seat: the start check (a))*
@@ -3277,6 +3371,31 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   since dispatch notes (a) and (c) kept `m11/` untouched, and M14 does not touch `m11/` either. Commit M14 (1b)
   changes its `[ ]` to `[-]` and appends the reason, so the resume rule ("resume from the first unticked box")
   cannot send a later session into `m11/`. The ten re-spellings stay with the fuzzer's manager for Option C.
+- **S97 — §4's probes run at HUNT5 and the baseline, both legs, under 20.1.2, never committed; the templates for
+  spellings only.** They live in `.work/probes14/` (probe files only, so `gen/snip.py`'s copy of a probe's directory
+  holds probes alone), copied, never run in place, and each batch runs under the lock. The first batch is the
+  manager's 22 probes at landing 148. The second is 25 generated grid14 templates, copied under their own names,
+  that carry every spelling the first batch had not compiled at HUNT5 (the struct forms and the twins' unused
+  bindings, §4's "still to confirm"), as M13 compiled its templates as probes (S89). They were run for their
+  spellings: every expectation was written in the generator from §27 before them, and none was set or changed from
+  their exits. All compile at HUNT5, so `RESPELL` and `TWIN_SKIP` stay empty.
+- **S98 — grid14's sections, as the brief's §5 writes them, with these spellings.** S 7 (F-051's four programs read
+  from `findings/F-051-wild-dead-load-legs-disagree/` and checked against their sha256, so `cells14/` regenerates
+  from the repository; the twins by two substitutions, each asserted once), U 40, W 20, K 30 and B 12: 109 cells, 0
+  skipped. Ids are `m<nnn>_<section>_<T>_<P>_<O>[_<after>]`, numbered over the whole space so a skip would not
+  renumber them; T is `int64` or `struct` (the struct S, read as `v.a`); `after` is a meta field of U and W; W's O is
+  `twin`; B's `boundary` is its O. A helper passes its code back: `runp` (the `param` place) with `pass`, and K's
+  `callee` through `func:rd = int32(int64:x)`, q09's form; B's `untaken` names `main`'s parameter `argv` (one
+  asserted substitution of grid13's `_~argv`), every other cell keeps `_~argv`. The expectations come from §27's
+  bullet at HUNT5 before any run (PLAN 9.6) and are not changed after it (S36, S45): U, K, B and the four seeds TRAP
+  107, the twins SAFE with the exit their own text gives. `s140` is set by the construction alone.
+- **S99 — the class `PERMITTED:S-140` and its order, in `gen/classify14.py`.** classify13's classes and order, with
+  the brief's five changes: the twins' expected exit (1); `PERMITTED:S-140` after `timeout`, `LOUD` and
+  `DEFECT:fallthrough` and before `DEFECT:leg_mismatch`, on the generator's flag and conditions 1–5 only, a flagged
+  cell without its twin's record an error (2); `--selftest` (3); `SUMMARY14.md` and `classified14.jsonl` (4); and
+  `--against13`, writing nothing, which re-derives conditions 1–5 itself (5). It wraps classify13's `run_class` for
+  every class but the new one, and imports `classify` for the re-class; `exp_mismatch` is copied. One addition:
+  `classified14.jsonl` also carries `after`. The live control for condition (c) is `--against13`'s third group.
 
 ## Log
 
@@ -3528,3 +3647,8 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     row. The baseline is M12's build, its digests re-read. The canaries pass at the baseline and HUNT5.
   - **(1b) The housekeeping:** M13's box 10 `[-]` (S96); M13v's (7) (`KNOWN_DEFECTS.md`'s headings), (8) (grid13's
     count, 1 361 + 3 = 1 364) and (9) (`cbc38b9`'s commit 04:49:55 and push 04:49:57). Wording only.
+  - **(2) Learn by snippet, the grid and the classifier:** the manager's 22 probes give their landing-148 verdicts
+    at HUNT5, and 25 grid14 templates compile there, for spellings only (S97). `gen/grid14.py` writes 109 cells (S 7,
+    U 40, W 20, K 30, B 12), skips none, and `--selfcheck` passes with condition (c) literal on 43 flagged cells
+    (S98); `gen/classify14.py --selftest` passes 15 of 15, and `--against13` was tried on synthetic records with two
+    wrong classifiers (S99). Committed before any grid14 run.
