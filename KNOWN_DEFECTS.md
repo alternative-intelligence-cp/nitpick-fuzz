@@ -360,14 +360,31 @@ Registered since M12 (status read in the registry at HUNT4 `c72639f`, landing 13
   marks a `SYM_PAT` target assigned, as it marks a local and a parameter. **Measured by M13 at HUNT4:**
   `pick_reinit_read` and `pick_reinit_loop` 0/22/22, the controls unchanged; the M9 grid's 24 cells clean.
 
-Not registered: M13's findings (2026-10-21), candidates for the workbench (PLAN D6), each present at the baseline:
-- **F-050** (`findings/F-050-callee-view-store-into-array-element/`): a callee storing a block-local view into an
-  element of the array behind its pointer argument outlives the storage, 170 at both legs at HUNT4: a use after
-  free in safe code, DEF-252's shape at a destination landing 116 does not reach.
-- **F-051** (`findings/F-051-wild-dead-load-legs-disagree/`): a dead load through a `wild` `NULL` pointer faults at
-  -O0 and is deleted at -O2 (107/14), under DEF-251 (i). Scope wild, the check of (i).
-- **F-052** (`findings/F-052-atomic-method-through-pointer-not-lowered/`): an atomic's method called through a
-  pointer with `.` passes the checker and is `EMIT-002`; `(<-p).load()` lowers. Lower priority.
+M13's findings (2026-10-21), each present at the baseline, verified by the fuzzer's manager (PLAN D6, the manager's
+since 2026-10-15: `README.md:46`) and registered as DEF-272, DEF-273 and DEF-274. **Status read in the registry at
+HUNT5 `249eae9`** (landing 161; rewritten in M14 (4)); each "fixed" is confirmed by M14's `gen/run_findings.py` at
+HUNT5, twice, under 20.1.2 (`findings/F-05[012]-*/VERDICTS-249eae9.txt`). The fuzzer's manager re-measured them at
+landings 138, 142 and 146 on its own builds under 20.1.2: reported by the M14 brief, not measured here.
+- **F-050 = DEF-272** (`findings/F-050-callee-view-store-into-array-element/`): a callee storing a block-local view
+  into an element of the array behind its pointer argument outlived the storage, 170 at both legs at HUNT4. **FIXED
+  at landing 138** (`2a9d601`): an explicit `<-` is a place step to the escape and aliasing analyses. At HUNT5 the two
+  holes, `elem_callee` and `elem_field_callee`, are `BORROW-002`, and the three controls are as at HUNT4
+  (`ctl_elem_direct` and `ctl_whole_callee` `BORROW-002`, `ctl_elem_outlives` 0/0).
+- **F-051 = DEF-273** (`findings/F-051-wild-dead-load-legs-disagree/`): a dead load through a `wild` `NULL` pointer
+  faults at -O0 and is deleted at -O2. **Ruled R1 by S-140** (the author, 2026-10-22 03:49:41) and recorded as
+  **D-364 with landing 142** (`79cd363`), which amended TYPE_REFERENCE §27; there is no compiler change. F-051's three
+  programs are the legs' one permitted disagreement, and `ctl_wild_used_load` guards the other half, the used load
+  that faults at both legs. **Not a defect.** At HUNT5: 107/14, 107/0 and 107/14, the control 107/107; grid14 classes
+  the three as `PERMITTED:S-140` (M14, `gen/classify14.py`).
+- **F-052 = DEF-274** (`findings/F-052-atomic-method-through-pointer-not-lowered/`): an atomic's method called through a
+  pointer with `.` passed the checker and was `EMIT-002`. **FIXED at landing 146** (`915f427`). At HUNT5 its three
+  programs compile and run 0/0, and so do its two controls.
+
+Not registered: M14's finding (2026-10-25), a candidate for the fuzzer's manager (PLAN D6), present at the baseline:
+- **F-053** (`findings/F-053-wild-used-load-legs-disagree/`): a load through a `wild` `NULL` pointer whose value the
+  program text reads, but on the path run decides nothing (read in a branch not taken, by a callee that ignores it,
+  by a copy never read, in `v - v` or `v != v`), faults at -O0 and is sunk or deleted at -O2 (107/0), where §27 says a
+  load whose value the program USES faults at both legs. Scope wild, reported apart as the check of §27 (D-364).
 
 ## Other known defects, for deduplication only (not in `known/`)
 

@@ -58,3 +58,38 @@ a load whose value is used and not for one whose value is not.
   executes it. Since landing 119 a plain pointer cannot hold `NULL`, so the face is confined to `wild` code,
   where a dereference is the author's responsibility under the TOS. Whether (i)'s sentence or the
   dereference's lowering is to change is the compiler seat's call.
+
+## S-140 (R1)
+
+*Appended in M14 (2026-10-25); nothing above is changed.*
+
+**The ruling.** F-051 was registered as DEF-273 and asked of the author as S-140. The author answered at 03:49:41 on
+2026-10-22, through `management_2`: "for the two questions i agree with the recommendations" — R1: amend
+TYPE_REFERENCE §27 to what is true, and record F-051's programs as the legs' one permitted disagreement, with no
+compiler change. It is recorded as **D-364 with landing 142** (`79cd363`), whose notice reads "S-134 and S-140
+RATIFIED as D-363 and D-364". DEF-273's registry row at HUNT5 reads "FIXED BY D-364".
+
+**§27's sentence**, at HUNT5 `249eae9` (TYPE_REFERENCE.md:2314–2324): "A store through a `NULL` pointer (a `wild`
+one, since landing 119), or a load from one whose value the program USES, is a hardware fault that reaches
+`failsafe` as `MachineFault` (D-307) at BOTH legs … A load whose value NOTHING uses is no read at -O2 -- dead-code
+elimination removes an unused load from valid memory, as it may of any load, and no attribute keeps one -- and faults
+at -O0: the legs' one permitted disagreement, narrow to an unused load through a `wild` `NULL` pointer (D-364,
+2026-10-22; DEF-273, the fuzzer's F-051; the fuzz corpus records F-051's programs as that disagreement)."
+
+**The three holes are permitted; `ctl_wild_used_load` guards the used-load half.** M14's classifier,
+`gen/classify14.py`, gives them their own run class, `PERMITTED:S-140`, decided only for a cell the generator flags
+as an unused load, and only when its -O0 leg faults and its -O2 leg gives what its load-deleted twin gives on both
+legs. Every other disagreement between the legs stays `DEFECT:leg_mismatch`.
+
+**At HUNT5**, measured in M14 under LLVM 20.1.2 (`VERDICTS-249eae9.txt`, HUNT5 twice and the baseline once; grid14's
+section S, `results/249eae9/classified14.jsonl` and `results/c3bdae2/classified14.jsonl`):
+
+| program | HUNT5 `249eae9`, runs 1 and 2 | grid14 class at HUNT5 (its twin) | baseline `c3bdae2` | grid14 class at the baseline |
+|---|---|---|---|---|
+| `wild_dead_load.npk` | 0 / 107 / 14 | `PERMITTED:S-140` (`wild_dead_load_t` 14/14, clean) | 0 / 107 / 14 | `PERMITTED:S-140` |
+| `wild_dead_load_exit0.npk` | 0 / 107 / 0 | `PERMITTED:S-140` (`wild_dead_load_exit0_t` 0/0, clean) | 0 / 107 / 0 | `PERMITTED:S-140` |
+| `wild_dead_struct_load.npk` | 0 / 107 / 14 | `PERMITTED:S-140` (`wild_dead_struct_load_t` 14/14, clean) | 0 / 107 / 14 | `PERMITTED:S-140` |
+| control `ctl_wild_used_load.npk` | 0 / 107 / 107 | clean | 0 / 107 / 12 | `DEFECT:leg_mismatch` |
+
+The boundary that D-364's "UNUSED" leaves open, a value the program text reads but that decides nothing on the path
+run, is M14's F-053 (`findings/F-053-wild-used-load-legs-disagree/`).

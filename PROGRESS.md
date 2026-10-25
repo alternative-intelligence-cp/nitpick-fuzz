@@ -94,11 +94,11 @@ committed. A session that starts here resumes at the first unticked box.
   (session 12, the Team seat; S92–S96). The boxes are the brief's sections §1–§8.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `581c091` → `e289864`, `e289864` an ancestor, M13 ticked, the tree clean before the switch, `local-m14` new; the go quoted as S93
   - [x] 2 HUNT5 named (`249eae9`, carrying landing 155 and §27's S-140 sentence; landings 149–161 past 148) and built; its `npkc.ll`, `npkc.o` and `npkrt.o` equal notice 161's ladder row; `llvm-config` prints 20.1.2; the canaries pass at the baseline and HUNT5
-  - [ ] 3 the housekeeping: items 1–4 in (1b), items 5 and 6 with the triage (4)
+  - [x] 3 the housekeeping: items 1–4 in (1b) (`3942f3f`: M13's box 10 `[-]`, M13v's (7), (8), (9)); items 5 and 6 with the triage (4): `KNOWN_DEFECTS.md`'s M13 block from HUNT5's registry, F-051's README section "S-140 (R1)"
   - [x] 4 learn by snippet, at HUNT5 and the baseline: the manager's 22 probes give their landing-148 verdicts at HUNT5; 25 grid14 templates, for spellings only, all compile at HUNT5, so no respelling and no skip (S97)
   - [x] 5 `gen/grid14.py` and `gen/classify14.py`, committed before any grid14 run: 109 cells (S 7, U 40, W 20, K 30, B 12), 0 skipped, `--selfcheck` passing with condition (c) literal on 43 flagged cells; `--selftest` 15 of 15 (S98, S99)
   - [x] 6 the runs: grid14 at HUNT5 twice (0 of 109 cells differ) and at the baseline; `--against13` exits 0 at both; F-050 … F-052 at HUNT5 twice and the baseline; the narrowness control's three parts reported with their counts
-  - [ ] 7 triage, through M5's five steps
+  - [x] 7 triage, through M5's five steps: B's ten 107/0 cells are one candidate, F-053 (a read `wild` `NULL` load sunk or deleted at -O2), reported apart as the check of §27 (D-364); no K, U or twin cell to triage (S100)
   - [ ] 8 the gate; `REPORT.md` §15
 
 ## Compilers
@@ -2547,6 +2547,49 @@ population; "any wild cell with 107 at -O0" makes it exit 1 on both.
    `PERMITTED:S-140` are flagged leg mismatches meeting conditions 1–5: **43 cells at HUNT5, 31 at the baseline**,
    besides the twins' change-1 moves (12 and 10).
 
+**Triage** (§7; S100). At HUNT5 the cells that are neither `clean` nor `PERMITTED:S-140` are B's ten at 107/0,
+`DEFECT:leg_mismatch`: `untaken`, `ignore`, `copy`, `selfsub` and `selfcmp`, each at `int64` and struct. No K cell
+(all 30 clean at 107/107), no U cell (all 40 permitted) and no twin (all 23 clean) needs triage. One candidate, F-053,
+through M5's five steps:
+- **Where the load goes** (a probe batch under the lock, 03:29:14, 2.3 s: `npkc` and `opt -O2` at HUNT5 under 20.1.2
+  on grid14's `int64` cells, the `load` instructions counted in each `@main`): `untaken` keeps one `load i64, ptr
+  null` at -O2, sunk into the branch that reads it (`if.then0`, entered when `argv.len > 100`); `ignore`, `copy`,
+  `selfsub` and `selfcmp` keep none; `deadadd`, K's `cmp` keep one; F-051's dead load keeps none. Two mechanisms, a
+  sink and a deletion, and by my reading one cause, so one candidate, as the brief's "sunk or deleted" foresees.
+- **(a) Deduplication** against `KNOWN_DEFECTS.md`, the registry at HUNT5 and S-140/D-364: F-051 / DEF-273 is the
+  load whose value nothing reads, and D-364 permits "an UNUSED load … and nothing else"; no registry entry names a read
+  load sunk or deleted (searched for "sunk", "untaken", `v != v`, `v - v`, "dead load", "F-053"). Not a duplicate.
+  The compiler was fetched again before filing (07:57:18): `origin/main` is still `249eae9`, so no newer landing
+  changes a face.
+- **(b) Minimised** by `gen/minimize.py .work/hunt5 <cell> --want 0,107,0 --llvm .work/llvm-20.1.2` on the five
+  `int64` cells, each alone under the lock (07:58:04–07:59:16, 72.5 s, 54–57 builds each): it cut every failsafe to
+  the six arms the compiler demands; it kept `ignore`'s body whole, and in the other four it also deleted the read,
+  leaving F-051's dead load at the same 0/107/0. That is the face: by exit codes the read is invisible. So the four
+  reproducers keep the body whole under the minimiser's failsafe (`IntOverflow` added where the compiler demands it,
+  `REACH-002`), and the README says so.
+- **(c) Confirmed** on both legs twice and **(d) at the baseline** by `gen/run_findings.py F-053 --hunt .work/hunt5
+  --base .work/base --llvm .work/llvm-20.1.2 --name VERDICTS.txt` (08:00:14, 8.9 s): the five faces 0/107/0 at both
+  HUNT5 runs and at the baseline (old: present before landing 115); the controls `ctl_wild_used_cmp` 107/107 (107/12
+  at the baseline), `ctl_wild_dead_load` 107/0 at both (the permitted reference), `ctl_wild_dead_add` 107/107 (107/0
+  at the baseline). The HUNT5 runs agree.
+- **(e)** `findings/F-053-wild-used-load-legs-disagree/`: five faces, three controls, `VERDICTS.txt` and the README
+  (the shape, §27 and D-364's words, the verdicts, grid14's ten cells at both compilers, the IR, the controls, the
+  minimisation, the deduplication, and what is measured apart from what is inferred). Class: **reported apart, as
+  the check of §27 (D-364), scope wild**, as F-051 was. It goes to the fuzzer's manager for D6 through the
+  dispatcher.
+
+**The housekeeping, items 5 and 6** (§3), in the same commit:
+- **(5)** `KNOWN_DEFECTS.md`'s M13 block ("Not registered … candidates for the workbench") is rewritten from the
+  registry at HUNT5: F-050 = DEF-272, FIXED at 138 (`2a9d601`); F-051 = DEF-273, ruled R1 by S-140 and recorded as
+  D-364 with landing 142 (`79cd363`), the legs' one permitted disagreement, not a defect; F-052 = DEF-274, FIXED at
+  146 (`915f427`). Each "fixed" is confirmed by M14's `run_findings` at HUNT5; the manager's re-measures at 138, 142
+  and 146 are labelled as reported. D6 is named the fuzzer's manager's (`README.md:46`). F-053 is listed after it as
+  M14's candidate.
+- **(6)** F-051's README gains a section "S-140 (R1)": the ruling and D-364 at 142, §27's sentence, the three holes
+  permitted and `ctl_wild_used_load` guarding the used-load half, and the four programs' HUNT5 verdicts with their
+  grid14 classes. No earlier line changed (`diff` against the copy before it: 0 lines removed), and no
+  `VERDICTS*.txt` file.
+
 ## Environment
 
 *(session 12, measured 2026-10-25 03:02:45 EDT; M14 run here, on the Team seat: the start check (a))*
@@ -3453,6 +3496,16 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   `--against13`, writing nothing, which re-derives conditions 1–5 itself (5). It wraps classify13's `run_class` for
   every class but the new one, and imports `classify` for the re-class; `exp_mismatch` is copied. One addition:
   `classified14.jsonl` also carries `after`. The live control for condition (c) is `--against13`'s third group.
+- **S100 — the triage's finding is F-053, numbered from F-053** (the brief). B's ten 107/0 cells are one candidate,
+  "a load through a `wild` `NULL` pointer whose value the program uses is sunk or deleted at -O2", where §27 promises a
+  fault at both legs: the -O2 IR shows a sink in one form and a deletion in four, which I read as one cause (the load
+  has no side effect for the optimiser to keep). Its faces are B's five forms, each at `int64`; its controls K's
+  `cmp` (107/107, the case an implementation deleting every load gets wrong), the permitted dead load (D-364's
+  reference) and B's `deadadd` (107/107). It is classed as F-051 was, reported apart as the check of §27 (D-364),
+  scope wild; whether §27's sentence or the lowering changes is the compiler seat's and the author's, and the README
+  argues for neither. `gen/minimize.py` cannot keep a read whose deletion leaves the verdict unchanged, so four
+  reproducers keep their bodies whole under its failsafe, as the README records. The candidate goes to the fuzzer's
+  manager for D6 through the dispatcher.
 
 ## Log
 
@@ -3714,3 +3767,13 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     the module place `TYPE-004`, K at 107/12 and 107/99. `--against13` exits 0 at both; the live control for (c) is
     the baseline's four struct `test` cells at `param` and `returned`, 107/0, `DEFECT:leg_mismatch`. F-050's holes
     `BORROW-002`, F-051 107/14, 107/0, 107/14 with its control 107/107, F-052's programs 0/0, at HUNT5.
+  - **An idle gap.** After the triage's IR probes (03:29:14 by `date`, and one short IR print after them), nothing ran
+    until `date` read 07:57:18: about 4 h 28 min with no command of mine and no cause found, as on earlier Team runs.
+    Nothing moved in it: `origin/main` was still `e289864`, `origin/local-m14` was `7e84583`, equal to HEAD, the tree
+    was clean, the files of the runs kept their 03:23–03:24 times, and the compiler's `origin/main` was still
+    `249eae9`. So commit M14 (4) comes more than 45 minutes after M14 (3) (03:26:35).
+  - **(4) Triage:** F-053, a load through a `wild` `NULL` pointer whose value the text reads but that decides nothing
+    on the path run, sunk (`untaken`) or deleted (`ignore`, `copy`, `selfsub`, `selfcmp`) at -O2: 107/0 at HUNT5 and the
+    baseline, its controls 107/107 (`cmp`, `deadadd`) and the permitted dead load 107/0; reported apart as the check
+    of §27 (D-364). `KNOWN_DEFECTS.md`'s M13 block rewritten from HUNT5's registry (DEF-272, DEF-273 by D-364,
+    DEF-274), F-053 listed as M14's candidate; F-051's README gains "S-140 (R1)".

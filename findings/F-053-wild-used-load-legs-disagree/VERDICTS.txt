@@ -1,0 +1,28 @@
+# F-053-wild-used-load-legs-disagree — verdicts by PLAN.md's recipe (gen/run_findings.py)
+# measured 2026-10-25 12:00 UTC; HUNT 249eae9 run 2 times, the baseline c3bdae2 once
+# HUNT runs agree for every program: yes
+
+ctl_wild_dead_add                            249eae9  run 1  npkc=0  codes=-  O0=107  O2=107
+ctl_wild_dead_load                           249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_used_cmp                            249eae9  run 1  npkc=0  codes=-  O0=107  O2=107
+wild_load_copied_unread                      249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_read_untaken                       249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_cmp                           249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_sub                           249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_to_ignoring_callee                 249eae9  run 1  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_dead_add                            249eae9  run 2  npkc=0  codes=-  O0=107  O2=107
+ctl_wild_dead_load                           249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_used_cmp                            249eae9  run 2  npkc=0  codes=-  O0=107  O2=107
+wild_load_copied_unread                      249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+wild_load_read_untaken                       249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_cmp                           249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_sub                           249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+wild_load_to_ignoring_callee                 249eae9  run 2  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_dead_add                            c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_dead_load                           c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+ctl_wild_used_cmp                            c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=12
+wild_load_copied_unread                      c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_read_untaken                       c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_cmp                           c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_self_sub                           c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
+wild_load_to_ignoring_callee                 c3bdae2  run 1  npkc=0  codes=-  O0=107  O2=0
