@@ -314,7 +314,7 @@ Partly fixed:
   and has not designed (D-353)", at line 10, `func:scale<comptime int32:K> = int32(int32:x) never fails { pass (x *
   K); };`. HUNT3 gives `NITPICK-EMIT-002` at 10:71 (measured in M13 too). With (a), all of DEF-236 is fixed at HUNT4.
 
-Open:
+Open at HUNT3:
 - **DEF-190** — F-036 (b): a literal's trailing `_` (`10_i32`) accepted. OPEN at HUNT3.
 - **DEF-239** — documentation: F-030, F-031, F-032, F-033, F-035, F-040, F-043 and F-044 (32 TYPE rows), by file.
   OPEN; a documentation-sync landing, none scheduled. F-039 (b) and F-046 (c), the backward pipe, are **not
@@ -325,6 +325,8 @@ Open:
 - **DEF-245** — the sixth face of DEF-164: a failing declaration header's body reported again. It names
   `as0100` and six more fuzz programs (`tr0425`, `cc0151c`, `md0219`, `tr0448`, `vf0580`, `tr0550`). OPEN, low.
   At HUNT3 none of the seven moved.
+
+Open at HUNT3, fixed since (each row names its landing; this heading is M14 (1b)'s, M13v's finding (7)):
 - **DEF-250** — the library seats' report: a module binding with no initialiser emitted read-only; -O2 answers 0.
   OPEN at HUNT3 (registered there by `nitpick-compiler_37`). **Fixed at landing 114** (`2f0937a`): D-211 is asked of
   every module binding, `TYPE-055` at the declaration. **Measured by M13 at HUNT4 `c72639f`:** the seed

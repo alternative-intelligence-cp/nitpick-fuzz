@@ -88,7 +88,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 7 grid13 at the baseline and at HUNT4 twice, and `FACES13.txt`: HUNT4's two runs agree (0 cells differ); 184 faces moved from HUNT3; 10 HUNT4 cells for triage
   - [x] 8 the regression leg at HUNT4 and `MOVES13.md`: recall 25/25; findings moved F-029 (136) and F-049 (132); M2 0; M9 24 (132); M10 0; zero UNEXPLAINED; P1–P11 ticked or explained
   - [x] 9 triage: F-050 (a soundness hole, DEF-252's array-element face), F-051 (the check of DEF-251 (i), scope wild), F-052 (crash / loud emission); C's six `OVERRESTRICT` a wrong expectation of mine (D-004 rule 3); each finding through the five steps with its control
-  - [ ] 10 (optional) the M11 re-spellings — not done: dispatch notes (a) and (c) keep `m11/` untouched (S91)
+  - [-] 10 (optional) the M11 re-spellings — not done: dispatch notes (a) and (c) keep `m11/` untouched (S91); closed unworked by S96 (M13v's finding (10)): the re-spellings stay with the fuzzer's manager for Option C
   - [x] 11 the gate holds in every box; `REPORT.md` §14; `KNOWN_DEFECTS.md`'s DEF-250, DEF-251 and DEF-252 rows from the seeds at HUNT4 (note (c)); the scratch removed
 - [ ] **M14** — the S-140 class (F-051 R1), a narrow run, at HUNT5 `249eae9` (landing 161) under LLVM 20.1.2
   (session 12, the Team seat; S92–S96). The boxes are the brief's sections §1–§8.
@@ -2090,7 +2090,10 @@ spellings only (04:46, S89). None is committed. What they settle, by code at HUN
 
 **The grid** (§5; S83–S88): `gen/grid13.py` (936 lines), `gen/classify13.py`, `gen/compare13.py`.
 `python3 gen/grid13.py --out cells13` generates **933 cells** and skips 431 combinations, each with its
-reason in `cells13/SKIPPED.txt`; 1 364 combinations in all, plus the three seeds:
+reason in `cells13/SKIPPED.txt`; 1 364 combinations in all, the three seeds among them: the axes give 1 361
+(930 generated + 431 skipped), and with the 3 seeds 930 + 3 = 933 generated, 933 + 431 = 1 364 (measured from
+`gen/grid13.py`'s `enumerate_space()` and `build()` in M14; this line said "1 364 combinations in all, plus the
+three seeds" until M14 (1b), counting the seeds twice: M13v's finding (8)):
 
 | section | generated | REFUSE | SAFE | TRAP | skipped |
 |---|---|---|---|---|---|
@@ -2292,7 +2295,8 @@ F-051 and F-052 listed as candidates. The scratch is removed: `.work/probes13`, 
   `npkrt.o` equal notice 137's ladder row; the canaries pass at all three; `llvm-config` prints 20.1.8 and 20.1.2.
 - [x] Housekeeping (1b) committed (`b8f9a4f`), DEF-256 among it, with no committed record changed but MOVES12's
   row 4 wording.
-- [x] grid13, classify13 and compare13 committed (`cbc38b9`, 04:49:57) before any grid13 run (the first, the
+- [x] grid13, classify13 and compare13 committed (`cbc38b9`: the commit's own date 04:49:55, its push 04:49:57 by
+  the reflog of `origin/local-m13`; M13v's finding (9)) before any grid13 run (the first, the
   seeds at HUNT3, at 04:50:05). The 89 template probes before it were §4's, for spellings only (S89). Every
   cell's expectation carries its rule and source; ids equal `mod:` names; the denominators are stated with
   `SKIPPED.txt` (933 generated, 431 skipped).
@@ -2378,6 +2382,19 @@ the Workspace copy at `9fc5dca`, read only).
 `$L python3 gen/snip.py commission/canary.npk commission/canary_malformed.npk --at hunt5 base --llvm .work/llvm-20.1.2`:
 at the baseline and HUNT5, `canary.npk` gives npkc 0 and runs 0/0, and `canary_malformed.npk` gives npkc 1 with
 `NITPICK-PARSE-001` ("canary_malformed.npk:3:20: expected a type").
+
+**The housekeeping (1b)** (§3, items 1–4), wording only; no committed record changes.
+- **(1) M13's box 10** is `[-]`, closed unworked by S96, with the reason appended (§1 step 5).
+- **(2) M13v's finding (7).** `KNOWN_DEFECTS.md`'s "Open:" heading stood over DEF-250 … DEF-253, whose rows read
+  "fixed". It is now "Open at HUNT3:" over DEF-190 … DEF-245, and a new heading, "Open at HUNT3, fixed since",
+  stands over DEF-250 … DEF-253. No row's text changed and no row moved.
+- **(3) M13v's finding (8).** The M13 section's "1 364 combinations in all, plus the three seeds" counted the
+  seeds twice. Measured from `gen/grid13.py` (`enumerate_space()` and `build()`): the axes give 1 361 (930
+  generated + 431 skipped), and with the 3 seeds 933 generated, 933 + 431 = 1 364. The line now shows that
+  arithmetic.
+- **(4) M13v's finding (9).** The M13 gate's "`cbc38b9`, 04:49:57" now names both times: the commit's own date
+  04:49:55 (`git log -1 --format=%ci cbc38b9`) and its push 04:49:57 (`git reflog show --date=iso
+  origin/local-m13`, "update by push").
 
 ## Environment
 
@@ -3255,6 +3272,11 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   manager's build of HUNT4 under 20.1.2 gave F-050 … F-052's verdict lines identical to M13's 20.1.8
   `VERDICTS.txt`, with `npkc.ll` and `npkrt.o` byte-identical, and its builds of landings 141–148 under 20.1.2
   matched the compiler's ladder rows for `npkc.ll` and `npkc.o`.
+- **S96 — M13's box 10 is closed unworked** (the brief's §1, step 5; M13v's finding (10)). The box, "the M11
+  re-spellings — not done", was the file's only unticked one, and it is no work to resume: S91 closed it unworked,
+  since dispatch notes (a) and (c) kept `m11/` untouched, and M14 does not touch `m11/` either. Commit M14 (1b)
+  changes its `[ ]` to `[-]` and appends the reason, so the resume rule ("resume from the first unticked box")
+  cannot send a later session into `m11/`. The ten re-spellings stay with the fuzzer's manager for Option C.
 
 ## Log
 
@@ -3504,3 +3526,5 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **HUNT5 is `249eae9`**, landing 161, carrying 155 and §27's S-140 sentence; landings 149–161 past 148 (S94).
     Built in 64.9 s under 20.1.2 (S95); `npkc.ll`, `npkc.o`, `npkrt.o` and `builder.o` equal notice 161's ladder
     row. The baseline is M12's build, its digests re-read. The canaries pass at the baseline and HUNT5.
+  - **(1b) The housekeeping:** M13's box 10 `[-]` (S96); M13v's (7) (`KNOWN_DEFECTS.md`'s headings), (8) (grid13's
+    count, 1 361 + 3 = 1 364) and (9) (`cbc38b9`'s commit 04:49:55 and push 04:49:57). Wording only.
