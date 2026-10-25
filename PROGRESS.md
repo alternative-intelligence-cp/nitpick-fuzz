@@ -90,8 +90,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 9 triage: F-050 (a soundness hole, DEF-252's array-element face), F-051 (the check of DEF-251 (i), scope wild), F-052 (crash / loud emission); C's six `OVERRESTRICT` a wrong expectation of mine (D-004 rule 3); each finding through the five steps with its control
   - [-] 10 (optional) the M11 re-spellings — not done: dispatch notes (a) and (c) keep `m11/` untouched (S91); closed unworked by S96 (M13v's finding (10)): the re-spellings stay with the fuzzer's manager for Option C
   - [x] 11 the gate holds in every box; `REPORT.md` §14; `KNOWN_DEFECTS.md`'s DEF-250, DEF-251 and DEF-252 rows from the seeds at HUNT4 (note (c)); the scratch removed
-- [ ] **M14** — the S-140 class (F-051 R1), a narrow run, at HUNT5 `249eae9` (landing 161) under LLVM 20.1.2
-  (session 12, the Team seat; S92–S96). The boxes are the brief's sections §1–§8.
+- [x] **M14** — the S-140 class (F-051 R1), a narrow run, at HUNT5 `249eae9` (landing 161) under LLVM 20.1.2
+  (session 12, the Team seat; S92–S100). The boxes are the brief's sections §1–§8.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `581c091` → `e289864`, `e289864` an ancestor, M13 ticked, the tree clean before the switch, `local-m14` new; the go quoted as S93
   - [x] 2 HUNT5 named (`249eae9`, carrying landing 155 and §27's S-140 sentence; landings 149–161 past 148) and built; its `npkc.ll`, `npkc.o` and `npkrt.o` equal notice 161's ladder row; `llvm-config` prints 20.1.2; the canaries pass at the baseline and HUNT5
   - [x] 3 the housekeeping: items 1–4 in (1b) (`3942f3f`: M13's box 10 `[-]`, M13v's (7), (8), (9)); items 5 and 6 with the triage (4): `KNOWN_DEFECTS.md`'s M13 block from HUNT5's registry, F-051's README section "S-140 (R1)"
@@ -99,7 +99,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 5 `gen/grid14.py` and `gen/classify14.py`, committed before any grid14 run: 109 cells (S 7, U 40, W 20, K 30, B 12), 0 skipped, `--selfcheck` passing with condition (c) literal on 43 flagged cells; `--selftest` 15 of 15 (S98, S99)
   - [x] 6 the runs: grid14 at HUNT5 twice (0 of 109 cells differ) and at the baseline; `--against13` exits 0 at both; F-050 … F-052 at HUNT5 twice and the baseline; the narrowness control's three parts reported with their counts
   - [x] 7 triage, through M5's five steps: B's ten 107/0 cells are one candidate, F-053 (a read `wild` `NULL` load sunk or deleted at -O2), reported apart as the check of §27 (D-364); no K, U or twin cell to triage (S100)
-  - [ ] 8 the gate; `REPORT.md` §15
+  - [x] 8 the gate holds in every box; `REPORT.md` §15, with a pointer in its opening; the scratch removed
 
 ## Compilers
 
@@ -2590,6 +2590,35 @@ through M5's five steps:
   grid14 classes. No earlier line changed (`diff` against the copy before it: 0 lines removed), and no
   `VERDICTS*.txt` file.
 
+**The close** (§8, §10): `REPORT.md` §15 written, with a one-bullet pointer in its opening; the scratch removed
+(`.work/probes14`, `.work/shake14` and `/home/randy/Team/TMP/M14`, at 08:07 EDT). `cells14/` stays, gitignored and
+regenerable, as `cells13/` does.
+
+**The gate** (§8), at the commit that ticks M14:
+- [x] Start checks: the tree clean before the switch, GitHub fetched, `main` fast-forwarded `581c091` → `e289864`,
+  `e289864` an ancestor, M13 ticked, `local-m14` new; the go quoted as S93.
+- [x] HUNT5 fetched (`249eae9`), carrying landing 155 (`02856cfc` an ancestor) and §27's S-140 sentence (one match);
+  built (64.9 s); its `npkc.ll`, `npkc.o` and `npkrt.o` equal notice 161's ladder row; the canaries pass at the
+  baseline and HUNT5; `llvm-config` prints 20.1.2.
+- [x] Housekeeping (1b) committed (`3942f3f`), with M13's box 10 marked `[-]` and no committed record changed.
+- [x] grid14 and classify14 committed (`f20e418`: the commit's own date 03:23:43, its push 03:23:45 by the reflog of
+  `origin/local-m14`) before any grid14 run (the first, HUNT5's run 1, at 03:23:57). The 25 template probes before it
+  were §4's, for spellings only (S97). `--selfcheck` and `--selftest` pass; every cell's `meta.json` carries its
+  expectation and rule; every id equals its `mod:` name; the denominators come with `SKIPPED.txt` (109 generated, 0
+  skipped).
+- [x] The runs: grid14 at HUNT5 twice, agreeing in all 109 cells, and at the baseline; `run_findings` for F-050 …
+  F-052 at HUNT5 twice and the baseline.
+- [x] The narrowness control: all three parts reported with their cell counts (10 and 37 unflagged cells; 0 and 4
+  flagged cells failing a condition; 43 and 31 moves into the class, at HUNT5 and the baseline); `--against13` exits
+  0 at HUNT5 and at the baseline.
+- [x] Triage: every cell in §7's scope (B's ten) through the five steps; F-053 with its controls; `KNOWN_DEFECTS.md`'s
+  M13 block and F-051's README updated (`2558ec6`).
+- [x] Denominators: §15's add up; per run the generated count is the sum of the class counts (109 = 43 + 56 + 10 at
+  HUNT5; 109 = 31 + 19 + 23 + 18 + 14 + 4 at the baseline).
+- [x] No committed record changed: `git diff --name-only --diff-filter=MDR origin/main -- results
+  'findings/*/VERDICTS*.txt'` prints nothing. No scratch is left: `.work/probes14`, `.work/shake14` and
+  `/home/randy/Team/TMP/M14` are removed.
+
 ## Environment
 
 *(session 12, measured 2026-10-25 03:02:45 EDT; M14 run here, on the Team seat: the start check (a))*
@@ -3777,3 +3806,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     baseline, its controls 107/107 (`cmp`, `deadadd`) and the permitted dead load 107/0; reported apart as the check
     of §27 (D-364). `KNOWN_DEFECTS.md`'s M13 block rewritten from HUNT5's registry (DEF-272, DEF-273 by D-364,
     DEF-274), F-053 listed as M14's candidate; F-051's README gains "S-140 (R1)".
+  - **(5) The close:** REPORT.md §15 with a pointer in its opening; P1–P9 each ticked; the gate holds in every box;
+    the scratch removed; **M14 is ticked**. The session stops here, as the brief says, and its summary goes to the
+    dispatcher, F-053 with it for the fuzzer's manager's D6 verification.
