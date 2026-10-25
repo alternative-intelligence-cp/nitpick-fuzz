@@ -97,7 +97,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [ ] 3 the housekeeping: items 1–4 in (1b), items 5 and 6 with the triage (4)
   - [x] 4 learn by snippet, at HUNT5 and the baseline: the manager's 22 probes give their landing-148 verdicts at HUNT5; 25 grid14 templates, for spellings only, all compile at HUNT5, so no respelling and no skip (S97)
   - [x] 5 `gen/grid14.py` and `gen/classify14.py`, committed before any grid14 run: 109 cells (S 7, U 40, W 20, K 30, B 12), 0 skipped, `--selfcheck` passing with condition (c) literal on 43 flagged cells; `--selftest` 15 of 15 (S98, S99)
-  - [ ] 6 the runs: grid14 at HUNT5 twice and at the baseline, `--against13` at both, F-050 … F-052 at HUNT5; the narrowness control
+  - [x] 6 the runs: grid14 at HUNT5 twice (0 of 109 cells differ) and at the baseline; `--against13` exits 0 at both; F-050 … F-052 at HUNT5 twice and the baseline; the narrowness control's three parts reported with their counts
   - [ ] 7 triage, through M5's five steps
   - [ ] 8 the gate; `REPORT.md` §15
 
@@ -2490,6 +2490,63 @@ in place of the S-140 test, each a case the control must get right: "flagged and
 `--against13` exit 1 on the baseline-shaped record (its four cells) and 0 on the HUNT5-shaped one, which has no live
 population; "any wild cell with 107 at -O0" makes it exit 1 on both.
 
+**The runs** (§6), each block under `set -e`, each runner alone under the lock at 4 jobs, LLVM 20.1.2:
+- **HUNT5, run 1** (`results/249eae9/cells14.jsonl`, the record; 03:23:57, 10.5 s) after `--out cells14`,
+  `--selfcheck` ("every check passes") and `--selftest` ("15 cases, 15 pass"); **run 2** (`.work/shake14/h5-run2/`,
+  03:24:14, 10.6 s). `compare13.py` lists **0 of 109 cells** and exits 0: HUNT5's two runs agree.
+- **The baseline** (`results/c3bdae2/cells14.jsonl`, 03:24:30, 8.0 s).
+- **F-050 … F-052** (`findings/F-05[012]-*/VERDICTS-249eae9.txt`, 03:24:51, 12.4 s): HUNT5 twice, the baseline once;
+  the HUNT5 runs agree for every program, and every baseline line equals `VERDICTS.txt`'s.
+
+| class | S | U | W | K | B | all at HUNT5 `249eae9` | all at the baseline `c3bdae2` |
+|---|---|---|---|---|---|---|---|
+| `PERMITTED:S-140` | 3 / 3 | 40 / 28 | | | | **43** | 31 |
+| clean | 4 / 3 | | 20 / 16 | 30 / – | 2 / – | **56** | 19 |
+| `DEFECT:leg_mismatch` | – / 1 | – / 4 | | – / 9 | 10 / 9 | **10** | 23 |
+| `DEFECT:fallthrough` | | | | – / 15 | – / 3 | 0 | 18 |
+| `REFUSED_TRAP` | | – / 8 | | – / 6 | | 0 | 14 |
+| `OVERRESTRICT` | | | – / 4 | | | 0 | 4 |
+| **generated** | **7** | **40** | **20** | **30** | **12** | **109** | **109** |
+
+(Each section cell reads HUNT5 / the baseline.) At each compiler 109 = the sum of the class counts, and no cell is
+`LOUD`, `CRASH`, `timeout` or `other`.
+- **At HUNT5:** the three dead-load seeds are permitted at 107/14, 107/0 and 107/14, `ctl_wild_used_load` is clean
+  at 107/107 and the three twins clean (14/14, 0/0, 14/14); every U cell is permitted, 20 at 107/14 (`test`) and 20
+  at 107/0 (`none`), each with its twin at 14/14 or 0/0; every W twin clean; **every K cell 107/107, clean**; B's
+  `deadadd` 107/107 clean at both T, and **B's other ten, `untaken`, `ignore`, `copy`, `selfsub` and `selfcmp` at
+  both T, 107/0, `DEFECT:leg_mismatch`**: the cells for triage (§7).
+- **At the baseline:** the module place is refused `TYPE-004` ("a `const` initialiser must be a constant
+  expression"), so its 8 U and 6 K cells are `REFUSED_TRAP` and its 4 W twins `OVERRESTRICT`, as M13 found the
+  module `fixed … = NULL` refused there. The dead-load seeds are permitted, `ctl_wild_used_load` is 107/12; U is
+  permitted in 28 cells and **4 are 107/0 against an `s140_o2` of 14** (below); K disagrees in all 24 cells it
+  compiles, the `int64` cells at `local`, `field` and `returned` 107/12 (9, `DEFECT:leg_mismatch`) and the struct
+  cells and the `int64` `param` cells 107/99 (15, `DEFECT:fallthrough`: the -O2 leg runs into the failsafe's
+  `(*)` arm, DEF-251's face before landing 115); B is 107/0 in 9 cells and 107/99 in 3 (the struct `untaken`,
+  `ignore` and `deadadd`).
+- **`--against13`** (writes nothing) **exits 0 at both compilers.** At HUNT5, 55 cells differ between classify13
+  and classify14: 43 `DEFECT:leg_mismatch` → `PERMITTED:S-140` on cells meeting conditions 1–5 (kind (a)), and 12
+  `DEFECT:wrong_value` → `clean` on the 14-twins (the 10 W `test` twins and two seed twins; kind (b)). At the
+  baseline, 41: 31 of kind (a) and 10 of kind (b) (its two module `test` twins are refused). Nothing else moves.
+
+**The narrowness control** (§6), three parts, each against a wrong classifier of its own:
+1. **Against a broad allowance** ("any `wild` cell with 107 at -O0"): every unflagged cell at 107 and then
+   something else stays a defect class, so condition 1 holds the class to the generator's flag. **At HUNT5, 10
+   cells**: B's ten at 107/0, each `DEFECT:leg_mismatch`. **At the baseline, 37 cells**: `ctl_wild_used_load` and
+   the nine `int64` K cells at 107/12, `DEFECT:leg_mismatch` (the case the brief names); the 15 K cells at 107/99,
+   `DEFECT:fallthrough` (decided before the class, as the brief's order puts it); B's 9 at 107/0, `DEFECT:leg_mismatch`;
+   B's 3 at 107/99, `DEFECT:fallthrough`. None is permitted.
+2. **Against a mid-width allowance** ("flagged and O0 = 107", without (c)): the flagged cells whose legs disagree
+   but fail condition 4 or 5, counted by `--against13`. **At the baseline, 4 cells, the live population the brief
+   expected**: `m007_u_struct_param_bind_test`, `m019_u_struct_returned_bind_test`,
+   `m027_u_struct_param_overwrite_test` and `m039_u_struct_returned_overwrite_test`, each 107/0 against an `s140_o2`
+   of 14 with its twin at 14/14, each failing condition 4 and each `DEFECT:leg_mismatch`: U's struct `test` cells at
+   `param` and `returned`, the `NULL` test folded away after the load as `KNOWN_DEFECTS.md` records before landing
+   115, now measured on `wild` cells. No other U `test` cell joined them. **At HUNT5, 0**: every flagged cell meets
+   (c), so there the selftest's cases are (c)'s only control.
+3. **Against a classifier that moves anything else:** `--against13` exits 0 at both, so the only moves into
+   `PERMITTED:S-140` are flagged leg mismatches meeting conditions 1–5: **43 cells at HUNT5, 31 at the baseline**,
+   besides the twins' change-1 moves (12 and 10).
+
 ## Environment
 
 *(session 12, measured 2026-10-25 03:02:45 EDT; M14 run here, on the Team seat: the start check (a))*
@@ -3652,3 +3709,8 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     U 40, W 20, K 30, B 12), skips none, and `--selfcheck` passes with condition (c) literal on 43 flagged cells
     (S98); `gen/classify14.py --selftest` passes 15 of 15, and `--against13` was tried on synthetic records with two
     wrong classifiers (S99). Committed before any grid14 run.
+  - **(3) The runs:** grid14 at HUNT5 twice (0 of 109 differ) and at the baseline. HUNT5: 43 `PERMITTED:S-140`, 56
+    clean, 10 `DEFECT:leg_mismatch` (B's boundary forms at 107/0); every K cell 107/107. The baseline: 31 permitted,
+    the module place `TYPE-004`, K at 107/12 and 107/99. `--against13` exits 0 at both; the live control for (c) is
+    the baseline's four struct `test` cells at `param` and `returned`, 107/0, `DEFECT:leg_mismatch`. F-050's holes
+    `BORROW-002`, F-051 107/14, 107/0, 107/14 with its control 107/107, F-052's programs 0/0, at HUNT5.
