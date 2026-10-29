@@ -109,7 +109,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 4 learn by snippet at HUNT6 and REG155: the expectations table copied and checked (104 rows, 0 mismatches); 96 probes, every hazard probe at its table row at both compilers, every twin clean; every grid15 cell one of the probed programs
   - [x] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run: 100 cells (S 16, R 64, W 20), 1 356 skipped of 1 440 combinations, `--selfcheck` passing; `--selftest` 18 of 18 (S105, S106)
   - [x] 6 the runs: grid15 at HUNT6 twice (0 of 100 cells differ) and at REG155; the recall gate exits 0, every check passing; 14 hazard cells `ACCEPTED:DEFECT:uaf` at HUNT6, the table's eight `H6/leak` keys
-  - [ ] 7 triage, through M5's five steps; the family block's cell ids
+  - [x] 7 triage, through M5's five steps: the fourteen accepted cells are eight keys, each OPEN at HUNT6 (DEF-298, DEF-299, DEF-309, DEF-305's parameter-rooted gap), so known and not filed (S107); no regression; the family block's cell ids filled
   - [ ] 8 the gate holds in every box; `REPORT.md` §16; the scratch removed
 
 ## Compilers
@@ -2853,6 +2853,48 @@ was regenerated, `--selfcheck` passed and `--selftest` gave 18 of 18 first.
 - **Disclosed:** a `git -C .work/nitpick fetch origin` (23:53:39–23:53:40, for §7) ran while HUNT6's run 2 was
   running. A fetch moves no worktree's HEAD or files, and the compiler's `origin/main` was still `1480ca8`.
 
+**Triage** (the brief's §7; PLAN 5.2's five steps; S107). Its scope is every HUNT6 cell neither `clean` nor
+`refused`: the fourteen `ACCEPTED:DEFECT:uaf` cells, which are eight keys (the six candidate seeds are six of the
+grid's keys again). No twin is anything but clean (42 of 42 at both compilers), so no harness problem stands first.
+- **(a) Deduplicated** against `KNOWN_DEFECTS.md` (the family block) and HUNT6's registry (`OPEN_DECISIONS.md` at
+  `1480ca8`, read in `.work/od-h6.md`). Every key is a shape OPEN at HUNT6, so each is known: PLAN 5.2 (a)'s "note
+  the cell id and move on", and P7 binds. None is filed, and F-054 is not used.
+
+  | key | cells at HUNT6, 70/70 | the registry's row at HUNT6 | how the cell matches it |
+  |---|---|---|---|
+  | `pp:cbv:dir:same` | `n075` | DEF-298, OPEN (`:3568`) | the registered shape r1, a by-value struct parameter's slice field handed on to a storing callee |
+  | `pp:cbp:dir:same` | `n077` | DEF-298, OPEN | the pointer twin the row measured at 158 (t298b, a by-value parameter's POINTER field handed on) |
+  | `pp:cps:dir:inner` | `n069`, `q11` | DEF-299, OPEN (`:3586`) | the registered shape pf: the box in an inner block, its slice field stored through by a callee |
+  | `pp:cpp:dir:inner` | `n073`, `q12` | DEF-299, OPEN | the pointer twin the row measured at 158 (t299c); one block refuses, as its t299b does |
+  | `pp:tl:dir:inner` | `n043`, `q05` | DEF-299, OPEN | the brief's pre-map; the same cause read (the store is recorded on the pointee `b`, whose block ends, not on `h` its field points to), in a same-frame two-level pointer local where the row names a parameter's pointee |
+  | `pp:fld:cres:same` | `n019`, `q17` | DEF-309, OPEN (`:3818`) | a direct whole-pointee write through a call-result pointer, `(<-(raw ids(p))) = S{…}` |
+  | `pp:fld:cresc:same` | `n021`, `q19` | DEF-305, FIXED at 161 (`:3737`) | its writer face (k302j) with the result rooted at a pointer PARAMETER: still open, the brief's incomplete fix |
+  | `pp:fld:cresm:same` | `n023`, `q20` | DEF-305, FIXED at 161 | its receiver face (k302k), the same parameter-rooted gap |
+
+  **Two flags for D6** (readings, not measurements): the DEF-299 row's letter names a pointer PARAMETER's pointee
+  stored through by a callee, while `tl`-inner is a pointer local's pointee stored through directly (and `pf`-inner,
+  one pointer level on a local struct, is refused); and the DEF-305 row says FIXED and names no parameter-rooted
+  exception. DEF-302's row (`:3672`–`:3676`) says the landing-160 resolver gives no target for a pointer rooted at a
+  PARAMETER ("a pointer parameter's pointee stays DEF-275's store-matrix question"), which may be why `cresc` and
+  `cresm` stay open; that is inferred, not bisected. The manager's r2 log reads all six candidates 70/70 at `249eae9`
+  (161) as well (`m15-probes-l163-r2.log` lines 18, 42, 46, 66, 74, 78, the manager's measurement).
+- **(b) Minimising** does not apply: (a) ends the triage of a known shape. The grid cell is already one probed
+  program of about forty lines, and its twin is the control a wrong analysis gets wrong.
+- **(c) Both legs, twice:** already measured. Each of the fourteen reads 70 at `-O0` and at `-O2` in HUNT6's run 1
+  and run 2, and in the probe batch before them.
+- **(d) The pair with REG155**, over the 58 hazard cells (by a scratch count of the two `classified15.jsonl`):
+  - accepted at both: the fourteen above, still-open holes, deduplicated by (a);
+  - accepted at REG155 and refused at HUNT6: 34, the 26 `pp` cells the table marks `reg155=="leak"` but the eight
+    `H6/leak` keys, and the eight DEF-296 seeds. A fix landed in (155, 163], so none is a finding;
+  - refused at both: 10, the `pp` cells `bare`, `fld`, `cad`, `mth`, `cps` and `cpp` in one block and `fld` ×
+    `callee` and `whole`, and F-050's two. They were fixed before 155;
+  - refused at REG155 and accepted at HUNT6: **none, so no regression** (the gate's `REGRESSION` 0).
+- **(e)** No finding directory is written.
+- **KNOWN_DEFECTS' family block:** the cells column is filled for every row, with the verdicts at both compilers.
+  DEF-311 says "no grid cell" (it is not registered at HUNT6). The compiler's `origin/main` was still `1480ca8` at
+  every fetch for §7: 23:53:40, 23:56:07, 23:57:20 and 00:00:45 on 2026-10-29 (`.work/fetch-m15-triage.log`). So no landing past 163
+  is measured, and the three call-result keys stand against DEF-309 and DEF-305 at 163.
+
 ## Environment
 
 *(session 13, measured 2026-10-28 23:19:31 EDT; M15 run here, on the Team seat: the start check (a))*
@@ -3881,6 +3923,14 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   rule:** a `pp` cell or a seed accepted at HUNT6 that reads the poison (ACCEPTED:DEFECT:uaf) is a use after free in
   safe code, a defect by CLAUDE.md, reported normally; it goes through §7's triage, where a road or write OPEN in the
   registry at HUNT6 is known and noted with its DEF, not filed.
+- **S107 — the triage files nothing: HUNT6's fourteen accepted hazard cells are eight known-open keys** (the brief's
+  §7 and P7). `cbv` and `cbp` are DEF-298 (OPEN); `cps`-inner, `cpp`-inner and `tl`-inner are DEF-299 (OPEN; `tl` by
+  the brief's pre-map); `cres` is DEF-309 (OPEN); `cresc` and `cresm` are DEF-305's parameter-rooted gap (the row says
+  FIXED at 161; the brief reads it as an incomplete fix, not a new defect). PLAN 5.2 (a) makes a shape whose fix is
+  not in HUNT6 known, so (b)–(e) do not run, F-054 is not used, and no `findings/` directory is added. The candidates
+  go to the fuzzer's manager through the dispatcher for D6, with two flags (DEF-299's letter against `tl`-inner,
+  DEF-305's FIXED against `cresc`/`cresm`). No landing past 163 reached the compiler's `origin/main` by the last
+  fetch, so no ADDITIONAL verdict at a later sha is recorded.
 
 ## Log
 
@@ -4194,3 +4244,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     gate exits 0 with every check passing. HUNT6 accepts the table's eight `H6/leak` keys and their six candidate
     seeds (70/70), and refuses every other hazard cell with `BORROW-015` (F-050's with `BORROW-002`); every twin is
     clean at both compilers; REG155 reads the poison in all 48 `reg155=="leak"` cells. Committed as M15 (3).
+  - **(4) Triage** (§7; S107): the fourteen accepted cells are eight keys, each OPEN in HUNT6's registry (DEF-298,
+    DEF-299, DEF-309, and DEF-305's parameter-rooted gap), so known; nothing is filed. Against REG155: 14 accepted at
+    both, 34 fixed in (155, 163], 10 fixed before 155, no regression. The family block's cells column is filled. The
+    compiler's `origin/main` stayed `1480ca8` through 00:00:45. Committed as M15 (4).

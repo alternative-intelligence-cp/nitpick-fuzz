@@ -395,31 +395,33 @@ road, the pointee then written (freeing the old body), the stored view then read
 both legs, unless D-325's freeze refuses the write (`NITPICK-BORROW-015`). These are the compiler seat's
 registrations, not this repository's findings. The status and the one-line shapes are read in the registry at HUNT6
 `1480ca8` (landing 163; `meta/roadmap/OPEN_DECISIONS.md`, read on 2026-10-28). F-050 = DEF-272 (M13's block above,
-fixed at landing 138) is this class's callee-store-into-an-array-element face and is not repeated here. The grid15
-cells that exercise each row are filled in M15 (4), after the runs; a row the grid cannot reach says "no grid cell",
-and M15 does not measure it. (The brief's §3 names DEF-302 as `destroy`, DEF-304 and DEF-306 as spawn and DEF-310 as
+fixed at landing 138) is this class's callee-store-into-an-array-element face and is not repeated here. The last
+column names the grid15 cells that exercise each row, with their verdicts at both compilers (M15 (4)); each `pp`
+cell's twin is the next id, clean at both. A cell is mapped to a row by the registry's shapes, read, not bisected
+(M15 runs REG155 and HUNT6 only). A row the grid cannot reach says "no grid cell", and M15 does not measure it.
+(The brief's §3 names DEF-302 as `destroy`, DEF-304 and DEF-306 as spawn and DEF-310 as
 the `List` reallocation; HUNT6's registry gives DEF-302 the aliased pointer write, DEF-304 and DEF-307 the `List`
 element pointer, DEF-306 the spawn's lend and DEF-310 `destroy`. The rows follow the registry.)
 
 | DEF | the shape (the registry's, in one line) | at HUNT6 `1480ca8` | grid15 cells |
 |---|---|---|---|
-| DEF-289 | the view stored through a slice's element: face 1 a local slice's (`sl[0i64].v = …`), face 2 a slice parameter's, into the caller's array | FIXED: face 1 at 156 (`a5693a6`), face 2 at 157 (`5cc1fb9`) | M15 (4) |
-| DEF-296 | the view stored through a pointer local, or a pointer field on the path, into this frame's own storage (eight faces, `.internal/handoff_35/probes_sib/`) | FIXED at 156 (`a5693a6`) | M15 (4) |
-| DEF-297 | a slice local handed to a writer under a live view of what it views | FIXED at 159 (`51b6d82`) | M15 (4) |
-| DEF-298 | a by-value struct parameter's slice field handed on to a storing callee | OPEN | M15 (4) |
-| DEF-299 | a store through a slice field (measured since: or a pointer field) of a pointer parameter's pointee freezes the pointee, not what the field views; the pointee in an inner block | OPEN | M15 (4) |
-| DEF-300 | a direct store through a range of the array itself | FIXED at 158 (`8e33737`) | M15 (4) |
-| DEF-301 | a slice argument that is a call's result (a ternary's, a `pick`'s) is no destination | FIXED at 159 (`51b6d82`) | M15 (4) |
-| DEF-302 | a view taken through one name and a write through another, one of them a pointer to the same storage | FIXED at 160 (`954c21a`) | M15 (4) |
-| DEF-303 | a range's element compared one position off | FIXED at 159 (`51b6d82`) | M15 (4) |
+| DEF-289 | the view stored through a slice's element: face 1 a local slice's (`sl[0i64].v = …`), face 2 a slice parameter's, into the caller's array | FIXED: face 1 at 156 (`a5693a6`), face 2 at 157 (`5cc1fb9`) | face 1: `n045` `sle`, `n047` `sle` inner; face 2: `n061` `csl`, `n063` `cslv`, `n065` `cslv` inner. HUNT6 refuses all five, REG155 reads 70/70 |
+| DEF-296 | the view stored through a pointer local, or a pointer field on the path, into this frame's own storage (eight faces, `.internal/handoff_35/probes_sib/`) | FIXED at 156 (`a5693a6`) | `n025`/`n027` `pl`, `n029`/`n031` `pld`, `n033`/`n035` `plw`, `n037`/`n039` `pf`, `n041` `tl`, `n051`/`n053` `lst`, `n057`/`n059` `cpl`, `n081`/`n083` `mpl` (one block / inner), and the eight seeds `s11` … `s24`. HUNT6 refuses all 23, REG155 reads 70/70 (the seeds 170/170) |
+| DEF-297 | a slice local handed to a writer under a live view of what it views | FIXED at 159 (`51b6d82`) | no grid cell (grid15 writes through the pointer parameter, never through a slice) |
+| DEF-298 | a by-value struct parameter's slice field handed on to a storing callee | OPEN | `n075` `cbv` (its registered shape) and `n077` `cbp` (its measured pointer twin): **accepted at HUNT6 and REG155, 70/70**, known-open |
+| DEF-299 | a store through a slice field (measured since: or a pointer field) of a pointer parameter's pointee freezes the pointee, not what the field views; the pointee in an inner block | OPEN | `n069` `cps` inner (its registered shape), `n073` `cpp` inner (its measured pointer twin) and `n043` `tl` inner (by the brief's pre-map: the row names a pointer parameter's pointee, `n043` stores through a pointer local's), with the candidate seeds `q11`, `q12` and `q05`: **accepted at HUNT6 and REG155, 70/70**, known-open; in one block `n067` and `n071` are refused at both |
+| DEF-300 | a direct store through a range of the array itself | FIXED at 158 (`8e33737`) | `n049` `rge`: HUNT6 refuses it, REG155 reads 70/70 |
+| DEF-301 | a slice argument that is a call's result (a ternary's, a `pick`'s) is no destination | FIXED at 159 (`51b6d82`) | no grid cell (no slice argument is a call's result) |
+| DEF-302 | a view taken through one name and a write through another, one of them a pointer to the same storage | FIXED at 160 (`954c21a`) | `n007` `alias`, `n009` `walias`, `n013` `calias`, `n017` `method` (the `Self->` receiver landing 160 routes): HUNT6 refuses all four, REG155 reads 70/70 |
+| DEF-303 | a range's element compared one position off | FIXED at 159 (`51b6d82`) | no grid cell (no write through a range) |
 | DEF-304 | a pointer into a `List` element held across an operation that grows, shrinks, reassigns, moves or drops the `List` | FIXED at 162 (`c79a2c0`) | no grid cell |
-| DEF-305 | a pointer with no name (a call's result) handed to a writer or used as a writing receiver, or a pointer composed with a slice | FIXED at 161 (`249eae9`) | M15 (4) |
+| DEF-305 | a pointer with no name (a call's result) handed to a writer or used as a writing receiver, or a pointer composed with a slice | FIXED at 161 (`249eae9`) | `n021` `cresc` and `n023` `cresm` (and the candidate seeds `q19`, `q20`), each with a call result rooted at the PARAMETER (`ids(p)`): **accepted at HUNT6 and REG155, 70/70**: the fix at 161 does not reach a parameter-rooted result (the brief's reading: an incomplete fix, not a new defect) |
 | DEF-306 | a spawn's lend reassigned, dropped or moved through an aliased pointer | FIXED at 163 (`1480ca8`) | no grid cell |
 | DEF-307 | a pointer into a `List` element reached other than syntactically `@l[i]`, not frozen against a reallocation | OPEN | no grid cell |
-| DEF-308 | a callee replacing the whole pointee, handed a named pointer, is checked against a view by the pointee's own name | FIXED at 163 (`1480ca8`) | M15 (4) |
-| DEF-309 | a direct whole-pointee write or move through a call-result pointer | OPEN | M15 (4) |
+| DEF-308 | a callee replacing the whole pointee, handed a named pointer, is checked against a view by the pointee's own name | FIXED at 163 (`1480ca8`) | `n015` `cwhole` (a copy of the parameter handed to a callee replacing the whole pointee): HUNT6 refuses it, REG155 reads 70/70 |
+| DEF-309 | a direct whole-pointee write or move through a call-result pointer | OPEN | `n019` `cres` (and the candidate seed `q17`): **accepted at HUNT6 and REG155, 70/70**, known-open |
 | DEF-310 | `destroy` through a pointer field escapes `TYPE-091` | OPEN | no grid cell |
-| DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | M15 (4) |
+| DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | no grid cell: not registered at HUNT6, and landing 164 had not reached the compiler's `origin/main` at M15's last fetch (2026-10-29 00:00:45 EDT) |
 
 ## Other known defects, for deduplication only (not in `known/`)
 
