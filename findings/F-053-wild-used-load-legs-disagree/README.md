@@ -67,8 +67,10 @@ copy is dead, and `v - v` and `v != v` fold; the add's overflow check and the co
 
 **The controls** (rule 5), each a case a wrong implementation gets wrong:
 - `ctl_wild_used_cmp`, K's `cmp`: an implementation that deleted every load through a `wild` pointer at -O2 would
-  answer 13 there; HUNT5 faults at both legs (107/107), and so do all 30 of grid14's K cells, at all five places and
-  both types. Before landing 115 the baseline answers 12 at -O2.
+  answer 12 there; HUNT5 faults at both legs (107/107), and so do all 30 of grid14's K cells, at all five places and
+  both types. Before landing 115 the baseline answers 12 at -O2. (12 is what `c3bdae2` measures: this control at 107/12,
+  and grid14's nine `int64` K cells at `local`, `field` and `returned` at 107/12; this line said 13 until M15 (1b), M14v's
+  finding F6.)
 - `ctl_wild_dead_load`, the permitted reference: the dead load §27 allows (D-364), 107/0, the -O2 leg as in the faces.
 - `ctl_wild_dead_add`, B's `deadadd`: the value is read only by an add whose result is never read, and the load
   stays (107/107), so HUNT5's -O2 leg does not drop every load whose value misses the exit; the faces are the forms

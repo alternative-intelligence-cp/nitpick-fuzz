@@ -105,7 +105,7 @@ committed. A session that starts here resumes at the first unticked box.
   (landing 155), under LLVM 20.1.2 (session 13, the Team seat; S101 onward). The boxes are the brief's sections §1–§8.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `e289864` → `70a0d8b`, `70a0d8b` an ancestor, M14 ticked, the tree clean before the switch, `local-m15` new; the go quoted as S102, the release beside it (after a stop on a guard refusal and the dispatcher's ruling, in the Log)
   - [x] 2 HUNT6 named (`1480ca8`, landing 163, carrying 156; no landing past 163 at the fetch) and REG155 `02856cf` (landing 155), both built under 20.1.2; each one's `npkc.ll`, `npkc.o`, `npkrt.o` and `builder.o` equal its ladder row (notice 164's, notice 156's); `llvm-config` prints 20.1.2; the canaries pass at both
-  - [ ] 3 the housekeeping (1b): F-053's README number; `KNOWN_DEFECTS.md`'s DEF-296 family block; M14v's F3 and F5 notes
+  - [x] 3 the housekeeping (1b): F-053's README number (13 → 12); `KNOWN_DEFECTS.md`'s DEF-296 family block, its rows read at HUNT6's registry (the cells column is box 7's); M14v's F3 and F5 notes
   - [ ] 4 learn by snippet at HUNT6 and REG155; the expectations table copied and checked
   - [ ] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run, `--selfcheck` and `--selftest` passing
   - [ ] 6 the runs: grid15 at HUNT6 twice and at REG155; the recall gate
@@ -2713,6 +2713,21 @@ commission/canary_malformed.npk --at hunt6 reg155 --llvm .work/llvm-20.1.2`: at 
 npkc 0 and runs 0/0, and `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` ("canary_malformed.npk:3:20:
 expected a type").
 
+**The housekeeping (1b)** (the brief's §3; wording only, no committed record changed):
+1. **F-053's README** (M14v's F6): "would answer 13" is now 12, with a parenthesis naming where 12 is measured at
+   `c3bdae2`: `ctl_wild_used_cmp` at 107/12 (F-053's `VERDICTS.txt`) and grid14's nine `int64` K cells at `local`,
+   `field` and `returned` (`m061`, `m065`, `m069`, `m071`, `m075`, `m079`, `m081`, `m085`, `m089`) at 107/12
+   (`results/c3bdae2/classified14.jsonl`). No `VERDICTS*.txt` is edited.
+2. **`KNOWN_DEFECTS.md`'s DEF-296 family block**, a section after the M13/M14 block: one row for each of DEF-289 and
+   DEF-296 … DEF-311, its one-line shape and status read in HUNT6's registry, labelled as the compiler seat's
+   registrations, measured where a grid cell exists by M15, with F-050 = DEF-272 cross-referenced, not repeated. The
+   cells column is filled in M15 (4); DEF-304, DEF-306, DEF-307 and DEF-310 say "no grid cell". The brief's §3 labels
+   (DEF-302 `destroy`, DEF-304 and DEF-306 spawn, DEF-310 the `List` reallocation) do not match HUNT6's registry, which
+   gives DEF-302 the aliased pointer write, DEF-304 and DEF-307 the `List` element pointer, DEF-306 the spawn's lend and
+   DEF-310 `destroy`; the rows follow the registry, and the block says so. DEF-311 is not registered at HUNT6.
+3. **M14v's F3 and F5**: a one-line note under F-053's "Not registered" entry in `KNOWN_DEFECTS.md`, and one after
+   §15.6's three parts in `REPORT.md`, each saying M14v ruled the point non-blocking. No verdict changes.
+
 ## Environment
 
 *(session 13, measured 2026-10-28 23:19:31 EDT; M15 run here, on the Team seat: the start check (a))*
@@ -4009,3 +4024,6 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **HUNT6 is `1480ca8`**, landing 163, carrying 156; no landing past 163 at the fetch (23:19:57; S103). REG155 is
     `02856cf` (S104). Both built under 20.1.2, in 64.8 s and 66.0 s; each one's `npkc.ll`, `npkc.o`, `npkrt.o` and
     `builder.o` equal its ladder row (notice 164's, notice 156's). The canaries pass at both.
+  - **(1b) The housekeeping** (§3), wording only: F-053's README says 12 where it said 13 (M14v's F6);
+    `KNOWN_DEFECTS.md` gains the DEF-296 family block, read at HUNT6's registry, whose rows follow the registry where
+    the brief's §3 labels differ; M14v's F3 and F5 each get a one-line note. No committed record changed.

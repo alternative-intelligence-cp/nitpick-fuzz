@@ -385,6 +385,41 @@ Not registered: M14's finding (2026-10-25), a candidate for the fuzzer's manager
   program text reads, but on the path run decides nothing (read in a branch not taken, by a callee that ignores it,
   by a copy never read, in `v - v` or `v != v`), faults at -O0 and is sunk or deleted at -O2 (107/0), where §27 says a
   load whose value the program USES faults at both legs. Scope wild, reported apart as the check of §27 (D-364).
+  *M14v (M14's verification, 2026-10-25) found this entry unrequested by M14's brief (its F3; M13 did the same for
+  F-050 … F-052) and ruled it non-blocking, so it stands as M14 left it (a note of M15 (1b)).*
+
+## The DEF-296 family (DEF-289, DEF-296 … DEF-311), registered by the compiler seat, measured where a grid cell exists by M15 — deduplicate against these
+
+A VIEW of a pointer parameter's pointee (`string_bytes(p.s)`, `S->:p`) stored into the frame's own storage by some
+road, the pointee then written (freeing the old body), the stored view then read: a use-after-free in safe code at
+both legs, unless D-325's freeze refuses the write (`NITPICK-BORROW-015`). These are the compiler seat's
+registrations, not this repository's findings. The status and the one-line shapes are read in the registry at HUNT6
+`1480ca8` (landing 163; `meta/roadmap/OPEN_DECISIONS.md`, read on 2026-10-28). F-050 = DEF-272 (M13's block above,
+fixed at landing 138) is this class's callee-store-into-an-array-element face and is not repeated here. The grid15
+cells that exercise each row are filled in M15 (4), after the runs; a row the grid cannot reach says "no grid cell",
+and M15 does not measure it. (The brief's §3 names DEF-302 as `destroy`, DEF-304 and DEF-306 as spawn and DEF-310 as
+the `List` reallocation; HUNT6's registry gives DEF-302 the aliased pointer write, DEF-304 and DEF-307 the `List`
+element pointer, DEF-306 the spawn's lend and DEF-310 `destroy`. The rows follow the registry.)
+
+| DEF | the shape (the registry's, in one line) | at HUNT6 `1480ca8` | grid15 cells |
+|---|---|---|---|
+| DEF-289 | the view stored through a slice's element: face 1 a local slice's (`sl[0i64].v = …`), face 2 a slice parameter's, into the caller's array | FIXED: face 1 at 156 (`a5693a6`), face 2 at 157 (`5cc1fb9`) | M15 (4) |
+| DEF-296 | the view stored through a pointer local, or a pointer field on the path, into this frame's own storage (eight faces, `.internal/handoff_35/probes_sib/`) | FIXED at 156 (`a5693a6`) | M15 (4) |
+| DEF-297 | a slice local handed to a writer under a live view of what it views | FIXED at 159 (`51b6d82`) | M15 (4) |
+| DEF-298 | a by-value struct parameter's slice field handed on to a storing callee | OPEN | M15 (4) |
+| DEF-299 | a store through a slice field (measured since: or a pointer field) of a pointer parameter's pointee freezes the pointee, not what the field views; the pointee in an inner block | OPEN | M15 (4) |
+| DEF-300 | a direct store through a range of the array itself | FIXED at 158 (`8e33737`) | M15 (4) |
+| DEF-301 | a slice argument that is a call's result (a ternary's, a `pick`'s) is no destination | FIXED at 159 (`51b6d82`) | M15 (4) |
+| DEF-302 | a view taken through one name and a write through another, one of them a pointer to the same storage | FIXED at 160 (`954c21a`) | M15 (4) |
+| DEF-303 | a range's element compared one position off | FIXED at 159 (`51b6d82`) | M15 (4) |
+| DEF-304 | a pointer into a `List` element held across an operation that grows, shrinks, reassigns, moves or drops the `List` | FIXED at 162 (`c79a2c0`) | no grid cell |
+| DEF-305 | a pointer with no name (a call's result) handed to a writer or used as a writing receiver, or a pointer composed with a slice | FIXED at 161 (`249eae9`) | M15 (4) |
+| DEF-306 | a spawn's lend reassigned, dropped or moved through an aliased pointer | FIXED at 163 (`1480ca8`) | no grid cell |
+| DEF-307 | a pointer into a `List` element reached other than syntactically `@l[i]`, not frozen against a reallocation | OPEN | no grid cell |
+| DEF-308 | a callee replacing the whole pointee, handed a named pointer, is checked against a view by the pointee's own name | FIXED at 163 (`1480ca8`) | M15 (4) |
+| DEF-309 | a direct whole-pointee write or move through a call-result pointer | OPEN | M15 (4) |
+| DEF-310 | `destroy` through a pointer field escapes `TYPE-091` | OPEN | no grid cell |
+| DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | M15 (4) |
 
 ## Other known defects, for deduplication only (not in `known/`)
 

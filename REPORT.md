@@ -1919,6 +1919,10 @@ Three parts, each against a wrong classifier of its own (rule 5):
    moves into `PERMITTED:S-140` are flagged leg mismatches meeting conditions 1–5, **43 at HUNT5 and 31 at the
    baseline**.
 
+*A note of M15 (1b):* part 2 says of condition 4 that the selftest is its only control at HUNT5; condition 5 (the
+twin gives `s140_o2` on both legs) has no live population at either compiler, so the selftest is its only control
+there too. M14v (M14's verification, 2026-10-25) recorded this as its F5 and ruled it non-blocking; no verdict changes.
+
 ### 15.7 Candidates and findings
 
 At HUNT5 the cells that are neither `clean` nor `PERMITTED:S-140` are B's ten; no K cell, U cell or twin needs triage.
