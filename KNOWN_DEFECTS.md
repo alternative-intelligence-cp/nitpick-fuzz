@@ -414,7 +414,7 @@ element pointer, DEF-306 the spawn's lend and DEF-310 `destroy`. The rows follow
 | DEF-301 | a slice argument that is a call's result (a ternary's, a `pick`'s) is no destination | FIXED at 159 (`51b6d82`) | no grid cell (no slice argument is a call's result) |
 | DEF-302 | a view taken through one name and a write through another, one of them a pointer to the same storage | FIXED at 160 (`954c21a`) | `n007` `alias`, `n009` `walias`, `n013` `calias`, `n017` `method` (the `Self->` receiver landing 160 routes): HUNT6 refuses all four, REG155 reads 70/70 |
 | DEF-303 | a range's element compared one position off | FIXED at 159 (`51b6d82`) | no grid cell (no write through a range) |
-| DEF-304 | a pointer into a `List` element held across an operation that grows, shrinks, reassigns, moves or drops the `List` | FIXED at 162 (`c79a2c0`) | no grid cell |
+| DEF-304 | a pointer into a `List` element held across an operation that grows, shrinks, reassigns, moves or drops the `List` | FIXED at 162 (`8c4f005`) | no grid cell |
 | DEF-305 | a pointer with no name (a call's result) handed to a writer or used as a writing receiver, or a pointer composed with a slice | FIXED at 161 (`249eae9`) | `n021` `cresc` and `n023` `cresm` (and the candidate seeds `q19`, `q20`), each with a call result rooted at the PARAMETER (`ids(p)`): **accepted at HUNT6 and REG155, 70/70**: the fix at 161 does not reach a parameter-rooted result (the brief's reading: an incomplete fix, not a new defect) |
 | DEF-306 | a spawn's lend reassigned, dropped or moved through an aliased pointer | FIXED at 163 (`1480ca8`) | no grid cell |
 | DEF-307 | a pointer into a `List` element reached other than syntactically `@l[i]`, not frozen against a reallocation | OPEN | no grid cell |

@@ -2305,7 +2305,7 @@ Not funded (the brief's §3):
   DEF-307 and DEF-310 are not measured.
 - `cresf` is `TYPE-024`.
 - One LLVM is used, and only -O0 against -O2.
-- Landing 164 had not reached the compiler's `origin/main` by the last fetch, so nothing is measured past 163.
+- Landing 164 had not reached the compiler's `origin/main` by the last fetch, so nothing is measured past 163; §16.12 records the post-run delta (annotated, not measured).
 
 **Left for the author, through the dispatcher.** None of these is M15's to settle:
 - `CLAUDE.md`'s defect definition and S-140 (M14's item);
@@ -2359,3 +2359,39 @@ python3 gen/classify15.py --cells cells15 --recall results/1480ca8/classified15.
 ```
 `gen/run.py` appends to its `--out` and skips the cells already there. So a re-run writes to a fresh path and is
 compared with `python3 gen/compare13.py`.
+
+### 16.12 D6 review and the landing-164 delta
+
+**D6, by the fuzzer's manager (`nitpick-fuzz_5`), 2026-10-29.** The fourteen candidate cells and the controls were
+reproduced independently on the manager's own builds — `.work/l163` (`1480ca8`) and `.work/l155` (`02856cf`), LLVM
+20.1.2 — and agree with the committed results cell by cell, leg by leg. Each of the fourteen reads `npkc=0`, O0=70,
+O2=70 at both compilers; the twins read 0/0; the refused neighbours `n011`, `n067`, `n041` give `NITPICK-BORROW-015`
+(the D-325 view-freeze), with `n041` split as recorded — refused at `1480ca8`, 70/70 at `02856cf`.
+`m15_expect_check.py` reads 104 rows, 0 mismatches; `grid15.py --selfcheck` and `classify15.py --selftest` pass; the
+recall gate exits 0 with FINDINGS 14 and REGRESSION 0. The logs are `.work/briefs/m15-d6-l163l155.log` and
+`m15-d6-controls-l163l155.log`. D6 files no finding (S107 stands): the fourteen are eight keys, each OPEN in HUNT6's
+registry.
+
+**The landing-164 delta — the compiler seat's record, annotated, not measured.** M15 ran wholly at `1480ca8`; landing
+164 (`3adfc05`) reached the compiler's `origin/main` at 00:18 EDT on 2026-10-29, after M15 finished (00:08:37), and was
+built or run by neither M15 nor D6. By the compiler's `OPEN_DECISIONS` at `3adfc05` (read read-only by M15v) and
+`nitpick-libs_28`'s W-30 copy (00:29, workbench build `95d4006`), three of the eight keys close at 164:
+
+- `pp:fld:cres:same` (`n019`, `q17`) — **DEF-309, FIXED at 164**;
+- `pp:fld:cresc:same` (`n021`, `q19`) and `pp:fld:cresm:same` (`n023`, `q20`) — the parameter-rooted call-result gap
+  that DEF-305's landing-161 fix left open is registered as **DEF-311** and FIXED at 164; `OPEN_DECISIONS` records
+  DEF-311 citing the fuzz seat's `q17`/`q19`/`q20` (these cells), and DEF-305's row gains a note to DEF-311 and DEF-309.
+
+`nitpick-libs_28` measured the three refused at `3adfc05` — `NITPICK-BORROW-015` under a view, `NITPICK-BORROW-016`
+under a lend. The other five keys are unchanged at 164: `cbv`, `cbp` (DEF-298) and `cps`, `cpp`, `tl` inner (DEF-299)
+stay OPEN, on the compiler seat's M3 plan; neither DEF is in landing 164's set. `OPEN_DECISIONS` at `3adfc05` marks
+DEF-309, DEF-310 and DEF-311 FIXED.
+
+**One new open shape, from `nitpick-libs_28`, with no grid15 cell:** DEF-312, a pointer field two levels below a
+call-result dereference (`(<-(raw idph(@ph))).p.o = …`), silent at both 163 and 164 (a known limit by exact cell).
+Landing 165 (DEF-307 + DEF-314) is the compiler seat's next.
+
+**Also corrected at D6:** `KNOWN_DEFECTS.md` and `PROGRESS.md` cited landing 162 as `c79a2c0`, which is the D-364
+meta-amendment child of the landing commit `8c4f005` ("landing 162: DEF-304"); the citation is corrected to `8c4f005`,
+as 163 and the other landings are cited (M15v's finding 1, verified against the compiler history at `1480ca8`). M15v's
+other findings are non-blocking and need no change to the tree.

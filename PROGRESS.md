@@ -2685,7 +2685,7 @@ NOTICES has no `| 164 |` row: **no landing past 163**. (management_4's word, in 
 landings from REG155 to HUNT6, from `meta/NOTICES.md` at HUNT6:
 - 156 `a5693a6` DEF-296 and DEF-289's first face; 157 `5cc1fb9` DEF-289's second face; 158 `8e33737` DEF-300;
 - 159 `51b6d82` DEF-297 and DEF-301 with DEF-303; 160 `954c21a` DEF-302; 161 `249eae9` DEF-305;
-- 162 `c79a2c0` DEF-304; 163 `1480ca8` DEF-306 + DEF-308.
+- 162 `8c4f005` DEF-304; 163 `1480ca8` DEF-306 + DEF-308.
 
 **REG155** (§2; S104) is `02856cf` (`02856cfc72463f105da70bd9c23c7f2cc1bf8151`, 2026-10-23 09:34:46 -0400, landing 155:
 DEF-288 and DEF-290), in `.work/REG.full` and `.work/REG`.
@@ -3951,6 +3951,20 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   DEF-305's FIXED against `cresc`/`cresm`). No landing past 163 reached the compiler's `origin/main` by the last
   fetch, so no ADDITIONAL verdict at a later sha is recorded.
 
+- **S108 — D6 review (the fuzzer's manager, `nitpick-fuzz_5`, 2026-10-29) and the landing-164 delta.** The fourteen
+  candidate cells and the controls were reproduced independently on the manager's own builds (`.work/l163` =
+  `1480ca8`, `.work/l155` = `02856cf`, LLVM 20.1.2) and agree with the committed results cell by cell, leg by leg;
+  `m15_expect_check.py` reads 104/0, `grid15 --selfcheck` and `classify15 --selftest` pass, and the recall gate exits
+  0 (FINDINGS 14, REGRESSION 0). Logs: `.work/briefs/m15-d6-l163l155.log`, `m15-d6-controls-l163l155.log`. Decisions:
+  (a) the landing-164 delta is recorded in REPORT §16.12 as an annotation, not a measurement — M15 built nothing past
+  163, and the 164 refusals are the compiler seat's record (`OPEN_DECISIONS` at `3adfc05`, read by M15v; libs_28's
+  W-30), not the manager's reading; (b) `cresc`/`cresm` = DEF-305's parameter-rooted gap at 163 is the face the
+  compiler registers and FIXES as DEF-311 at 164 (citing the fuzz seat's `q17`/`q19`/`q20`), with DEF-309 for `cres`
+  — D6 does not adjudicate 305-vs-311 beyond citing `OPEN_DECISIONS`; (c) the landing-162 citation `c79a2c0` (the
+  D-364 meta-amendment child) is corrected to the landing commit `8c4f005` in `KNOWN_DEFECTS.md` and `PROGRESS.md`
+  (M15v's finding 1, verified against the compiler history at `1480ca8`). M15v's other findings (2, 3, 4, 6, 7) are
+  non-blocking and need no change to the tree. `main` is fast-forwarded to M15's branch.
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -4271,3 +4285,10 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     `REPORT.md` §16 is written, with a pointer in its opening paragraph. Every box of the gate holds, and no
     committed record changed. The scratch was removed at 00:08:09. M15 is ticked, and the session stops here. The
     eight candidates go to the fuzzer's manager through the dispatcher, for D6.
+  - **(6) D6 and merge** (the manager, `nitpick-fuzz_5`, 2026-10-29): the fourteen candidates and the controls
+    reproduced on the manager's own builds (`.work/l163`, `.work/l155`), agreeing with the committed results leg by
+    leg; checker 104/0; `--selfcheck`/`--selftest` pass; the recall gate exits 0 (FINDINGS 14, REGRESSION 0). REPORT
+    §16.12 adds the D6 attestation and the annotated landing-164 delta (`cres`/`cresc`/`cresm` refused at `3adfc05`
+    by the compiler's record — DEF-309 and DEF-311 FIXED at 164 — not measured here), and `KNOWN_DEFECTS.md` and
+    `PROGRESS.md` correct the landing-162 citation to `8c4f005` (S108). `main` is fast-forwarded from `70a0d8b` to
+    M15's branch; M15 closed.
