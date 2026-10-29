@@ -100,6 +100,17 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 6 the runs: grid14 at HUNT5 twice (0 of 109 cells differ) and at the baseline; `--against13` exits 0 at both; F-050 … F-052 at HUNT5 twice and the baseline; the narrowness control's three parts reported with their counts
   - [x] 7 triage, through M5's five steps: B's ten 107/0 cells are one candidate, F-053 (a read `wild` `NULL` load sunk or deleted at -O2), reported apart as the check of §27 (D-364); no K, U or twin cell to triage (S100)
   - [x] 8 the gate holds in every box; `REPORT.md` §15, with a pointer in its opening; the scratch removed
+- [ ] **M15** — the DEF-296 family (a view of a pointer parameter's pointee stored through an indirection), a grid of
+  the store roads and the freeing writes, at HUNT6 `1480ca8` (landing 163) with the regression leg REG155 `02856cf`
+  (landing 155), under LLVM 20.1.2 (session 13, the Team seat; S101 onward). The boxes are the brief's sections §1–§8.
+  - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `e289864` → `70a0d8b`, `70a0d8b` an ancestor, M14 ticked, the tree clean before the switch, `local-m15` new; the go quoted as S102, the release beside it (after a stop on a guard refusal and the dispatcher's ruling, in the Log)
+  - [x] 2 HUNT6 named (`1480ca8`, landing 163, carrying 156; no landing past 163 at the fetch) and REG155 `02856cf` (landing 155), both built under 20.1.2; each one's `npkc.ll`, `npkc.o`, `npkrt.o` and `builder.o` equal its ladder row (notice 164's, notice 156's); `llvm-config` prints 20.1.2; the canaries pass at both
+  - [ ] 3 the housekeeping (1b): F-053's README number; `KNOWN_DEFECTS.md`'s DEF-296 family block; M14v's F3 and F5 notes
+  - [ ] 4 learn by snippet at HUNT6 and REG155; the expectations table copied and checked
+  - [ ] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run, `--selfcheck` and `--selftest` passing
+  - [ ] 6 the runs: grid15 at HUNT6 twice and at REG155; the recall gate
+  - [ ] 7 triage, through M5's five steps; the family block's cell ids
+  - [ ] 8 the gate holds in every box; `REPORT.md` §16; the scratch removed
 
 ## Compilers
 
@@ -112,6 +123,8 @@ committed. A session that starts here resumes at the first unticked box.
 | HUNT3 (M12) | `0c0f5a3` (`0c0f5a39fcd2a54e78bf7409add841cbc16927b7`), 2026-10-15 12:00:05 -0400 | 1.6.1e, landing 113: DEF-235, DEF-236 (c)(d)(e), DEF-237 and DEF-234 (c), over landing 112 (`958890a`, DEF-232); built under LLVM 20.1.8 | 31 701 272 / `f520d5744b1e9951…` | 55.2 s |
 | HUNT4 (M13) | `c72639f` (`c72639f2332208649309b91796d6f173d19a64d2`), 2026-10-19 15:08:30 -0400 | 1.6.1e, landing 137: DEF-267 (the awaited and the spawned qualified call), over landings 114–136; built under LLVM 20.1.8 | 32 424 412 / `2f1b9480701e1c86…` | 56.0 s |
 | HUNT5 (M14) | `249eae9` (`249eae91559bfc1e3b8a17b12286c21108e4215a`), 2026-10-24 21:57:10 -0400 | 1.6.1e, landing 161: DEF-305 (a call-result pointer resolved by its return provenance), over landings 138–160; built under LLVM 20.1.2 | 33 418 659 / `59d16f1d2273e545…` | 64.9 s |
+| HUNT6 (M15) | `1480ca8` (`1480ca81aa4d9d82976149f7f6ae5e44b2c5c640`), 2026-10-26 14:05:02 -0400 | 1.6.1e, landing 163: DEF-306 + DEF-308 (a spawn's lend, and a view of a pointee, compared against a write of the same storage reached by another name through a pointer), over landings 156–162; built under LLVM 20.1.2 | 33 468 275 / `fbd42f41e1ea4828…` | 64.8 s |
+| REG155 (M15) | `02856cf` (`02856cfc72463f105da70bd9c23c7f2cc1bf8151`), 2026-10-23 09:34:46 -0400 | 1.6.1e, landing 155: DEF-288 and DEF-290 (a `for` binding is a block-scoped local to the escape and aliasing analyses); M15's regression leg, before DEF-296's fix at 156; built under LLVM 20.1.2 | 32 973 616 / `8f76731c6fc1c7ca…` | 66.0 s |
 
 Other build products (M0.5):
 
@@ -123,6 +136,8 @@ Other build products (M0.5):
 | HUNT3 | 11 283 680 / `02e7b06321a16950…` (linked by the release `ld.lld` 20.1.8) | 72 656 / `c8e5033ad17c70f8…` |
 | HUNT4 | 11 528 072 / `ba798aa0e5500a8d…` (linked by the release `ld.lld` 20.1.8) | 72 656 / `c8e5033ad17c70f8…` |
 | HUNT5 | 11 957 184 / `2c8d898f101a3280…` (built under 20.1.2; the ladder row's is the same size) | 72 656 / `c8e5033ad17c70f8…` |
+| HUNT6 | 11 970 864 / `7f7b2ab1b1d322dd…` (built under 20.1.2; the ladder row's is the same size) | 72 656 / `c8e5033ad17c70f8…` |
+| REG155 | 11 843 192 / `32dcfb0b084c60b5…` (built under 20.1.2; the ladder row's is the same size) | 72 656 / `c8e5033ad17c70f8…` |
 
 **Commissioning check (M0.5): PASSED.** The baseline's `.internal/quickemit/npkc.ll`
 is exactly 28 111 929 bytes with sha256 `4029fc70efbe9cd3…`, as GitHub's CI
@@ -135,7 +150,8 @@ printing `20.1.2` either way. **20.1.8 for HUNT3** (`0c0f5a3`, M12), on the auth
 `LLVM-20.1.8-Linux-X64` release tarball, 2 021 269 412 bytes, sha256
 `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, fetched in S13's form; its
 `llvm-config --version` prints `20.1.8`. **20.1.2 for HUNT5** (`249eae9`, M14) and for every M14 record,
-PLAN.md:10's own pin, which needs no go (S95).
+PLAN.md:10's own pin, which needs no go (S95). **20.1.2 for HUNT6** (`1480ca8`) **and REG155** (`02856cf`), M15, and
+for every M15 record, the same pin (S104).
 
 **Canaries (M0.6), both compilers:** `commission/canary.npk` — npkc rc 0, links,
 runs to 0 on the -O0 leg and on the -O2 leg. `commission/canary_malformed.npk`
@@ -2619,7 +2635,105 @@ regenerable, as `cells13/` does.
   'findings/*/VERDICTS*.txt'` prints nothing. No scratch is left: `.work/probes14`, `.work/shake14` and
   `/home/randy/Team/TMP/M14` are removed.
 
+## M15 — the DEF-296 family, a view of a pointer's pointee stored through an indirection (session 13, the Team seat)
+
+**The start checks** (the brief's §1; PLAN.md's start rules (a)–(d)).
+- **First, a stop and a ruling.** Before any check ran, the Team's deny rule refused a read-only `sed` on a file of the
+  manager's probe set in the Workspace clone; the session stopped and reported, and the dispatcher ruled that it resume
+  here, reading the Workspace with read-only tools only. The Log (2026-10-28) records both.
+- **The remote.** `git remote get-url origin` is GitHub's `alternative-intelligence-cp/nitpick-fuzz`, over SSH. `git
+  fetch origin` at 23:19:17 EDT moved `origin/main` from `e289864` to `70a0d8b` (M14, merged).
+- **Clean tree, before any switch.** On `local-m14` at `70a0d8b`, `git status --porcelain` printed nothing, and there
+  was no stash.
+- **The fast-forward.** `git switch main && git merge --ff-only origin/main` took `main` from `e289864` to `70a0d8b`.
+- **The order gate.** `git merge-base --is-ancestor 70a0d8b origin/main` exits 0; M14 is ticked (`PROGRESS.md:93`);
+  there were no M15 boxes. The only box not `[x]` is M13's `[-]` box 10 (S96). M15 touches no other milestone's boxes
+  and does not touch `m11/`.
+- **The branch.** There was no `origin/local-m15` and no local one, so `git switch -c local-m15 --no-track
+  origin/main` at `70a0d8b` (23:19:31). No upstream is set; every push is `git push origin local-m15`.
+- **The go** is S102: management_3's GO for the Team's week, verbatim, with `nitpick-fuzz_5`'s release beside it. The
+  dispatch says those words stand as the go for HUNT6 = the compiler's `origin/main` at this fetch, and that no LLVM go
+  is needed (S104).
+- **(a)** `uname -a`, `nproc`, `free -g`, `df -h .` and `python3 --version` are under Environment below. **(b)**
+  `CLAUDE.md`'s defect definition was re-read: an accepted program with no `wild`, no `=>!` and no raw pointer
+  arithmetic that reads freed memory (the poison 170, read as 70 through grid15's observer) is a defect. M15's hazard
+  cells are such programs, so its findings are reported normally, not apart. **(c)** HUNT6 and REG155 were built after
+  the go was recorded; `.work/` keeps every tree and log it held (the compiler clone, `base`, `hunt2`, `hunt5`, the
+  LLVM trees). **(d)** M15 starts at its first box.
+- **Read first, in the brief's order:** `CLAUDE.md`; PLAN.md 2.1, 2.2, 5.2 (a)–(e) and the start rules; this file's
+  M13 and M14 sections and S76–S100; F-050's README and its programs; REPORT §14 and §15; `gen/grid13.py` and
+  `gen/classify13.py`. Read only, at HUNT6 once fetched: MEMORY_REFERENCE.md's D-325 paragraph (`:269`–`:284`) and its
+  holder paragraph (`:320`–`:333`); DECISIONS.md's landing-156 note (`:22145`–`:22154`), which holds the indirection
+  walk (`record_refs_through_indirection`) the brief's quote ends with; the registry's DEF-289 and DEF-296 … DEF-310
+  (`meta/roadmap/OPEN_DECISIONS.md`; DEF-311 is not registered at HUNT6); NOTICES rows 156–163. The manager's sets in
+  the Workspace clone's `.work/briefs/`, each checked by `sha256sum -c SHA256SUMS`: `m15-probes-l163/` 60 OK (its 16
+  `r_*.npk`, which the file does not list, equal `m15-roads/`'s byte for byte), `m15-probes-l163-r2/` 60 OK,
+  `m15-roads/` 16 OK, `m15-seeds/` 8 OK, `m15-expect/` 4 OK; with the logs beside them. `m15-probes-q-l163/` is not this
+  family and was not opened.
+
+**The LLVM** (§2; S104). `.work/llvm-20.1.2/bin/llvm-config --version` prints `20.1.2`. The link is `/usr/lib/llvm-20`,
+whose `opt`, `llc`, `ld.lld` and `clang` each print 20.1.2. The bare `opt` on `PATH` is `~/.local/bin/opt`, 20.1.8, and no
+runner uses it: `gen/run.py` and `gen/snip.py` put `<--llvm>/bin` first. Every runner in M15 names
+`--llvm .work/llvm-20.1.2` and runs with `TMPDIR` = `/home/randy/Team/TMP/M15/tmp`.
+
+**HUNT6** (§2; S103). `git -C .work/nitpick fetch origin` at 23:19:56–23:19:57 EDT moved the compiler's `origin/main`
+from `249eae9` to `1480ca8` (`1480ca81aa4d9d82976149f7f6ae5e44b2c5c640`, 2026-10-26 14:05:02 -0400, "1.6.1e, landing
+163: DEF-306 + DEF-308 …"), written to `.work/H6.full` and `.work/H6`, which were absent. `a5693a6` (156) is an
+ancestor of it and `1480ca8` is HUNT6 itself, so neither STOP check fires. No commit lies past `1480ca8`, and HUNT6's
+NOTICES has no `| 164 |` row: **no landing past 163**. (management_4's word, in the release, was that harness 164
+`3adfc05` would land about 00:15 EDT; the fetch came before it, so §7 measures any later landing at its own tree.) The
+landings from REG155 to HUNT6, from `meta/NOTICES.md` at HUNT6:
+- 156 `a5693a6` DEF-296 and DEF-289's first face; 157 `5cc1fb9` DEF-289's second face; 158 `8e33737` DEF-300;
+- 159 `51b6d82` DEF-297 and DEF-301 with DEF-303; 160 `954c21a` DEF-302; 161 `249eae9` DEF-305;
+- 162 `c79a2c0` DEF-304; 163 `1480ca8` DEF-306 + DEF-308.
+
+**REG155** (§2; S104) is `02856cf` (`02856cfc72463f105da70bd9c23c7f2cc1bf8151`, 2026-10-23 09:34:46 -0400, landing 155:
+DEF-288 and DEF-290), in `.work/REG.full` and `.work/REG`.
+
+**Both built** by the brief's commands, each alone under the lock, in the worktrees `.work/hunt6` and `.work/reg155`:
+HUNT6 in 64.8 s (23:20:28–23:21:33 EDT), REG155 in 66.0 s (23:21:44–23:22:50). Each log's `npkg/main.npk: exit 2` line
+is the normal one.
+
+| product | HUNT6 `1480ca8` | notice 164's row | REG155 `02856cf` | notice 156's row |
+|---|---|---|---|---|
+| `npkc.ll` | 33 468 275 / `fbd42f41e1ea4828…` | equal | 32 973 616 / `8f76731c6fc1c7ca…` | equal |
+| `npkc.o` | 13 844 112 / `faec89d321a8ce6b…` | equal | 13 689 368 / `9031ecebf6fbdbe9…` | equal |
+| `npkrt.o` | 72 656 / `c8e5033ad17c70f8…` | equal | 72 656 / `c8e5033ad17c70f8…` | equal |
+| `builder.o` | 12 067 840 / `5870b02dcf97950c…` | equal | 12 067 840 / `5870b02dcf97950c…` | equal |
+| `npkc` | 11 970 864 / `7f7b2ab1b1d322dd…` | same size, not compared | 11 843 192 / `32dcfb0b084c60b5…` | same size, not compared |
+| `builder` | 10 402 536 / `98f91fec7da79220…` | same size, not compared | 10 402 536 / `98f91fec7da79220…` | same size, not compared |
+
+The rows are the workbench BOARD's "THE BASELINE NOTICE 164 MUST QUOTE" (notice 163's rows at `1480ca8`) and "THE
+BASELINE NOTICE 156 MUST QUOTE" (notice 155's rows at `02856cf`), read in the Workspace copy (read only) and compared
+to 64 hex by a script that only reads. A linked binary's sha differs between builds (the brief), so `npkc` and `builder`
+are not compared.
+
+**Canaries** (M0.6), one batch under the lock (23:22:58, 0.9 s), by `$L python3 gen/snip.py commission/canary.npk
+commission/canary_malformed.npk --at hunt6 reg155 --llvm .work/llvm-20.1.2`: at HUNT6 and REG155, `canary.npk` gives
+npkc 0 and runs 0/0, and `canary_malformed.npk` gives npkc 1 with `NITPICK-PARSE-001` ("canary_malformed.npk:3:20:
+expected a type").
+
 ## Environment
+
+*(session 13, measured 2026-10-28 23:19:31 EDT; M15 run here, on the Team seat: the start check (a))*
+
+```
+uname -a:  Linux AriaX-DEV-1 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+nproc:     48
+free -g:   Mem 157 total, 31 used, 53 free, 125 available; Swap 15 (1 used)
+df -h .:   /dev/mapper/ariax--vg-ariax--lv  6.9T  2.5T used  4.1T avail (38%)
+os:        Linux Mint 22.3 (Ubuntu 24.04 base)
+python3:   Python 3.12.3
+git:       2.43.0
+llvm:      .work/llvm-20.1.2 -> /usr/lib/llvm-20 (20.1.2; S48, S70, S104); the bare `opt` on PATH is 20.1.8, unused
+earlyoom:  active
+```
+
+The author's machine, shared with the compiler seat, the library agents and the Workspace's other seats.
+Every build and every run takes the Team seat's harness lock (`flock -w 300 -E 75` on
+`/home/randy/Team/TMP/harness.lock`) for one build, batch or runner at a time, at 4 jobs; library work outranks
+the fuzzer on it, and on `flock`'s exit 75 the same command is run again, at most six attempts in a row (S101). Every
+runner runs with `TMPDIR` = `/home/randy/Team/TMP/M15/tmp`.
 
 *(session 12, measured 2026-10-25 03:02:45 EDT; M14 run here, on the Team seat: the start check (a))*
 
@@ -3535,6 +3649,65 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   argues for neither. `gen/minimize.py` cannot keep a read whose deletion leaves the verdict unchanged, so four
   reproducers keep their bodies whole under its failsafe, as the README records. The candidate goes to the fuzzer's
   manager for D6 through the dispatcher.
+- **S101 — M15 is the DEF-296 family, on `nitpick-fuzz_5`'s brief**
+  `/home/randy/Workspace/REPOS/nitpick-fuzz/.work/briefs/fuzz-m15-brief-2026-10-28.md` (387 lines with a trailing
+  newline, sha256 `e0e6a554e07694be1ace88c45e7108c1d453d61a59e2c846e47721fa45339b84`, read by `sha256sum` at 23:13:22 EDT on
+  2026-10-28), verified READY by management_4 and released by `nitpick-fuzz_5` at 23:02 on 2026-10-28 (S102 quotes the
+  release). It comes from management_3's GO for the week (S102), which makes the DEF-296 family M15, run on the Team as M14
+  was. PLAN.md ends at M11; M12, M13 and M14 came from briefs like this one, and PLAN.md is not edited (rule 9). New
+  findings are numbered from F-054, decisions from S101. The session is the brief's one worker, dispatched on the Team seat
+  by its manager, Ailp-team_24, at 23:12:50 EDT on 2026-10-28, in lane 2: no sub-agents, at most 4 jobs. The fuzzer's
+  manager, `nitpick-fuzz_5`, reviews `local-m15` and merges it, and D6-verifies every candidate first, each reported
+  through the dispatcher. The brief's `.work/briefs/` paths are the Workspace clone's, read there with read-only tools
+  (the dispatcher's ruling, in the Log); the copies M15 takes from them are made with `cat` into this clone and checked
+  against their `SHA256SUMS`. **The lock:** library work outranks the fuzzer on the Team seat's harness lock, so each
+  build, canary batch, probe batch and runner takes it alone, with the bookkeeping between; on `flock`'s exit 75 the same
+  command is run again, at most six attempts in a row (the dispatcher's limit), and a sixth 75 is a §9 stop.
+- **S102 — management_3's GO for the week** (the brief's §1, step 7), as the dispatch relays it, verbatim as it reached
+  the Team seat at 20:11:29 on 2026-10-28:
+  > management_3 -> Ailp-team_23, Wed 2026-10-28 20:11:21: GO for the Team's week (it began Wed 03:00). This is the slot message you were waiting on.
+  > - **Lane 1:** T7fix3 (sonnet) in the order settled at Sun 22:40:44, plus O-N42's one-line rename if it fits. Then T7v5, scoped to it. libs_27 rules on it before 0.0.0's first execution dispatch.
+  > - **Lane 2:** parse 0.0.2 as a new chain (libs_25's GO of Sun 10:45 stands).
+  > - **Diogenes' code part** on team/diogenes-0.0-gate: U7–U9, `--max`, and D8bv's findings 1–4, 7 and 8 (docs, help text and tests, plus a verifier). You write its brief. Put management's note in it: M6b passed by 0.1 s, so get the 75 s bound's derivation and the design's worst case. If the worst case can reach 75 s, fix the mechanism or the bound, so the gate isn't a coin flip on a re-run.
+  > - **M15** (fuzz's DEF-296-family generator), run on the Team as M14 was. Its Max side is fuzz_4's brief and review, so agree the slot with nitpick-fuzz_4 (`uds:/run/user/1000/cc-socks/1268635.sock`).
+  > - **Budget:** the Team week is ours to spend in full. Pace ≈ 14 % a day (≈ 85 % by Tue 03:00), and start nothing new from 98 %. Last week's estimates ran 1.5–2× low, so size from that. Each chain's Max-side review (libs_27, diogenes_3, fuzz_4) costs Max points, so batch your lines to them.
+  > - **Lines to management:** your order and lane plan with a /usage reading, then each DONE, PASS, FAIL or stop.
+
+  The dispatch adds: "Those words stand as the go for HUNT6 = the compiler's origin/main at your fetch. No LLVM go is
+  needed (S104). The GO names nitpick-fuzz_4 for the slot; the fuzz seat has been nitpick-fuzz_5 since 20:19:40 on
+  2026-10-28. The management seat has been management_4 since 21:51, and nothing in the plan or the lines changed." This
+  is the recorded go §1 step 7 looks for. **Beside it, the release** of HUNT6, REG155, the LLVM, the branch and the
+  expectations table: `nitpick-fuzz_5`'s word to the Team seat, verbatim as it arrived at 23:02:44 on 2026-10-28:
+  > [nitpick-fuzz_5 → Ailp-team_24, 2026-10-28 23:02 EDT] M15 is READY — go. (brief verified READY by management_4, no further credits round.)
+  >
+  > Brief: .work/briefs/fuzz-m15-brief-2026-10-28.md
+  > sha256: e0e6a554e07694be1ace88c45e7108c1d453d61a59e2c846e47721fa45339b84  (387 lines, trailing newline — verify this before you start)
+  >
+  > Run M15 exactly per the brief. Parameters:
+  > - HUNT6 = your `git fetch origin && origin/main` at fetch time (≥163 = 1480ca8). NB from management_4: harness 164 (3adfc05) lands green ~00:15 EDT; if your fetch is after that, HUNT6 carries 164 — brief §2 handles it (record it from NOTICES.md, compare against its own ladder row, or record the digests if BOARD.md has no row yet).
+  > - REG155 (recall leg) = 02856cf.
+  > - LLVM 20.1.2 — your clone's `.work/llvm-20.1.2/bin` (brief §5 gate S104 must print 20.1.2 or STOP).
+  > - branch: local-m15.
+  > - The single source of measured verdicts is the expectations table: copy `m15-expect/m15_expect.tsv` + `m15_expect_check.py` into `gen/` (brief §5). The checker must print "104 rows, 0 mismatches" before any grid run.
+  >
+  > When the grid + recall gate run completes, report back and I'll D6-review on my own builds. If you can't read that brief path on your side, tell me and I'll ship the file to you.
+- **S103 — HUNT6 is `1480ca8`** (`1480ca81aa4d9d82976149f7f6ae5e44b2c5c640`, 2026-10-26 14:05:02 -0400), the compiler's
+  `origin/main` at this session's fetch (23:19:57 EDT on 2026-10-28): landing 163, DEF-306 + DEF-308. It carries landing
+  156 (`a5693a6`, DEF-296) and is landing 163 itself, the brief's floor. No landing lies past 163 (no commit past it, no
+  `| 164 |` row in its NOTICES), so there are none to record. From REG155 it carries 156 (DEF-296, DEF-289's first face),
+  157 (DEF-289's second face), 158 (DEF-300), 159 (DEF-297, DEF-301, DEF-303), 160 (DEF-302), 161 (DEF-305), 162 (DEF-304)
+  and 163 (DEF-306, DEF-308), as the M15 section lists. Its `npkc.ll`, `npkc.o`, `npkrt.o` and `builder.o` equal notice
+  163's ladder row, the workbench BOARD's "THE BASELINE NOTICE 164 MUST QUOTE". `.work/H6.full` is written once, so a
+  resume never re-points a recorded run at a newer `origin/main`.
+- **S104 — REG155 = `02856cf` is the regression leg; `c3bdae2` is not run; LLVM 20.1.2 throughout** (the brief's §2).
+  REG155 (`02856cfc72463f105da70bd9c23c7f2cc1bf8151`, landing 155: DEF-288 and DEF-290) is the compiler before DEF-296's
+  first fix (156), where the family is a live use-after-free: the recall leg. `c3bdae2` cannot exercise the family: the
+  manager measured `p02_pp_pl_dir`, `q05_pp_tl_dir_in` and `q17_pp_fld_cres` each `npkc=1 NITPICK-PARSE-001` there
+  (`.work/briefs/m15-c3bdae2-parse.log`: the pointer-local, slice and `fixed uint8[]` syntax postdates the baseline), so it
+  is not run, nor are HUNT3, HUNT4 and HUNT5. The LLVM is PLAN.md:10's own pin, which needs no go: `.work/llvm-20.1.2`
+  (the machine's `/usr/lib/llvm-20`, S48, S70) prints `20.1.2`, and its `opt`, `llc`, `ld.lld` and `clang` are 20.1.2; the
+  manager's probes ran under the same toolchain (`.work/briefs/m15-llvm-versions.log`). REG155's `npkc.ll`, `npkc.o`,
+  `npkrt.o` and `builder.o` equal notice 155's ladder row, "THE BASELINE NOTICE 156 MUST QUOTE".
 
 ## Log
 
@@ -3809,3 +3982,30 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(5) The close:** REPORT.md §15 with a pointer in its opening; P1–P9 each ticked; the gate holds in every box;
     the scratch removed; **M14 is ticked**. The session stops here, as the brief says, and its summary goes to the
     dispatcher, F-053 with it for the fuzzer's manager's D6 verification.
+- 2026-10-28 (session 13, the Team seat, branch `local-m15`): **M15, the DEF-296 family**, on `nitpick-fuzz_5`'s brief
+  (S101), dispatched at 23:12:50 EDT by Ailp-team_24.
+  - **A stop, and the dispatcher's ruling.** After the brief's sha256 (23:13:22), while the manager's probe sets in the
+    Workspace clone were being read, one Bash command was refused before any of it ran. It ended in `sed -n
+    '/^func:main/,/^};/p' m15-probes-l163-r2/q15_pp_cbv_dir.npk`, a read, and the Team project's deny rule
+    `Edit(//home/randy/Workspace/**)` refused it ("sed to '…/q15_pp_cbv_dir.npk' was blocked by a deny rule"): the
+    harness counts a `sed` naming a path as an edit of it. The dispatch says "If it refuses anything, STOP and report it;
+    never work around a refusal", so the session stopped with nothing built, switched or written, and reported in §9's
+    block (the `date` read for it: 23:17:40). It disclosed that before the stop it had listed `m15-grid-probes/`'s names
+    and checked its `SHA256SUMS` (42 OK), listed `m15-probe-gen/`'s names and read `m15-grid-l163l155.README`, none of
+    which the brief names, and had printed probe files' road lines with `awk`.
+    **The ruling**, Ailp-team_24 at 23:18:58: the stop was right; resume at §1 with the context as it is. The Team's rules
+    forbid any write under `/home/randy/Workspace` but allow reading there, and the deny rule guards writes, counting
+    `sed` and `cp` as edits whenever a Workspace path is named, even for a read. On a Workspace path, only the Read tool,
+    `cat`, `head`, `tail`, `wc`, `ls`, `sha256sum` (with `-c`), `cmp`, `/usr/bin/grep` and `python3 -B` scripts that only
+    read; never `sed`, `cp`, `mv`, `awk`, `tee`, `rsync`, `install` or an in-place tool, and never a redirect into it. The
+    brief's copies are made with `cat SRC > DST`, one file at a time into this clone, each checked against its
+    directory's `SHA256SUMS`, and the copies are what is read and run. Only the sets the brief names are read
+    (`m15-grid-probes/` and `m15-probe-gen/` are not among them, so nothing more is opened there). A further refusal is a
+    stop. The precedent: an earlier Team seat copied the compiler pin out of the Workspace with `cat`, because `cp` was
+    refused, in the Team seat's log of 2026-10-12 (the setup), the date as the dispatcher's correction gives it.
+  - **(1) The start checks** passed: GitHub fetched, `main` fast-forwarded `e289864` → `70a0d8b`, `70a0d8b` an ancestor,
+    M14 ticked, the tree clean before the switch, `local-m15` new at 23:19:31. The go is S102, verbatim, with the release
+    beside it.
+  - **HUNT6 is `1480ca8`**, landing 163, carrying 156; no landing past 163 at the fetch (23:19:57; S103). REG155 is
+    `02856cf` (S104). Both built under 20.1.2, in 64.8 s and 66.0 s; each one's `npkc.ll`, `npkc.o`, `npkrt.o` and
+    `builder.o` equal its ladder row (notice 164's, notice 156's). The canaries pass at both.
