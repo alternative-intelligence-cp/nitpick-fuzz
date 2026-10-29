@@ -108,7 +108,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 3 the housekeeping (1b): F-053's README number (13 → 12); `KNOWN_DEFECTS.md`'s DEF-296 family block, its rows read at HUNT6's registry (the cells column is box 7's); M14v's F3 and F5 notes
   - [x] 4 learn by snippet at HUNT6 and REG155: the expectations table copied and checked (104 rows, 0 mismatches); 96 probes, every hazard probe at its table row at both compilers, every twin clean; every grid15 cell one of the probed programs
   - [x] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run: 100 cells (S 16, R 64, W 20), 1 356 skipped of 1 440 combinations, `--selfcheck` passing; `--selftest` 18 of 18 (S105, S106)
-  - [ ] 6 the runs: grid15 at HUNT6 twice and at REG155; the recall gate
+  - [x] 6 the runs: grid15 at HUNT6 twice (0 of 100 cells differ) and at REG155; the recall gate exits 0, every check passing; 14 hazard cells `ACCEPTED:DEFECT:uaf` at HUNT6, the table's eight `H6/leak` keys
   - [ ] 7 triage, through M5's five steps; the family block's cell ids
   - [ ] 8 the gate holds in every box; `REPORT.md` §16; the scratch removed
 
@@ -2812,6 +2812,47 @@ expected a type").
   grid), and `classify15.py` and its gate were tried once on synthetic records made from the table's rows in the Team
   scratch (no compiler ran; gate exit 0, 14 findings, as the table predicts). No cell of `cells15/` was compiled or run.
 
+**The runs** (the brief's §6), by its block as written (a script in the Team scratch, each runner alone under the lock,
+no `flock` 75; `.work/run15.log`), after commit M15 (2) `51337dc`. The trees were `1480ca8` and `02856cf`, their HEADs
+equal to `.work/H6.full` and `.work/REG.full`, and `gen/grid15.py` and `gen/classify15.py` equal to HEAD; the grid
+was regenerated, `--selfcheck` passed and `--selftest` gave 18 of 18 first.
+
+| run | wall | `ACCEPTED:DEFECT:uaf` | `clean` | `refused` | generated |
+|---|---|---|---|---|---|
+| HUNT6 `1480ca8`, run 1 (the record) | 23:53:28–23:53:36 | 14 | 42 | 44 | 100 |
+| HUNT6, run 2 (`.work/shake15/`) | 23:53:36–23:53:43 | 14 | 42 | 44 | 100 |
+| REG155 `02856cf` | 23:53:43–23:53:52 | 48 | 42 | 10 | 100 |
+
+- **HUNT6's two runs agree:** `compare13` lists 0 of 100 cells, exit 0.
+- **By section**, at HUNT6: S 6 `uaf` (the six candidates) and 10 `refused` (the eight DEF-296 faces, `BORROW-015`;
+  F-050's two, `BORROW-002`); R 5 `uaf` (`tl`, `cps` and `cpp` inner; `cbv` and `cbp`), 27 `refused`, 32 twins clean;
+  W 3 `uaf` (`cres`, `cresc`, `cresm`), 7 `refused`, 10 twins clean. At REG155: S 14 `uaf` (the eight faces at
+  170/170, the candidates at 70/70) and 2 `refused` (F-050's); R 26 `uaf`, 6 `refused` (`bare`, `fld`, `cad`, `mth`,
+  and `cps` and `cpp` in one block), 32 clean; W 8 `uaf`, 2 `refused` (`callee`, `whole`), 10 clean. Every refusal
+  of a hazard cell is `NITPICK-BORROW-015` at both compilers but F-050's `NITPICK-BORROW-002`.
+- **The recall gate**, `python3 gen/classify15.py --cells cells15 --recall results/1480ca8/classified15.jsonl
+  results/02856cf/classified15.jsonl`, **exit 0**:
+  ```
+  ok  COMMIT — the HUNT6 file's commit 1480ca8 (pinned 1480ca8), the REG155 file's 02856cf (pinned 02856cf)
+  ok  COVERAGE — 100 index ids; HUNT6 100 records (0 missing, 0 extra, 0 doubled), REG155 100 records (0 missing, 0 extra, 0 doubled)
+  ok  SEED-RECALL — 8 of the 8 named DEF-296 seeds ACCEPTED:DEFECT:uaf at REG155
+  ok  LEAK-RECALL — 48 of 48 reg155=="leak" cells ACCEPTED:DEFECT:* at REG155
+  ok  SILENT-PASS — 0 hazard cells ACCEPTED:clean/other/timeout at either compiler (of 58)
+  ok  TWIN — 42 of 42 twins clean at both compilers
+  ok  CODE-H6 — 44 of 44 hazard cells refused at HUNT6 name every expected code
+  ok  CODE-REG — 10 of 10 hazard cells refused at REG155 name only NITPICK-BORROW- codes
+  ok  UNANCHORED — 0 pp cells with reg155 None refused at both compilers
+  ok  REGRESSION — 0 hazard cells refused at REG155 and ACCEPTED:DEFECT:* at HUNT6
+  FINDINGS: 14 hazard cells ACCEPTED:DEFECT:* at HUNT6 (for triage, not a failure)
+  ```
+  The fourteen: `n019_pp_fld_cres_same`, `n021_pp_fld_cresc_same`, `n023_pp_fld_cresm_same`, `n043_pp_tl_dir_inner`,
+  `n069_pp_cps_dir_inner`, `n073_pp_cpp_dir_inner`, `n075_pp_cbv_dir_same`, `n077_pp_cbp_dir_same`, each 70/70 at
+  both compilers, and the six candidate seeds `q05`, `q11`, `q12`, `q17`, `q19`, `q20` (the same six keys), 70/70 at
+  both: the table's eight `H6/leak` keys, no other. Every hazard verdict of the two record runs is the table's row for
+  its key (116 records, the 58 hazard cells at both compilers, 0 differ, by a scratch comparison).
+- **Disclosed:** a `git -C .work/nitpick fetch origin` (23:53:39–23:53:40, for §7) ran while HUNT6's run 2 was
+  running. A fetch moves no worktree's HEAD or files, and the compiler's `origin/main` was still `1480ca8`.
+
 ## Environment
 
 *(session 13, measured 2026-10-28 23:19:31 EDT; M15 run here, on the Team seat: the start check (a))*
@@ -4149,3 +4190,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     s): every hazard probe at its table row at both compilers, every twin clean, `cresf` `TYPE-024`. grid15, 100 cells
     (S 16, R 64, W 20), each grid cell one of the probed programs; `--selfcheck` passes; classify15's `--selftest` 18
     of 18 (S105, S106). Committed as M15 (2), before any grid15 run.
+  - **(3) The runs** (23:53:28–23:53:52): grid15 at HUNT6 twice, agreeing in all 100 cells, and at REG155; the recall
+    gate exits 0 with every check passing. HUNT6 accepts the table's eight `H6/leak` keys and their six candidate
+    seeds (70/70), and refuses every other hazard cell with `BORROW-015` (F-050's with `BORROW-002`); every twin is
+    clean at both compilers; REG155 reads the poison in all 48 `reg155=="leak"` cells. Committed as M15 (3).
