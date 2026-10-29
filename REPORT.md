@@ -91,6 +91,16 @@ run on two legs (-O0, and through `opt -O2`) at two compilers.
   30). One candidate, **F-053**: a `wild` `NULL` load whose value the text reads but that decides nothing on the path
   run is sunk or deleted at -O2 (107/0), reported apart as the check of §27 (D-364). At HUNT5 F-050 and F-052 are
   fixed, and F-051 is the permitted disagreement.
+- **M15, the DEF-296 family (section 16).** This is a sweep, at HUNT6 `1480ca8` (landing 163) with REG155 `02856cf`
+  as the recall leg, under LLVM 20.1.2. It covers the roads that store a view of a pointer parameter's pointee into the
+  frame's storage, and the writes that then free the pointee. grid15 has 100 cells (1 356 combinations skipped), and
+  the recall gate passes every check. Every twin is clean at both compilers, and nothing regressed. At HUNT6, 14
+  cells (eight keys) read freed memory in safe code. Each key is a shape still OPEN in the registry, so M15 files no
+  new finding:
+  - DEF-298 (`cbv`, `cbp`);
+  - DEF-299 (`cps`, `cpp` and `tl` in an inner block);
+  - DEF-309 (`cres`);
+  - DEF-305's parameter-rooted gap (`cresc`, `cresm`).
 
 ## 1. The two compilers
 
@@ -2006,4 +2016,346 @@ python3 gen/run_findings.py F-050 F-051 F-052 --hunt .work/hunt5 --base .work/ba
 python3 gen/run_findings.py F-053 --hunt .work/hunt5 --base .work/base --llvm .work/llvm-20.1.2 --name VERDICTS.txt
 ```
 `gen/run.py` appends to its `--out` and skips the cells already there, so a re-run writes to a fresh path and is
+compared with `python3 gen/compare13.py`.
+
+## 16. M15 — the DEF-296 family
+
+M15 is the task after M14 (S101). It sweeps the roads by which a VIEW of a pointer parameter's pointee
+(`string_bytes(p.s)` with `S->:p`) can be stored into the frame's own storage, and the writes by which that pointee can
+then be freed. The aim is to confirm that the fixes of landings 156–163 hold at HUNT6 and to find any road still open.
+Every hazard cell is safe code, with no `wild`, no `=>!` and no raw pointer arithmetic. So a cell that is accepted and
+reads the allocator's poison is a defect by `CLAUDE.md`, reported normally, not apart as M14's were. M15 ran on
+2026-10-28 and 29, on the Team seat, on branch `local-m15`. It ran one harness at a time under the seat's lock, at 4
+jobs, under LLVM 20.1.2, from the fuzzer's manager's brief (`fuzz-m15-brief-2026-10-28.md`, sha256 `e0e6a554…`, S101).
+
+### 16.1 The compilers
+
+| role | commit | LLVM | build | `npkc.ll` bytes / sha256 | `npkc.o` | `npkrt.o` | `npkc` |
+|---|---|---|---|---|---|---|---|
+| HUNT6 | `1480ca8` (`1480ca81aa4d9d82976149f7f6ae5e44b2c5c640`) | 20.1.2 | 64.8 s | 33 468 275 / `fbd42f41e1ea4828…`, equal to notice 164's ladder row | 13 844 112 / `faec89d321a8ce6b…`, equal | 72 656 / `c8e5033ad17c70f8…`, equal | 11 970 864 / `7f7b2ab1b1d322dd…`; the row's is the same size |
+| REG155 | `02856cf` (`02856cfc72463f105da70bd9c23c7f2cc1bf8151`) | 20.1.2 | 66.0 s | 32 973 616 / `8f76731c6fc1c7ca…`, equal to notice 156's ladder row | 13 689 368 / `9031ecebf6fbdbe9…`, equal | 72 656 / `c8e5033ad17c70f8…`, equal | 11 843 192 / `32dcfb0b084c60b5…`; the row's is the same size |
+
+- **HUNT6** is the compiler's `origin/main` at the session's fetch: 23:19:57 EDT, committed 2026-10-26 14:05:02 -0400.
+  It is landing 163 (DEF-306 + DEF-308) and carries landing 156 (`a5693a6`, the brief's floor).
+  - The landings from REG155 to HUNT6 are 156 (DEF-296, DEF-289's first face), 157 (DEF-289's second face), 158
+    (DEF-300), 159 (DEF-297, DEF-301, DEF-303), 160 (DEF-302), 161 (DEF-305), 162 (DEF-304) and 163 (DEF-306, DEF-308)
+    (S103).
+  - **No landing past 163** is in HUNT6, or was in the compiler's `origin/main` at any later fetch. The last fetch
+    was at 00:07:42 EDT on 2026-10-29. management_4's word was that landing 164 (`3adfc05`: DEF-309, DEF-310, DEF-311) would land
+    about 00:15 EDT.
+  - The ladder rows are the workbench BOARD's "THE BASELINE NOTICE 164 MUST QUOTE" and "… 156 MUST QUOTE", and
+    `builder.o` equals them too.
+- **REG155** is landing 155 (DEF-288, DEF-290). It comes before DEF-296's first fix, so it is the recall and
+  regression leg. `c3bdae2` is not run, because the family's spellings are `PARSE-001` there (the manager's
+  measurement). HUNT3, HUNT4 and HUNT5 are not run either (S104).
+- **LLVM 20.1.2 throughout**, PLAN.md:10's own pin (S104): `.work/llvm-20.1.2` is the machine's `/usr/lib/llvm-20`,
+  and its `llvm-config` prints 20.1.2. The canaries pass at both compilers.
+- **The go** (S102) is management_3's GO for the Team's week (2026-10-28 20:11:21): "**M15** (fuzz's DEF-296-family
+  generator), run on the Team as M14 was." The dispatch adds: "Those words stand as the go for HUNT6 = the
+  compiler's origin/main at your fetch. No LLVM go is needed (S104)." `nitpick-fuzz_5`'s release (23:02:44) is
+  quoted beside it.
+
+### 16.2 The housekeeping
+
+Commit M15 (1b), wording only:
+- **F-053's README** now says a deleted-load implementation would answer 12, not 13 (M14v's F6). 12 is measured at
+  `c3bdae2`, by `ctl_wild_used_cmp` and grid14's nine `int64` K cells, each at 107/12.
+- **`KNOWN_DEFECTS.md` gains the DEF-296 family block.** It has one row for each of DEF-289 and DEF-296 … DEF-311,
+  with the shape and status read in HUNT6's registry. The rows are labelled as the compiler seat's registrations,
+  measured where a grid cell exists by M15, and F-050 = DEF-272 is cross-referenced, not repeated. The brief's §3
+  labels for DEF-302, DEF-304, DEF-306 and DEF-310 do not match HUNT6's registry, so the rows follow the registry and
+  the block says so.
+- **M14v's F3 and F5** each get a one-line note: under F-053's "Not registered" entry, and after 15.6.
+
+M15 (4) filled the block's cells column (16.8). No committed record changed.
+
+### 16.3 The rule under test, and the recall gate
+
+**The rule** is MEMORY_REFERENCE.md's D-325 paragraph at HUNT6 (`:269`–`:284`). Every grid15 cell carries it verbatim
+as its `rule`, and `--selfcheck` re-reads it from `1480ca8`. A view of a binding is a shared party on its root from
+the holder's declaration to the end of its block, and every write-capable access of what it views refuses
+(`NITPICK-BORROW-015`). Since landing 156 (DEF-296), a store through an indirection lands where the indirection points
+(`record_refs_through_indirection`). So once a view of `p`'s pointee is stored anywhere this frame owns, the pointee
+is frozen while the holder lives, and a write that frees the old body (`p.s = …`) must refuse.
+
+**The hazard and its control.** Every hazard cell stores the view by one road, frees the pointee by one write, and then
+reads the stored view through grid13's `OBS_V`. The observer gives 21 for the original byte, so `main` exits 0, and 70
+for the free poison 170. The twin stores `string_bytes("abcdef")` instead, an owned literal that is never freed, and
+must run to 0. A wrong analysis, one that flags the store road rather than the stored borrow, refuses the twin.
+
+**The recall gate**, `gen/classify15.py --recall` (S106), runs ten checks and prints every failing check's tag. It
+exits 3 on `REGRESSION`, 1 on any other tag, and 0 otherwise. The ten checks:
+- `COMMIT`: each file is tied to its pinned sha;
+- `COVERAGE`: each file covers every index id;
+- `SEED-RECALL`: the eight DEF-296 seeds are `ACCEPTED:DEFECT:uaf` at REG155;
+- `LEAK-RECALL`: every `reg155=="leak"` cell is accepted and reads freed memory at REG155;
+- `SILENT-PASS`: no hazard cell is `ACCEPTED:clean`, `other` or `timeout` at either compiler;
+- `TWIN`: every twin is clean at both compilers;
+- `CODE-H6`: every expected code is named at HUNT6;
+- `CODE-REG`: only `BORROW-` codes are named at REG155;
+- `UNANCHORED`: no unanchored hazard is refused at both compilers;
+- `REGRESSION`: no hazard cell is refused at REG155 and accepted at HUNT6.
+
+It also lists the FINDINGS, the hazard cells accepted at HUNT6. `--selftest` builds synthetic records in memory and
+proves that each check fires with exactly its own tag set and exit code: 18 cases, 18 pass (PROGRESS.md has the
+output).
+
+### 16.4 grid15
+
+`gen/grid15.py` imports `Prog`, `X`, `FAILSAFE13`, `OBS_V`, `Skip` and `WILD_RE` from grid13. It defines its own
+`S = { string:s; }` and `Holder = { (fixed uint8[]):v; int32:k; }`.
+
+**The axes:**
+- R, 20 store roads: `bare`, `fld`, `pl`, `pld`, `plw`, `pf`, `tl`, `sle`, `rge`, `lst`, `cad`, `cpl`, `csl`,
+  `cslv`, `cps`, `cpp`, `cbv`, `cbp`, `mth` and `mpl`;
+- W, 12 freeing writes: `dir`, `whole`, `alias`, `walias`, `callee`, `calias`, `cwhole`, `method`, `cres`, `cresc`,
+  `cresm` and `cresf`;
+- B, the placement: `same`, or `inner` (the store in an inner block that ends before the write);
+- V, the view: `pp` (the hazard), `lo` (deferred) and `twin`.
+
+PROGRESS.md's M15 section spells out every road and write.
+
+**Where the expectations come from:**
+- A cell's `expect` is a reading of the rule, written before the first run: `REFUSE` for a hazard, `SAFE` (exit 0)
+  for a twin.
+- Its `expect_codes` and `reg155` come from the manager's expectations table, `gen/m15_expect.tsv`. The table has 104
+  rows, each citing the log line it was read from, and `m15_expect_check.py` prints "104 rows, 0 mismatches". No cell
+  has a code override.
+- Every spelling was compiled and run at both compilers before any grid run. Every grid cell equals a probed program
+  byte for byte, apart from its `mod:` line.
+
+| section | what | expectation (before any run) | generated |
+|---|---|---|---|
+| S | the eight DEF-296 faces (the compiler's `.internal/handoff_35/probes_sib/`, through the manager's `m15-seeds/`), F-050's two holes, and the six candidates (`m15-probes-l163-r2/`), byte for byte with their sha256 | `REFUSE`, `BORROW-015` (F-050's `BORROW-002`); `reg155` "leak" (F-050's "refuse") | 16 |
+| R | the 20 roads × B (`same` for all 20, `inner` for the 12 indirection roads) × V (`pp`, `twin`), with W = `dir` | `pp` `REFUSE` `BORROW-015`; twin `SAFE`, 0 | 64 |
+| W | R = `fld` × the ten writes `whole` … `cresm` × `same` × V | the same | 20 |
+| **all** | 1 440 combinations (20 × 12 × 2 × 3) and 16 seeds: 84 emitted, **1 356 in `cells15/SKIPPED.txt`** | 58 `REFUSE` (42 `pp` keys and 16 seeds), 42 `SAFE` | **100** |
+
+**The skip reasons:**
+- 480 have the `lo` view, which is deferred to a later milestone;
+- 760 have a write other than `dir` on a road other than `fld`;
+- 80 have `cresf`: `(raw ids(p)).s = …` is `TYPE-024`, not a place;
+- 36 have an inner placement on a road without one: `bare`, `fld`, `cad`, `csl`, `rge`, `mth`, `cbv` and `cbp`.
+
+**The exit codes seen:** 0 for an intact view, 70 for the poison read through `OBS_V`, and 170 for the seeds' own
+observer. 22 to 25 never occur.
+
+### 16.5 Results by section and compiler
+
+From `results/<commit>/classified15.jsonl`. In each run, generated = the sum of the class counts, and no cell is
+`LOUD`, `CRASH`, `timeout` or `other`. HUNT6's two runs agree in all 100 cells.
+
+| class | S at HUNT6 | R at HUNT6 | W at HUNT6 | **HUNT6** | S at REG155 | R at REG155 | W at REG155 | **REG155** |
+|---|---|---|---|---|---|---|---|---|
+| `ACCEPTED:DEFECT:uaf` | 6 | 5 | 3 | **14** | 14 | 26 | 8 | **48** |
+| clean | | 32 | 10 | **42** | | 32 | 10 | **42** |
+| refused | 10 | 27 | 7 | **44** | 2 | 6 | 2 | **10** |
+| **generated** | **16** | **64** | **20** | **100** | **16** | **64** | **20** | **100** |
+
+**By road**, for the `pp` cell with W = `dir`. In this table "refused" is `BORROW-015`, "70" is `ACCEPTED:DEFECT:uaf`
+at 70/70, and each column gives HUNT6 / REG155:
+
+| R | one block | inner block | R | one block | inner block |
+|---|---|---|---|---|---|
+| `bare` | refused / refused | — | `cad` | refused / refused | — |
+| `fld` | refused / refused | — | `cpl` | refused / 70 | refused / 70 |
+| `pl` | refused / 70 | refused / 70 | `csl` | refused / 70 | — |
+| `pld` | refused / 70 | refused / 70 | `cslv` | refused / 70 | refused / 70 |
+| `plw` | refused / 70 | refused / 70 | `cps` | refused / refused | **70 / 70** |
+| `pf` | refused / 70 | refused / 70 | `cpp` | refused / refused | **70 / 70** |
+| `tl` | refused / 70 | **70 / 70** | `cbv` | **70 / 70** | — |
+| `sle` | refused / 70 | refused / 70 | `cbp` | **70 / 70** | — |
+| `rge` | refused / 70 | — | `mth` | refused / refused | — |
+| `lst` | refused / 70 | refused / 70 | `mpl` | refused / 70 | refused / 70 |
+
+**By write**, R = `fld`, one block, HUNT6 / REG155:
+- refused / refused: `dir`, `whole` and `callee`;
+- refused / 70: `alias`, `walias`, `calias`, `cwhole` and `method`;
+- **70 / 70**: `cres`, `cresc` and `cresm`.
+
+**The seeds:**
+- The eight DEF-296 faces are refused (`BORROW-015`) at HUNT6 and read 170/170 at REG155.
+- F-050's two holes are refused (`BORROW-002`) at both compilers.
+- The six candidates read 70/70 at both.
+
+Every one of the 42 twins is clean, 0/0, at both compilers.
+
+**The predictions**, from the manager's probes at landing 163:
+- **P1** ✓ `--selfcheck` passes, and no cell is `wild`: every cell's scope is "plain".
+- **P2** ✓ The eight DEF-296 seeds read 170/170 at REG155 (`DEFECT:uaf`) and are refused with `BORROW-015` at HUNT6.
+  F-050's two holes are `BORROW-002` at both compilers.
+- **P3** ✓ At HUNT6 every same-block `pp` road is refused but `cbv` and `cbp`. The other holes are `tl`, `cps` and
+  `cpp` in an inner block, and the writes `cres`, `cresc` and `cresm`. The same-block `cps` and `cpp` and the `fld` ×
+  `cwhole` write are refused. No landing past 163 reached `origin/main` by the last fetch, so nothing is re-measured
+  past 163.
+- **P4** ✓ At REG155 the twelve same-block `dir` roads fixed at 156–159 read 70/70: `pl`, `pld`, `plw`, `pf`, `tl`,
+  `sle`, `rge`, `lst`, `cpl`, `csl`, `cslv` and `mpl`. `bare`, `fld`, `mth` and `cad` are refused. The seeds read
+  170/170.
+- **P5** ✓ All 42 twins are clean at both compilers. `bare`'s hazard is refused at both, and no cell has an
+  `expect_codes` override.
+- **P6** ✓ HUNT6's two runs agree: 0 of 100 cells differ.
+- **P7** ✓ The open DEF-298, DEF-299, DEF-309 and DEF-305 keys are deduplicated and not filed (16.7). There is no new
+  finding, which is inside the prediction of zero to one.
+
+### 16.6 The recall gate
+
+Run as `python3 gen/classify15.py --cells cells15 --recall results/1480ca8/classified15.jsonl
+results/02856cf/classified15.jsonl`, it **exits 0**:
+```
+ok  COMMIT — the HUNT6 file's commit 1480ca8 (pinned 1480ca8), the REG155 file's 02856cf (pinned 02856cf)
+ok  COVERAGE — 100 index ids; HUNT6 100 records (0 missing, 0 extra, 0 doubled), REG155 100 records (0 missing, 0 extra, 0 doubled)
+ok  SEED-RECALL — 8 of the 8 named DEF-296 seeds ACCEPTED:DEFECT:uaf at REG155
+ok  LEAK-RECALL — 48 of 48 reg155=="leak" cells ACCEPTED:DEFECT:* at REG155
+ok  SILENT-PASS — 0 hazard cells ACCEPTED:clean/other/timeout at either compiler (of 58)
+ok  TWIN — 42 of 42 twins clean at both compilers
+ok  CODE-H6 — 44 of 44 hazard cells refused at HUNT6 name every expected code
+ok  CODE-REG — 10 of 10 hazard cells refused at REG155 name only NITPICK-BORROW- codes
+ok  UNANCHORED — 0 pp cells with reg155 None refused at both compilers
+ok  REGRESSION — 0 hazard cells refused at REG155 and ACCEPTED:DEFECT:* at HUNT6
+FINDINGS: 14 hazard cells ACCEPTED:DEFECT:* at HUNT6 (for triage, not a failure)
+```
+**The pairs** over the 58 hazard cells:
+- 14 are accepted at both compilers: the open holes in 16.7.
+- 34 are accepted at REG155 and refused at HUNT6, so a fix landed in (155, 163]. These are 26 `pp` cells and the
+  eight DEF-296 seeds.
+- 10 are refused at both, fixed before 155. These are `bare`, `fld`, `cad` and `mth`, `cps` and `cpp` in one block,
+  `fld` × `callee` and `whole`, and F-050's two.
+- **None is refused at REG155 and accepted at HUNT6, so there is no regression.**
+
+Every hazard verdict of the two record runs is the table's row for its key: 116 records, 0 differ.
+
+### 16.7 Candidates and findings
+
+**M15 files no finding** (S107). HUNT6's fourteen accepted cells are eight keys, and each one's shape is OPEN in
+HUNT6's registry. Under PLAN 5.2 (a) that makes each one known: note the cell id and move on. P7 binds the same way, so
+F-054 is not used.
+
+Each of the eight is `ACCEPTED:DEFECT:uaf`: a use-after-free in safe code at both legs (70/70), at HUNT6 and at REG155
+alike. That is a defect by `CLAUDE.md`, and the compiler seat's registration.
+
+| key | cells | control: the twin, clean at both (and a refused neighbour) | the registry's row at HUNT6 | what governs it |
+|---|---|---|---|---|
+| `pp:cbv:dir:same` | `n075` | `n076` | DEF-298, OPEN: its registered shape r1, a by-value struct parameter's slice field handed on to a storing callee | open at 163; the compiler seat's M3 plan, with DEF-299 |
+| `pp:cbp:dir:same` | `n077` | `n078` | DEF-298, OPEN: the pointer twin it measured at 158 (t298b) | the same |
+| `pp:cps:dir:inner` | `n069`, `q11` | `n070` (`n067`, one block, refused) | DEF-299, OPEN: its registered shape pf | the same |
+| `pp:cpp:dir:inner` | `n073`, `q12` | `n074` (`n071`, one block, refused) | DEF-299, OPEN: the pointer twin it measured at 158 (t299c) | the same |
+| `pp:tl:dir:inner` | `n043`, `q05` | `n044` (`n041`, one block, refused) | DEF-299, OPEN, by the brief's pre-map | the same |
+| `pp:fld:cres:same` | `n019`, `q17` | `n020` | DEF-309, OPEN: a direct whole-pointee write through a call-result pointer | open at 163; landing 164, by the compiler seat's word, not reached by the last fetch |
+| `pp:fld:cresc:same` | `n021`, `q19` | `n022` (`n011`, the named `callee`, refused) | DEF-305, FIXED at 161: its writer face, with the result rooted at a pointer PARAMETER | the fix at 161 does not reach it: an incomplete fix (the brief), not a new defect |
+| `pp:fld:cresm:same` | `n023`, `q20` | `n024` (`n017`, the named `method`, refused) | DEF-305, FIXED at 161: its receiver face, the same parameter-rooted gap | the same |
+
+The manager's r2 log reads all six candidates at 70/70 at `249eae9` (161) as well, the manager's measurement.
+
+**Two flags for D6**, both readings rather than measurements:
+- **DEF-299's text and `tl`-inner.** The row's text names a pointer parameter's pointee that a callee stores through.
+  `tl`-inner instead stores directly through a pointer local's pointee (`bp.p.v`), and `pf`-inner, one pointer level
+  on a local struct, is refused. The cause reads the same: the store is recorded on the pointee `b`, whose block ends,
+  and not on `h`, which its field points to.
+- **DEF-305's status and `cresc`/`cresm`.** DEF-305's row says FIXED and names no parameter-rooted exception. DEF-302's
+  row says that the landing-160 resolver gives no target for a pointer rooted at a PARAMETER, which may be the cause.
+  That is inferred, not bisected.
+
+All eight go to the fuzzer's manager through the dispatcher, for D6.
+
+### 16.8 The family's status at HUNT6
+
+The registry's status at `1480ca8`, and the grid15 cells by the registry's shapes (read, not bisected). The verdicts
+column gives HUNT6 / REG155; `KNOWN_DEFECTS.md`'s family block has the shapes.
+
+| DEF | at HUNT6 | grid15 cells | HUNT6 / REG155 |
+|---|---|---|---|
+| DEF-289 | FIXED: face 1 at 156, face 2 at 157 | `n045`, `n047` (`sle`); `n061` (`csl`); `n063`, `n065` (`cslv`) | refused / 70 |
+| DEF-296 | FIXED at 156 | 15 cells: `pl`, `pld`, `plw`, `pf`, `lst`, `cpl`, `mpl` in both placements, and `tl` in one block; and the eight seeds | refused / 70 (the seeds 170) |
+| DEF-297 | FIXED at 159 | no grid cell | — |
+| DEF-298 | **OPEN** | `n075` `cbv`, `n077` `cbp` | **70 / 70** |
+| DEF-299 | **OPEN** | `n069` `cps`, `n073` `cpp` and `n043` `tl`, inner (with `q11`, `q12`, `q05`); in one block, `n067` and `n071` | **70 / 70**; one block, refused / refused |
+| DEF-300 | FIXED at 158 | `n049` `rge` | refused / 70 |
+| DEF-301 | FIXED at 159 | no grid cell | — |
+| DEF-302 | FIXED at 160 | `n007` `alias`, `n009` `walias`, `n013` `calias`, `n017` `method` | refused / 70 |
+| DEF-303 | FIXED at 159 | no grid cell | — |
+| DEF-304 | FIXED at 162 | no grid cell | — |
+| DEF-305 | FIXED at 161 | `n021` `cresc`, `n023` `cresm` (with `q19`, `q20`), parameter-rooted | **70 / 70** |
+| DEF-306 | FIXED at 163 | no grid cell | — |
+| DEF-307 | **OPEN** | no grid cell | — |
+| DEF-308 | FIXED at 163 | `n015` `cwhole` | refused / 70 |
+| DEF-309 | **OPEN** | `n019` `cres` (with `q17`) | **70 / 70** |
+| DEF-310 | **OPEN** | no grid cell | — |
+| DEF-311 | not registered at HUNT6 | no grid cell | — |
+
+The early-fixed controls are refused at both compilers. They are `bare`, `fld`, `cad` and `mth` with `dir`, and `fld`
+with `whole` and `callee`, closed before 155 by D-325's base, landing 154's direct field store and the store-matrix
+callee store.
+
+### 16.9 What M15 does not cover
+
+Not funded (the brief's §3):
+- the rest of `KNOWN_DEFECTS.md`'s rebase to HUNT6: DEF-234, DEF-245 and DEF-265, DEF-256, DEF-190, DEF-268, and the
+  non-family defects in the 275–295 range;
+- the Option C re-read of the M11 rows, and the M11 re-spellings;
+- F-020's `ctl_j3`, a RESERVED class, the wild→plain roads family, D-339's lock rules, landing 128's buffer ground,
+  and DEF-264;
+- the regression leg of the old grids (recall, F-001 … F-053, M2, M9, M10, M13, M14) at HUNT6.
+
+**grid15's own limits:**
+- The frame-local `lo` view is deferred: 480 combinations are skipped, and the manager's log keeps its measurements.
+- The writes are asked on the `fld` road only, and the roads with `dir` only.
+- The inner placement is asked on the twelve indirection roads only.
+- There is one view, a `string`'s bytes, and one holder.
+- No cell reaches `destroy`, a spawn or a `List` reallocation, so DEF-297, DEF-301, DEF-303, DEF-304, DEF-306,
+  DEF-307 and DEF-310 are not measured.
+- `cresf` is `TYPE-024`.
+- One LLVM is used, and only -O0 against -O2.
+- Landing 164 had not reached the compiler's `origin/main` by the last fetch, so nothing is measured past 163.
+
+**Left for the author, through the dispatcher.** None of these is M15's to settle:
+- `CLAUDE.md`'s defect definition and S-140 (M14's item);
+- FZ-2's counting;
+- `PLAN.md:16` and `README.md:25`;
+- F-020's `ctl_j3`.
+
+F-053's §27 "USES" was ruled Q77 (b), and nothing is open there.
+
+### 16.10 Cost
+
+At 4 jobs, one harness at a time under the lock. Each time is the command's wall time, any lock wait included, and no
+`flock` returned 75.
+
+| step | wall |
+|---|---|
+| HUNT6's build | 64.8 s |
+| REG155's build | 66.0 s |
+| the canaries | 0.9 s |
+| §4's probe batch: 96 files at two compilers | 61 s |
+| grid15 at HUNT6 twice, and at REG155 | 8 + 7 + 9 s |
+| triage | no compiler run |
+| **in all** | **about 217 s**, under 4 min of harness time |
+
+**The session's times:**
+- dispatched at 23:12:50 EDT on 2026-10-28;
+- stopped at 23:17:40 on a guard refusal, and resumed on the dispatcher's ruling at 23:18:58 (PROGRESS.md's Log);
+- the commits: M15 (1) at 23:29:53, (1b) at 23:36:23, (2) at 23:52:58, (3) at 23:55:35 and (4) at 00:02:07 on
+  2026-10-29;
+- this section's commit closes M15.
+
+PROGRESS.md's M15 section has every command and time.
+
+### 16.11 Reproducing
+
+Start from a clone at the commit that closes M15, with the compiler cloned to `.work/nitpick` and LLVM 20.1.2 at
+`.work/llvm-20.1.2`. `.work/H6` and `.work/REG` hold the short shas that `--recall`'s `COMMIT` check reads.
+```
+git -C .work/nitpick worktree add --detach ../hunt6 1480ca81aa4d9d82976149f7f6ae5e44b2c5c640
+git -C .work/nitpick worktree add --detach ../reg155 02856cfc72463f105da70bd9c23c7f2cc1bf8151
+(cd .work/hunt6 && PATH=$PWD/../llvm-20.1.2/bin:$PATH python3 bootstrap/harness/quickemit.py --keep npkg/main.npk)
+(cd .work/reg155 && PATH=$PWD/../llvm-20.1.2/bin:$PATH python3 bootstrap/harness/quickemit.py --keep npkg/main.npk)
+echo 1480ca8 > .work/H6; echo 02856cf > .work/REG
+python3 gen/grid15.py --out cells15 && python3 gen/grid15.py --selfcheck
+python3 gen/classify15.py --selftest
+python3 gen/run.py .work/hunt6 --cells cells15 --llvm .work/llvm-20.1.2 --jobs 4 --out results/1480ca8/cells15.jsonl
+python3 gen/classify15.py --cells cells15 results/1480ca8/cells15.jsonl
+python3 gen/run.py .work/reg155 --cells cells15 --llvm .work/llvm-20.1.2 --jobs 4 --out results/02856cf/cells15.jsonl
+python3 gen/classify15.py --cells cells15 results/02856cf/cells15.jsonl
+python3 gen/classify15.py --cells cells15 --recall results/1480ca8/classified15.jsonl results/02856cf/classified15.jsonl
+```
+`gen/run.py` appends to its `--out` and skips the cells already there. So a re-run writes to a fresh path and is
 compared with `python3 gen/compare13.py`.

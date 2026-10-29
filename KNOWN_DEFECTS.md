@@ -421,7 +421,7 @@ element pointer, DEF-306 the spawn's lend and DEF-310 `destroy`. The rows follow
 | DEF-308 | a callee replacing the whole pointee, handed a named pointer, is checked against a view by the pointee's own name | FIXED at 163 (`1480ca8`) | `n015` `cwhole` (a copy of the parameter handed to a callee replacing the whole pointee): HUNT6 refuses it, REG155 reads 70/70 |
 | DEF-309 | a direct whole-pointee write or move through a call-result pointer | OPEN | `n019` `cres` (and the candidate seed `q17`): **accepted at HUNT6 and REG155, 70/70**, known-open |
 | DEF-310 | `destroy` through a pointer field escapes `TYPE-091` | OPEN | no grid cell |
-| DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | no grid cell: not registered at HUNT6, and landing 164 had not reached the compiler's `origin/main` at M15's last fetch (2026-10-29 00:00:45 EDT) |
+| DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | no grid cell: not registered at HUNT6, and landing 164 had not reached the compiler's `origin/main` at M15's last fetch (2026-10-29 00:07:42 EDT) |
 
 ## Other known defects, for deduplication only (not in `known/`)
 

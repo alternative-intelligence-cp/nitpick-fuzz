@@ -100,7 +100,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 6 the runs: grid14 at HUNT5 twice (0 of 109 cells differ) and at the baseline; `--against13` exits 0 at both; F-050 … F-052 at HUNT5 twice and the baseline; the narrowness control's three parts reported with their counts
   - [x] 7 triage, through M5's five steps: B's ten 107/0 cells are one candidate, F-053 (a read `wild` `NULL` load sunk or deleted at -O2), reported apart as the check of §27 (D-364); no K, U or twin cell to triage (S100)
   - [x] 8 the gate holds in every box; `REPORT.md` §15, with a pointer in its opening; the scratch removed
-- [ ] **M15** — the DEF-296 family (a view of a pointer parameter's pointee stored through an indirection), a grid of
+- [x] **M15** — the DEF-296 family (a view of a pointer parameter's pointee stored through an indirection), a grid of
   the store roads and the freeing writes, at HUNT6 `1480ca8` (landing 163) with the regression leg REG155 `02856cf`
   (landing 155), under LLVM 20.1.2 (session 13, the Team seat; S101 onward). The boxes are the brief's sections §1–§8.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `e289864` → `70a0d8b`, `70a0d8b` an ancestor, M14 ticked, the tree clean before the switch, `local-m15` new; the go quoted as S102, the release beside it (after a stop on a guard refusal and the dispatcher's ruling, in the Log)
@@ -110,7 +110,7 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run: 100 cells (S 16, R 64, W 20), 1 356 skipped of 1 440 combinations, `--selfcheck` passing; `--selftest` 18 of 18 (S105, S106)
   - [x] 6 the runs: grid15 at HUNT6 twice (0 of 100 cells differ) and at REG155; the recall gate exits 0, every check passing; 14 hazard cells `ACCEPTED:DEFECT:uaf` at HUNT6, the table's eight `H6/leak` keys
   - [x] 7 triage, through M5's five steps: the fourteen accepted cells are eight keys, each OPEN at HUNT6 (DEF-298, DEF-299, DEF-309, DEF-305's parameter-rooted gap), so known and not filed (S107); no regression; the family block's cell ids filled
-  - [ ] 8 the gate holds in every box; `REPORT.md` §16; the scratch removed
+  - [x] 8 the gate holds in every box; `REPORT.md` §16, with a pointer in its opening; the scratch removed
 
 ## Compilers
 
@@ -2892,8 +2892,27 @@ grid's keys again). No twin is anything but clean (42 of 42 at both compilers), 
 - **(e)** No finding directory is written.
 - **KNOWN_DEFECTS' family block:** the cells column is filled for every row, with the verdicts at both compilers.
   DEF-311 says "no grid cell" (it is not registered at HUNT6). The compiler's `origin/main` was still `1480ca8` at
-  every fetch for §7: 23:53:40, 23:56:07, 23:57:20 and 00:00:45 on 2026-10-29 (`.work/fetch-m15-triage.log`). So no landing past 163
+  every fetch for §7: 23:53:40, 23:56:07, 23:57:20 and 00:00:45 on 2026-10-29, and at the close, 00:07:42
+(`.work/fetch-m15-triage.log`). So no landing past 163
   is measured, and the three call-result keys stand against DEF-309 and DEF-305 at 163.
+
+**The close** (the brief's §8 and §10).
+- **The gate holds in every box.** The start checks, the compilers and the housekeeping are boxes 1–3. grid15 and
+  classify15 were committed before any run, with `--selfcheck` and `--selftest` passing (boxes 4 and 5). The runs
+  had the trees at their pins and `gen/` equal to M15 (2), HUNT6's two runs agreed, and the recall gate exited 0
+  (box 6). The triage is box 7.
+- **The recall gate is reported** with every tag's count in `REPORT.md` §16.6.
+- **The denominators add up.** In each run, generated = the sum of the class counts: HUNT6 14 + 42 + 44 = 100 (both
+  runs) and REG155 48 + 42 + 10 = 100. The grid is 84 emitted + 1 356 skipped = 1 440 combinations, plus 16 seeds,
+  which gives the 100 cells.
+- **No committed record changed.** `git diff --name-only --diff-filter=MDR origin/main -- results
+  'findings/*/VERDICTS*.txt'` prints nothing. M15 only adds the six files under `results/1480ca8/` and
+  `results/02856cf/`.
+- **The scratch is removed** at 00:08:09: `.work/probes15/`, `.work/shake15/` and `/home/randy/Team/TMP/M15/` (with
+  the `TMPDIR` in it). `.work/` keeps its trees (`hunt6`, `reg155` and the rest) and its logs, including
+  `.work/probes15-h6r155.log`, `.work/run15.log` and `.work/fetch-m15-triage.log`.
+- **`REPORT.md` §16**, "M15 — the DEF-296 family", has sections 16.1–16.11, with P1–P7 each ticked. A bullet points to
+  it from the report's opening paragraph.
 
 ## Environment
 
@@ -4248,3 +4267,7 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     DEF-299, DEF-309, and DEF-305's parameter-rooted gap), so known; nothing is filed. Against REG155: 14 accepted at
     both, 34 fixed in (155, 163], 10 fixed before 155, no regression. The family block's cells column is filled. The
     compiler's `origin/main` stayed `1480ca8` through 00:00:45. Committed as M15 (4).
+  - **(5) The close** (2026-10-29): the last fetch (00:07:42) still found `1480ca8`, so nothing is measured past 163.
+    `REPORT.md` §16 is written, with a pointer in its opening paragraph. Every box of the gate holds, and no
+    committed record changed. The scratch was removed at 00:08:09. M15 is ticked, and the session stops here. The
+    eight candidates go to the fuzzer's manager through the dispatcher, for D6.
