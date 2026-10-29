@@ -106,8 +106,8 @@ committed. A session that starts here resumes at the first unticked box.
   - [x] 1 the start checks: GitHub fetched, `main` fast-forwarded `e289864` → `70a0d8b`, `70a0d8b` an ancestor, M14 ticked, the tree clean before the switch, `local-m15` new; the go quoted as S102, the release beside it (after a stop on a guard refusal and the dispatcher's ruling, in the Log)
   - [x] 2 HUNT6 named (`1480ca8`, landing 163, carrying 156; no landing past 163 at the fetch) and REG155 `02856cf` (landing 155), both built under 20.1.2; each one's `npkc.ll`, `npkc.o`, `npkrt.o` and `builder.o` equal its ladder row (notice 164's, notice 156's); `llvm-config` prints 20.1.2; the canaries pass at both
   - [x] 3 the housekeeping (1b): F-053's README number (13 → 12); `KNOWN_DEFECTS.md`'s DEF-296 family block, its rows read at HUNT6's registry (the cells column is box 7's); M14v's F3 and F5 notes
-  - [ ] 4 learn by snippet at HUNT6 and REG155; the expectations table copied and checked
-  - [ ] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run, `--selfcheck` and `--selftest` passing
+  - [x] 4 learn by snippet at HUNT6 and REG155: the expectations table copied and checked (104 rows, 0 mismatches); 96 probes, every hazard probe at its table row at both compilers, every twin clean; every grid15 cell one of the probed programs
+  - [x] 5 `gen/grid15.py` and `gen/classify15.py`, committed before any grid15 run: 100 cells (S 16, R 64, W 20), 1 356 skipped of 1 440 combinations, `--selfcheck` passing; `--selftest` 18 of 18 (S105, S106)
   - [ ] 6 the runs: grid15 at HUNT6 twice and at REG155; the recall gate
   - [ ] 7 triage, through M5's five steps; the family block's cell ids
   - [ ] 8 the gate holds in every box; `REPORT.md` §16; the scratch removed
@@ -2728,6 +2728,90 @@ expected a type").
 3. **M14v's F3 and F5**: a one-line note under F-053's "Not registered" entry in `KNOWN_DEFECTS.md`, and one after
    §15.6's three parts in `REPORT.md`, each saying M14v ruled the point non-blocking. No verdict changes.
 
+**Learn by snippet** (the brief's §4), at HUNT6 and REG155.
+- **The copies.** With `cat`, one file at a time, into `.work/probes15/` (scratch): the files each `SHA256SUMS` lists
+  in `m15-probes-l163/` (60), `m15-probes-l163-r2/` (60), `m15-roads/` (16) and `m15-seeds/` (8); each set's
+  `sha256sum -c`, run on the copies against its `SHA256SUMS` (itself copied with `cat` to the Team scratch), is all OK.
+  `m15_expect.tsv` and `m15_expect_check.py` into `gen/`, both OK against `m15-expect/SHA256SUMS`. The checker, as §4
+  runs it, reading only: `python3 -B gen/m15_expect_check.py gen/m15_expect.tsv
+  /home/randy/Workspace/REPOS/nitpick-fuzz/.work/briefs` prints **"104 rows, 0 mismatches"**, exit 0 (rows cite
+  `m15-roads.log` 32, `m15-grid-l163l155.log` 36, `m15-probes-l155.log` 16, `m15-probes-l163-r2.log` 16,
+  `m15-f050-l163l155.log` 4).
+- **My own probes**, 30, where the named sets have none: the seven `fld` writes the table keys (`w_pp_fld_<w>` for
+  `whole`, `alias`, `walias`, `callee`, `calias`, `cwhole`, `method`; `r_fld.npk` with the write spellings of
+  `m15-probes-l163/`'s `p03`–`p09`), and 23 twins (`rt_<road>` for the 16 roads, `wt_pp_fld_<w>` for the seven).
+- **One batch under the lock** (23:39:55–23:40:56 EDT, 61 s, `.work/probes15-h6r155.log`): 96 files at HUNT6 and
+  REG155, by `$L python3 gen/snip.py <files> --at hunt6 reg155 --llvm .work/llvm-20.1.2 --show-msg`: the 16 roads,
+  `m15-probes-l163-r2/`'s `q01`–`q20` with their twins (40), my 30, the eight seeds and F-050's two holes.
+  - **Every hazard probe gives its table row**, at both compilers: 104 lines, the 42 `pp` keys, the eight seeds and
+    F-050's two, 0 differ.
+  - **Every twin is clean**, 0/0 at both compilers, 42 of 42.
+  - **`q18_pp_fld_cresf` and its twin** are `NITPICK-TYPE-024` at both (`(raw ids(p)).s = …` is no place), the write
+    grid15 omits.
+- **The spellings and codes**, every one compiled at both compilers:
+  - **The view** `string_bytes(p.s)` (`S->:p`), its twin `string_bytes("abcdef")`.
+  - **The roads**: `bare` `fixed uint8[]:hv = V;`; `fld` `h.v = V;`; `pl` `Holder->:hp = @h; hp.v = V;`; `pld`
+    `(<-hp).v = V;`; `plw` `<-hp = Holder{ v: V, k: 1i32 };`; `pf` `Outer:ou = Outer{ inner: @h, n: 0i32 };
+    ou.inner.v = V;`; `tl` `BP:b = BP{ p: @h, n: 0i32 }; BP->:bp = @b; bp.p.v = V;`; `sle` `Holder[]:sl =
+    arr[0i64...2i64]; sl[0i64].v = V;`; `rge` `arr[0i64...2i64][0i64].v = V;`; `lst` `List<Holder>->:lp = @l;
+    (<-lp)[0i64].v = V;` (the `List` by `list_init::<Holder>(2i64)` and one `list_push`); `cad` `drop put(@h, V);`;
+    `cpl` `drop put(hp, V);`; `csl` `drop puts(arr[0i64...2i64], V);`; `cslv` `Holder[]:t = arr[0i64...2i64]; drop
+    puts(t, V);`; `cps` `Box:bx = Box{ sl: arr[0i64...2i64], n: 0i32 }; drop putq(@bx, V);`; `cpp` `PB:pb = PB{ q:
+    @h, n: 0i32 }; drop putpq(@pb, V);`; `cbv` `drop gb(Box{ sl: arr[0i64...2i64], n: 0i32 }, V);`; `cbp` `drop
+    gp(PB{ q: @h, n: 0i32 }, V);`; `mth` `drop h.hset(V);`; `mpl` `drop hp.hset(V);`.
+  - **The writes**: `dir` `p.s = raw fresh();`; `whole` `<-p = S{ s: raw fresh() };`; `alias` `S->:q = p; q.s =
+    raw fresh();`; `walias` `S->:q = p; <-q = S{ s: raw fresh() };`; `callee` `drop ws(p);`; `calias` `S->:q = p;
+    drop ws(q);`; `cwhole` `S->:q = p; drop wsw(q);`; `method` `drop p.sset();`; `cres` `(<-(raw ids(p))) = S{ s:
+    raw fresh() };`; `cresc` `drop ws(raw ids(p));`; `cresm` `drop (raw ids(p)).sset();`.
+  - **The inner placement**: `int32:g = 0i32; if (g == 0i32) { <the road's bindings and the store> }`, the
+    holder (`h`, `arr` or the `List`) before it.
+  - **The codes**: every refusal of a hazard probe is `NITPICK-BORROW-015` at both compilers, but F-050's two holes,
+    `NITPICK-BORROW-002` at both; every accepted hazard probe reads 70/70 (the seeds 170/170, their own observer).
+- **grid15's cells are the probes' programs.** Each of grid15's 84 `pp` and twin cells equals a probe of this batch
+  byte for byte apart from its `mod:` line (a scratch comparison): 35 `pp` cells the manager's (16 `m15-roads/`, 19
+  `m15-probes-l163-r2/`), 7 mine, 19 twins the manager's (`-r2`'s), 23 mine. So every spelling grid15 uses was
+  compiled and run at HUNT6 and REG155 before any grid15 run.
+
+**grid15 and classify15** (the brief's §5; S105, S106), committed in M15 (2) before any grid15 run.
+- **`gen/grid15.py`** imports `Prog`, `X`, `FAILSAFE13`, `OBS_V`, `Skip` and `WILD_RE` from `gen/grid13.py` and
+  defines its own `S` and `Holder`. **100 cells:** S 16 (the eight DEF-296 faces, F-050's two holes, the six
+  candidates), R 64 (32 `pp` keys, 20 same-block `dir` roads and 12 inner, each with its twin), W 20 (`fld` × ten
+  writes, each with its twin). The space R × W × B × V is 20 × 12 × 2 × 3 = **1 440 combinations: 84 emitted, 1 356
+  in `cells15/SKIPPED.txt`** (480 the `lo` view, deferred; 760 a write other than `dir` on a road other than `fld`;
+  80 `cresf`, `TYPE-024`; 36 an inner placement on a road without one). `cells15/` is in `.gitignore` (this commit)
+  before the first write. `--selfcheck`:
+  ```
+  note RULE15 equals the D-325 paragraph at HUNT6 1480ca8
+  note cells15/ is this build, byte for byte
+  selfcheck: 100 cells (R:pp 32, R:twin 32, S 16, W:pp 10, W:twin 10), 1356 skipped, 1440 combinations + 16 seeds; 42 pp keys = the table's; every check passes
+  ```
+- **`gen/classify15.py`** imports `classify`, `run_class` and `exp_mismatch` from `gen/classify13.py`, writes
+  `classified15.jsonl` and `SUMMARY15.md`, and runs the recall gate (`--recall`). `--selftest`, in memory:
+  ```
+  ok    good pair: seeds uaf@REG, leak cells uaf@REG, twins clean, codes, anchored, coverage, commits -> {}, exit 0
+  ok    COMMIT: both files carry the same commit                                                      -> {COMMIT}, exit 1
+  ok    COMMIT: the two files' commits swapped                                                        -> {COMMIT}, exit 1
+  ok    COVERAGE: an extra id in one file, a benign twin clean at HUNT6                               -> {COVERAGE}, exit 1
+  ok    SEED-RECALL: a named seed ACCEPTED:DEFECT:double_free@REG (95/95)                             -> {SEED-RECALL}, exit 1
+  ok    SEED-RECALL: a named seed ACCEPTED:DEFECT:false_trap@REG (91/91)                              -> {SEED-RECALL}, exit 1
+  ok    LEAK-RECALL: pp:pl:dir:same (leak, refused@HUNT6) refused@REG with BORROW-015                 -> {LEAK-RECALL}, exit 1
+  ok    SILENT-PASS: a leak pp cell ACCEPTED:clean@HUNT6 (0/0)                                        -> {SILENT-PASS}, exit 1
+  ok    SILENT-PASS: a leak pp cell ACCEPTED:other@HUNT6 (5/5)                                        -> {SILENT-PASS}, exit 1
+  ok    SILENT-PASS: pp:fld:dir:same (refuse) ACCEPTED:timeout@REG155                                 -> {SILENT-PASS}, exit 1
+  ok    TWIN@REG155: a twin not clean at REG155 (70/70, DEFECT:uaf), clean@HUNT6                      -> {TWIN}, exit 1
+  ok    TWIN@HUNT6: a twin not clean at HUNT6 (refused, OVERRESTRICT), clean@REG155                   -> {TWIN}, exit 1
+  ok    CODE-H6: pp:fld:dir:same refused@HUNT6 with PARSE-001 only, clean BORROW-015@REG              -> {CODE-H6}, exit 1
+  ok    CODE-REG: pp:fld:dir:same refused@REG with BORROW-015 and PARSE-001, clean@HUNT6              -> {CODE-REG}, exit 1
+  ok    UNANCHORED: a pp cell with reg155 None refused at both                                        -> {UNANCHORED}, exit 1
+  ok    FINDINGS: pp:pl:dir:same ACCEPTED:DEFECT:uaf@HUNT6, leak@REG: listed, no tag                  -> {}, exit 0
+  ok    REGRESSION: pp:fld:dir:same (refuse) refused@REG, ACCEPTED:DEFECT:uaf@HUNT6                   -> {REGRESSION}, exit 3
+  ok    REGRESSION outranks: a regression and a COVERAGE breakage                                     -> {COVERAGE, REGRESSION}, exit 3
+  selftest: 18 cases, 18 pass
+  ```
+- **Disclosed:** before this commit `gen/grid15.py` wrote `cells15/` (for `--selfcheck`'s comparison of the written
+  grid), and `classify15.py` and its gate were tried once on synthetic records made from the table's rows in the Team
+  scratch (no compiler ran; gate exit 0, 14 findings, as the table predicts). No cell of `cells15/` was compiled or run.
+
 ## Environment
 
 *(session 13, measured 2026-10-28 23:19:31 EDT; M15 run here, on the Team seat: the start check (a))*
@@ -3723,6 +3807,39 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   (the machine's `/usr/lib/llvm-20`, S48, S70) prints `20.1.2`, and its `opt`, `llc`, `ld.lld` and `clang` are 20.1.2; the
   manager's probes ran under the same toolchain (`.work/briefs/m15-llvm-versions.log`). REG155's `npkc.ll`, `npkc.o`,
   `npkrt.o` and `builder.o` equal notice 155's ladder row, "THE BASELINE NOTICE 156 MUST QUOTE".
+- **S105 — grid15's sections** (the brief's §5). A cell is one road R (20), one write W (12, `cresf` among them),
+  one placement B (`same`, `inner`) and one provenance V (`pp`, `twin`, `lo`): 1 440 combinations. Emitted: every `pp`
+  key of the expectations table, 42 (section R: the 20 roads with `dir` in one block and the 12 indirection roads
+  `pl pld plw pf tl sle lst cpl cslv mpl cps cpp` inner; section W: `fld` with the ten writes other than `dir`, in one
+  block), each with its twin, 84; the rest, 1 356, in `SKIPPED.txt` with their reasons (`lo` deferred, the brief's
+  Deliverable 1; `cresf` `TYPE-024`, measured in §4; the write-side sweep on `fld` only; no inner placement for `bare
+  fld rge cad csl cbv cbp mth`). Section S, 16: the eight DEF-296 faces and the six candidates embedded byte for byte
+  with the manager's `SHA256SUMS` lines, F-050's two holes read from their committed directory against their sha256.
+  The readings: **(a)** each cell's text is the manager's spelling (§4), the template `f(S->:p)` storing the view,
+  writing the pointee and passing grid13's observer's code to `main`, grid13's failsafe after `main`; **(b)** `expect`
+  is the rule's (REFUSE for a `pp` cell and a seed, SAFE with exit 0 for a twin), `expect_codes` and `reg155` are the
+  table's (the H6 row's code when it refuses, else `NITPICK-BORROW-015`; the REG row's verdict), written before the
+  first run; **(c)** `rule` is the D-325 paragraph at HUNT6 (MEMORY_REFERENCE.md:269–284, its lines joined by one
+  space; `--selfcheck` re-reads it from `1480ca8`), and `source` names the governing landing by the registry's shapes
+  at HUNT6, read and not measured, as each `source` says (the brief's 156, 154, 116 and 160, refined where the
+  registry names the road: 157 for a slice parameter, 158 for a range, DEF-298 and DEF-299 OPEN); **(d)** a seed's T,
+  P, O and observer are "seed" (the brief's §5 seed line, which I read over its general "observer = exit"), and so are
+  its R, W, V and B; **(e)** ids are `n<NNN>_<V>_<R>_<W>_<B>` for the grid and the program's own `mod:` name for a
+  seed; T, P and O carry V, R and `<W>_<B>` for `gen/run.py`, and every meta also carries `key` (the table's) and
+  `pair` (the twin's pp cell, and back).
+- **S106 — the recall gate, its selftest, and the finding rule** (the brief's §5 and §6). `gen/classify15.py
+  --recall` runs every check (COMMIT, COVERAGE, SEED-RECALL, LEAK-RECALL, SILENT-PASS, TWIN, CODE-H6, CODE-REG,
+  UNANCHORED, REGRESSION), prints each one's result with its count and a `TAG` line for each failure, lists the
+  findings, and exits 3 on REGRESSION, else 1 on any tag, else 0. The twin is the only gated control. My readings:
+  **(a)** SILENT-PASS, CODE-H6 and CODE-REG are asked of every hazard cell, the seeds with the `pp` cells (the brief
+  names `pp` cells; asking the seeds too can only add a failure, and the table predicts none); **(b)** a record whose
+  id is not in the index, or an index id with no record, is COVERAGE's alone, so each check fires by itself; **(c)**
+  the brief's selftest "a twin is ACCEPTED:…" is a twin not clean (a SAFE cell's class has no `ACCEPTED:` prefix):
+  70/70 at REG155, refused (OVERRESTRICT) at HUNT6. `--selftest` builds its records in memory with classify13's own
+  `classify` and `exp_mismatch` and reads no file: 18 cases, each its exact tag set and exit code. **The finding
+  rule:** a `pp` cell or a seed accepted at HUNT6 that reads the poison (ACCEPTED:DEFECT:uaf) is a use after free in
+  safe code, a defect by CLAUDE.md, reported normally; it goes through §7's triage, where a road or write OPEN in the
+  registry at HUNT6 is known and noted with its DEF, not filed.
 
 ## Log
 
@@ -4027,3 +4144,8 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   - **(1b) The housekeeping** (§3), wording only: F-053's README says 12 where it said 13 (M14v's F6);
     `KNOWN_DEFECTS.md` gains the DEF-296 family block, read at HUNT6's registry, whose rows follow the registry where
     the brief's §3 labels differ; M14v's F3 and F5 each get a one-line note. No committed record changed.
+  - **(2) Learn by snippet, grid15 and classify15.** The manager's sets copied with `cat` and checked (all OK); the
+    expectations table and its checker into `gen/`, "104 rows, 0 mismatches". One probe batch at HUNT6 and REG155 (61
+    s): every hazard probe at its table row at both compilers, every twin clean, `cresf` `TYPE-024`. grid15, 100 cells
+    (S 16, R 64, W 20), each grid cell one of the probed programs; `--selfcheck` passes; classify15's `--selftest` 18
+    of 18 (S105, S106). Committed as M15 (2), before any grid15 run.
