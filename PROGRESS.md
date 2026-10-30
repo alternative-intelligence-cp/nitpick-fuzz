@@ -3965,6 +3965,36 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
   (M15v's finding 1, verified against the compiler history at `1480ca8`). M15v's other findings (2, 3, 4, 6, 7) are
   non-blocking and need no change to the tree. `main` is fast-forwarded to M15's branch.
 
+- **S109 — landing 170–171's re-coding of six M10/M11 claim programs: recorded, not respelled (the fuzzer's
+  manager, `nitpick-fuzz_5`, 2026-10-30; management_7's ruling).** management_7's GO of 10:38:53 asked that the
+  six programs be respelled and the retired-form claims be turned into refusal claims; its correction of
+  11:07:23 withdrew that, and it holds: by **S45/S36** a claim's expectation does not change after its first run
+  (a `fixed` change is a spelling of the program's own, not the claim's), and by **S91/S96** the M11
+  re-spellings are Option C's (M11b, the reference delta), which `nitpick-fuzz_4`'s M15 brief
+  (`.work/briefs/fuzz-m15-brief-2026-10-28.md:137`) lists as unfunded; the precedent is **DEF-246** (landing
+  103's `TYPE-007` moves in six M11 claims, recorded "Option C's" and left — only M10's own generator line
+  changed and regenerated, Log 1700–1711). So the working-tree respellings were reverted; all eight claims
+  (`r10_result_literal_both` with `ct0332`/`ty1332`, `ty1343`, `as0195`, `as0307`, `ty1942`, `cc0059`) keep
+  `run:0`, and the move is recorded in `KNOWN_DEFECTS.md` (DEF-373, DEF-367) on DEF-246's model. **Measured** on
+  the manager's own build of landing 171 (`224d907`, a worktree `.work/l171` off `.work/nitpick`,
+  `bootstrap/harness/quickemit.py`, LLVM 20.1.2), each program before→after via `gen/snip.py … --at l171 --llvm
+  .work/llvm`:
+  - `cc0059` (F117): `TYPE-007,TYPE-046` → `run:0`. `:15` `?| fallback`→`?| move(fallback)` (DEF-367, 170); `:16`
+    `?! 9tbb32`→`?! E9` with `error:E9;` and a `failsafe (E9)` arm (`TYPE-007` from 169; `?! E9` and the arm by
+    D-179/REACH-002).
+  - `as0195` `TYPE-101`→`run:0` (`return Result{ value: 5i32 }`); `as0307` `TYPE-101`→`run:0` (`Result{ value:
+    5i32 }`); `ty1942` `TYPE-101`→`run:0` (`return Result{ value: NIL }`, the corrected `pass(NIL)` desugar).
+  - `r10_result_literal_both` and `ty1343` `TYPE-101`→ a refusal claim `refuse:NITPICK-TYPE-101`.
+  These re-derivations and outcomes are Option C's input. **My call, claim by claim (program's own spelling vs
+  the claim's own subject, for Option C):** `as0195` and `cc0059` are the program's own spelling — `as0195`'s
+  claim ("`return` takes a `Result` literal and returns 5") and `cc0059`'s ("the three honest async-unwrap
+  spellings compile and each yields the value") survive the one-field and D-167/D-179 corrections unchanged;
+  `r10` (with `ct0332`, `ty1332`), `ty1343`, `as0307` and `ty1942` are the claim's own subject — the both form
+  is what each asserts (CHECKLIST:226, CLAIMS:169 and :2714, the quoted rows), so respelling them would change
+  the claim. (management_7 read `as0195` as the program's own spelling and the other five as the claim's;
+  `cc0059`'s reading is the manager's.) Records-only commit; nothing in `m10/`, `m11/` or `gen/` changed.
+  Budget: ~0.1 pt (one l171 build).
+
 ## Log
 
 - 2026-09-25 (session 1, this branch): started at M0.1 with nothing ticked.
@@ -4292,3 +4322,9 @@ A fresh VM of the same kind as sessions 2–4: `.work/` did not exist.
     by the compiler's record — DEF-309 and DEF-311 FIXED at 164 — not measured here), and `KNOWN_DEFECTS.md` and
     `PROGRESS.md` correct the landing-162 citation to `8c4f005` (S108). `main` is fast-forwarded from `70a0d8b` to
     M15's branch; M15 closed.
+
+- 2026-10-30 (the fuzzer's manager, `nitpick-fuzz_5`): on management_7's GO (10:38:53) and its correction
+  (11:07:23), built landing 171 (`224d907`) and measured the six M10/M11 claim programs F117/F118 name; by
+  S45/S36 and S91/S96 (Option C) the respellings were reverted and the move recorded instead (`KNOWN_DEFECTS.md`
+  DEF-373/DEF-367; S109). Records-only commit; no program, expectation or generator changed. Parked again for
+  M16 (after DEF-318…DEF-323's landing).

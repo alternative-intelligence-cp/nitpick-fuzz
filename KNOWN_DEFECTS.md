@@ -423,6 +423,28 @@ element pointer, DEF-306 the spawn's lend and DEF-310 `destroy`. The rows follow
 | DEF-310 | `destroy` through a pointer field escapes `TYPE-091` | OPEN | no grid cell |
 | DEF-311 | not registered at HUNT6; landing 164 carries it with DEF-309 and DEF-310 (the compiler seat, 2026-10-28) | not registered | no grid cell: not registered at HUNT6, and landing 164 had not reached the compiler's `origin/main` at M15's last fetch (2026-10-29 00:07:42 EDT) |
 
+## Landings 170–171 (F117, F118): six M10/M11 claim programs re-coded — recorded, not respelled (Option C's)
+
+Landing 170 (`b122540`) and landing 171 (`224d907`) re-code six M10/M11 claim programs that `F117`/`F118` (the
+compiler's `meta/NOTICES.md` at `224d907`) name. By S45/S36 a claim's expectation does not change after its
+first run, and by S91/S96 the M11 re-spellings are Option C's (M11b); so the programs and their `run:0`
+expectations stand, and the move is recorded here on DEF-246's model (the fuzzer's manager, `nitpick-fuzz_5`,
+2026-10-30, management_7's ruling of 11:07; measured on the manager's own build `.work/l171` = `224d907`, LLVM
+20.1.2; PROGRESS S109).
+
+- **DEF-373** — the both-field `Result` literal retired; a literal writes ONE field. **Fixed at 171**
+  (`224d907`): `NITPICK-TYPE-101` at a literal naming both. At `224d907` it refuses the both form in
+  `m10/programs/r10_result_literal_both.npk` (and, through that program, the claims `ct0332` CONTROL:332 and
+  `ty1332` TYPE:1332), `m11/programs/ty1343.npk`, `m11/programs/as0307.npk` and `m11/programs/ty1942.npk` —
+  each the claim's own subject — and `m11/programs/as0195.npk`, whose both-form value is the program's own
+  spelling. All keep `run:0` (their M10/M11-era answer; S45, S36); the re-derivations are Option C's (S91,
+  S96), listed in PROGRESS S109.
+- **DEF-367** — an owner copied through an operator handing back a place's value (a ternary, `??`, `?!`, `?|`,
+  `relay`, a cast) needs `move(...)`. **Fixed at 170** (`b122540`): `NITPICK-TYPE-046`. At `224d907` it refuses
+  `m11/programs/cc0059.npk:15` (`?| fallback`); the corrected spelling is `?| move(fallback)` (Option C's).
+- **`cc0059.npk:16`** (`?! 9tbb32`) — `NITPICK-TYPE-007` from 169, the old `:62` trap spelling (pre-D-179). The
+  corrected spelling is `?! E9` with `error:E9;` and a `failsafe (E9)` arm (D-179 / REACH-002). Option C's.
+
 ## Other known defects, for deduplication only (not in `known/`)
 
 - **DEF-95** — a literal-step `till`/`loop` demanded a spurious `(BadStep)` arm.
